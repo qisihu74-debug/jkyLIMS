@@ -116,6 +116,9 @@ public class WorkHourRatioMethodUtils {
                 BigDecimal proportion = BigDecimal.valueOf(Double.valueOf(data.getProportion()) / 100).setScale(4, BigDecimal.ROUND_HALF_UP);
                 // 分组工时
                 data.setTotalWorkingHours(sum);
+                if (com.lims.manage.erp.util.StringUtils.isEmpty(data.getTotalWorkingHours())) {
+                    data.setTotalWorkingHours("0");
+                }
                 BigDecimal zhi1 = BigDecimal.valueOf(Double.valueOf(data.getTotalWorkingHours())).setScale(4, BigDecimal.ROUND_HALF_UP);
                 //当前人的工时 = 比例 * zhi 保留四位小数。
                 BigDecimal he = proportion.multiply(zhi1).setScale(4, BigDecimal.ROUND_HALF_UP);

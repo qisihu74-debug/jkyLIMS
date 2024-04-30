@@ -1207,11 +1207,18 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             if (CollectionUtil.isEmpty(testTaskOrderWorkingHoursList)) {
                 // 任务id集合 不包含 工时信息
                 for (Long taskId : taskIds) {
-                    // 根据taskId 循环新增工时数据
-                    //TODO:1月5日  查询基础表信息 - 检测类型包含工时
-//                    List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
-//                    sqlBasisList = taskMapper.selectEntrustBasis(30);
-                    reportIssuanceAllottedTime(taskId);
+                    // 查询任务单下所属检测项是否包含工时
+                    List<TestItemOrderWorkingHours> listWorks = testItemOrderWorkingHoursMapper.selectTaskList(taskId);
+                    Boolean status = false;
+                    for (TestItemOrderWorkingHours testItemOrderWorkingHours : listWorks) {
+                        if (StringUtils.isNotEmpty(testItemOrderWorkingHours.getWorkingHours())) {
+                            status = true;
+                        }
+                    }
+                    if (status) {
+                        // 根据taskId 循环新增工时数据
+                        reportIssuanceAllottedTime(taskId);
+                    }
                 }
             } else {
                 // 任务id集合获取 得到 工时信息:
@@ -1235,11 +1242,18 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     testItemOrderWorkingHoursMapper.delete(itemDeleteQueryWrapper);
                 }
                 for (Long taskId : taskIds) {
-                    // 根据taskId 循环新增工时数据
-                    //TODO:1月5日  查询基础表信息 - 检测类型包含工时
-//                    List<TestInitDataEntity> sqlBasisList = new ArrayList<>();
-//                    sqlBasisList = taskMapper.selectEntrustBasis(30);
-                    reportIssuanceAllottedTime(taskId);
+                    // 查询任务单下所属检测项是否包含工时
+                    List<TestItemOrderWorkingHours> listWorks = testItemOrderWorkingHoursMapper.selectTaskList(taskId);
+                    Boolean status = false;
+                    for (TestItemOrderWorkingHours testItemOrderWorkingHours : listWorks) {
+                        if (StringUtils.isNotEmpty(testItemOrderWorkingHours.getWorkingHours())) {
+                            status = true;
+                        }
+                    }
+                    if (status) {
+                        // 根据taskId 循环新增工时数据
+                        reportIssuanceAllottedTime(taskId);
+                    }
                 }
             }
         } else {
@@ -1664,7 +1678,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             System.out.println("workingHours == " + workingHours.toString());
             // 百分比 = 所占工时 / 总工时 * 100 保留两位小数
             //当前人的工时 = 比例 * zhi 保留四位小数。
-            BigDecimal he = workingHours.divide(totalWorkingHoursBig).multiply(new BigDecimal(100)).setScale(4, BigDecimal.ROUND_HALF_UP);
+            BigDecimal he = workingHours.divide(totalWorkingHoursBig, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100)).setScale(4, BigDecimal.ROUND_HALF_UP);
             // 所占工时
             data.setProportion(String.valueOf(he));
             taskRelMap.put(userId, data);
