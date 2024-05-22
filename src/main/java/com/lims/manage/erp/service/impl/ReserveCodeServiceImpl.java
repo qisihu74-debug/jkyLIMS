@@ -210,15 +210,8 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
         String[] arrays = newReportNumber.split("-");
         // 当前系统报告最大号
         int reportMaxCode = 0;
-        // 条数
-        int number = 13;
-        if (arrays[0].length() == 2) {
-            number = 12;
-        } else {
-            number = 13;
-        }
-        Integer finalReportMaxCode = reserveCodeEntityMapper.getfinalReportOtherMaxCode(arrays[1], arrays[0], number);
-        Integer midReportMaxCode = reserveCodeEntityMapper.getMidReportOtherMaxCode(arrays[1], arrays[0], number);
+        Integer finalReportMaxCode = reserveCodeEntityMapper.getfinalReportOtherMaxCode(arrays[1], arrays[0]);
+        Integer midReportMaxCode = reserveCodeEntityMapper.getMidReportOtherMaxCode(arrays[1], arrays[0]);
         if (finalReportMaxCode == null && midReportMaxCode == null) {
             return ResultUtil.error("操作失败： " + "报告号" + newReportNumber + " 在系统中不存在 " + arrays[1] + "年" + "报告号");
         }

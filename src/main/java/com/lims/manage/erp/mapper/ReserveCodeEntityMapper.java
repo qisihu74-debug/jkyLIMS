@@ -89,13 +89,13 @@ public interface ReserveCodeEntityMapper {
      * @return
      */
     @Select("SELECT\n" +
-            "\tMAX( SUBSTR( report_code FROM #{number} ) + 0 ) \n" +
+            "\t MAX( SUBSTRING_INDEX(report_code, '-', -1) + 0 )  \n" +
             "FROM\n" +
             "\ttest_report_record \n" +
             "WHERE\n" +
             "\treport_code LIKE CONCAT( '%-', #{year}, '-%' ) \n" +
             "\tAND report_code LIKE CONCAT( '%', #{code}, '%' )")
-    Integer getfinalReportOtherMaxCode(String year, String code, int number);
+    Integer getfinalReportOtherMaxCode(String year, String code);
 
     /**
      * 查询中间报告
@@ -105,13 +105,13 @@ public interface ReserveCodeEntityMapper {
      * @return
      */
     @Select("SELECT\n" +
-            "\tMAX( SUBSTR( report_code FROM #{number} ) + 0 ) \n" +
+            "\tMAX( SUBSTRING_INDEX(report_code, '-', -1) + 0 ) \n" +
             "FROM\n" +
             "\ttest_report_record_mid \n" +
             "WHERE\n" +
             "\treport_code LIKE CONCAT( '%-', #{year}, '-%' ) \n" +
             "\tAND report_code LIKE CONCAT( '%', #{code}, '%' )")
-    Integer getMidReportOtherMaxCode(String year, String code, Integer number);
+    Integer getMidReportOtherMaxCode(String year, String code);
 
     /**
      * 更新最终报告
