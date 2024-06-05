@@ -58,16 +58,11 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -405,7 +400,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list, String workingHoursId) {
+    public Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list, String workingHoursId) throws ParseException {
         // 当前登录需要为授权签字人： TODO: 11月10日 roleId = 66L 为授权签字人
         Long roleId = 66L;
         List<Long> userIds = sysUserDao.selectUserIds(roleId);
@@ -433,10 +428,29 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         if (taskOrderWokingHoursData == null) {
             return ResultUtil.error("分配失败，不是领单人");
         }
-        // 允许调整一次。
+        // 判断任务单是否存在
         TaskTestEntity taskDetails = taskMapper.selectTaskEntity(list.get(0).getTaskId());
         if (taskDetails == null) {
             return ResultUtil.error("分配失败，任务单不存在");
+        }
+        // 通过任务单id 获取 报告的签发时间
+        ReportRecordEntity reportDetails = reportMapper.queryReportDetailsByTaskKey(taskDetails.getId());
+        if (reportDetails == null) {
+            return ResultUtil.error("分配失败，报告单不存在");
+        }
+        // 当前签发-月底时间。
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date nowDate = new Date();
+        // 去除当前时间 时分秒
+        Date currentLatestTime = format.parse(format.format(nowDate));
+        // 报告签发时间 06-05 - 月底为 06-30
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(reportDetails.getIssuerTime());
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        Date lastDayOfMonth = calendar.getTime();
+        //  报告签发（2024-06-05）月底 2024-06-30 < 当前时间 2024-07-05
+        if (lastDayOfMonth.before(currentLatestTime)) {
+            return ResultUtil.error("分配失败,最晚分配时间为 " + format.format(lastDayOfMonth));
         }
         // 删除旧数据
         LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
@@ -480,7 +494,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             if (workingHoursId != null) {
                 taskOrderWorkingHours.setWorkingHoursId(workingHoursId);
             }
-            taskOrderWorkingHours.setUpdateTime(new Date());
+            taskOrderWorkingHours.setUpdateTime(null);
             testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
         }
         return ResultUtil.success("数据新增成功");
