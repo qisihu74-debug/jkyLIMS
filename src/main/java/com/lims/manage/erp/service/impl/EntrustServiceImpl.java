@@ -6084,33 +6084,34 @@ public class EntrustServiceImpl implements EntrustService {
                 Set<String> setStr = new HashSet<>();
                 Set<String> setAlias = new HashSet<>();
                 Set<String> setProductId = new HashSet<>();
-                for(SampleEntity sampleEntity : sampleList){
+                for (SampleEntity sampleEntity : sampleList) {
                     setStr.add(sampleEntity.getSampleName());
                     setAlias.add(sampleEntity.getAliasName());
                     setProductId.add(sampleEntity.getProductId().toString());
                 }
-                for(String setStrName : setStr){
-                    sampleNameBuffer.append(setStrName+",");
+                for (String setStrName : setStr) {
+                    sampleNameBuffer.append(setStrName + ",");
                 }
-                for(String setStrName : setAlias){
-                    aliasNameBuffer.append(setStrName+",");
+                for (String setStrName : setAlias) {
+                    aliasNameBuffer.append(setStrName + ",");
                 }
-                for(String setStrName : setProductId){
-                    productIdBuffer.append(setStrName+",");
+                for (String setStrName : setProductId) {
+                    productIdBuffer.append(setStrName + ",");
                 }
-                testTaskPool.setSample(sampleNameBuffer.deleteCharAt(sampleNameBuffer.length()-1).toString());
-                testTaskPool.setProductId(productIdBuffer.deleteCharAt(productIdBuffer.length()-1).toString());
-                testTaskPool.setAliasName(aliasNameBuffer.deleteCharAt(aliasNameBuffer.length()-1).toString());
+                testTaskPool.setSample(sampleNameBuffer.deleteCharAt(sampleNameBuffer.length() - 1).toString());
+                testTaskPool.setProductId(productIdBuffer.deleteCharAt(productIdBuffer.length() - 1).toString());
+                testTaskPool.setAliasName(aliasNameBuffer.deleteCharAt(aliasNameBuffer.length() - 1).toString());
             }
+            testTaskPool.setTaskListStatus(entity.getTaskListStatus());
             // 新增流水任务单
             taskPoolMapper.insert(testTaskPool);
-           if(CollectionUtil.isNotEmpty(addTaskRelEntities)){
-               for(TestEntrustedTaskRelEntity testEntrustedTaskRelEntity : addTaskRelEntities){
-                   testEntrustedTaskRelEntity.setTaskId(testTaskPool.getId().longValue());
-               }
-               // 审核发布： 任务单流转 需要业务员提供信息
-               methodEntrustApprovedDistributionOfFlow(entity.getEntrustmentId(),addTaskRelEntities);
-           }
+            if (CollectionUtil.isNotEmpty(addTaskRelEntities)) {
+                for (TestEntrustedTaskRelEntity testEntrustedTaskRelEntity : addTaskRelEntities) {
+                    testEntrustedTaskRelEntity.setTaskId(testTaskPool.getId().longValue());
+                }
+                // 审核发布： 任务单流转 需要业务员提供信息
+                methodEntrustApprovedDistributionOfFlow(entity.getEntrustmentId(), addTaskRelEntities);
+            }
             return msg;
         }else {
             return msg;

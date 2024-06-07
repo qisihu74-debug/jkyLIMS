@@ -107,8 +107,8 @@ public class TestTaskPool implements Serializable {
     /**
      * 领取时间
      */
-    @DateTimeFormat(pattern="yyyy-MM-dd")
-    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date receiveDate;
     @TableField(exist = false)
     private List<TaskRes> list;
@@ -117,4 +117,9 @@ public class TestTaskPool implements Serializable {
      */
     @TableField(exist = false)
     private String entrustmentNo;
+
+    /**
+     * 任务单状态：!=null 任务生成规则根据签发人所属团队走
+     */
+    private String taskListStatus;
 }
