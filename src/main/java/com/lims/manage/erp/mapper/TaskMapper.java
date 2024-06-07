@@ -664,7 +664,7 @@ public interface TaskMapper extends BaseMapper {
             "\tt1.task_flow_req,\n" +
             "\tt1.publisher,\n" +
             "\tt1.receive_date,\n" +
-            "\tt1.publish_date,t1.task_list_status \n" +
+            "\tt1.publish_date,IFNULL( t1.task_list_status, 0 ) as task_list_status \n" +
             "FROM\n" +
             "\ttest_task_pool t1\n" +
             "\tLEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id\n" +
