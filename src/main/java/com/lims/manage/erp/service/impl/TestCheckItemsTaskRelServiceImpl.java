@@ -449,9 +449,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         Date lastDayOfMonth = calendar.getTime();
         //  报告签发（2024-06-05）月底 2024-06-30 < 当前时间 2024-07-05
-        if (lastDayOfMonth.before(currentLatestTime)) {
-            return ResultUtil.error("分配失败,最晚分配时间为 " + format.format(lastDayOfMonth));
-        }
+//        if (lastDayOfMonth.before(currentLatestTime)) {
+//            return ResultUtil.error("分配失败,最晚分配时间为 " + format.format(lastDayOfMonth));
+//        }
         // 删除旧数据
         LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, list.get(0).getTaskId());
