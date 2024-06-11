@@ -349,7 +349,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         // TODO: 2024年6月6日： 审核发布时 指向合并或者是拆分。
         // 判定 true = 新任务单，false = 旧任务单 null
         Boolean taskListStatus = false;
-        if (testTaskPool.getTaskListStatus().equals("1")) {
+        if (testTaskPool.getTaskListStatus() != null && testTaskPool.getTaskListStatus().equals("1")) {
             taskListStatus = false;
         } else {
             taskListStatus = true;

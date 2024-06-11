@@ -53,8 +53,7 @@
         t1.task_code,
         t2.NAME AS receiver,
         "任务大厅" AS source,
-        IF
-        ( IFNULL( t3.update_time, 0 ) = 0, 0, 1 ) AS state,
+        0 AS state,
         t3.working_hours as workingHours,
         t3.working_hours_id as workingHoursId
         FROM
