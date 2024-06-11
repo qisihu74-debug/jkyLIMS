@@ -104,9 +104,29 @@ public interface StatisticsService {
 
     /**
      * 查询区域信息
+     *
      * @return
      */
     List<LabelValueVo> getAreas();
 
     List<TeamTreeStructureEntity> getChirds();
+
+    /**
+     * 部门产值详情统计--子级--导出
+     *
+     * @param teamId
+     * @param beginDate
+     * @param endDate
+     * @throws IOException
+     */
+    List<StatisticsNodeDetailVo> teamStatisticsNodeDetailExport(String teamId, String beginDate, String endDate);
+
+    /**
+     * 部门产值详情统计统计Excel
+     *
+     * @param list
+     * @return
+     * @throws IOException
+     */
+    InputStream teamStatisticsNodeDetailExportFunction(List<StatisticsNodeDetailVo> list) throws IOException;
 }

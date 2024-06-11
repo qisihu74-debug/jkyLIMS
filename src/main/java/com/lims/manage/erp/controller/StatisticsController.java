@@ -21,6 +21,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -360,5 +361,41 @@ public class StatisticsController {
     @GetMapping("/getTeamInfo")
     public Result getTeamInfo() {
         return ResultUtil.success("查询部门信息成功！", statisticsService.getChirds());
+    }
+
+    /**
+     * 部门产值详情统计--子级--导出
+     *
+     * @param teamId
+     * @param beginDate
+     * @param endDate
+     * @param response
+     * @throws IOException
+     */
+    @GetMapping("/teamStatisticsNodeDetailExport")
+    public void teamStatisticsNodeDetailExport(String teamId, String beginDate, String endDate, HttpServletResponse response) throws IOException {
+
+        BufferedOutputStream bos = null;
+        List<StatisticsNodeDetailVo> list = statisticsService.teamStatisticsNodeDetailExport(teamId, beginDate, endDate);
+//        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+//        response.setContentType("application/vnd.ms-excel");
+//        response.setHeader("Content-Disposition", "attachment; filename=" + java.net.URLEncoder.encode(fileName.toString(), "UTF-8") + ".xls");
+        String fileName = new String("部门详情产值统计".getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        response.setContentType("application/vnd.ms-excel; charset=utf-8");
+        InputStream inputStream = statisticsService.teamStatisticsNodeDetailExportFunction(list);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+
+
     }
 }
