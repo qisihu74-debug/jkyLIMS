@@ -238,7 +238,7 @@ public class TestInstrumentController extends ApiController {
         Workbook workbook;
         try {
             workbook = transformer.transformXLS(fileStream, stringObjectHashMap);
-            workbook.setSheetName(0, stringObjectHashMap.get("deviceInfo").toString() + "使用记录");
+            workbook.setSheetName(0, stringObjectHashMap.get("deviceInfo").toString().replace("/", "-") + "使用记录");
             response.reset();
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             response.setContentType("application/vnd.ms-excel");

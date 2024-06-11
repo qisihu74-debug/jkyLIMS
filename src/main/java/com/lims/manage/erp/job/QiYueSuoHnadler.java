@@ -41,7 +41,7 @@ public class QiYueSuoHnadler {
     private QiYueSuoEntity qiYueSuoEntity;
 
     /**
-     * 根据文件类型创建合同文档
+     * step1:根据文件类型创建文档
      * @param file (必传) pdf报告文件
      * @param title (必传)名称
      * @param fileType (必传)文件类型：doc, docx, txt, pdf, png, gif, jpg, jpeg, tiff, html, rtf, xls, txt
@@ -161,6 +161,12 @@ public class QiYueSuoHnadler {
             }
     ]
         }*/
+
+    /**
+     * Step2 创建合同
+      * @param reqBean
+     * @return
+     */
     @SneakyThrows
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置用印流程id
@@ -338,7 +344,7 @@ public class QiYueSuoHnadler {
     }
 
     /**
-     * 获取契约锁报告签署url地址
+     * step3获取契约锁报告签署url地址
      * @param reqBean
      * @return
      */
@@ -358,7 +364,7 @@ public class QiYueSuoHnadler {
     }
 
     /**
-     * 契约锁报告下载
+     * step4契约锁报告下载
      * @param contractId
      * @param name
      * @param contact
