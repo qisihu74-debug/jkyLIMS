@@ -515,4 +515,22 @@ public interface ReportMapper {
 
     @Update("update test_report_record set operate_type=#{state} where report_code=#{reportCode} ")
     void updateOperateState(@Param("reportCode") String reportCode, @Param("state") int state);
+
+    /**
+     * 查询报告详情 根据任务单id查询
+     *
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt2.id,\n" +
+            "\tt2.issuer_time \n" +
+            "FROM\n" +
+            "\ttest_task AS t1\n" +
+            "\tLEFT JOIN test_report_record AS t2 ON t1.entrustment_id = t2.entrustment_id \n" +
+            "WHERE\n" +
+            "\tt1.id = #{taskId} \n" +
+            "\tAND t2.issuer_time IS NOT NULL\n" +
+            "\tLIMIT 1 ")
+    ReportRecordEntity queryReportDetailsByTaskKey(@Param("taskId") Long taskId);
 }

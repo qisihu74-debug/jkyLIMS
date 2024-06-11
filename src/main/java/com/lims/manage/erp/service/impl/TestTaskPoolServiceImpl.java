@@ -244,15 +244,57 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized Result addTaskCollection(List<SampleItemEntity> list) {
+        // 登录人
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 任务大厅or修改时验证
+        Result getValidationStatus = verifyTheTaskListStatus(list, userInfo.getUserId());
+        if (getValidationStatus.getCode() == null) {
+            return getValidationStatus;
+        }
+        Long entrustId = (Long) getValidationStatus.getData();
+        // 通过委托单id 查询旧任务列表
+        List<TaskProgressVo> oldTaskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
+        // 通过委托单 获取流水任务单详情
+        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
+        TestTaskPool testTaskPool = taskPoolMapper.selectOne(queryWrapper);
+        if (testTaskPool == null) {
+            return ResultUtil.error("领取失败： 当前流水号任务单不存在");
+        }
+        // 验证领取人对应科室信息
+        Result verifyTeamCollection = verifyClaimBaseConditions(userInfo.getUserId());
+        if (verifyTeamCollection.getCode() == null) {
+            return verifyTeamCollection;
+        }
+        List<Long> teamCollection = (List<Long>) verifyTeamCollection.getData();
+        // 领取任务单： 1、合并任务单 2、拆分任务单
+        // 判断旧任务单列表 == null：领取
+        if (CollectionUtils.isEmpty(oldTaskProgressVos)) {
+            // 领取任务单
+            return getATaskList(list, entrustId, teamCollection.get(0), testTaskPool, oldTaskProgressVos, userInfo);
+        } else {
+            // 修改任务单： 直接修改即可
+            return updateTaskList(oldTaskProgressVos, list, userInfo, entrustId, testTaskPool);
+        }
+    }
+
+    /**
+     * 任务大厅or修改时验证任务单真伪
+     * 1、通过通过检测项主键 获取 委托单是否存在
+     * 2、查询当前领单人 是否为 授权角色id = 66
+     *
+     * @param list   任务大厅传递数据
+     * @param userId 登录人id
+     * @return 抛出error 直接抛出，success 传递 entrustId
+     */
+    public Result verifyTheTaskListStatus(List<SampleItemEntity> list, Long userId) {
         // 通过检测项主键 获取 委托单id
         Long entrustId = taskPoolMapper.selectEntrustmentId(list.get(0).getItemIds().get(0));
         if (entrustId == null) {
             return ResultUtil.error("数据异常、委托单不存在");
         }
-        // 登录人
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 查询当前登录人 是否为 授权角色
-        List<SysRoleEntity> roleList = sysRoleDao.selectSysRoleByUserId(userInfo.getUserId());
+        List<SysRoleEntity> roleList = sysRoleDao.selectSysRoleByUserId(userId);
         if (CollectionUtils.isEmpty(roleList)) {
             return ResultUtil.error("领取失败：登录人无角色");
         }
@@ -265,104 +307,162 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (!flag) {
             return ResultUtil.error("领取失败：登录人无授权签字人角色");
         }
-        // 通过委托单id 查询旧任务列表
-        List<TaskProgressVo> taskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
-        // 通过委托单 获取流水任务单详情
-        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
-        TestTaskPool testTaskPool = taskPoolMapper.selectOne(queryWrapper);
-        if (testTaskPool == null) {
-            return ResultUtil.error("领取失败： 当前流水号任务单不存在");
-        }
+        return ResultUtil.success(entrustId);
+    }
+
+    /**
+     * 验证领取人对应科室信息
+     * <p>
+     * userId 用户id
+     *
+     * @return
+     */
+    public Result verifyClaimBaseConditions(Long userId) {
         // 领取人的科室id
         List<Long> userList = new ArrayList<>();
-        userList.add(userInfo.getUserId());
-        List<Long> detectorsCollection2 = teamMapper.getUsersByTechnicist(userList);
-        // 判断旧任务单列表：领取（任务单列表 = null），还是修改。
-        if (CollectionUtils.isEmpty(taskProgressVos)) {
-            if (CollectionUtil.isEmpty(detectorsCollection2)) {
-                // 抛出 领取人 需要包含科室
-                return ResultUtil.error("领取人 需要存在科室");
-            }
-            if (detectorsCollection2.size() >= 2) {
-                // 抛出 领取人 生成单号 指向存在问题。
-                return ResultUtil.error("领取人 科室存在多个");
-            }
+        userList.add(userId);
+        List<Long> teamIds = teamMapper.getUsersByTechnicist(userList);
+        if (CollectionUtil.isEmpty(teamIds)) {
+            // 抛出 领取人 需要包含科室
+            return ResultUtil.error("领取人 需要存在科室");
+        }
+        if (teamIds.size() >= 2) {
+            // 抛出 领取人 生成单号 指向存在问题。
+            return ResultUtil.error("领取人 科室存在多个");
+        }
+        return ResultUtil.success(teamIds);
+    }
+
+    /**
+     * 领取任务单
+     *
+     * @param list               检测数据
+     * @param entrustId          委托单ID
+     * @param teamId             部门id
+     * @param testTaskPool       流水任务单详情
+     * @param oldTaskProgressVos 旧任务单集合
+     * @param userInfo           用户信息
+     * @return 返回操作信息
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Result getATaskList(List<SampleItemEntity> list, Long entrustId, Long teamId, TestTaskPool testTaskPool, List<TaskProgressVo> oldTaskProgressVos, SysUserEntity userInfo) {
+        // TODO: 2024年6月6日： 审核发布时 指向合并或者是拆分。
+        // 判定 true = 新任务单，false = 旧任务单 null
+        Boolean taskListStatus = false;
+        if (testTaskPool.getTaskListStatus() != null && testTaskPool.getTaskListStatus().equals("1")) {
+            taskListStatus = false;
+        } else {
+            taskListStatus = true;
+        }
+        if (taskListStatus) {
             // TODO: 2024年1月3日  任务生成规则根据签发人所属团队走   = 授权操作人 = 领取人。
             //    规则：人员跨部门可以选。 （新的任务单号 生成时、只有一个单号。）
-            //  领取任务单
-            newAddTask(list, entrustId, detectorsCollection2.get(0), testTaskPool);
+            newAddTask(list, entrustId, teamId, testTaskPool);
             // 调用方法 进行 更新流水号任务单信息
             methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
-            return ResultUtil.success("领取成功");
-        }
-        // 旧任务单不为空 参与效验 领取人 与登录是否一致
-        if (CollectionUtil.isNotEmpty(taskProgressVos)) {
-            // 遍历
-            for (TaskProgressVo taskProgressVo : taskProgressVos) {
-                if (taskProgressVo.getReceiver() != null && !taskProgressVo.getReceiver().equals(userInfo.getUserId().toString())) {
-                    return ResultUtil.error("领取失败： 领单人与任务单存在的领单人不符合");
+        } else if (!taskListStatus && list.size() == 1) {
+            newAddTask(list, entrustId, teamId, testTaskPool);
+            // 调用方法 进行 更新流水号任务单信息
+            methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+        } else {
+            // TODO： 执行 旧操作 下列操作 全为旧操作
+            // 通过委托单id 查看检测项列表。
+            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+            // 任务领取-循环验证 数据 msg = null 正常执行、！= null 抛出。
+            Result msg = loopValidation(list);
+            if (msg != null) {
+                return msg;
+            }
+            // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
+            // 根据科室id 及 委托单主键 查询任务单是否存在？
+            //                        // TODO: 2023年12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 任务单更新为废弃操作、产值 = 0 。
+            //                           TODO:          2、 任务单不存在的话，创建任务单即可。
+            //调用方法： 补充检测项信息并发布任务单
+            // key = deptId value = 旧单号
+            Map<Long, TaskProgressVo> taskCodeMap = new HashMap<>();
+            // 2、进行录入任务单信息
+            if (CollectionUtil.isNotEmpty(list)) {
+                for (SampleItemEntity sampleItemEntity : list) {
+                    String sampler = sampleItemEntity.getSampler().split("-")[0];
+                    methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue(), taskCodeMap);
                 }
             }
+            // 调用方法 进行 更新流水号任务单信息
+            methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
         }
-        if (CollectionUtil.isNotEmpty(taskProgressVos) && taskProgressVos.size() == 1) {
+        return ResultUtil.success("领取成功");
+    }
+
+    /**
+     * 更新任务单
+     *
+     * @param oldTaskProgressVos 任务单列表
+     * @param list               传递信息
+     * @param userInfo           用户信息
+     * @param entrustId          委托单id
+     * @param testTaskPool       流水号任务单
+     * @return 返回信息
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Result updateTaskList(List<TaskProgressVo> oldTaskProgressVos, List<SampleItemEntity> list, SysUserEntity userInfo, Long entrustId, TestTaskPool testTaskPool) {
+        // 遍历
+        for (TaskProgressVo taskProgressVo : oldTaskProgressVos) {
+            if (taskProgressVo.getReceiver() != null && !taskProgressVo.getReceiver().equals(userInfo.getUserId().toString())) {
+                return ResultUtil.error("领取失败： 领单人与任务单存在的领单人不符合");
+            }
+        }
+        if (oldTaskProgressVos.size() == 1) {
             // TODO： 判断任务单状态 task_list_status = 任务单状态：!=null 任务生成规则根据签发人所属团队走
-            if (taskProgressVos.get(0).getTaskListStatus() != null) {
-                if (CollectionUtil.isEmpty(detectorsCollection2)) {
-                    // 抛出 领取人 需要包含科室
-                    return ResultUtil.error("领取人 需要存在科室");
-                }
-                if (detectorsCollection2.size() >= 2) {
-                    // 抛出 领取人 生成单号 指向存在问题。
-                    return ResultUtil.error("领取人 科室存在多个");
-                }
+            if (oldTaskProgressVos.get(0).getTaskListStatus() != null) {
                 //TODO： 执行我的任务 修改即可
                 // 更新 领取任务单
-                newUpdateTask(list, entrustId, taskProgressVos.get(0));
+                newUpdateTask(list, entrustId, oldTaskProgressVos.get(0));
                 // 调用方法 进行 更新流水号任务单信息
                 methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
                 return ResultUtil.success("更新成功");
             }
-        }
-        // TODO： 执行 旧操作 下列操作 全为旧操作
-        // 通过委托单id 查看检测项列表。
-        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
-        // 任务领取-循环验证 数据 msg = null 正常执行、！= null 抛出。
-        Result msg = loopValidation(list);
-        if (msg != null) {
-            return msg;
-        }
-        // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
-        // 根据科室id 及 委托单主键 查询任务单是否存在？
-        //                        // TODO: 2023年12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 任务单更新为废弃操作、产值 = 0 。
-        //                           TODO:          2、 任务单不存在的话，创建任务单即可。
-        //调用方法： 补充检测项信息并发布任务单
-        // key = deptId value = 旧单号
-        Map<Long, TaskProgressVo> taskCodeMap = new HashMap<>();
-        // 1.1：任务单列表存在的话
-        if (CollectionUtil.isNotEmpty(taskProgressVos)) {
-            // 处理旧任务单与检测项关系
-            processingOldTaskList(list, taskProgressVos, itemList, entrustId);
-            // 针对 list 含有 taskId的 进行集合循环
-            Iterator<SampleItemEntity> it = list.iterator();
-            while (it.hasNext()) {
-                SampleItemEntity data = it.next();
-                if (data.getTaskId() != null) {
-                    it.remove();
+        } else {
+            // TODO： 执行 旧操作 下列操作 全为旧操作
+            // 通过委托单id 查看检测项列表。
+            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+            // 任务领取-循环验证 数据 msg = null 正常执行、！= null 抛出。
+            Result msg = loopValidation(list);
+            if (msg != null) {
+                return msg;
+            }
+            // 获取每组检测项 对应的 （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
+            // 根据科室id 及 委托单主键 查询任务单是否存在？
+            //                        // TODO: 2023年12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 任务单更新为废弃操作、产值 = 0 。
+            //                           TODO:          2、 任务单不存在的话，创建任务单即可。
+            //调用方法： 补充检测项信息并发布任务单
+            // key = deptId value = 旧单号
+            Map<Long, TaskProgressVo> taskCodeMap = new HashMap<>();
+            // 1.1：任务单列表存在的话
+            if (CollectionUtil.isNotEmpty(oldTaskProgressVos)) {
+                // 处理旧任务单与检测项关系
+                processingOldTaskList(list, oldTaskProgressVos, itemList, entrustId);
+                // 针对 list 含有 taskId的 进行集合循环
+                Iterator<SampleItemEntity> it = list.iterator();
+                while (it.hasNext()) {
+                    SampleItemEntity data = it.next();
+                    if (data.getTaskId() != null) {
+                        it.remove();
+                    }
                 }
             }
-        }
-        // 2、进行录入任务单信息
-        if (CollectionUtil.isNotEmpty(list)) {
-            for (SampleItemEntity sampleItemEntity : list) {
-                String sampler = sampleItemEntity.getSampler().split("-")[0];
-                methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue(), taskCodeMap);
+            // 2、进行录入任务单信息
+            if (CollectionUtil.isNotEmpty(list)) {
+                for (SampleItemEntity sampleItemEntity : list) {
+                    String sampler = sampleItemEntity.getSampler().split("-")[0];
+                    methodPublishTaskList(entrustId, sampler, sampleItemEntity, itemList, testTaskPool.getId().longValue(), taskCodeMap);
+                }
             }
+            // 调用方法 进行 更新流水号任务单信息
+            methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
         }
-        // 调用方法 进行 更新流水号任务单信息
-        methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
         return ResultUtil.success("操作成功");
     }
+
 
     /**
      * TODO: 12月21日 1、 旧任务单存在 更新任务单 更新检测项 ，2、任务单与前端绑定不一致， 删除任务单操作。

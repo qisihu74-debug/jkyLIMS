@@ -5,13 +5,7 @@ import com.lims.manage.erp.entity.HourCount;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.SampleEntity;
 import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.vo.AreaStatisticsResultVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.PersonalStatsVo;
-import com.lims.manage.erp.vo.StatisticsParamVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
-import com.lims.manage.erp.vo.TeamOutputValueVo;
-import com.lims.manage.erp.vo.TestTeamVo;
+import com.lims.manage.erp.vo.*;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -249,6 +243,16 @@ public interface StatisticsMapper {
      */
     @MapKey("reportProducer")
     Map<String, Map<String, Object>> selectReportProducerMap(PersonalStatsVo personalStats);
+
+    /**
+     * 根据部门id 及 日期 统计具体报告清单
+     *
+     * @param teamId
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    List<StatisticsNodeDetailVo> getTeamStatisticsNode(@Param("teamId") String teamId, @Param("beginDate") String beginDate, @Param("endDate") String endDate);
 
 
 }

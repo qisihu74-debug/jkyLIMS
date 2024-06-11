@@ -1404,7 +1404,8 @@
         t1.publisher,
         t1.publish_date AS publishDate,
         t4.team,
-        t4.entrustment_no
+        t4.entrustment_no,
+        IFNULL( t1.task_list_status, 0 ) as task_list_status
         FROM
         test_task_pool t1
         INNER JOIN (
@@ -1500,7 +1501,8 @@
         tb1.publish_date AS publishDate,
         tb1.receive_name AS receiveName,
         tb1.receive_date AS receiveDate,
-        tb1.task_code As taskCode
+        tb1.task_code As taskCode,
+        IF( tb2.task_list_status is NULL, 1, 0 ) as task_list_status
         FROM
         test_task_pool tb1
         LEFT JOIN test_task tb2 ON tb1.id = tb2.pool_id

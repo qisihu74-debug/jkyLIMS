@@ -225,9 +225,9 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
         // 当前变更的报告单号
         int nowRportNumber = Integer.parseInt(arrays[arrays.length - 1]);
         if (nowRportNumber > reportMaxCode) {
-            // 进行 A%B 求余操作
-            int zhi = nowRportNumber % reportMaxCode;
-            if (zhi > 10) {
+            // 进行 A-B 求差操作
+            int zhi = nowRportNumber - reportMaxCode;
+            if (zhi > 0 && zhi > 10) {
                 return ResultUtil.error("操作失败：报告号 " + nowRportNumber + " 超过当前最大数10位" + " 系统最大报告号 " + arrays[0] + "-" + arrays[1] + "-YC-" + reportMaxCode);
             }
         }

@@ -89,7 +89,7 @@ public interface ReserveCodeEntityMapper {
      * @return
      */
     @Select("SELECT\n" +
-            "\tMAX( SUBSTR( report_code FROM 13 ) + 0 ) \n" +
+            "\t MAX( SUBSTRING_INDEX(report_code, '-', -1) + 0 )  \n" +
             "FROM\n" +
             "\ttest_report_record \n" +
             "WHERE\n" +
@@ -105,7 +105,7 @@ public interface ReserveCodeEntityMapper {
      * @return
      */
     @Select("SELECT\n" +
-            "\tMAX( SUBSTR( report_code FROM 13 ) + 0 ) \n" +
+            "\tMAX( SUBSTRING_INDEX(report_code, '-', -1) + 0 ) \n" +
             "FROM\n" +
             "\ttest_report_record_mid \n" +
             "WHERE\n" +

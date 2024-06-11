@@ -30,6 +30,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Comparator;
@@ -143,7 +144,7 @@ public class StatisticAnalysisInterface {
      * @return
      */
     @PostMapping(value = "postAdjustingQuotas")
-    public Result<?> postAdjustingQuotas(@RequestBody TestTaskOrderWorkingHoursVo taskOrderWorkingHoursVo) {
+    public Result<?> postAdjustingQuotas(@RequestBody TestTaskOrderWorkingHoursVo taskOrderWorkingHoursVo) throws ParseException {
         if (taskOrderWorkingHoursVo == null) {
             return ResultUtil.error("缺少必填参数");
         }

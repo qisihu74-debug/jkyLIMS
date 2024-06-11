@@ -15,6 +15,7 @@ import com.lims.manage.erp.vo.WorkHourStatisticVo;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +74,7 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @param list
      * @return
      */
-    Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list, String workingHoursId);
+    Result postAdjustingQuotas(List<TestTaskOrderWorkingHours> list, String workingHoursId) throws ParseException;
 
     /**
      * 工时统计-按照人员统计

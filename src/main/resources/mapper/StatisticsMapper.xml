@@ -1410,4 +1410,66 @@
             </if>
         </foreach>
     </select>
+
+    <select id="getTeamStatisticsNode" resultType="com.lims.manage.erp.vo.StatisticsNodeDetailVo">
+        SELECT
+        t3.id,
+        t3.entrustment_id ,
+        t3.report_code ,
+        t3.sample_name ,
+        t2.discount,
+        t2.actual_price,
+        t4.actualReportPrice AS system_price,
+        t2.entrustment_no
+        FROM
+        test_task AS t1
+        LEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_report_record AS t3 ON t3.entrustment_id = t2.id
+        LEFT JOIN (
+        SELECT
+        reportValue_talbe.entrust_id,
+        SUM( IFNULL( entrust_table.discount, 1 ) * IFNULL( unit_price, 0 ) * IFNULL( times, 0 ) ) actualReportPrice
+        FROM
+        test_entrusted_sample_checkitem_statistics AS reportValue_talbe
+        LEFT JOIN test_entrusted_info AS entrust_table ON reportValue_talbe.entrust_id = entrust_table.id
+        WHERE
+        entrust_id IN (
+        SELECT
+        t3.entrustment_id
+        FROM
+        test_task AS t1
+        LEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_report_record AS t3 ON t3.entrustment_id = t2.id
+        WHERE
+        DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT( #{beginDate}, '%Y-%m-%d' )
+        AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
+        AND t1.dept_id IN ( SELECT id FROM test_team WHERE pid = #{teamId} OR id = #{teamId} )
+        )
+        GROUP BY
+        entrust_id
+        ) AS t4 ON t2.id = t4.entrust_id
+        WHERE
+        DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT(  #{beginDate}, '%Y-%m-%d' )
+        AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
+        AND t1.dept_id IN ( SELECT id FROM test_team WHERE pid = #{teamId} OR id = #{teamId} )
+        UNION
+        SELECT
+        t3.id,
+        null ,
+        t3.report_code ,
+        t3.sample_name ,
+        t2.discount,
+        null,
+        null,
+        t2.entrustment_no
+        FROM
+        test_task AS t1
+        LEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_report_record_mid AS t3 ON t3.entrust_id = t2.id
+        WHERE
+        DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT( #{beginDate}, '%Y-%m-%d' )
+        AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
+        AND t1.dept_id IN ( SELECT id FROM test_team WHERE pid = #{teamId} OR id = #{teamId} )
+        ORDER BY entrustment_no desc
+    </select>
 </mapper>
