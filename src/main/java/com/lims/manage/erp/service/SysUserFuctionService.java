@@ -1,7 +1,9 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.SysFunction;
+import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.entity.TreeFunction;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.SysRoleFuncMenuVo;
 
 import java.util.List;
@@ -29,31 +31,47 @@ public interface SysUserFuctionService {
 
     /**
      * 依据 用户ID 展示所属菜单项。
+     *
      * @param userid
      * @return
      */
-    List<TreeFunction> GetListUpgrade(Long userid);
-
-    /**
-     * 依据 用户ID 展示所属菜单项。
-     * @param userid
-     * @return
-     */
-    List<TreeFunction> GetListUpgrade1(Long userid,String userName);
+    List<TreeFunction> GetListUpgrade(Long userid, String userName);
 
     /**
      * 查询角色现有权限
+     *
      * @param roleId
      * @return
      */
     List<Long> getRoleMenu(Long roleId);
 
     /**
+     * 查询角色ID已有权限集合
+     *
+     * @param roleId
+     * @return
+     */
+    List<TreeFunction> getRoleMenuList(Long roleId);
+
+    /**
+     * 查询角色ID已有权限Ids集合
+     *
+     * @param roleId
+     * @return
+     */
+    List<Long> getRoleMenuIds(Long roleId);
+
+    /**
      * 角色授权
+     *
      * @param
      * @return
      */
     Boolean grant(SysRoleFuncMenuVo entity);
+
+    Result postRoleSettingPermissions(List<SysRoleMenuEntity> list);
+
+    Result postcancelRolePermissions(List<SysRoleMenuEntity> list);
 
 
 }

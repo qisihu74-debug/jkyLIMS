@@ -32,12 +32,11 @@ public class SysMenuEntity implements Serializable {
 	/**
 	 * 权限所属菜单id
 	 */
-	@TableField(exist = false)
+	@TableField(value = "own_func")
 	private Long fuctionId;
 	/**
 	 * 注释
 	 */
-	@TableField(exist = false)
 	private String note;
 	/**
 	 * 角色是否已拥有权限
