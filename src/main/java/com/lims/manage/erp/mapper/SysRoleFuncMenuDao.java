@@ -89,7 +89,8 @@ public interface SysRoleFuncMenuDao {
     List<SysRoleFunctionParent> selectSetMenuPid(Long userId);
 
     /**
-     * 查询角色已有权限
+     * 查询角色已有菜单
+     *
      * @param roleId
      * @return
      */

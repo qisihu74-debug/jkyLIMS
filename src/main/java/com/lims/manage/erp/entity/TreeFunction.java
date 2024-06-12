@@ -2,6 +2,7 @@ package com.lims.manage.erp.entity;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,4 +20,8 @@ public class TreeFunction {
     private List Children;
     private Long userId;
     private String userName;
+    /**
+     * 菜单对应权限
+     */
+    private List<SysMenuEntity> menuEntityList = new ArrayList<>();
 }

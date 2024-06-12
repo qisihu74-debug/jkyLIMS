@@ -2,6 +2,8 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysMenuEntity;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -10,15 +12,26 @@ import java.util.List;
  * @Author gjl
  * @CreateTime 2021/11/09 15:57
  */
+@Component
+@Mapper
 public interface SysMenuDao extends BaseMapper<SysMenuEntity> {
 
     /**
      * 根据角色查询用户权限
+     *
      * @Author gjl
      * @CreateTime 2021/11/09 10:14
-     * @Param  roleId 角色ID
+     * @Param roleId 角色ID
      * @Return List<SysMenuEntity> 权限集合
      */
     List<SysMenuEntity> selectSysMenuByRoleId(Long roleId);
-	
+
+    /**
+     * 通过userId 获取对应的权限集合
+     *
+     * @param userId
+     * @return
+     */
+    List<SysMenuEntity> selectSysMenuEntityListByUserId(Long userId);
+
 }

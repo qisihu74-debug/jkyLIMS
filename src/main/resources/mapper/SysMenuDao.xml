@@ -16,10 +16,19 @@
     </resultMap>
 
     <!-- 查询用户权限集合 -->
-    <select id="selectSysMenuByRoleId"  parameterType="long" resultType="com.lims.manage.erp.entity.SysMenuEntity" >
+    <select id="selectSysMenuByRoleId" parameterType="long" resultType="com.lims.manage.erp.entity.SysMenuEntity">
       SELECT sm.* FROM sys_menu sm
       LEFT JOIN sys_role_menu se ON sm.menu_id = se.menu_id
       WHERE se.role_id = #{roleId}
+    </select>
+
+    <select id="selectSysMenuEntityListByUserId" resultType="com.lims.manage.erp.entity.SysMenuEntity">
+        SELECT
+            *
+        FROM
+            sys_menu
+        WHERE
+            menu_id IN ( SELECT menu_id FROM sys_role_menu WHERE role_id IN ( SELECT role_id FROM sys_user_role WHERE user_id = #{userId} ) )
     </select>
 
 

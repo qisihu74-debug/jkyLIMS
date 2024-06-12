@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.lims.manage.erp.entity.SysFunction;
+import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TreeFunction;
 import com.lims.manage.erp.result.Result;
@@ -80,30 +81,40 @@ public class UserFuctionController {
         return ResultUtil.success("查询角色菜单权限成功！", sysUserFuctionService.getRoleMenu(roleId));
     }
 
-    // 暂时未做限制 直接放行 优化。 废弃
-    @GetMapping("getMenuDisplayNew2")
-    public Result getMenuDisplayNew() {
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (userInfo == null) {
-            return ResultUtil.error("token 已过期！");
-        }
-        List<TreeFunction> dataList = sysUserFuctionService.GetListUpgrade(userInfo.getUserId());
-        if (dataList != null && dataList.size() > 0 && !dataList.isEmpty()) {
-            return ResultUtil.success(dataList);
-        }
-        return ResultUtil.error("使用人角色未配置菜单");
-
+    /**
+     * 查询角色ID已授权限集合
+     *
+     * @param roleId
+     * @return
+     */
+    @GetMapping("/getRoleMenuList")
+    //@RequiresRoles("ADMIN")
+    public Result getRoleMenuList(Long roleId) {
+        return ResultUtil.success("查询角色菜单权限成功！", sysUserFuctionService.getRoleMenuList(roleId));
     }
+
+    /**
+     * 查询角色ID已授权限集合
+     *
+     * @param roleId
+     * @return
+     */
+    @GetMapping("/getRoleMenuIds")
+    //@RequiresRoles("ADMIN")
+    public Result getRoleMenuIds(Long roleId) {
+        return ResultUtil.success("查询角色菜单权限成功！", sysUserFuctionService.getRoleMenuIds(roleId));
+    }
+
 
     //  优化 菜单展示。
     @GetMapping("getMenuDisplayNew")
     public Result getMenuDisplayNew1() {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        log.info("菜单进入获取登录人\tuserId"+userInfo.getUserId()+"\tname="+userInfo.getUsername());
+        log.info("菜单进入获取登录人\tuserId" + userInfo.getUserId() + "\tname=" + userInfo.getUsername());
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        List<TreeFunction> dataList = sysUserFuctionService.GetListUpgrade1(userInfo.getUserId(),userInfo.getUsername());
+        List<TreeFunction> dataList = sysUserFuctionService.GetListUpgrade(userInfo.getUserId(), userInfo.getUsername());
         if (dataList != null && dataList.size() > 0 && !dataList.isEmpty()) {
             log.info("菜单输出获取登录人\tuserId"+userInfo.getUserId()+"\tname="+userInfo.getUsername());
             return ResultUtil.success(dataList);
@@ -144,6 +155,34 @@ public class UserFuctionController {
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "角色授权ID【" + entity.getRoleId() + "】状态为" + "失败！", Const.SYS_MANAGER_LOG, false);
             return ResultUtil.error(-1, "授权失败");
         }
+    }
+
+    /**
+     * 角色设置权限
+     *
+     * @param list
+     * @return
+     */
+    @PostMapping("roleSettingPermissions")
+//    @RequiresPermissions("sys:menu:grant")
+    //@RequiresRoles("ADMIN")
+    public Result roleSettingPermissions(@RequestBody List<SysRoleMenuEntity> list) {
+
+        return sysUserFuctionService.postRoleSettingPermissions(list);
+    }
+
+    /**
+     * 取消角色设置权限
+     *
+     * @param list
+     * @return
+     */
+    @DeleteMapping("cancelRolePermissions")
+//    @RequiresPermissions("sys:menu:grant")
+    //@RequiresRoles("ADMIN")
+    public Result cancelRolePermissions(@RequestBody List<SysRoleMenuEntity> list) {
+
+        return sysUserFuctionService.postcancelRolePermissions(list);
     }
 
 
