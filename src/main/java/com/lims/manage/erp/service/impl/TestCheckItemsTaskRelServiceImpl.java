@@ -32,6 +32,7 @@ import com.lims.manage.erp.mapper.TestTaskOrderWorkingHoursMapper;
 import com.lims.manage.erp.mapper.TestTeamDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.StatisticsService;
 import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
@@ -1449,7 +1450,13 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 hourCount.setPercentage(percentage+"%");
             }
             //计算部门产值和个人绩效占比
-            Double price = statisticsMapper.countDeptPriceByTime(bean.getStartDate(), bean.getStopDate());
+            List<TeamOutputValueVo> teamOutputValueVos = statisticsMapper.teamStatistics231219(bean.getSTime()+" 00:00:00", bean.getETime()+" 23:59:59", null);
+            //统计总产值
+            for (TeamOutputValueVo outputValueVo :teamOutputValueVos){
+                outputValueVo.setPrice(Double.parseDouble(outputValueVo.getTaskPrice()));
+            }
+            Double price = teamOutputValueVos.stream().mapToDouble(TeamOutputValueVo::getPrice)
+                    .sum();
             for (HourCount hourCount :hourCounts){
                 hourCount.setTeamPrice(price.intValue());
                 if (price != null) {

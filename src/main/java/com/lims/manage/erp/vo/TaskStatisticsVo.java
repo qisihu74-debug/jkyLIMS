@@ -126,5 +126,8 @@ public class TaskStatisticsVo {
      * 工时id
      */
     private Long workingHoursId;
-
+    @TableField(exist = false)
+    private String sTime;
+    @TableField(exist = false)
+    private String eTime;
 }

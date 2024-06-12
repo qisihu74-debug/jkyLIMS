@@ -16,4 +16,5 @@ public class TeamOutputValueVo {
      * 应收报告产值
      */
     private Double systemReportPrice;
+    private Double price;
 }

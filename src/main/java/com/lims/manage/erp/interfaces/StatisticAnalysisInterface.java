@@ -306,6 +306,8 @@ public class StatisticAnalysisInterface {
         bean.setDate(DateUtil.timeFormat(stopDate));
         bean.setStopDate(date);
         bean.setStartDate(DateUtil.timeFormat(startDate));
+        bean.setSTime(startDate);
+        bean.setETime(stopDate);
         List<HourCount> list = testCheckItemsTaskRelService.exportHours(bean);
         if (!CollectionUtils.isEmpty(list)){
             List<HourCount> sortList = list.stream()
