@@ -18,7 +18,7 @@ import java.util.List;
  * @Copyright © 河南交科院
  */
 public interface SnRuleDao {
-    @Select("select * from sys_serial_number_record where type=#{type}")
+    @Select("select * from sys_serial_number_record where type=#{type} for update")
     SnRecord getInfoByType(@Param("type") String type);
 
     @Select("SELECT\n" +

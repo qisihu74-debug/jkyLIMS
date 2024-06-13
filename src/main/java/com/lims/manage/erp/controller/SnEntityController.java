@@ -178,7 +178,28 @@ public class SnEntityController {
 	 */
 	@GetMapping("getSnByType")
 	public Result getSnByType(String type,String code){
-		String sn = service.getSnByType(type,code);
-		return ResultUtil.success(sn);
+		// 创建一个Runnable对象，它包含线程需要执行的任务
+		Runnable task = () -> {
+			// 打印当前线程的名字和递增的计数器
+			String sn = service.getSnByType(type,code);
+			System.out.println("线程："+Thread.currentThread().getName() + "获取到编号: "+sn);
+		};
+		// 创建并启动三个线程，它们都将运行相同的任务
+		Thread thread1 = new Thread(task, "Thread-1");
+		Thread thread2 = new Thread(task, "Thread-2");
+		Thread thread3 = new Thread(task, "Thread-3");
+		thread1.start();
+		thread2.start();
+		thread3.start();
+		// 等待所有线程执行完毕，这里简单通过join方法实现
+		try {
+			thread1.join();
+			thread2.join();
+			thread3.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("All threads have finished execution.");
+		return ResultUtil.success("成功");
 	}
 }
