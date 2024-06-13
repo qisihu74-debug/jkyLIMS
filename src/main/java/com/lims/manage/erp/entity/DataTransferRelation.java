@@ -21,7 +21,7 @@ public class DataTransferRelation implements Serializable {
 	 * 记录id
 	 */
 	@TableId(type = IdType.AUTO)
-	private String id;
+	private Integer id;
 
 	/**
 	 * 数据id
