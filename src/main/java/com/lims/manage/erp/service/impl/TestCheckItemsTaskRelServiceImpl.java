@@ -1453,7 +1453,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             List<TeamOutputValueVo> teamOutputValueVos = statisticsMapper.teamStatistics231219(bean.getSTime()+" 00:00:00", bean.getETime()+" 23:59:59", null);
             //统计总产值
             for (TeamOutputValueVo outputValueVo :teamOutputValueVos){
-                outputValueVo.setPrice(Double.parseDouble(outputValueVo.getTaskPrice()));
+                outputValueVo.setPrice(outputValueVo.getActualReportPrice());
             }
             Double price = teamOutputValueVos.stream().mapToDouble(TeamOutputValueVo::getPrice)
                     .sum();
