@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.DataTransferRelationDao">
+
+    <!--  获取流转关系条数  -->
+    <select id="getTransferRelationCount" resultType="Integer">
+        SELECT count(*)
+        FROM test_data_transfer_relation
+        WHERE (data_id = #{transferRelation.dataId} AND data_relation_id = #{transferRelation.dataRelationId})
+            OR (data_id = #{transferRelation.dataRelationId} AND data_relation_id = #{transferRelation.dataId})
+    </select>
+
+    <!--  根据数据id获取和数据有关联的数据id列表  -->
+    <select id="getDataIdSet" resultType="string">
+        SELECT relation.data_relation_id
+        FROM test_data_transfer_relation relation
+        WHERE relation.data_id = #{dataId}
+        UNION
+        SELECT relation.data_id
+        FROM test_data_transfer_relation relation
+        WHERE relation.data_relation_id = #{dataId}
+    </select>
+</mapper>
