@@ -38,8 +38,8 @@ public class SysRoleEntity implements Serializable {
      */
     private Timestamp createTime;
     /**
-     * 是否删除-=1不可删除
-     */
+	 * 是否删除=1不可删除
+	 */
     private Integer isDelete;
 
 }

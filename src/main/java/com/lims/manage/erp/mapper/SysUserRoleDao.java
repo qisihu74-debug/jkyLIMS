@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysUserRoleEntity;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -26,6 +27,7 @@ public interface SysUserRoleDao extends BaseMapper<SysUserRoleEntity> {
 
     /**
      * 插入新角色
+     *
      * @param newRoles
      * @return
      */
@@ -33,4 +35,14 @@ public interface SysUserRoleDao extends BaseMapper<SysUserRoleEntity> {
 
     @Select("select distinct role_id from sys_user_role where user_id=#{userId}")
     List<Long> getRoleIdsByUserId(@Param("userId") Long userId);
+
+    @Select("SELECT\n" +
+            "\tt2.role_id AS VALUE,\n" +
+            "\tt2.role_name AS label \n" +
+            "FROM\n" +
+            "\tsys_user_role AS t1\n" +
+            "\tLEFT JOIN sys_role t2 ON t1.role_id = t2.role_id \n" +
+            "WHERE\n" +
+            "\tt1.user_id = #{userId}")
+    List<LabelValueVo> getRolesByUserId(@Param("userId") Long userId);
 }

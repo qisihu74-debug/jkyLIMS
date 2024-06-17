@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserTreeEntity;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.RegisterUserInfoVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
@@ -74,19 +75,13 @@ public interface SysUserService extends IService<SysUserEntity> {
      */
     Boolean resetPassword(SysUserEntity entity);
 
+
     /**
      * 获取用户信息列表
      * @param vo
      * @return
      */
     List<UserInfoVo> getUserInfos(UserInfoParamVo vo);
-
-    /**
-     * 获取用户信息列表——二次开发
-     * @param vo
-     * @return
-     */
-    List<UserInfoVo> getUserInfos_two(UserInfoParamVo vo);
 
     /**
      * 更新用户信息

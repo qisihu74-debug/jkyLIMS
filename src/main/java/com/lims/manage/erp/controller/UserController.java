@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -69,16 +70,6 @@ public class UserController {
     @Autowired
     private DeptService deptService;
 
-//    /**
-//     * 获取用户列表废弃
-//     *
-//     * @return
-//     */
-//    @PostMapping("list_abandon")
-////    @RequiresPermissions("sys:user:list")
-//    public Result getList(@RequestBody UserInfoParamVo vo) {
-//        return ResultUtil.success(sysUserService.getUserInfos(vo));
-//    }
 
     /**
      * 获取所有用户名称列表
@@ -105,8 +96,8 @@ public class UserController {
      */
     @PostMapping("list")
 //    @RequiresPermissions("sys:user:list")
-    public Result getList_two(@RequestBody UserInfoParamVo vo) {
-        return ResultUtil.success(sysUserService.getUserInfos_two(vo));
+    public Result getList(@RequestBody UserInfoParamVo vo) {
+        return ResultUtil.success(sysUserService.getUserInfos(vo));
     }
 
     /**
@@ -154,30 +145,10 @@ public class UserController {
         if (sysUserDao.getOne(vo.getUsername()) != null) {
             return ResultUtil.error("当前账号已存在");
         }
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (userInfo == null) {
-            return ResultUtil.error("token已过期，请重新登录");
-        }
-        // 查询使用人 是否已经被占用账号
-        if (vo.getDingUserId() != null && vo.getDingUserId().length() != 0) {
-            // 钉钉用户id 存在其他使用人
-            if (!sysUserService.getTheUserList(vo.getDingUserId())) {
-                return ResultUtil.error("使用人 已拥有账号");
-            }
-        }
-
-        // 查询此账号是否存在
-        DingUserEntity sysDingUserData = dingUserService.getById(vo.getDingUserId());
-        if (sysDingUserData == null) {
-            return ResultUtil.error("使用人不存在！，请重新选择使用人");
-        }
         vo.setUserId(GenID.getID());
         RegisterUserInfoVo userInfoVo = new RegisterUserInfoVo();
-        // 更改用户时： 通过userId 和 员工使用人 查询绑定问题 并返回 部门集合 List<Long>
-        List<Long> deptList = deptService.getDepartmentIdLong(vo.getUserId(), vo.getDingUserId());
-        vo.setDepartmentIdLong(deptList);
         // 处理部门信息
-        if (vo.getDepartmentIdLong() != null && vo.getDepartmentIdLong().size() > 0) {
+        if (CollectionUtil.isNotEmpty(vo.getDepartmentIdLong())) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("[");
             for (Long deptId : vo.getDepartmentIdLong()) {
@@ -186,7 +157,6 @@ public class UserController {
             stringBuilder.append("]");
             userInfoVo.setDeptId(stringBuilder.toString());
         }
-
         userInfoVo.setUsername(vo.getUsername());
         userInfoVo.setMobile(vo.getMobile());
         userInfoVo.setEmail(vo.getEmail());
@@ -202,10 +172,6 @@ public class UserController {
         }
         entity.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         entity.setUserId(vo.getUserId());
-
-        if (sysDingUserData.getName() != null && !sysDingUserData.getName().isEmpty()) {
-            entity.setName(sysDingUserData.getName());
-        }
         sysUserService.save(entity);
         // 角色信息
         if (vo.getRoleIdsLong() != null && vo.getRoleIdsLong().size() > 0) {
@@ -221,9 +187,6 @@ public class UserController {
                 sysUserRoleDao.insertNewRole(roleEntity);
             }
         }
-//        //存放sys_ding_user数据
-//        DingUserEntity dingUserEntity = new DingUserEntity(entity.getUserId().toString(),vo);
-//        dingUserService.save(dingUserEntity);
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "新增用户【" + vo.getUsername() + "】成功！", Const.CREATE_USER, true);
         return ResultUtil.success();
     }

@@ -2,6 +2,7 @@ package com.lims.manage.erp.vo;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.lims.manage.erp.entity.SysUserEntity;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -40,4 +41,20 @@ public class UserInfoVo {
      * 更新时间
      */
     private Timestamp time;
+
+    public UserInfoVo() {
+    }
+
+    public UserInfoVo(SysUserEntity sysUserEntity) {
+        this.userId = sysUserEntity.getUserId();
+        this.username = sysUserEntity.getUsername();
+        this.createTime = sysUserEntity.getCreateTime();
+        this.state = sysUserEntity.getState();
+        this.note = sysUserEntity.getNote();
+        this.name = sysUserEntity.getName();
+        this.mobile = sysUserEntity.getMobile();
+        this.position = sysUserEntity.getPosition();
+        this.email = sysUserEntity.getEmail();
+        this.time = sysUserEntity.getTime();
+    }
 }
