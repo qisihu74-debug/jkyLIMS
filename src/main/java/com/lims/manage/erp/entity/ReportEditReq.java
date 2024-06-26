@@ -1,7 +1,10 @@
 package com.lims.manage.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,4 +51,7 @@ public class ReportEditReq {
      * 操作类型0线上编辑的报告，1线下编辑的报告
      */
     private Integer operateType;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern ="yyyy-MM-dd" , timezone ="GMT+8")
+    private Date reportTime;
 }

@@ -434,11 +434,11 @@ public interface ReportRecordEntityMapper {
     @Select("select max(end_time) from test_entrusted_sample_checkitem_rel where entrust_id=#{entrustId}")
     java.sql.Date getMaxTime(@Param("entrustId") Long entrustId);
 
-    @Update("update test_report_record set report_code=#{newReportCode},report_complete_time=#{reportCompleteTime},required_completion_time=#{date}," +
+    @Update("update test_report_record set report_complete_time=#{reportCompleteTime},required_completion_time=#{date}," +
             "sample_name=#{sampleName},task_code=#{taskCode},task_id=#{taskId},combine_time=#{combineTime} where report_code=#{reportCode}")
     void updateTime(@Param("reportCode") String reportCode, @Param("reportCompleteTime") Date reportCompleteTime,
                     @Param("date") Date date,@Param("sampleName") String sampleName,@Param("taskId") Long taskId,
-                    @Param("taskCode") String taskCode,@Param("combineTime") Date combineTime,@Param("newReportCode") String newReportCode);
+                    @Param("taskCode") String taskCode,@Param("combineTime") Date combineTime);
 
     @Update("update test_report_record set category = '电子章', qys_docment_id = #{documentId} where report_code=#{reportCode}")
     void updateQysInfo(@Param("reportCode") String reportCode, @Param("documentId") Long documentId);
@@ -466,7 +466,8 @@ public interface ReportRecordEntityMapper {
             "\tt2.reviewer,\n" +
             "\tt2.receiver,\n" +
             "\tt4.name As receiverName,\n" +
-            "\tt3.report_code As reportCode\n" +
+            "\tt3.report_code As reportCode,\n" +
+            "\tt3.report_complete_time As reportTime\n" +
             "FROM\n" +
             "\ttest_entrusted_info t1\n" +
             "LEFT JOIN test_task t2 ON t1.id = t2.entrustment_id\n" +
@@ -486,7 +487,8 @@ public interface ReportRecordEntityMapper {
             "\tt2.reviewer,\n" +
             "\tt2.receiver,\n" +
             "\tt4.name,\n" +
-            "\tt3.report_code\n" +
+            "\tt3.report_code,\n" +
+            "\tt3.report_complete_time As reportTime\n" +
             "FROM\n" +
             "\ttest_entrusted_info t1\n" +
             "LEFT JOIN test_task t2 ON t1.id = t2.entrustment_id\n" +

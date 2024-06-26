@@ -74,4 +74,5 @@ public class ApproveInfo {
      */
     private List<KeyValue> qfrMap;
     private String mobile;
+    private String reportTime;
 }

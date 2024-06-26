@@ -449,9 +449,9 @@ public interface ReportService {
     List<LabelValueVo> makeReportSampleInfos(Long entrustId,Long taskId);
     List<LabelValueVo> makeReportSampleInfos(Long entrustId);
 
-    Date getReportCompleteTime(String reportCode);
+    Date getReportCompleteTime(Long reportCode);
 
-    void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date date2,String newReportCode);
+    void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date date2);
 
     QiYueSuoResponse createbycategoryBatch(QiYueSuoReqBean reqBean,List<String> stringList);
 

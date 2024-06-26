@@ -124,6 +124,9 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -1874,6 +1877,13 @@ public class ReportServiceImpl implements ReportService {
         approveInfo.setProjectName(approveInfoList.get(0).getProjectName());
         approveInfo.setProjectPart(approveInfoList.get(0).getProjectPart());
         approveInfo.setReportCode(approveInfoList.get(0).getReportCode());
+        // 定义日期时间格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // 将字符串转换为LocalDateTime对象
+        LocalDateTime localDateTime = LocalDateTime.parse(approveInfoList.get(0).getReportTime(), formatter);
+        // 从LocalDateTime对象中获取LocalDate对象，即只有日期部分
+        LocalDate dateOnly = localDateTime.toLocalDate();
+        approveInfo.setReportTime(dateOnly.toString());
         approveInfo.setJcrMap(jcMap);
         approveInfo.setShrMap(shMap);
         approveInfo.setQfrMap(qfMap);
@@ -4736,11 +4746,15 @@ public class ReportServiceImpl implements ReportService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean submitEditReport(ReportEditReq bean) {
         Long entrustIdByTaskId = bean.getEntrustId();
+        //根据reportTime设置报告生成规则
+        Date reportTime = bean.getReportTime();
+        String formalReportCode = reportService.getFormalReportCode(entrustIdByTaskId, DateUtil.formatDate(reportTime));
         // 通过任务单id 获取委托单下报告数量
         Integer reportCount = entrustEntityMapper.getReportNumById(entrustIdByTaskId);
         //报告类型0最终，1中间报告
         Integer reportType = bean.getReportType();
         ReportRecordEntity reportRecordEntity = new ReportRecordEntity();
+        reportRecordEntity.setReportCode(formalReportCode);
         if (bean.getOperateType() == 0){
             reportRecordEntity.setOperateType(0);
         }else {
@@ -4775,7 +4789,7 @@ public class ReportServiceImpl implements ReportService {
                 //更新任务单状态
                 taskMapper.updateReportStatusByEntrustId(1, entrustIdByTaskId);
                 reportRecordEntity.setState(1 + "");
-                reportRecordEntity.setReportCompleteTime(new Date(System.currentTimeMillis()));
+                reportRecordEntity.setReportCompleteTime(bean.getReportTime());
                 //设置报告类型
                 reportRecordEntity.setType("0");
 //                String reserveCodeStr = recordEntityMapper.getReserveCodeStr(entrustIdByTaskId);
@@ -4786,8 +4800,6 @@ public class ReportServiceImpl implements ReportService {
 //                    //更新预留编号的状态和使用时间
 //                    recordEntityMapper.updateReserveCode(reserveCodeStr);
 //                }
-                //设置临时报告编号
-                reportRecordEntity.setReportCode(GenID.getUUID());
                 reportRecordEntity.setId(GenID.getID());
                 reportRecordEntity.setEntrustmentId(entrustIdByTaskId);
                 // 报告数量
@@ -4827,13 +4839,12 @@ public class ReportServiceImpl implements ReportService {
 //                        //更新预留编号的状态和使用时间
 //                        recordEntityMapper.updateReserveCode(reserveCodeStr);
 //                    }
-                    //设置临时报告编号
-                    reportRecordEntity.setReportCode(GenID.getUUID());
                     reportRecordEntity.setId(GenID.getID());
                     //设置报告类型
                     reportRecordEntity.setType("1");
                     // 报告数量
                     reportRecordEntity.setNumber(reportCount);
+                    reportRecordEntity.setReportCompleteTime(bean.getReportTime());
                     recordEntityMapper.insert(reportRecordEntity);
                 }
             }
@@ -4852,14 +4863,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Date getReportCompleteTime(String reportCode) {
-        ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
-        java.sql.Date date = recordEntityMapper.getMaxTime(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+    public Date getReportCompleteTime(Long entrustId) {
+        java.sql.Date date = recordEntityMapper.getMaxTime(entrustId);
         return date;
     }
 
     @Override
-    public void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date combineTime,String newReportCode) {
+    public void updateTime(String reportCode, Date reportCompleteTime,Date date,String sampleName,Long taskId,String taskCode,Date combineTime) {
 //        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
 //        format.setTimeZone(TimeZone.getTimeZone("UTC"));
 //        Date codeDate = null;
@@ -4882,10 +4892,7 @@ public class ReportServiceImpl implements ReportService {
 //            //更新预留编号的状态和使用时间
 //            recordEntityMapper.updateReserveCode(reserveCodeStr);
 //        }
-        if(newReportCode == null || "null".equals(newReportCode)){
-            newReportCode = reportCode;
-        }
-        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode,combineTime,newReportCode);
+        recordEntityMapper.updateTime(reportCode,reportCompleteTime,date,sampleName,taskId,taskCode,combineTime);
     }
 
     /**
