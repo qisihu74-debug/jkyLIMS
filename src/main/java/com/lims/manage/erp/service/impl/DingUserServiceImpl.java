@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.mapper.DingUsertDao;
 import com.lims.manage.erp.service.DingUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author gjl
@@ -16,4 +19,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DingUserServiceImpl extends ServiceImpl<DingUsertDao, DingUserEntity> implements DingUserService {
+   @Autowired
+   private DingUsertDao dingUsertDao;
+
+    @Override
+    public List<DingUserEntity> getInfo() {
+        return dingUsertDao.getInfo();
+    }
 }

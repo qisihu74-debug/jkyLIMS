@@ -29,6 +29,7 @@ import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.ShiroUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,6 +200,7 @@ public class TechnicistFilesController {
             return ResultUtil.error("文件类型不正确，请上传正确的文件类型");
         }
         TechnicistFiles technicistFiles = JSON.parseObject(jsonParam, TechnicistFiles.class);
+        technicistFiles.setUserId(ShiroUtils.getUserInfo().getUserId());
         String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, file.getOriginalFilename());
         if (!StringUtils.isEmpty(upload)) {
             String uploadUrl = upload.substring(0, upload.indexOf("?"));
@@ -304,11 +306,15 @@ public class TechnicistFilesController {
      */
     @GetMapping("list")
     public Result list(Integer technicistId, Integer type, Integer pageNum, Integer pageSize) {
-        if (technicistId == null || type == null || pageNum == null || pageSize == null) {
+        if (type == null || pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少参数");
         }
         LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TechnicistFiles::getTechnicistId, technicistId);
+        if (technicistId == null){
+            queryWrapper.eq(TechnicistFiles::getUserId, ShiroUtils.getUserInfo().getUserId());
+        }else {
+            queryWrapper.eq(TechnicistFiles::getTechnicistId, technicistId);
+        }
         queryWrapper.eq(TechnicistFiles::getType, type);
         PageHelper.startPage(pageNum, pageSize);
         List<TechnicistFiles> list = technicistFilesService.list(queryWrapper);

@@ -5,6 +5,7 @@ import com.lims.manage.erp.entity.DingUserEntity;
 import com.lims.manage.erp.vo.UserInfoVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -50,4 +51,19 @@ public interface DingUsertDao extends BaseMapper<DingUserEntity> {
      * @return
      */
     int deletePerson(String userid);
+
+    @Select("SELECT\n" +
+            "\tuserid,\n" +
+            "\t`name`,\n" +
+            "\tmobile\n" +
+            "FROM\n" +
+            "\tsys_ding_user\n" +
+            "WHERE\n" +
+            "\tuserid NOT IN (\n" +
+            "\t\tSELECT DISTINCT\n" +
+            "\t\t\tding_user_id\n" +
+            "\t\tFROM\n" +
+            "\t\t\tsys_user WHERE ding_user_id is not null\n" +
+            "\t)")
+    List<DingUserEntity> getInfo();
 }
