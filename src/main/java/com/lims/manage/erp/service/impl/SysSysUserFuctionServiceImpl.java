@@ -444,4 +444,40 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
         }
         return ResultUtil.success();
     }
+
+    @Override
+    public Result list() {
+
+        List<TreeFunction> list = childrenMenuClsList();
+        return ResultUtil.success(list);
+    }
+
+    /**
+     * 菜单方法执行遍历
+     *
+     * @return
+     */
+    List<TreeFunction> childrenMenuClsList() {
+        //创建一个新的集合重新存放数据
+        List<TreeFunction> menuClsList = new ArrayList<>();
+        //查询全部父子级菜单
+        List<TreeFunction> menuCls = fuctionDao.getList();
+        //遍历查询
+        for (TreeFunction menuCl : menuCls) {
+            if (menuCl.getFunctionPid() == 0) {//先判断父级(判断pid==0,是0就是父级)说明menuCl对象是父级
+                menuClsList.add(menuCl);//存放父级菜单
+            } else {//pid不是0的话menuCl对象就是子级就走else
+                for (TreeFunction cl : menuCls) {
+                    if (menuCl.getFunctionPid() == cl.getFunctionId()) {//根据menuCl的pid(走else了就是子级)==cl的mid(它是父级)判断该菜单是哪个父级菜单的子菜单,并存放到父级菜单里面
+                        List childrenList = cl.getChildren();
+                        cl.setCatesFlag(true);
+                        childrenList.add(menuCl);
+                        cl.setChildren(childrenList);
+                        break;
+                    }
+                }
+            }
+        }
+        return menuClsList;
+    }
 }

@@ -1,9 +1,12 @@
 package com.lims.manage.erp.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lims.manage.erp.entity.SysFunction;
 import com.lims.manage.erp.entity.SysRoleMenuEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TreeFunction;
+import com.lims.manage.erp.mapper.SysUserFuctionDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
@@ -13,6 +16,7 @@ import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.SysRoleFuncMenuVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +39,8 @@ public class UserFuctionController {
     private SysUserFuctionService sysUserFuctionService;
     @Autowired
     private LogManagerService logManagerService;
+    @Autowired
+    private SysUserFuctionDao fuctionDao;
 
     /**
      * 获取当前登录用户的菜单列表
@@ -185,5 +191,62 @@ public class UserFuctionController {
         return sysUserFuctionService.postcancelRolePermissions(list);
     }
 
+    /**
+     * 菜单管理-新增
+     *
+     * @param treeFunction
+     * @return
+     */
+    @PostMapping("/add")
+    @Transactional(rollbackFor = Exception.class)
+    public Result addMenu(@RequestBody TreeFunction treeFunction) {
+
+        // 最大id +1
+        LambdaQueryWrapper<SysFunction> queryWrapper = new LambdaQueryWrapper<SysFunction>();
+        queryWrapper.orderByDesc(SysFunction::getFunctionId);
+        queryWrapper.last("limit 1");
+        SysFunction sysFunctionMaxId = fuctionDao.selectOne(queryWrapper);
+        if (treeFunction != null && treeFunction.getMenuValue() != null) {
+            LambdaQueryWrapper<SysFunction> fuctionWrapper = new LambdaQueryWrapper<SysFunction>();
+            fuctionWrapper.eq(SysFunction::getMenuValue, treeFunction.getMenuValue());
+            List<SysFunction> functionList = fuctionDao.selectList(fuctionWrapper);
+            if (CollectionUtil.isNotEmpty(functionList)) {
+                return ResultUtil.error("新增失败，菜单标志符唯一性");
+            }
+        }
+        treeFunction.setFunctionPid(sysFunctionMaxId != null ? sysFunctionMaxId.getFunctionId() + 1 : 1);
+        SysFunction sysFunction = new SysFunction(treeFunction);
+        fuctionDao.insert(sysFunction);
+        return ResultUtil.success();
+    }
+
+    /**
+     * 菜单管理-编辑
+     *
+     * @param treeFunction
+     * @return
+     */
+    @PostMapping("/edit")
+    @Transactional(rollbackFor = Exception.class)
+    public Result editMenu(@RequestBody TreeFunction treeFunction) {
+        if (treeFunction != null && treeFunction.getMenuValue() != null) {
+            LambdaQueryWrapper<SysFunction> fuctionWrapper = new LambdaQueryWrapper<SysFunction>();
+            fuctionWrapper.eq(SysFunction::getMenuValue, treeFunction.getMenuValue());
+            fuctionWrapper.ne(SysFunction::getFunctionId, treeFunction.getFunctionId());
+            List<SysFunction> functionList = fuctionDao.selectList(fuctionWrapper);
+            if (CollectionUtil.isNotEmpty(functionList)) {
+                return ResultUtil.error("编辑失败，菜单标志符保持唯一性");
+            }
+        }
+        SysFunction sysFunction = new SysFunction(treeFunction);
+        fuctionDao.updateById(sysFunction);
+        return ResultUtil.success();
+    }
+
+    // 菜单展示。
+    @GetMapping("list")
+    public Result list() {
+        return ResultUtil.success(sysUserFuctionService.list());
+    }
 
 }

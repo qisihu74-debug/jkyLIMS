@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysFunction;
 import com.lims.manage.erp.entity.TreeFunction;
@@ -18,10 +19,11 @@ import java.util.List;
  */
 @Component
 @Mapper
-public interface SysUserFuctionDao extends BaseMapper {
+public interface SysUserFuctionDao extends BaseMapper<SysFunction> {
 
     /**
      * 根据用户id获取当前管理员菜单
+     *
      * @param userId
      * @return
      */

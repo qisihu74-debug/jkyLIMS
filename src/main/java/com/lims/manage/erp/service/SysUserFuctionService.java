@@ -73,5 +73,12 @@ public interface SysUserFuctionService {
 
     Result postcancelRolePermissions(List<SysRoleMenuEntity> list);
 
+    /**
+     * 菜单列表
+     *
+     * @return
+     */
+    Result list();
+
 
 }

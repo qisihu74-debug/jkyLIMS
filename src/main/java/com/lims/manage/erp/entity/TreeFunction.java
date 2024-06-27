@@ -17,9 +17,17 @@ public class TreeFunction {
     private Long functionPid;
     private Integer sort;
     private boolean catesFlag;
-    private List Children;
+    private List Children = new ArrayList();
     private Long userId;
     private String userName;
+    /**
+     * 菜单类型
+     */
+    private String dataType;
+    /**
+     * 菜单名称
+     */
+    private String menuValue;
     /**
      * 菜单对应权限
      */

@@ -22,7 +22,9 @@ WHERE
         DISTINCT function_id as functionId,
         NAME AS treeName,
         function_pid as functionPid,
-        sort
+        sort,
+        data_type,
+        menu_value
     FROM
         sys_function
     where is_valid = 0
