@@ -127,7 +127,7 @@ public class TechnicistFilesController {
      */
     @PostMapping("uploadResume")
     public Result uploadResume(@RequestParam("technicistId") Integer technicistId, @RequestParam("file") MultipartFile file) {
-        if (technicistId == null || file == null || file.isEmpty()) {
+        if (file == null || file.isEmpty()) {
             return ResultUtil.error("缺少参数");
         }
         String filename = file.getOriginalFilename();
@@ -149,12 +149,13 @@ public class TechnicistFilesController {
      * @param technicistId
      */
     @GetMapping("previewResume")
-    public void previewResume(Integer technicistId, HttpServletResponse response) {
-        if (technicistId == null) {
-            return;
-        }
+    public void previewResume(Integer technicistId,String userId, HttpServletResponse response) {
         LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TechnicistFiles::getTechnicistId, technicistId);
+        if (technicistId == null || technicistId.intValue() == 0){
+            queryWrapper.eq(TechnicistFiles::getUserId, userId);
+        }else {
+            queryWrapper.eq(TechnicistFiles::getTechnicistId, technicistId);
+        }
         queryWrapper.eq(TechnicistFiles::getType, 1);
         queryWrapper.select(TechnicistFiles::getFileUrl);
         TechnicistFiles one = technicistFilesService.getOne(queryWrapper);
@@ -310,7 +311,7 @@ public class TechnicistFilesController {
             return ResultUtil.error("缺少参数");
         }
         LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
-        if (technicistId == null){
+        if (technicistId == null || technicistId.intValue() == 0){
             queryWrapper.eq(TechnicistFiles::getUserId, ShiroUtils.getUserInfo().getUserId());
         }else {
             queryWrapper.eq(TechnicistFiles::getTechnicistId, technicistId);
@@ -351,9 +352,6 @@ public class TechnicistFilesController {
      */
     @GetMapping("exportFiles")
     public void exportFiles(Integer technicistId, HttpServletResponse response) {
-        if (technicistId == null) {
-            return;
-        }
         String path = qiYueSuoEntity.getAutographPath();
         //目录数组
         String[] dirs = {path + GenID.getID() + "-人员履历表",path + GenID.getID() + "-证件材料",path + GenID.getID() + "-培训类材料",
@@ -363,7 +361,11 @@ public class TechnicistFilesController {
         List<File>[] fileArray = new List[]{Lists.newArrayList(), Lists.newArrayList(), Lists.newArrayList(),
                 Lists.newArrayList(), Lists.newArrayList(), Lists.newArrayList()};
         LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TechnicistFiles::getTechnicistId, technicistId);
+        if (technicistId == null || technicistId.intValue() == 0){
+            queryWrapper.eq(TechnicistFiles::getUserId, ShiroUtils.getUserInfo().getUserId());
+        }else {
+            queryWrapper.eq(TechnicistFiles::getTechnicistId, technicistId);
+        }
         List<TechnicistFiles> list = technicistFilesService.list(queryWrapper);
         List<TechnicistFiles>[] datas = new List[]{Lists.newArrayList(),Lists.newArrayList(),Lists.newArrayList(),
                 Lists.newArrayList(),Lists.newArrayList()};
