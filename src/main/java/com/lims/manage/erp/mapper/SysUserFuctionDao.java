@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysFunction;
 import com.lims.manage.erp.entity.TreeFunction;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,4 +31,12 @@ public interface SysUserFuctionDao extends BaseMapper<SysFunction> {
     List<SysFunction> getFunctionByuserId(Long userId);
 
     List<TreeFunction> getList();
+
+    /**
+     * 根据用户id 及角色id 获取当前账户权限信息
+     *
+     * @param userId
+     * @return
+     */
+    List<SysFunction> getReturnPermissionSet(@Param("userId") Long userId, @Param("roleId") Long roleId);
 }

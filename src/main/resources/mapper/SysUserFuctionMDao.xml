@@ -24,12 +24,36 @@ WHERE
         function_pid as functionPid,
         sort,
         data_type,
-        menu_value
+        menu_value,
+        menu_type,
+        manage_content
     FROM
         sys_function
     where is_valid = 0
     ORDER BY
         function_pid asc,
+        sort ASC
+    </select>
+
+    <select id="getReturnPermissionSet" resultType="com.lims.manage.erp.entity.SysFunction">
+        SELECT
+        t3.*
+        FROM
+        sys_user_role AS t1
+        LEFT JOIN sys_role_function AS t2 ON t1.role_id = t2.role_id
+        LEFT JOIN sys_function AS t3 ON t3.function_id = t2.function_id
+        WHERE
+        t3.function_id IS NOT NULL
+        <if test="userId!= null and userId !='' ">
+            AND t1.user_id = #{userId}
+        </if>
+        <if test="roleId!= null and roleId !='' ">
+            AND t2.role_id = #{roleId}
+        </if>
+        GROUP BY
+        t3.function_id
+        ORDER BY
+        function_pid ASC,
         sort ASC
     </select>
 

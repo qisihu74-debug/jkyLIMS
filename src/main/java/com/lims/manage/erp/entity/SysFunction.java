@@ -36,19 +36,29 @@ public class SysFunction implements Serializable {
     /**
      * 菜单序号
      */
-    private int sort;
+    private Integer sort;
     @TableField(exist = false)
     private Boolean flag;
 
     /**
-     * 菜单名称
+     * 菜单类型
      */
     private String dataType;
 
     /**
-     * 菜单名称
+     * 菜单标识
      */
     private String menuValue;
+
+    /**
+     * 菜单属性
+     */
+    private String menuType;
+
+    /**
+     * 管理页值
+     */
+    private String manageContent;
 
     public SysFunction() {
     }
@@ -57,8 +67,10 @@ public class SysFunction implements Serializable {
         this.functionId = treeFunction.getFunctionId();
         this.functionPid = treeFunction.getFunctionPid();
         this.name = treeFunction.getTreeName();
-        this.sort = treeFunction.getSort();
-        this.dataType = treeFunction.getDataType();
-        this.menuValue = treeFunction.getMenuValue();
+        this.sort = treeFunction.getSort() != null ? treeFunction.getSort() : null;
+        this.dataType = treeFunction.getDataType() != null ? treeFunction.getDataType() : null;
+        this.menuValue = treeFunction.getMenuValue() != null ? treeFunction.getMenuValue() : null;
+        this.menuType = treeFunction.getMenuType() != null ? treeFunction.getMenuType() : null;
+        this.manageContent = treeFunction.getManageContent() != null ? treeFunction.getManageContent() : null;
     }
 }

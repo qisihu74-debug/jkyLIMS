@@ -14,6 +14,7 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.SysUserFuctionService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.SysRoleFuncMenuVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -309,61 +310,20 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
         return dataList;
     }
 
-    /**
-     * 1、用户拥有 多个角色 2、多个角色下 展示具体菜单项ID
-     * 暂时废弃 6月28 误删（测试菜单详情处理）
-     * @param userid
+    /*
+     * 获取全部子集
+     * @param id
+     * @param list
      * @return
      */
-    public List<TreeFunction> returnListUpgrade1(Long userid) {
-        PageHelper.clearPage();
-        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
-        //记录日志
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户(userid)=" + userid + "获取菜单：" + ShiroUtils.getUserInfo().getUsername() + "用户获取菜单大小\t" + menuIdList.size() + "成功！", Const.SYS_MANAGER_LOG, true);
-        // 获取菜单列表
-        List<TreeFunction> dataList = fuctionDao.getList();
-        // 通过用户id 返回 对应的菜单权限信息
-        //记录日志
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "获取菜单全部：" + ShiroUtils.getUserInfo().getUsername() + "用户获取菜单大小\t" + dataList.size() + "成功！", Const.SYS_MANAGER_LOG, true);
-        if (CollectionUtil.isEmpty(menuIdList)) {
-            // 抛出null = 此用户不包含菜单信息，请配置
-            return null;
-        }
-        // 得到用户id下 所属菜单。
-        Map<Long, SysRoleFunction> map = new HashMap<>();
-        for (SysRoleFunctionParent sysRoleFunction : menuIdList) {
-            map.put(sysRoleFunction.getFunctionId(), sysRoleFunction);
-            map.put(sysRoleFunction.getFunctionPid(), sysRoleFunction);
-        }
-        for (SysRoleFunctionParent sysRoleFunction : menuIdList) {
-            for (TreeFunction treeFunction : dataList) {
-                if (treeFunction.getFunctionId().equals(sysRoleFunction.getFunctionPid())) {
-                    // 主要取决于key 不要求vlue数值的准确性
-                    map.put(treeFunction.getFunctionId(), sysRoleFunction);
-                }
-                if (treeFunction.getFunctionPid().equals(sysRoleFunction.getFunctionId())) {
-                    // 主要取决于key 不要求vlue数值的准确性
-                    map.put(treeFunction.getFunctionPid(), sysRoleFunction);
-                }
+    public static List<TreeFunction> getChildrenList(Long id, List<TreeFunction> list) {
+        List<TreeFunction> pdr = new ArrayList<>();
+        for (TreeFunction per : list) {
+            if (per.getFunctionPid().equals(id)) {
+                pdr.add(per);
             }
         }
-        for (TreeFunction data : dataList) {
-            if (map.get(data.getFunctionId()) != null && map.get(data.getFunctionPid()) == null) {
-                SysRoleFunction removeEntity = new SysRoleFunction();
-                removeEntity.setId(0L);
-                map.put(data.getFunctionPid(), removeEntity);
-            }
-        }
-        // 菜单ID信息 展示所有 去除 functionIdSet
-        Iterator<TreeFunction> iterator = dataList.iterator();
-        while (iterator.hasNext()) {
-            TreeFunction item = iterator.next();
-            SysRoleFunction removeEntity = map.get(item.getFunctionId());
-            if (removeEntity == null) {
-                iterator.remove();
-            }
-        }
-        return dataList;
+        return pdr;
     }
 
     /**
@@ -445,39 +405,124 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
         return ResultUtil.success();
     }
 
-    @Override
-    public Result list() {
-
-        List<TreeFunction> list = childrenMenuClsList();
-        return ResultUtil.success(list);
-    }
-
     /**
-     * 菜单方法执行遍历
+     * 1、用户拥有 多个角色 2、多个角色下 展示具体菜单项ID
+     * 暂时废弃 6月28 误删（测试菜单详情处理）
      *
+     * @param userid
      * @return
      */
-    List<TreeFunction> childrenMenuClsList() {
-        //创建一个新的集合重新存放数据
-        List<TreeFunction> menuClsList = new ArrayList<>();
-        //查询全部父子级菜单
-        List<TreeFunction> menuCls = fuctionDao.getList();
-        //遍历查询
-        for (TreeFunction menuCl : menuCls) {
-            if (menuCl.getFunctionPid() == 0) {//先判断父级(判断pid==0,是0就是父级)说明menuCl对象是父级
-                menuClsList.add(menuCl);//存放父级菜单
-            } else {//pid不是0的话menuCl对象就是子级就走else
-                for (TreeFunction cl : menuCls) {
-                    if (menuCl.getFunctionPid() == cl.getFunctionId()) {//根据menuCl的pid(走else了就是子级)==cl的mid(它是父级)判断该菜单是哪个父级菜单的子菜单,并存放到父级菜单里面
-                        List childrenList = cl.getChildren();
-                        cl.setCatesFlag(true);
-                        childrenList.add(menuCl);
-                        cl.setChildren(childrenList);
-                        break;
-                    }
+    public List<TreeFunction> returnListUpgrade1(Long userid) {
+        PageHelper.clearPage();
+        // 对于dataType = button的移除。
+        List<SysRoleFunctionParent> menuIdList = sysRoleFuncMenuDao.selectSetMenuPid(userid);
+        //记录日志
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户(userid)=" + userid + "获取菜单：" + ShiroUtils.getUserInfo().getUsername() + "用户获取菜单大小\t" + menuIdList.size() + "成功！", Const.SYS_MANAGER_LOG, true);
+        // 获取菜单列表
+        List<TreeFunction> dataList = fuctionDao.getList();
+        // 通过用户id 返回 对应的菜单权限信息
+        //记录日志
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "获取菜单全部：" + ShiroUtils.getUserInfo().getUsername() + "用户获取菜单大小\t" + dataList.size() + "成功！", Const.SYS_MANAGER_LOG, true);
+        if (CollectionUtil.isEmpty(menuIdList)) {
+            // 抛出null = 此用户不包含菜单信息，请配置
+            return null;
+        }
+        Iterator<SysRoleFunctionParent> it = menuIdList.iterator();
+//        while (it.next())
+        // 得到用户id下 所属菜单。
+        Map<Long, SysRoleFunction> map = new HashMap<>();
+        for (SysRoleFunctionParent sysRoleFunction : menuIdList) {
+            map.put(sysRoleFunction.getFunctionId(), sysRoleFunction);
+            map.put(sysRoleFunction.getFunctionPid(), sysRoleFunction);
+        }
+        for (SysRoleFunctionParent sysRoleFunction : menuIdList) {
+            for (TreeFunction treeFunction : dataList) {
+                if (treeFunction.getFunctionId().equals(sysRoleFunction.getFunctionPid())) {
+                    // 主要取决于key 不要求vlue数值的准确性
+                    map.put(treeFunction.getFunctionId(), sysRoleFunction);
+                }
+                if (treeFunction.getFunctionPid().equals(sysRoleFunction.getFunctionId())) {
+                    // 主要取决于key 不要求vlue数值的准确性
+                    map.put(treeFunction.getFunctionPid(), sysRoleFunction);
                 }
             }
         }
-        return menuClsList;
+        for (TreeFunction data : dataList) {
+            if (map.get(data.getFunctionId()) != null && map.get(data.getFunctionPid()) == null) {
+                SysRoleFunction removeEntity = new SysRoleFunction();
+                removeEntity.setId(0L);
+                map.put(data.getFunctionPid(), removeEntity);
+            }
+        }
+        // 菜单ID信息 展示所有 去除 functionIdSet
+        Iterator<TreeFunction> iterator = dataList.iterator();
+        while (iterator.hasNext()) {
+            TreeFunction item = iterator.next();
+            SysRoleFunction removeEntity = map.get(item.getFunctionId());
+            if (removeEntity == null) {
+                iterator.remove();
+            }
+        }
+        return dataList;
     }
+
+    @Override
+    public Result list() {
+
+        List<TreeFunction> list = searchMenu();
+        return ResultUtil.success(list);
+    }
+
+    @Override
+    public Result getReturnPermissionSet(Long userId) {
+        List<SysFunction> functionList = fuctionDao.getReturnPermissionSet(userId, null);
+        // if
+        if (CollectionUtil.isEmpty(functionList)) {
+            return ResultUtil.success(null);
+        }
+        List<TreeFunction> treeFunctionList = new ArrayList<>();
+        Map<Long, SysFunction> map = new HashMap<>();
+        for (SysFunction sysFunction : functionList) {
+            map.put(sysFunction.getFunctionId(), sysFunction);
+        }
+        for (SysFunction sysFunction : functionList) {
+            if (StringUtils.isNotEmpty(sysFunction.getDataType()) && sysFunction.getDataType().equals("button")) {
+                if (map.get(sysFunction.getFunctionId()) != null) {
+                    SysFunction sysFunctionPid = map.get(sysFunction.getFunctionPid());
+                    TreeFunction treeFunction = new TreeFunction(sysFunction);
+                    if (StringUtils.isNotEmpty(treeFunction.getMenuValue()) && StringUtils.isNotEmpty(sysFunctionPid.getMenuValue())) {
+                        treeFunction.setManageContent(sysFunctionPid.getMenuValue() + ":" + treeFunction.getMenuValue());
+                    }
+                    treeFunctionList.add(treeFunction);
+                }
+            }
+        }
+        return ResultUtil.success(treeFunctionList);
+    }
+
+    public List<TreeFunction> searchMenu() {
+
+        //创建一个新的集合重新存放数据
+        List<TreeFunction> directoryTree = new ArrayList<>();
+        //查询全部父子级菜单
+        List<TreeFunction> menuList = fuctionDao.getList();
+
+        if (CollectionUtil.isEmpty(menuList)) {
+            return null;
+        }
+
+        for (TreeFunction e : menuList) {
+            List<TreeFunction> pdrList = getChildrenList(e.getFunctionId(), menuList);
+            e.setChildren(pdrList != null ? pdrList : null);
+        }
+
+        for (TreeFunction e : menuList) {
+            if (e.getFunctionPid() == 0) {
+                directoryTree.add(e);
+            }
+        }
+        return directoryTree;
+    }
+
+
 }

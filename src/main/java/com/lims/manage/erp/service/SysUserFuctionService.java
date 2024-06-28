@@ -80,5 +80,12 @@ public interface SysUserFuctionService {
      */
     Result list();
 
+    /**
+     * 根据用户id获取用户菜单列表
+     *
+     * @param userId
+     * @return
+     */
+    Result getReturnPermissionSet(Long userId);
 
 }
