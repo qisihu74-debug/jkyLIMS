@@ -207,12 +207,13 @@ public class TechnicistFilesController {
             String uploadUrl = upload.substring(0, upload.indexOf("?"));
             technicistFiles.setFileUrl(uploadUrl);
         }
-        LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TechnicistFiles::getContent,technicistFiles.getContent());
-        TechnicistFiles one = technicistFilesService.getOne(queryWrapper);
-        if (one != null){
-            return ResultUtil.error("名称内容已存在！");
-        }
+//        LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(TechnicistFiles::getContent,technicistFiles.getContent());
+//        queryWrapper.eq(TechnicistFiles::getUserId,technicistFiles.getUserId());
+//        TechnicistFiles one = technicistFilesService.getOne(queryWrapper);
+//        if (one != null){
+//            return ResultUtil.error("名称内容已存在！");
+//        }
         boolean save = technicistFilesService.save(technicistFiles);
         if (save) {
             return ResultUtil.success("添加成功");
@@ -242,14 +243,14 @@ public class TechnicistFilesController {
         }
         TechnicistFiles technicistFiles = JSON.parseObject(jsonParam, TechnicistFiles.class);
         TechnicistFiles selectOne = technicistFilesService.getById(technicistFiles.getId());
-        if (!selectOne.getContent().equals(technicistFiles.getContent())){
-            LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(TechnicistFiles::getContent,technicistFiles.getContent());
-            TechnicistFiles one = technicistFilesService.getOne(queryWrapper);
-            if (one != null){
-                return ResultUtil.error("名称内容已存在");
-            }
-        }
+//        if (!selectOne.getContent().equals(technicistFiles.getContent())){
+//            LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
+//            queryWrapper.eq(TechnicistFiles::getContent,technicistFiles.getContent());
+//            TechnicistFiles one = technicistFilesService.getOne(queryWrapper);
+//            if (one != null){
+//                return ResultUtil.error("名称内容已存在");
+//            }
+//        }
         //如果文件发生变更删除旧文件，更新新文件
         if (file != null) {
             String fileUrl = selectOne.getFileUrl();
