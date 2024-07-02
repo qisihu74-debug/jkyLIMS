@@ -97,8 +97,6 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
     public List<TreeFunction> GetListUpgrade(Long userid, String userName) {
         PageHelper.clearPage();
         List<TreeFunction> dataList = returnListUpgrade1(userid);
-        // 补充dataList
-        methodConfigureMenuPermissions(userid, dataList);
         if (CollectionUtils.isEmpty(dataList)) {
             System.out.println("此用户不包含菜单信息，请配置");
             return null;
@@ -326,51 +324,7 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
         return pdr;
     }
 
-    /**
-     * 通过userId 及菜单信息 进行配置
-     *
-     * @param userId
-     * @param dataList
-     */
-    public void methodConfigureMenuPermissions(Long userId, List<TreeFunction> dataList) {
 
-        // 通过用户id 获取拥有权限集合
-        List<SysMenuEntity> menuListByUserId = sysMenuDao.selectSysMenuEntityListByUserId(userId);
-        Map<Long, String> menuListByUserIdMap = new HashMap<>();
-        if (CollectionUtil.isNotEmpty(menuListByUserId)) {
-            for (SysMenuEntity sysMenuEntity : menuListByUserId) {
-                menuListByUserIdMap.put(sysMenuEntity.getMenuId(), "true");
-            }
-        }
-        // 获取权限列表
-        List<SysMenuEntity> menuList = sysMenuDao.selectList(null);
-        // key = 菜单fuctionId，value = 拥有的权限列表
-        Map<Long, List<SysMenuEntity>> map = new HashMap<>();
-        for (SysMenuEntity sysMenuEntity : menuList) {
-            // 用户拥有权限设置为 true
-            if (menuListByUserIdMap.get(sysMenuEntity.getMenuId()) != null) {
-                sysMenuEntity.setFlag(true);
-            } else {
-                // 用户没有此权限 设置为 false
-                sysMenuEntity.setFlag(false);
-            }
-            if (map.get(sysMenuEntity.getFuctionId()) == null) {
-                List<SysMenuEntity> menuEntityList = new ArrayList<>();
-                menuEntityList.add(sysMenuEntity);
-                map.put(sysMenuEntity.getFuctionId(), menuEntityList);
-            } else {
-                List<SysMenuEntity> menuEntityList = map.get(sysMenuEntity.getFuctionId());
-                menuEntityList.add(sysMenuEntity);
-                map.put(sysMenuEntity.getFuctionId(), menuEntityList);
-            }
-        }
-        for (TreeFunction treeFunction : dataList) {
-            if (map.get(treeFunction.getFunctionId()) != null) {
-                List<SysMenuEntity> menuPermissionSet = map.get(treeFunction.getFunctionId());
-                treeFunction.setMenuEntityList(menuPermissionSet);
-            }
-        }
-    }
 
     /**
      * 角色设置权限
@@ -427,8 +381,14 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
             // 抛出null = 此用户不包含菜单信息，请配置
             return null;
         }
+        // 返回个人菜单栏时：过滤权限
         Iterator<SysRoleFunctionParent> it = menuIdList.iterator();
-//        while (it.next())
+        while (it.hasNext()) {
+            SysRoleFunctionParent item = it.next();
+            if (item.getDataType().equals("button")) {
+                it.remove();
+            }
+        }
         // 得到用户id下 所属菜单。
         Map<Long, SysRoleFunction> map = new HashMap<>();
         for (SysRoleFunctionParent sysRoleFunction : menuIdList) {
