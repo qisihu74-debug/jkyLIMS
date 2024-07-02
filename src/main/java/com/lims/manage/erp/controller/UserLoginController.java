@@ -115,7 +115,8 @@ public class UserLoginController {
         SysUserEntity userData = ShiroUtils.getUserInfo();
         userData.setPassword(null);
         userData.setSalt(null);
-        userData.setTechnicistId(sysUserService.getTechnicistIdByUserId(userData.getUserId()));
+        Integer byUserId = sysUserService.getTechnicistIdByUserId(userData.getUserId());
+        userData.setTechnicistId(byUserId==null?0:byUserId);
         //获取用户的角色列表
         List<SysUserRoleEntity> roleIdList = sysUserRoleService.list(Wrappers.<SysUserRoleEntity>lambdaQuery().eq(SysUserRoleEntity::getUserId, ShiroUtils.getUserInfo().getUserId()).select(SysUserRoleEntity::getRoleId));
         //只保存角色id

@@ -20,6 +20,11 @@ import com.lims.manage.erp.vo.SysUserPasswordVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
 import lombok.SneakyThrows;
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -497,4 +502,55 @@ public class UserController {
         }
     }
 
+    /**
+     * 给无系统用户的人员创建账号
+     * @return
+     */
+    @GetMapping("batchAddUser")
+    public Result batchAddUser(){
+        //查询所有未被创建账号的信息
+        List<DingUserEntity> list = dingUserService.getInfo();
+        for (DingUserEntity entity :list){
+            UserInfoVo userInfoVo = new UserInfoVo();
+            userInfoVo.setName(entity.getName());
+            //用户名称默认为姓名全拼
+            userInfoVo.setUsername(convertToPinyin(entity.getName()));
+            userInfoVo.setMobile(entity.getMobile());
+            userInfoVo.setEmail(entity.getEmail());
+            List<Long> roles = Lists.newArrayList();
+            roles.add(4749275677132642L);
+            userInfoVo.setRoleIdsLong(roles);
+            userInfoVo.setDingUserId(entity.getUserid());
+            Result result = addUser(userInfoVo);
+        }
+        return ResultUtil.success("添加账号成功");
+    }
+
+    /**
+     * 将中文姓名转为拼音全称
+     * @param chineseName
+     * @return
+     */
+    public String convertToPinyin(String chineseName) {
+        StringBuilder pinyin = new StringBuilder();
+        char[] nameChars = chineseName.toCharArray();
+        HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
+        format.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+        format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+        for (char nameChar : nameChars) {
+            if (Character.toString(nameChar).matches("[\\u4e00-\\u9fa5]+")) { // 判断是否为汉字
+                try {
+                    String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(nameChar, format);
+                    if (pinyinArray != null && pinyinArray.length > 0) {
+                        pinyin.append(pinyinArray[0]);
+                    }
+                } catch (BadHanyuPinyinOutputFormatCombination e) {
+                    e.printStackTrace();
+                }
+            } else {
+                pinyin.append(nameChar); // 非汉字字符直接追加
+            }
+        }
+        return pinyin.toString();
+    }
 }

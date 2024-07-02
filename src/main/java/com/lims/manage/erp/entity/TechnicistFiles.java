@@ -57,4 +57,6 @@ public class TechnicistFiles {
      * 附件
      */
     private String fileUrl;
+
+    private Long userId;
 }

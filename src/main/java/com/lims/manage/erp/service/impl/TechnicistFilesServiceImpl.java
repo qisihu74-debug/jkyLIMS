@@ -33,7 +33,11 @@ public class TechnicistFilesServiceImpl extends ServiceImpl<TechnicistFilesDao, 
     public Boolean uploadResume(Integer technicistId, MultipartFile file) {
         //查询技术人员履历表
         LambdaQueryWrapper<TechnicistFiles> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TechnicistFiles::getTechnicistId,technicistId);
+        if (technicistId == null || technicistId.intValue() == 0){
+            queryWrapper.eq(TechnicistFiles::getUserId, ShiroUtils.getUserInfo().getUserId());
+        }else {
+            queryWrapper.eq(TechnicistFiles::getTechnicistId, technicistId);
+        }
         queryWrapper.eq(TechnicistFiles::getType,1);
         TechnicistFiles selectOne = this.baseMapper.selectOne(queryWrapper);
         if (selectOne == null){
@@ -47,6 +51,7 @@ public class TechnicistFilesServiceImpl extends ServiceImpl<TechnicistFilesDao, 
                 technicistFiles.setOperateTime(new Date(System.currentTimeMillis()));
                 technicistFiles.setUpdateTime(new Date(System.currentTimeMillis()));
                 technicistFiles.setTechnicistId(technicistId);
+                technicistFiles.setUserId(ShiroUtils.getUserInfo().getUserId());
                 technicistFiles.setType(1);
                 technicistFiles.setFileUrl(uploadUrl);
                 this.baseMapper.insert(technicistFiles);

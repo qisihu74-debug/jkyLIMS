@@ -2960,28 +2960,6 @@ public class ReportServiceImpl implements ReportService {
                                         if ("${拌和方式}".equals(string)) {
                                             cells.get(n, j).setValue(mixInfoEntity.getMixingWay() == null ? "——" : mixInfoEntity.getMixingWay());
                                         }
-                                        if ("材料名称".equals(string)) {
-                                            insertRow = n;
-                                            indexName = j;
-                                        }
-                                        if ("规格".equals(string)) {
-                                            indexGg = j;
-                                        }
-                                        if ("生产厂家/产地".equals(string)) {
-                                            indexCd = j;
-                                        }
-                                        if ("生产批号".equals(string)) {
-                                            indexPh = j;
-                                        }
-                                        if ("样品数量".equals(string)) {
-                                            indexNum = j;
-                                        }
-                                        if ("样品状态".equals(string)) {
-                                            indexZt = j;
-                                        }
-                                        if ("样品编号".equals(string)) {
-                                            indexBh = j;
-                                        }
                                     } else {
                                         TestSampleMixInfoEntity entity = mixInfoEntityMapper.selectByEntrustId(id);
                                         if (entity != null) {
@@ -3010,29 +2988,29 @@ public class ReportServiceImpl implements ReportService {
                                             if ("${拌和方式}".equals(string)) {
                                                 cells.get(n, j).setValue(entity.getMixingWay() == null ? "——" : entity.getMixingWay());
                                             }
-                                            if ("材料名称".equals(string)) {
-                                                insertRow = n;
-                                                indexName = j;
-                                            }
-                                            if ("规格".equals(string)) {
-                                                indexGg = j;
-                                            }
-                                            if ("生产厂家/产地".equals(string)) {
-                                                indexCd = j;
-                                            }
-                                            if ("生产批号".equals(string)) {
-                                                indexPh = j;
-                                            }
-                                            if ("样品数量".equals(string)) {
-                                                indexNum = j;
-                                            }
-                                            if ("样品状态".equals(string)) {
-                                                indexZt = j;
-                                            }
-                                            if ("样品编号".equals(string)) {
-                                                indexBh = j;
-                                            }
                                         }
+                                    }
+                                    if ("材料名称".equals(string)) {
+                                        insertRow = n;
+                                        indexName = j;
+                                    }
+                                    if ("规格".equals(string)) {
+                                        indexGg = j;
+                                    }
+                                    if ("生产厂家/产地".equals(string)) {
+                                        indexCd = j;
+                                    }
+                                    if ("生产批号".equals(string)) {
+                                        indexPh = j;
+                                    }
+                                    if ("样品数量".equals(string)) {
+                                        indexNum = j;
+                                    }
+                                    if ("样品状态".equals(string)) {
+                                        indexZt = j;
+                                    }
+                                    if ("样品编号".equals(string)) {
+                                        indexBh = j;
                                     }
                                 }
                             }

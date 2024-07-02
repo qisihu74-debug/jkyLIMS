@@ -3,6 +3,8 @@ package com.lims.manage.erp.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.DingUserEntity;
 
+import java.util.List;
+
 /**
  * @author gjl
  * @version V1.0
@@ -12,4 +14,5 @@ import com.lims.manage.erp.entity.DingUserEntity;
  * @Copyright © 河南交科院
  */
 public interface DingUserService extends IService<DingUserEntity> {
+    List<DingUserEntity> getInfo();
 }
