@@ -628,9 +628,9 @@ public class ReportApprovalController {
      * @return
      */
     @GetMapping("verifySave11")
-    public Result verifySave(@RequestParam("list") List<Long> list) {
-//    public Result verifySave() {
-//        List<Long> list = taskMapper.getreportIdszzzz();
+//    public Result verifySave(@RequestParam("list") List<Long> list) {
+    public Result verifySave() {
+        List<Long> list = taskMapper.getreportIdszzzz();
         System.out.println("条数 == " + list.size());
         for (Long id : list) {
             System.out.println("id == " + id);
