@@ -1,6 +1,8 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -21,6 +23,7 @@ public class SysFunction implements Serializable {
     /**
      * 菜单id
      */
+    @TableId(type = IdType.AUTO)
     private Long functionId;
     /**
      * 菜单父ID
@@ -33,8 +36,41 @@ public class SysFunction implements Serializable {
     /**
      * 菜单序号
      */
-    private int sort;
+    private Integer sort;
     @TableField(exist = false)
     private Boolean flag;
 
+    /**
+     * 菜单类型
+     */
+    private String dataType;
+
+    /**
+     * 菜单标识
+     */
+    private String menuValue;
+
+    /**
+     * 菜单属性
+     */
+    private String menuType;
+
+    /**
+     * 管理页值
+     */
+    private String manageContent;
+
+    public SysFunction() {
+    }
+
+    public SysFunction(TreeFunction treeFunction) {
+        this.functionId = treeFunction.getFunctionId();
+        this.functionPid = treeFunction.getFunctionPid();
+        this.name = treeFunction.getTreeName();
+        this.sort = treeFunction.getSort() != null ? treeFunction.getSort() : null;
+        this.dataType = treeFunction.getDataType() != null ? treeFunction.getDataType() : null;
+        this.menuValue = treeFunction.getMenuValue() != null ? treeFunction.getMenuValue() : null;
+        this.menuType = treeFunction.getMenuType() != null ? treeFunction.getMenuType() : null;
+        this.manageContent = treeFunction.getManageContent() != null ? treeFunction.getManageContent() : null;
+    }
 }

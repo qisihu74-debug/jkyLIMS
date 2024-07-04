@@ -39,9 +39,9 @@ public class DeptController {
     @PostMapping("add")
     //@RequiresRoles("ADMIN")
     public Result add(@RequestBody DingDeptEntity entity) {
-        if (entity.getParentId() == null) {
-            return ResultUtil.error("请选择上级部门");
-        }
+//        if (entity.getParentId() == null) {
+//            return ResultUtil.error("请选择上级部门");
+//        }
         if (StringUtils.isEmpty(entity.getName())) {
             return ResultUtil.error("部门名称为空");
         }
@@ -50,7 +50,7 @@ public class DeptController {
             return ResultUtil.error("token已过期！");
         }
         // 验证部门编号
-        if (entity.getCode() != null) {
+        if (StringUtils.isNotEmpty(entity.getCode())) {
             if (deptService.getDeptCode(entity.getCode())) {
                 return ResultUtil.error("部门编号已存在，请重新输入！");
             }

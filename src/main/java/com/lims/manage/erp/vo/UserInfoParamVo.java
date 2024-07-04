@@ -8,4 +8,6 @@ public class UserInfoParamVo {
     private String username;
     private String mobile;
     private String state;
+    private Integer pageNum;
+    private Integer pageSize;
 }

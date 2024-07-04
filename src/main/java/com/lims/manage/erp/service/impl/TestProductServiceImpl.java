@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.*;
@@ -22,6 +23,7 @@ import com.lims.manage.erp.vo.TestProductVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.thymeleaf.util.ListUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -79,11 +81,11 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         testProductItemVo.getTestProduct().setDelFlag(0);
         testProductItemVo.getTestProduct().setCreateTime(new Date());
         //保存产品
-        if (this.save(testProductItemVo.getTestProduct())){
+        if (this.save(testProductItemVo.getTestProduct())) {
             //设置产品判定依据
-            if (testProductItemVo.getStandardRelIds().size()>0){
+            if (testProductItemVo.getStandardRelIds().size() > 0) {
                 for (Integer standardRelId : testProductItemVo.getStandardRelIds()) {
-                    testProductStandardFileRelService.save(new TestProductStandardFileRel(testProductItemVo.getTestProduct().getProductId(),standardRelId));
+                    testProductStandardFileRelService.save(new TestProductStandardFileRel(testProductItemVo.getTestProduct().getProductId(), standardRelId));
                 }
             }
             //设置产品等级
@@ -115,8 +117,8 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
             }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加产品" + testProductItemVo.getTestProduct().getProductId() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
             return ResultUtil.success("添加成功!");
-        }else {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加产品失败!", Const.PRODUCT_MANAGEMENT_LOG,false);
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加产品失败!", Const.PRODUCT_MANAGEMENT_LOG, false);
             return ResultUtil.error("保存产品信息失败，未知异常!");
         }
     }
@@ -125,7 +127,7 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
     @Transactional(rollbackFor = Exception.class)
     public Result updTestProduct(TestProductItemVo testProductItemVo) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
         //判断产品基本信息参数
@@ -211,30 +213,48 @@ public class TestProductServiceImpl extends ServiceImpl<TestProductDao, TestProd
         if (count > 0) {
             return ResultUtil.error("删除失败，产品基础信息与业务信息参与绑定");
         }
+        //存储有产品的产品分类名称
+        StringBuilder noDelProductType = new StringBuilder();
+        List<TestProduct> productList = new ArrayList<>();
+
         for (Long aLong : idList) {
-            LambdaUpdateWrapper<TestProduct> testProductWrapper = new LambdaUpdateWrapper<>();
-            testProductWrapper.eq(TestProduct::getProductId, aLong);
-            testProductWrapper.set(TestProduct::getDelFlag, 1);
-            testProductDao.update(null, testProductWrapper);
+            //判断产品下是否有产品检测项
+            //根据产品id获取产品检测项信息
+            LambdaQueryWrapper<TestProductItem> wrapper = Wrappers.lambdaQuery();
+            wrapper.eq(TestProductItem::getProductId, aLong);
+            count = testProductItemService.count(wrapper);
+            if (count == 0) {
+                TestProduct product = new TestProduct();
+                product.setProductId(aLong.intValue());
+                product.setDelFlag(1);
+                productList.add(product);
+            } else {
+                TestProduct product = this.getById(aLong);
+                if (product != null) {
+                    noDelProductType.append(product.getProductName()).append(",");
+                }
+            }
         }
-        // TODO： 2023年12月7日 产品数据执行软删除。
-/*//        for (Long aLong : idList) {
-//            LambdaQueryWrapper<TestProduct> productLambdaQueryWrapper = new LambdaQueryWrapper<>();
-//            productLambdaQueryWrapper.eq(TestProduct::getProductId, aLong);
-//            this.remove(productLambdaQueryWrapper);
-//            //删除原有依据
-//            testProductStandardFileRelService.remove(new QueryWrapper<TestProductStandardFileRel>().eq("product_id", aLong));
-//            //删除原产品等级
-//            testProductSpecsService.remove(new QueryWrapper<TestProductSpecs>().eq("product_id", aLong));
-//            // 删除 报告模板xls与产品关联
-//            LambdaQueryWrapper<TestReportTemplateProductRef> productRefLambdaQueryWrapper = new LambdaQueryWrapper<>();
-//            productRefLambdaQueryWrapper.eq(TestReportTemplateProductRef::getProductId, aLong);
-//            testReportTemplateProductRefDao.delete(productRefLambdaQueryWrapper);
-//            //删除原报告与报告关系
-//            testProductDao.deleteProductReportRel(aLong);
-//        }*/
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
-        return ResultUtil.success("删除成功");
+
+        if (ListUtils.isEmpty(productList)) {
+            if (!StringUtils.isEmpty(noDelProductType)) {
+                return ResultUtil.error("产品分类：" + noDelProductType + "下存在产品,请删除产品后再尝试！");
+            } else {
+                return ResultUtil.error("没有找到要删除的产品分类信息");
+            }
+        } else {
+            if (this.updateBatchById(productList)) {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "成功!", Const.PRODUCT_MANAGEMENT_LOG, true);
+                if (com.lims.manage.erp.util.StringUtils.isNotEmpty(noDelProductType)) {
+                    return ResultUtil.error("产品分类：" + noDelProductType + "下存在产品,请删除产品后再尝试！");
+                }
+                return ResultUtil.success("删除成功");
+            }else {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除产品" + idList.toArray() + "失败!", Const.PRODUCT_MANAGEMENT_LOG, true);
+                return ResultUtil.error("删除失败");
+            }
+        }
+
     }
 
     @Override

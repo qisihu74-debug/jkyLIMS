@@ -62,42 +62,6 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
             "            )SELECT id,name,parent_id FROM cte")
     List<DingDeptEntity> parentList(Long id);
 
-    /**
-     * 根据当前登陆管理员id获取管理员所属部门及子级别=部门idj集合
-     * @param userId
-     * @return
-     */
-    @Select("WITH RECURSIVE td AS (\n" +
-            "\tSELECT\n" +
-            "\t\tid\n" +
-            "\tFROM\n" +
-            "\t\tsys_dept\n" +
-            "\tWHERE\n" +
-            "\t\tid IN (\n" +
-            "\t\t\tSELECT DISTINCT\n" +
-            "\t\t\t\tsdep.id\n" +
-            "\t\t\tFROM\n" +
-            "\t\t\t\tsys_user sysu\n" +
-            "\t\t\tLEFT JOIN sys_person sysp ON sysu.person_id = sysp.id\n" +
-            "\t\t\tLEFT JOIN sys_dept sdep ON sysp.dept_id = sdep.id\n" +
-            "\t\t\tWHERE\n" +
-            "\t\t\t\tsysu.user_id = #{userId}\n" +
-            "\t\t)\n" +
-            "\tAND is_delete = 0\n" +
-            "\tUNION ALL\n" +
-            "\t\tSELECT\n" +
-            "\t\t\tc.id\n" +
-            "\t\tFROM\n" +
-            "\t\t\tsys_dept c,\n" +
-            "\t\t\ttd\n" +
-            "\t\tWHERE\n" +
-            "\t\t\tc.pid = td.id\n" +
-            ") SELECT\n" +
-            "\tid\n" +
-            "FROM\n" +
-            "\ttd")
-    List<Long> getChirdDeptsByUser(Long userId);
-
     @Select("SELECT\n" +
             "id\n" +
             "FROM\n" +
@@ -127,4 +91,13 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
             "\tu.user_id = #{userId}\n" +
             "\tAND d.`name` = '技术质量部'")
     Long checkUserId(@Param("userId") Long userId);
+
+    @Select("SELECT\n" +
+            "\tt1.id AS VALUE,\n" +
+            "\tt1.NAME AS label \n" +
+            "FROM\n" +
+            "\tsys_dept AS t1\n" +
+            "\tLEFT JOIN sys_user_dept_middle AS t2 ON t1.id = t2.dept_id\n" +
+            "\tWHERE t2.user_id = #{userId}")
+    List<LabelValueVo> selectDepartments(@Param("userId") Long userId);
 }

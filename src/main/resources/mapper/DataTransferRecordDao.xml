@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.DataTransferRecordDao">
+
+    <!--  根据数据id获取数据的流转记录列表  -->
+    <select id="getTransferRecordList" resultType="com.lims.manage.erp.vo.DataTransferRecordVo">
+        SELECT dataTransfer.id,dataTransfer.data_describe,dataTransfer.data_time,userInfo.`name` AS user_name
+        FROM test_data_transfer_record dataTransfer
+        INNER JOIN sys_user userInfo ON dataTransfer.user_id = userInfo.user_id
+        <where>
+        <if test="dataIdSet!=null">
+            dataTransfer.data_id IN
+            <foreach collection="dataIdSet" item="id"  open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        </where>
+        ORDER BY data_time
+    </select>
+</mapper>

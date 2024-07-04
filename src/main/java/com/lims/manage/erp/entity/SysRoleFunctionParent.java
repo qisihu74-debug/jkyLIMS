@@ -25,4 +25,8 @@ public class SysRoleFunctionParent extends SysRoleFunction {
      * 序号
      */
     private Integer sort;
+    /**
+     * 菜单类型
+     */
+    private String dataType;
 }

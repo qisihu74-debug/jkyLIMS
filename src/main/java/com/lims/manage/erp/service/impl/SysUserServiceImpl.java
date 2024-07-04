@@ -1,16 +1,19 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.DeptDao;
-import com.lims.manage.erp.mapper.DingUsertDao;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.SysUserRoleDao;
+import com.lims.manage.erp.mapper.*;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -19,17 +22,13 @@ import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.docx4j.wml.U;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @Description 系统用户业务实现
@@ -48,6 +47,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     private SysUserRoleDao sysUserRoleDao;
     @Autowired
     private DingUsertDao dingUsertDao;
+    @Autowired
+    private SysUserDeptMiddleEntityMapper sysUserDeptMiddleEntityMapper;
 
     @Override
     public List<SysUserEntity> getUserNameList() {
@@ -56,7 +57,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
     @Override
     public List<SysUserEntity> getExceptUserNameList() {
-        return this.list(Wrappers.<SysUserEntity>lambdaQuery().ne(SysUserEntity::getUserId,ShiroUtils.getUserInfo().getUserId()).select(SysUserEntity::getUserId, SysUserEntity::getName));
+        return this.list(Wrappers.<SysUserEntity>lambdaQuery().ne(SysUserEntity::getUserId, ShiroUtils.getUserInfo().getUserId()).select(SysUserEntity::getUserId, SysUserEntity::getName));
     }
 
     /**
@@ -131,47 +132,60 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         return sysUserDao.resetPassword(entity);
     }
 
-    @Override
-    public List<UserInfoVo> getUserInfos(UserInfoParamVo vo) {
-        List<UserInfoVo> userInfos = sysUserDao.getUserInfos(vo);
-        if (!userInfos.isEmpty()) {
-            for (UserInfoVo userInfoVo : userInfos) {
-                List<LabelValueVo> department = Lists.newArrayList();
-                String departmentId = userInfoVo.getDepartmentId();
-                String replace;
-                if (departmentId != null && departmentId.contains("[")) {
-                    replace = departmentId.replace("[", "").replace("]", "");
-                } else {
-                    replace = departmentId;
-                }
-                if (replace != null && replace.contains(",")) {
-                    String[] split = replace.split(",");
-                    for (int i = 0; i < split.length; i++) {
-                        String deptId = split[i].trim();
-                        LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(deptId));
-                        if(departmentInfo!=null){
-                            department.add(departmentInfo);
-                        }
-                    }
-                } else if (replace != null && !replace.contains(",")&&!"".equals(replace)) {
-                    LabelValueVo departmentInfo = deptDao.getRoleInfoById(Long.parseLong(replace));
-                    if(departmentInfo!=null){
-                        department.add(departmentInfo);
-                    }
-                }
-                userInfoVo.setDepartment(department);
-            }
-        }
-        return userInfos;
-    }
-
     /**
-     * 获取用户信息列表——二次开发
+     * 获取用户信息列表
+     *
      * @param vo
      * @return
      */
-    @Override
-    public List<UserInfoVo> getUserInfos_two(UserInfoParamVo vo) {
+//    @Override
+//    public Result getUserInfos(UserInfoParamVo vo) {
+//
+//        LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+//        if (StringUtils.isNotEmpty(vo.getUsername())) {
+//            queryWrapper.like(SysUserEntity::getUsername, vo.getUsername());
+//        }
+//        if (StringUtils.isNotEmpty(vo.getMobile())) {
+//            queryWrapper.like(SysUserEntity::getMobile, vo.getMobile());
+//        }
+//        if (StringUtils.isNotEmpty(vo.getState())) {
+//            queryWrapper.eq(SysUserEntity::getState, vo.getState());
+//        }
+//        if (vo.getDeptId() != null) {
+//            LambdaQueryWrapper<SysUserDeptMiddleEntity> queryWrapper1 = new LambdaQueryWrapper<>();
+//            queryWrapper1.eq(SysUserDeptMiddleEntity::getDeptId, vo.getDeptId());
+//            List<SysUserDeptMiddleEntity> userList = sysUserDeptMiddleEntityMapper.selectList(queryWrapper1);
+//            List<String> userIds = new ArrayList<>();
+//            for (SysUserDeptMiddleEntity sysUserDeptMiddleEntity : userList) {
+//                userIds.add(sysUserDeptMiddleEntity.getUserId());
+//            }
+//            queryWrapper.in(SysUserEntity::getUserId, userIds);
+//        }
+//        PageHelper.startPage(vo.getPageNum(), vo.getPageSize());
+//        // 用户数据 = 0
+//        queryWrapper.eq(SysUserEntity::getIsDelete, 0);
+//        // 设置排序
+//        queryWrapper.orderByAsc(SysUserEntity::getTime);
+//        List<SysUserEntity> sysUserEntities = sysUserDao.selectList(queryWrapper);
+//        PageInfo<UserInfoVo> result = new PageInfo(sysUserEntities);
+//        if (CollectionUtil.isNotEmpty(result.getList())) {
+//            List<UserInfoVo> sysUserEntityList = result.getList();
+//            List<UserInfoVo> userInfoVos = new ArrayList<>();
+//            for (UserInfoVo sysUserEntity : sysUserEntityList) {
+//                UserInfoVo userInfoVo = new UserInfoVo(sysUserEntity);
+//                userInfoVos.add(userInfoVo);
+//            }
+//            for (UserInfoVo userInfoVo : userInfoVos) {
+//                // 根据user_id 查询 部门数据即可。
+//                userInfoVo.setDepartment(deptDao.selectDepartments(userInfoVo.getUserId()));
+//                // 根据user_id 查询 角色信息
+//                userInfoVo.setRoles(sysUserRoleDao.getRolesByUserId(userInfoVo.getUserId()));
+//            }
+//            result.setList(userInfoVos);
+//        }
+//        return ResultUtil.success(result);
+//    }
+    public List<UserInfoVo> getUserInfos(UserInfoParamVo vo) {
         List<UserInfoVo> userInfos = sysUserDao.getUserInfos(vo);
         if (!userInfos.isEmpty()) {
             for (UserInfoVo userInfoVo : userInfos) {
