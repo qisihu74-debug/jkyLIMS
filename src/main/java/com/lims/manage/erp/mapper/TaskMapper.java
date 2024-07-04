@@ -708,4 +708,17 @@ public interface TaskMapper extends BaseMapper {
 
     @Update("update test_task set report_complete = #{state} WHERE entrustment_id = #{entrustId}")
     void updateTaskReportComplete(@Param("entrustId") Long entrustId, @Param("state") String state);
+
+    /**
+     * 获取所有含有工时的报告信息Id 返回
+     *
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_report_record \n" +
+            "WHERE\n" +
+            "\tentrustment_id IN ( SELECT entrustment_id FROM test_task WHERE id IN ( SELECT task_id FROM test_task_order_working_hours GROUP BY task_id ) )")
+    List<Long> getreportIdszzzz();
 }

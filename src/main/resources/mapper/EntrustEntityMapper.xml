@@ -133,6 +133,7 @@
         <result property="auditState" column="auditState"></result>
         <result property="entrustmentNostr" column="entrustmentNostr"></result>
         <result property="aliasName" column="aliasName"></result>
+        <result property="taskListStatus" column="task_list_status"></result>
         <collection property="taskCodes" ofType="com.lims.manage.erp.vo.TaskCodeVo">
             <result property="taskCode" column="taskCode"></result>
             <result property="teamName" column="teamName"></result>
@@ -217,7 +218,8 @@
         state,
         auditState,
         sampleLogisticsNo,
-        taskState
+        taskState,
+        task_list_status
         FROM v_entrust_list
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="entrustmentNo!=null and entrustmentNo!=''">
@@ -405,7 +407,8 @@
         state,
         auditState,
         sampleLogisticsNo,
-        taskState
+        taskState,
+        task_list_status
         FROM v_entrust_list
         <trim prefix="WHERE" prefixOverrides="AND |OR ">
             <if test="entrustmentNo!=null and entrustmentNo!=''">

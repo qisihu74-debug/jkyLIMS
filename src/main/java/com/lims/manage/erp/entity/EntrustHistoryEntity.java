@@ -121,4 +121,10 @@ public class EntrustHistoryEntity {
      */
     @TableField(exist = false)
     private String sampleCode;
+
+    /**
+     * 任务单状态：0是合并1是拆分
+     */
+    @TableField(exist = false)
+    private String taskListStatus;
 }
