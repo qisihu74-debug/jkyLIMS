@@ -1,7 +1,10 @@
 package com.lims.manage.erp.service;
 
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.AduditBaseData;
 import com.lims.manage.erp.entity.InternalAuditorActive;
+
+import java.util.List;
 
 /**
  * @author gjl
@@ -22,4 +25,10 @@ public interface QsAuditService {
      * @return
      */
     PageInfo<InternalAuditorActive> internalAuditorActiveList(Integer pageNum, Integer pageSize, String name, Long userId);
+
+    /**
+     * 查询内审基础信息
+     * @return
+     */
+    List<AduditBaseData> getCheckBaseDataList();
 }
