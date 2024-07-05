@@ -394,4 +394,12 @@ logistics_costs, unit, samplestandard, sample_count,
                 check_item_id = #{checkItemPid}
     </select>
 
+    <select id="selectItemVoWorkingHoursList" resultType="com.lims.manage.erp.vo.CheckItemInfoVo">
+        SELECT check_item_id,product_id,check_item_name,working_hours FROM test_product_item
+        <foreach collection="checkIds" item="id" index="index" open="WHERE check_item_id IN (" close=")"
+                 separator=",">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>
