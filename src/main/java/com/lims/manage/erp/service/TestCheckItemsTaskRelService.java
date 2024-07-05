@@ -176,8 +176,14 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
 
     /**
      * 处理积分数据
+     *
      * @param list
      * @param workbook
      */
     void handExcelData(List<HourCount> list, Workbook workbook, TaskStatisticsVo bean, HttpServletResponse response) throws Exception;
+
+    /**
+     * 任务单工时比例调整恢复
+     */
+    void updateTaskSimplexHourRatio();
 }

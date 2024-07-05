@@ -643,4 +643,16 @@ public class ReportApprovalController {
 
     }
 
+    /**
+     * 工时从新统计导入
+     */
+    /**
+     * @return
+     */
+    @PostMapping("updateTaskSimplexHourRatio")
+    public void updateTaskSimplexHourRatio() {
+
+        testCheckItemsTaskRelService.updateTaskSimplexHourRatio();
+
+    }
 }

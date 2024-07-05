@@ -22,14 +22,7 @@ import com.lims.manage.erp.entity.TestInitDataEntity;
 import com.lims.manage.erp.entity.TestItemOrderWorkingHours;
 import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
 import com.lims.manage.erp.entity.TestTeam;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.StatisticsMapper;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TestCheckItemsTaskRelMapper;
-import com.lims.manage.erp.mapper.TestItemOrderWorkingHoursMapper;
-import com.lims.manage.erp.mapper.TestTaskOrderWorkingHoursMapper;
-import com.lims.manage.erp.mapper.TestTeamDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.StatisticsService;
@@ -92,6 +85,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     private TestCheckItemsTaskRelMapper testCheckItemsTaskRelMapper;
     @Autowired
     private StatisticsMapper statisticsMapper;
+    @Autowired
+    private ProductItemEntityMapper productItemEntityMapper;
 
     @Override
     public IPage<WorkHourStatisticVo> getWorkHoursList(Page<WorkHourStatisticVo> page, Map<String, Object> paramMap) {
@@ -1924,5 +1919,17 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         BigDecimal percentum = surplusProportion.add(new BigDecimal(data.getProportion())).setScale(2, BigDecimal.ROUND_FLOOR);
         data.setProportion(percentum.toString());
         testTaskOrderWorkingHoursMapper.updateByPrimaryKeySelective(data);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateTaskSimplexHourRatio() {
+        // 获取最新的工时信息：
+        List<TestTaskOrderWorkingHours> latestWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(null);
+        // 获取检测项下 对下 工时
+        List<TestItemOrderWorkingHours> itemWorkingHoursList = testItemOrderWorkingHoursMapper.selectList(null);
+        // 获取产品检测项 工时
+//        productItemEntityMapper
+
     }
 }
