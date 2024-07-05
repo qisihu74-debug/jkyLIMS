@@ -1,7 +1,12 @@
 package com.lims.manage.erp.controller;
 
-import com.lims.manage.erp.annotation.Log;
+import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.InternalAuditorActive;
 import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.QsAuditService;
+import com.lims.manage.erp.util.ShiroUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,18 +22,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/audit/")
 public class QsAuditController {
+    @Autowired
+    private QsAuditService qsAuditService;
 
     /**
      * 技术质量部内审活动列表
+     * @param pageNum
+     * @param pageSize
      * @param name
-     * @param time
      * @return
      */
     @GetMapping("internalAuditorActiveList")
-    public Result internalAuditorActiveList(String name,String time){
-
-
-        return null;
+    public Result internalAuditorActiveList(Integer pageNum, Integer pageSize, String name){
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少参数");
+        }
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        PageInfo<InternalAuditorActive> pageInfo = qsAuditService.internalAuditorActiveList(pageNum,pageSize,name,userId);
+        return ResultUtil.success(pageInfo);
     }
 
 }
