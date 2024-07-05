@@ -1,9 +1,9 @@
 package com.lims.manage.erp.entity;
 
+import com.lims.manage.erp.vo.Node;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author gjl
@@ -14,29 +14,27 @@ import java.util.Map;
  * @Copyright © 河南交科院
  */
 public class BaseTreeBuild {
-    /**
-     * 将flat list转换为tree结构
-     * @param flatAduditBaseDatas 扁平化列表
-     * @return 树形结构的根节点列表
-     */
-    public static List<AduditBaseData> buildTree(List<AduditBaseData> flatAduditBaseDatas) {
-        Map<Integer, AduditBaseData> AduditBaseDataMap = new HashMap<>();
-        List<AduditBaseData> rootAduditBaseDatas = new ArrayList<>();
-        // 先将所有节点放入map中，以便快速查找
-        for (AduditBaseData AduditBaseData : flatAduditBaseDatas) {
-            AduditBaseDataMap.put(AduditBaseData.getId(), AduditBaseData);
-        }
-        // 遍历所有节点，构建父子关系
-        for (AduditBaseData AduditBaseData : flatAduditBaseDatas) {
-            Integer pid = AduditBaseData.getPid();
-            if (pid == null || !AduditBaseDataMap.containsKey(pid)) {
-                // 如果pid为null或找不到父节点，则认为是根节点
-                rootAduditBaseDatas.add(AduditBaseData);
-            } else {
-                AduditBaseData parentAduditBaseData = AduditBaseDataMap.get(pid);
-                parentAduditBaseData.getChildren().add(AduditBaseData);
+    public static List<AduditBaseData> buildTree(List<AduditBaseData> nodes) {
+        List<AduditBaseData> result = new ArrayList<>();
+        for (AduditBaseData node : nodes) {
+            if (node.getPid() == 0) { // 如果节点是根节点
+                result.add(node);
+            } else { // 如果节点有父节点
+                AduditBaseData parent = findParent(nodes, node.getPid()); // 查找父节点
+                if (parent != null) {
+                    parent.getChildren().add(node); // 将当前节点添加到父节点的子节点列表中
+                }
             }
         }
-        return rootAduditBaseDatas;
+        return result;
+    }
+
+    private static AduditBaseData findParent(List<AduditBaseData> nodes, int pid) {
+        for (AduditBaseData node : nodes) {
+            if (node.getId() == pid) {
+                return node;
+            }
+        }
+        return null;
     }
 }
