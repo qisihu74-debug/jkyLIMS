@@ -450,7 +450,7 @@ public class SysSysUserFuctionServiceImpl implements SysUserFuctionService {
                 if (map.get(sysFunction.getFunctionId()) != null) {
                     SysFunction sysFunctionPid = map.get(sysFunction.getFunctionPid());
                     TreeFunction treeFunction = new TreeFunction(sysFunction);
-                    if (StringUtils.isNotEmpty(treeFunction.getMenuValue()) && StringUtils.isNotEmpty(sysFunctionPid.getMenuValue())) {
+                    if (sysFunctionPid != null && StringUtils.isNotEmpty(treeFunction.getMenuValue()) && StringUtils.isNotEmpty(sysFunctionPid.getMenuValue())) {
                         treeFunction.setManageContent(sysFunctionPid.getMenuValue() + ":" + treeFunction.getMenuValue());
                     }
                     treeFunctionList.add(treeFunction);
