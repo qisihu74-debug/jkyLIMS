@@ -5,7 +5,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -46,4 +45,25 @@ public interface QsAuditDao {
 
     @Select("select editor_id from qs_audit_active where active_id=#{activeId}")
     String getUserIdByActiveId(@Param("activeId") int activeId);
+
+    @Select("<script>"
+            + "SELECT"
+            + " qaa.active_id,"
+            + " dept.user_name As deptLeader,"
+            + " qad.divide_id,"
+            + " qaa.name,"
+            + " qaa.start_time,"
+            + " qaa.end_time,"
+            + " qaa.editor_date,"
+            + " IFNULL(qdr.state, '整改通知') AS state"
+            + " FROM qs_audit_active qaa"
+            + " LEFT JOIN qs_audit_divide qad ON qaa.active_id = qad.active_id"
+            + " LEFT JOIN qs_divide_rectification_record qdr ON qad.divide_id = qdr.divide_id"
+            + " LEFT JOIN sys_dept dept ON qad.dept_name = dept.name"
+            + " WHERE dept.user_id = #{userId}"
+            + "<if test=\"name != null and name.trim().length() > 0\">"
+            + " AND qaa.name LIKE CONCAT('%', #{name}, '%')"
+            + "</if>"
+            + "</script>")
+    List<InternalAuditorActive> deptLeaderActiveList(@Param("name") String name, @Param("userId") Long userId);
 }

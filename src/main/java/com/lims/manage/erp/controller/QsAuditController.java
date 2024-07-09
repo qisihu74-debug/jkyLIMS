@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +104,26 @@ public class QsAuditController {
             }
         }
         return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 继续检查数据操作、检查完成修改操作回显
+     * @param divideId
+     * @return
+     */
+    @GetMapping("checkEcho")
+    public Result checkEcho(int divideId){
+        if (divideId == 0){
+            return ResultUtil.error("缺少参数");
+        }
+        LambdaQueryWrapper<DivideAuditDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DivideAuditDetail::getDivideId,divideId);
+        List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper);
+        LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(DivideAuditDetailRel::getDivideId,divideId);
+        DivideAuditDetailRel one = divideAuditDetailRelService.getOne(queryWrapper1);
+        one.setList(list);
+        return ResultUtil.success(one);
     }
 
     /**
@@ -243,14 +262,10 @@ public class QsAuditController {
                     }
                 }
             }
-            return ResultUtil.success("暂存成功");
+            return ResultUtil.success("提交成功");
         }
         return ResultUtil.error("无效的内审活动类型："+state);
     }
-
-    //继续检查数据回显，
-
-    //检查完成修改数据回显
 
     @SneakyThrows
     @GetMapping("importBaseData")
@@ -288,4 +303,72 @@ public class QsAuditController {
         aduditBaseDataService.saveBatch(list);
         return ResultUtil.success("导入成功");
     }
+
+    /**
+     * 部门负责人查看内审活动列表
+     * @param pageNum
+     * @param pageSize
+     * @param name
+     * @return
+     */
+    @GetMapping("deptLeaderActiveList")
+    public Result deptLeaderActiveList(Integer pageNum, Integer pageSize, String name) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少参数");
+        }
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        PageInfo<InternalAuditorActive> pageInfo = qsAuditService.deptLeaderActiveList(pageNum,pageSize,name,userId);
+        //处理内审员
+        List<Integer> ids = Lists.newArrayList();
+        List<Integer> fgIds = Lists.newArrayList();
+
+        for (InternalAuditorActive active :pageInfo.getList()){
+            ids.add(active.getActiveId());
+            fgIds.add(active.getDivideId());
+        }
+        //查询活动下的人员信息
+        LambdaQueryWrapper<AuditTeamNumber> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.in(AuditTeamNumber::getActiveId,ids);
+        List<AuditTeamNumber> list = auditTeamNumberService.list(queryWrapper);
+        for (InternalAuditorActive active :pageInfo.getList()){
+            List<AuditTeamNumber> userList = Lists.newArrayList();
+            for (AuditTeamNumber auditTeamNumber :list){
+                if (active.getActiveId() == auditTeamNumber.getActiveId()){
+                    AuditTeamNumber teamNumber = new AuditTeamNumber();
+                    teamNumber.setUserId(auditTeamNumber.getUserId());
+                    teamNumber.setName(auditTeamNumber.getName());
+                    userList.add(teamNumber);
+                }
+            }
+        }
+        //查询基本信息qs_audit_divide_rel
+        LambdaQueryWrapper<DivideRectificationRecord> queryWrapper1 = new LambdaQueryWrapper();
+        queryWrapper1.in(DivideRectificationRecord::getDivideId,fgIds);
+        List<DivideRectificationRecord> records = divideRectificationRecordService.list(queryWrapper1);
+        for (InternalAuditorActive active :pageInfo.getList()){
+            for (DivideRectificationRecord record :records){
+                if (active.getDivideId() == record.getDivideId()){
+                    active.setRectificationRecord(record);
+                }
+            }
+        }
+        return ResultUtil.success(pageInfo);
+    }
+
+    //部门负责人接收通知提交，更新状态为等待纠正（前提判断管理员是否完成整改）
+
+
+    //部门负责人完成纠正，更新状态为等待验证，向内审员发送通知（前提判断管理员是否完成整改）
+
+
+    //部门负责人修改，更新数据（前提判断管理员是否完成整改）
+
+
+    //内审员列表措施验证，数据回显
+
+
+
+    //内审员措施验证，更新数据，更新状态为已完成（前提判断管理员是否完成整改）
+
+
 }

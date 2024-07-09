@@ -45,4 +45,14 @@ public interface QsAuditService {
      * @return
      */
     String getUserIdByActiveId(int activeId);
+
+    /**
+     * 部门负责人内审活动列表
+     * @param pageNum
+     * @param pageSize
+     * @param name
+     * @param userId
+     * @return
+     */
+    PageInfo<InternalAuditorActive> deptLeaderActiveList(Integer pageNum, Integer pageSize, String name, Long userId);
 }

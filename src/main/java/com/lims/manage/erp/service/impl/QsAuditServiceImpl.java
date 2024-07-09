@@ -52,4 +52,12 @@ public class QsAuditServiceImpl implements QsAuditService {
     public String getUserIdByActiveId(int activeId) {
         return qsAuditDao.getUserIdByActiveId(activeId);
     }
+
+    @Override
+    public PageInfo<InternalAuditorActive> deptLeaderActiveList(Integer pageNum, Integer pageSize, String name, Long userId) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<InternalAuditorActive> list = qsAuditDao.deptLeaderActiveList(name,userId);
+        PageInfo<InternalAuditorActive> pageInfo = new PageInfo<>(list);
+        return pageInfo;
+    }
 }

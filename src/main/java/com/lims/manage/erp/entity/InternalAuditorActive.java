@@ -62,4 +62,11 @@ public class InternalAuditorActive {
      */
     @TableField(exist = false)
     private List<AuditTeamNumber> userList;
+    /**
+     * 部门负责人
+     */
+    @TableField(exist = false)
+    private String deptLeader;
+    @TableField(exist = false)
+    private DivideRectificationRecord rectificationRecord;
 }
