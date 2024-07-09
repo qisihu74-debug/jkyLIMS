@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public interface QsAuditDao {
     @Select("<script>"
             + "SELECT"
             + " qaa.active_id,"
+            + " qad.dept_name,"
             + " qad.divide_id,"
             + " qaa.name,"
             + " qaa.start_time,"
@@ -39,4 +41,9 @@ public interface QsAuditDao {
             + "</script>")
     List<InternalAuditorActive> internalAuditorActiveList(@Param("name") String name, @Param("userId") Long userId);
 
+    @Select("select state from qs_audit_active where active_id=#{activeId}")
+    String getStateByActiveId(@Param("activeId") int activeId);
+
+    @Select("select editor_id from qs_audit_active where active_id=#{activeId}")
+    String getUserIdByActiveId(@Param("activeId") int activeId);
 }

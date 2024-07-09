@@ -384,4 +384,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     public List<String> getDingIdsByUserIds(Set<Long> userIds) {
         return sysUserDao.getDingIdsByUserIds(userIds);
     }
+
+    @Override
+    public String getPositionByDeptName(String deptName) {
+        return sysUserDao.getPositionByDeptName(deptName);
+    }
 }

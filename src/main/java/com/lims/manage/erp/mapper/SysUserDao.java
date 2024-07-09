@@ -218,4 +218,18 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "WHERE\n" +
             "\tt3.role_id = 99")
     List<SysUserEntity> systemManagementList();
+
+    @Select("SELECT\n" +
+            "\tding_user_id\n" +
+            "FROM\n" +
+            "\tsys_user\n" +
+            "WHERE\n" +
+            "\tuser_id = (\n" +
+            "\t\tSELECT\n" +
+            "\t\t\tuser_id\n" +
+            "\t\tFROM\n" +
+            "\t\t\tsys_dept\n" +
+            "\t\tWHERE\n" +
+            "\t\t\tNAME = #{deptName} )")
+    String getPositionByDeptName(@Param("deptName") String deptName);
 }

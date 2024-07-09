@@ -31,4 +31,18 @@ public interface QsAuditService {
      * @return
      */
     List<AduditBaseData> getCheckBaseDataList();
+
+    /**
+     * 查看活动状态完成情况
+     * @param activeId
+     * @return
+     */
+    String getStateByActiveId(int activeId);
+
+    /**
+     * 根据内审活动id获取发布管理员的userId
+     * @param activeId
+     * @return
+     */
+    String getUserIdByActiveId(int activeId);
 }

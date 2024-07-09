@@ -132,5 +132,7 @@ public interface SysUserService extends IService<SysUserEntity> {
     List<SysUserEntity> auditUserList();
 
     List<String> getDingIdsByUserIds(Set<Long> userIds);
+
+    String getPositionByDeptName(String deptName);
 }
 

@@ -42,4 +42,14 @@ public class QsAuditServiceImpl implements QsAuditService {
         queryWrapper.orderByAsc(AduditBaseData::getSort);
         return aduditBaseDataDao.selectList(queryWrapper);
     }
+
+    @Override
+    public String getStateByActiveId(int activeId) {
+        return qsAuditDao.getStateByActiveId(activeId);
+    }
+
+    @Override
+    public String getUserIdByActiveId(int activeId) {
+        return qsAuditDao.getUserIdByActiveId(activeId);
+    }
 }

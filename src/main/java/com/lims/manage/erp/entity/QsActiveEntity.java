@@ -1,65 +1,44 @@
 package com.lims.manage.erp.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author gjl
  * @version V1.0
  * @Package com.lims.manage.erp.entity
  * @desc
- * @date 2024-07-05 11:11
+ * @date 2024-07-09 11:38
  * @Copyright © 河南交科院
  */
 @Data
-public class InternalAuditorActive {
-    /**
-     * 活动id
-     */
+@TableName("qs_audit_active")
+public class QsActiveEntity {
     private int activeId;
-    /**
-     * 分工id
-     */
-    private int divideId;
-    /**
-     * 活动名称
-     */
     private String name;
-    /**
-     * 审核开始时间
-     */
+    private String purpose;
+    private String nature;
+    private String range;
+    private String basis;
+    private String group_leader_id;
+    private String groupLeaderName;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date startTime;
-    /**
-     * 审核结束时间
-     */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date endTime;
-    /**
-     * 活动编制时间
-     */
+    private String points;
+    private String editorId;
+    private String editorName;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
-    private Date editorDate;
-    /**
-     * 状态：检查待开始，检查中，检查完成，措施验证，已完成
-     */
+    private String editorDate;
+    private String url;
     private String state;
-    /**
-     * 受审部门
-     */
-    @TableField(exist = false)
-    private String deptName;
-    /**
-     * 审核员列表
-     */
-    @TableField(exist = false)
-    private List<AuditTeamNumber> userList;
+
 }
