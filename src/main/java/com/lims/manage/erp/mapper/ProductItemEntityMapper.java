@@ -6,6 +6,7 @@ import com.lims.manage.erp.vo.CheckItemInfoVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -67,15 +68,24 @@ public interface ProductItemEntityMapper {
 
     /**
      * 查询检测项详细信息
+     *
      * @param checkIds
      * @return
      */
-    List<CheckItemInfoVo> getItemInfo3(@Param("checkIds")List<Integer> checkIds);
+    List<CheckItemInfoVo> getItemInfo3(@Param("checkIds") List<Integer> checkIds);
 
     /**
      * 查询父名称、父ID
+     *
      * @param checkItemPid
      * @return
      */
     CheckItemDetailVo getParentInfo(Integer checkItemPid);
+
+    /**
+     * 查询检测项 基础参数工时
+     *
+     * @return
+     */
+    List<CheckItemInfoVo> selectItemVoWorkingHoursList(@Param("checkIds") List<Integer> checkIds);
 }

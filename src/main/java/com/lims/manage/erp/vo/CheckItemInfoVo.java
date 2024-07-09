@@ -79,10 +79,12 @@ public class CheckItemInfoVo {
 
     private String editData;
 
+    private String workingHours;
+
     public CheckItemInfoVo() {
     }
 
-    public CheckItemInfoVo(Integer checkItemId, String checkItemName, Integer productId, String checkPrice, Integer methodId, String methodName, Integer standardId, String standardCode, String standardName, Integer state,String originUrl,String opinion) {
+    public CheckItemInfoVo(Integer checkItemId, String checkItemName, Integer productId, String checkPrice, Integer methodId, String methodName, Integer standardId, String standardCode, String standardName, Integer state, String originUrl, String opinion) {
         this.checkItemId = checkItemId;
         this.checkItemName = checkItemName;
         this.productId = productId;
