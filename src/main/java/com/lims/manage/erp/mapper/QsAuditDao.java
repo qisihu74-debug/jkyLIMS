@@ -47,7 +47,7 @@ public interface QsAuditDao {
     String getUserIdByActiveId(@Param("activeId") int activeId);
 
     @Select("<script>"
-            + "SELECT"
+            + "SELECT DISTINCT"
             + " qaa.active_id,"
             + " dept.user_name As deptLeader,"
             + " qad.divide_id,"
