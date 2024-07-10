@@ -1,10 +1,10 @@
 package com.lims.manage.erp.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
@@ -14,6 +14,7 @@ import com.lims.manage.erp.entity.AuditTeamNumber;
 import com.lims.manage.erp.entity.BaseTreeBuild;
 import com.lims.manage.erp.entity.DivideAuditDetail;
 import com.lims.manage.erp.entity.DivideAuditDetailRel;
+import com.lims.manage.erp.entity.DivideEntity;
 import com.lims.manage.erp.entity.DivideRectificationRecord;
 import com.lims.manage.erp.entity.InternalAuditorActive;
 import com.lims.manage.erp.entity.SysUserEntity;
@@ -25,6 +26,7 @@ import com.lims.manage.erp.service.AuditTeamNumberService;
 import com.lims.manage.erp.service.DivideAuditDetailRelService;
 import com.lims.manage.erp.service.DivideAuditDetailService;
 import com.lims.manage.erp.service.DivideRectificationRecordService;
+import com.lims.manage.erp.service.DivideService;
 import com.lims.manage.erp.service.QsAuditService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.DingNotifyUtils;
@@ -78,6 +80,8 @@ public class QsAuditController {
     private DingNotifyUtils dingNotifyUtils;
     @Autowired
     private AuditTeamNumberService auditTeamNumberService;
+    @Autowired
+    private DivideService divideService;
 
     /**
      * 技术质量部内审活动列表
@@ -96,19 +100,19 @@ public class QsAuditController {
         //处理内审员
         List<Integer> ids = Lists.newArrayList();
         for (InternalAuditorActive active :pageInfo.getList()){
-            ids.add(active.getActiveId());
+            ids.add(active.getDivideId());
         }
         //查询活动下的人员信息
-        LambdaQueryWrapper<AuditTeamNumber> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.in(AuditTeamNumber::getActiveId,ids);
-        List<AuditTeamNumber> list = auditTeamNumberService.list(queryWrapper);
+        LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.in(DivideEntity::getDivideId,ids);
+        List<DivideEntity> list = divideService.list(queryWrapper);
         for (InternalAuditorActive active :pageInfo.getList()){
             List<AuditTeamNumber> userList = Lists.newArrayList();
-            for (AuditTeamNumber auditTeamNumber :list){
-                if (active.getActiveId() == auditTeamNumber.getActiveId()){
+            for (DivideEntity divideEntity :list){
+                if (active.getDivideId() == divideEntity.getDivideId()){
                     AuditTeamNumber teamNumber = new AuditTeamNumber();
-                    teamNumber.setUserId(auditTeamNumber.getUserId());
-                    teamNumber.setName(auditTeamNumber.getName());
+                    teamNumber.setUserId(divideEntity.getAuditorId());
+                    teamNumber.setName(divideEntity.getAuditorName());
                     userList.add(teamNumber);
                 }
             }
@@ -331,24 +335,22 @@ public class QsAuditController {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         PageInfo<InternalAuditorActive> pageInfo = qsAuditService.deptLeaderActiveList(pageNum,pageSize,name,userId);
         //处理内审员
-        List<Integer> ids = Lists.newArrayList();
         List<Integer> fgIds = Lists.newArrayList();
 
         for (InternalAuditorActive active :pageInfo.getList()){
-            ids.add(active.getActiveId());
             fgIds.add(active.getDivideId());
         }
         //查询活动下的人员信息
-        LambdaQueryWrapper<AuditTeamNumber> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.in(AuditTeamNumber::getActiveId,ids);
-        List<AuditTeamNumber> list = auditTeamNumberService.list(queryWrapper);
+        LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.in(DivideEntity::getDivideId,fgIds);
+        List<DivideEntity> list = divideService.list(queryWrapper);
         for (InternalAuditorActive active :pageInfo.getList()){
             List<AuditTeamNumber> userList = Lists.newArrayList();
-            for (AuditTeamNumber auditTeamNumber :list){
-                if (active.getActiveId() == auditTeamNumber.getActiveId()){
+            for (DivideEntity divideEntity :list){
+                if (active.getDivideId() == divideEntity.getDivideId()){
                     AuditTeamNumber teamNumber = new AuditTeamNumber();
-                    teamNumber.setUserId(auditTeamNumber.getUserId());
-                    teamNumber.setName(auditTeamNumber.getName());
+                    teamNumber.setUserId(divideEntity.getAuditorId());
+                    teamNumber.setName(divideEntity.getAuditorName());
                     userList.add(teamNumber);
                 }
             }
@@ -551,11 +553,66 @@ public class QsAuditController {
         return ResultUtil.success("已接收整改通知");
     }
 
-    //内审员列表措施验证，数据回显
+    /**
+     * 内审员列表措施验证，数据回显
+     * @param divideId
+     * @return
+     */
+    @GetMapping("rectificationEcho")
+    public Result rectificationEcho(int divideId){
+        if (divideId == 0){
+            return ResultUtil.error("缺少参数");
+        }
+        InternalAuditorActive internalAuditorActive = new InternalAuditorActive();
+        //查询活动下的人员信息
+        List<AuditTeamNumber> userList = Lists.newArrayList();
+        LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(DivideEntity::getDivideId,divideId);
+        List<DivideEntity> list = divideService.list(queryWrapper);
+        for (DivideEntity divideEntity :list){
+            AuditTeamNumber teamNumber = new AuditTeamNumber();
+            teamNumber.setUserId(divideEntity.getAuditorId());
+            teamNumber.setName(divideEntity.getAuditorName());
+            userList.add(teamNumber);
+        }
+        internalAuditorActive.setUserList(userList);
+        //基本信息
+        LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(DivideAuditDetailRel::getDivideId,divideId);
+        DivideAuditDetailRel one = divideAuditDetailRelService.getOne(queryWrapper1);
+        internalAuditorActive.setDivideAuditDetailRel(one);
+        //纠错信息
+        LambdaQueryWrapper<DivideRectificationRecord> queryWrapper2 = new LambdaQueryWrapper<>();
+        queryWrapper2.eq(DivideRectificationRecord::getDivideId,divideId);
+        DivideRectificationRecord record = divideRectificationRecordService.getOne(queryWrapper2);
+        internalAuditorActive.setRectificationRecord(record);
+        return ResultUtil.success(internalAuditorActive);
+    }
 
-
-
-    //内审员措施验证，更新数据，更新状态为已完成（前提判断管理员是否完成整改）
-
+    /**
+     * 内审员措施验证
+     * @param record
+     * @return
+     */
+    @PostMapping("internalAuditorRectification")
+    public Result internalAuditorRectification(@RequestBody DivideRectificationRecord record){
+        if (StringUtils.isEmpty(record.getVerificationOfCorrectiveMeasures()) || StringUtils.isEmpty(record.getAuditorId())
+                || StringUtils.isEmpty(record.getAuditorName()) || record.getVerificationDate() == null
+                || record.getActiveId() == 0 || record.getDivideId() == 0){
+            return ResultUtil.error("缺少参数");
+        }
+        //更新数据，更新状态为已完成（前提判断管理员是否完成整改）
+        String state = qsAuditService.getStateByActiveId(record.getActiveId());
+        if ("待总结，已完成".contains(state)) {
+            return ResultUtil.error("操作失败，管理员已将内审活动完成整改");
+        }
+        record.setState("已完成");
+        divideRectificationRecordService.updateById(record);
+        LambdaUpdateWrapper<DivideAuditDetailRel> updateWrapper = new LambdaUpdateWrapper();
+        updateWrapper.eq(DivideAuditDetailRel::getDivideId,record.getDivideId());
+        updateWrapper.set(DivideAuditDetailRel::getState,"已完成");
+        divideAuditDetailRelService.update(null,updateWrapper);
+        return ResultUtil.success("措施验证完成");
+    }
 
 }

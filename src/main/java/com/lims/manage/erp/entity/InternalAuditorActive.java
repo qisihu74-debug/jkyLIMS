@@ -69,4 +69,6 @@ public class InternalAuditorActive {
     private String deptLeader;
     @TableField(exist = false)
     private DivideRectificationRecord rectificationRecord;
+    @TableField(exist = false)
+    private DivideAuditDetailRel divideAuditDetailRel;
 }
