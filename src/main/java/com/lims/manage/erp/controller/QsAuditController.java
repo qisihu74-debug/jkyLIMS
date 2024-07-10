@@ -1,11 +1,14 @@
 package com.lims.manage.erp.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
+import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.AduditBaseData;
 import com.lims.manage.erp.entity.AuditTeamNumber;
 import com.lims.manage.erp.entity.BaseTreeBuild;
@@ -25,6 +28,7 @@ import com.lims.manage.erp.service.DivideRectificationRecordService;
 import com.lims.manage.erp.service.QsAuditService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.DingNotifyUtils;
+import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +40,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author gjl
@@ -368,7 +376,6 @@ public class QsAuditController {
      */
     @Log(title = "部门负责人接收整改通知", businessType = BusinessType.INSERT)
     @PostMapping("acceptNotice")
-    @Transactional(rollbackFor = Exception.class)
     public Result acceptNotice(@RequestBody DivideRectificationRecord record) {
         if (StringUtils.isEmpty(record.getAnalysisAndCorrectiveMeasures()) || record.getRequiredCompletionDate() == null
                 || StringUtils.isEmpty(record.getDeptLeader()) || record.getReceivedDate() == null) {
@@ -392,11 +399,157 @@ public class QsAuditController {
         return ResultUtil.success("已接收整改通知");
     }
 
-    //部门负责人完成纠正，更新状态为等待验证，向内审员发送通知（前提判断管理员是否完成整改）
+    /**
+     * 部门负责人完成纠正
+     * @param json
+     * @param files
+     * @return
+     */
+    @Log(title = "部门负责人完成纠正", businessType = BusinessType.INSERT)
+    @PostMapping("completeCorrection")
+    public Result completeCorrection(@RequestParam("json") String json, MultipartFile[] files) {
+        DivideRectificationRecord record = JSON.parseObject(json, DivideRectificationRecord.class);
+        if (StringUtils.isEmpty(record.getCorrectionCompletionStatus()) || record.getActualFinishingDate() == null
+                || StringUtils.isEmpty(record.getDeptLeader())) {
+            return ResultUtil.error("缺少检查结果相关信息");
+        }
+        if (files == null){
+            return ResultUtil.error("请上传整改报告");
+        }
+        //查询活动状态，判断管理员是否完成检查
+        String state = qsAuditService.getStateByActiveId(record.getActiveId());
+        if ("待总结，已完成".contains(state)) {
+            return ResultUtil.error("操作失败，管理员已将内审活动完成整改");
+        }
+        //判断内审员操作状态
+        LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(DivideAuditDetailRel::getDivideId,record.getDivideId());
+        DivideAuditDetailRel one = divideAuditDetailRelService.getOne(queryWrapper);
+        if ("已完成".equals(one.getState())){
+            return ResultUtil.error("操作失败，内审员已将措施验证完成");
+        }
+        //文件上传，要求是pdf文档
+        StringBuilder stringBuilder = new StringBuilder();
+        for (MultipartFile file: files){
+            if (file != null) {
+                String filename = file.getOriginalFilename();
+                String[] split = filename.split("\\.");
+                if (!"pdf".equals(split[split.length - 1])) {
+                    return ResultUtil.error("文件类型不正确，请上传正确的文件类型");
+                }
+                //上传附件
+                String upload = MinIoUtil.upload(BucketsConst.internal_audit, file, file.getOriginalFilename());
+                if (!org.springframework.util.StringUtils.isEmpty(upload)) {
+                    String uploadUrl = upload.substring(0, upload.indexOf("?"));
+                    stringBuilder.append(uploadUrl);
+                    stringBuilder.append(",");
+                }
+            }
+        }
+        record.setUrl(stringBuilder.toString().substring(0,stringBuilder.length()-1));
+        //更新状态为等待纠正
+        record.setState("等待验证");
+        divideRectificationRecordService.updateById(record);
+        //钉钉通知内审员,根据活动id查询内审员id集合
+        Set<Long> ids = new HashSet<>();
+        LambdaQueryWrapper<AuditTeamNumber> numberLambdaQueryWrapper = new LambdaQueryWrapper();
+        numberLambdaQueryWrapper.eq(AuditTeamNumber::getActiveId,record.getActiveId());
+        List<AuditTeamNumber> list = auditTeamNumberService.list(numberLambdaQueryWrapper);
+        for (AuditTeamNumber auditTeamNumber :list){
+            ids.add(Long.parseLong(auditTeamNumber.getUserId()));
+        }
+        //获取钉钉id
+        List<String> idsByUserIds = sysUserService.getDingIdsByUserIds(ids);
+        for (String dingId :idsByUserIds){
+            try {
+                dingNotifyUtils.OAWorkNotice(dingId,"部门负责人纠正完成通知",record.getDeptLeader(),"部门负责人："+record.getDeptLeader()+" 已完成纠正，请相关内审员及时处理");
+            }catch (Exception e){
+                log.error("部门负责人完成整改纠正发送通知给内审员失败:{}",e);
+            }
+        }
+        return ResultUtil.success("已接收整改通知");
+    }
 
-
-    //部门负责人修改，更新数据（前提判断管理员是否完成整改）
-
+    /**
+     * 部门负责人修改
+     * @param json
+     * @param files
+     * @return
+     */
+    @Log(title = "部门负责人修改整改休息", businessType = BusinessType.INSERT)
+    @PostMapping("editCorrection")
+    public Result editCorrection(@RequestParam("json") String json, MultipartFile[] files) {
+        DivideRectificationRecord record = JSON.parseObject(json, DivideRectificationRecord.class);
+        if (StringUtils.isEmpty(record.getCorrectionCompletionStatus()) || record.getActualFinishingDate() == null
+                || StringUtils.isEmpty(record.getDeptLeader())) {
+            return ResultUtil.error("缺少检查结果相关信息");
+        }
+        //查询活动状态，判断管理员是否完成检查
+        String state = qsAuditService.getStateByActiveId(record.getActiveId());
+        if ("待总结，已完成".contains(state)) {
+            return ResultUtil.error("操作失败，管理员已将内审活动完成整改");
+        }
+        //判断内审员操作状态
+        LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(DivideAuditDetailRel::getDivideId,record.getDivideId());
+        DivideAuditDetailRel one = divideAuditDetailRelService.getOne(queryWrapper);
+        if ("已完成".equals(one.getState())){
+            return ResultUtil.error("操作失败，内审员已将措施验证完成");
+        }
+        //文件上传，要求是pdf文档
+        StringBuilder stringBuilder = new StringBuilder();
+        if (files != null){
+            //删除旧文件
+            DivideRectificationRecord byId = divideRectificationRecordService.getById(record.getDivideId());
+            if (StringUtils.isNotEmpty(byId.getUrl())){
+                String[] split = byId.getUrl().split(",");
+                for (String url :split){
+                    String[] strings = url.split("\\/");
+                    String bluckName = strings[3];
+                    String fileName = strings[4];
+                    MinIoUtil.deleteFile(bluckName,fileName);
+                }
+            }
+            for (MultipartFile file: files){
+                if (file != null) {
+                    String filename = file.getOriginalFilename();
+                    String[] split = filename.split("\\.");
+                    if (!"pdf".equals(split[split.length - 1])) {
+                        return ResultUtil.error("文件类型不正确，请上传正确的文件类型");
+                    }
+                    //上传附件
+                    String upload = MinIoUtil.upload(BucketsConst.internal_audit, file, file.getOriginalFilename());
+                    if (!org.springframework.util.StringUtils.isEmpty(upload)) {
+                        String uploadUrl = upload.substring(0, upload.indexOf("?"));
+                        stringBuilder.append(uploadUrl);
+                        stringBuilder.append(",");
+                    }
+                }
+            }
+            record.setUrl(stringBuilder.toString().substring(0,stringBuilder.length()-1));
+        }
+        //更新状态为等待纠正
+        record.setState("等待验证");
+        divideRectificationRecordService.updateById(record);
+        //钉钉通知内审员,根据活动id查询内审员id集合
+        Set<Long> ids = new HashSet<>();
+        LambdaQueryWrapper<AuditTeamNumber> numberLambdaQueryWrapper = new LambdaQueryWrapper();
+        numberLambdaQueryWrapper.eq(AuditTeamNumber::getActiveId,record.getActiveId());
+        List<AuditTeamNumber> list = auditTeamNumberService.list(numberLambdaQueryWrapper);
+        for (AuditTeamNumber auditTeamNumber :list){
+            ids.add(Long.parseLong(auditTeamNumber.getUserId()));
+        }
+        //获取钉钉id
+        List<String> idsByUserIds = sysUserService.getDingIdsByUserIds(ids);
+        for (String dingId :idsByUserIds){
+            try {
+                dingNotifyUtils.OAWorkNotice(dingId,"部门负责人纠正完成通知",record.getDeptLeader(),"部门负责人："+record.getDeptLeader()+" 已完成纠正，请相关内审员及时处理");
+            }catch (Exception e){
+                log.error("部门负责人完成整改纠正发送通知给内审员失败:{}",e);
+            }
+        }
+        return ResultUtil.success("已接收整改通知");
+    }
 
     //内审员列表措施验证，数据回显
 
