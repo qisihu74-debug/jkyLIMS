@@ -5,6 +5,7 @@ import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
+import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.AduditBaseData;
 import com.lims.manage.erp.entity.AuditTeamNumber;
 import com.lims.manage.erp.entity.BaseTreeBuild;
@@ -13,6 +14,7 @@ import com.lims.manage.erp.entity.DivideAuditDetailRel;
 import com.lims.manage.erp.entity.DivideRectificationRecord;
 import com.lims.manage.erp.entity.InternalAuditorActive;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.AduditBaseDataService;
@@ -157,6 +159,7 @@ public class QsAuditController {
      * @param detailRel
      * @return
      */
+    @Log(title = "检查暂存", businessType = BusinessType.INSERT)
     @PostMapping("stagingCheck")
     public Result stagingCheck(@RequestBody DivideAuditDetailRel detailRel){
         if (CollectionUtils.isEmpty(detailRel.getList())){
@@ -195,6 +198,7 @@ public class QsAuditController {
      * @param detailRel
      * @return
      */
+    @Log(title = "检查提交", businessType = BusinessType.INSERT)
     @PostMapping("submitCheck")
     @Transactional(rollbackFor = Exception.class)
     public Result submitCheck(@RequestBody DivideAuditDetailRel detailRel){
@@ -355,8 +359,38 @@ public class QsAuditController {
         return ResultUtil.success(pageInfo);
     }
 
-    //部门负责人接收通知提交，更新状态为等待纠正（前提判断管理员是否完成整改）
 
+
+    /**
+     * 部门负责人接收通知提交
+     * @param record
+     * @return
+     */
+    @Log(title = "部门负责人接收整改通知", businessType = BusinessType.INSERT)
+    @PostMapping("acceptNotice")
+    @Transactional(rollbackFor = Exception.class)
+    public Result acceptNotice(@RequestBody DivideRectificationRecord record) {
+        if (StringUtils.isEmpty(record.getAnalysisAndCorrectiveMeasures()) || record.getRequiredCompletionDate() == null
+                || StringUtils.isEmpty(record.getDeptLeader()) || record.getReceivedDate() == null) {
+            return ResultUtil.error("缺少检查结果相关信息");
+        }
+        //查询活动状态，判断管理员是否完成检查
+        String state = qsAuditService.getStateByActiveId(record.getActiveId());
+        if ("待总结，已完成".contains(state)) {
+            return ResultUtil.error("操作失败，管理员已将内审活动完成整改");
+        }
+        //判断内审员操作状态
+        LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(DivideAuditDetailRel::getDivideId,record.getDivideId());
+        DivideAuditDetailRel one = divideAuditDetailRelService.getOne(queryWrapper);
+        if ("已完成".equals(one.getState())){
+            return ResultUtil.error("操作失败，内审员已将措施验证完成");
+        }
+        //更新状态为等待纠正
+        record.setState("等待纠正");
+        divideRectificationRecordService.updateById(record);
+        return ResultUtil.success("已接收整改通知");
+    }
 
     //部门负责人完成纠正，更新状态为等待验证，向内审员发送通知（前提判断管理员是否完成整改）
 
