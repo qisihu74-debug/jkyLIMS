@@ -565,7 +565,7 @@ public class QsAuditController {
         List<String> idsByUserIds = sysUserService.getDingIdsByUserIds(ids);
         for (String dingId :idsByUserIds){
             try {
-                dingNotifyUtils.OAWorkNotice(dingId,"部门负责人纠正完成通知",record.getDeptLeader(),"部门负责人："+record.getDeptLeader()+" 已完成纠正，请相关内审员及时处理");
+                dingNotifyUtils.OAWorkNotice(dingId,"部门负责人纠正修改完成通知",record.getDeptLeader(),"部门负责人："+record.getDeptLeader()+" 已完成纠正修改，请相关内审员及时处理");
             }catch (Exception e){
                 log.error("部门负责人完成整改纠正发送通知给内审员失败:{}",e);
             }
