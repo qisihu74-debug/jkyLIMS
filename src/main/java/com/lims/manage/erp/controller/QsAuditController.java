@@ -11,10 +11,29 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.AduditBaseData;
+import com.lims.manage.erp.entity.AuditTeamNumber;
+import com.lims.manage.erp.entity.BaseTreeBuild;
+import com.lims.manage.erp.entity.DingDeptEntity;
+import com.lims.manage.erp.entity.DivideAuditDetail;
+import com.lims.manage.erp.entity.DivideAuditDetailRel;
+import com.lims.manage.erp.entity.DivideEntity;
+import com.lims.manage.erp.entity.DivideRectificationRecord;
+import com.lims.manage.erp.entity.InternalAuditorActive;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.AduditBaseDataService;
+import com.lims.manage.erp.service.AuditTeamNumberService;
+import com.lims.manage.erp.service.DeptService;
+import com.lims.manage.erp.service.DivideAuditDetailRelService;
+import com.lims.manage.erp.service.DivideAuditDetailService;
+import com.lims.manage.erp.service.DivideRectificationRecordService;
+import com.lims.manage.erp.service.DivideService;
+import com.lims.manage.erp.service.QsAuditService;
+import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.MinIoUtil;
@@ -70,6 +89,8 @@ public class QsAuditController {
     @Autowired
     private DivideService divideService;
     @Autowired
+    private DeptService deptService;
+    @Autowired
     private ActiveService activeService;
 
     /**
@@ -106,6 +127,7 @@ public class QsAuditController {
                     userList.add(teamNumber);
                 }
             }
+            active.setUserList(userList);
         }
         return ResultUtil.success(pageInfo);
     }
@@ -187,7 +209,7 @@ public class QsAuditController {
             divideAuditDetailService.saveBatch(detailRel.getList());
             //插入或者更新qs_audit_divide_rel
             DivideAuditDetailRel rel = new DivideAuditDetailRel();
-            rel.setDivideId(detailRel.getActiveId());
+            rel.setDivideId(detailRel.getDivideId());
             rel.setState("检查中");
             divideAuditDetailRelService.saveOrUpdate(rel);
             return ResultUtil.success("暂存成功");
@@ -331,30 +353,45 @@ public class QsAuditController {
             fgIds.add(active.getDivideId());
         }
         //查询活动下的人员信息
-        LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.in(DivideEntity::getDivideId,fgIds);
-        List<DivideEntity> list = divideService.list(queryWrapper);
-        for (InternalAuditorActive active :pageInfo.getList()){
-            List<AuditTeamNumber> userList = Lists.newArrayList();
-            for (DivideEntity divideEntity :list){
-                if (active.getDivideId() == divideEntity.getDivideId()){
-                    AuditTeamNumber teamNumber = new AuditTeamNumber();
-                    teamNumber.setUserId(divideEntity.getAuditorId());
-                    teamNumber.setName(divideEntity.getAuditorName());
-                    userList.add(teamNumber);
+        if (CollectionUtils.isNotEmpty(fgIds)){
+            LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper();
+            queryWrapper.in(DivideEntity::getDivideId,fgIds);
+            List<DivideEntity> list = divideService.list(queryWrapper);
+            for (InternalAuditorActive active :pageInfo.getList()){
+                List<AuditTeamNumber> userList = Lists.newArrayList();
+                for (DivideEntity divideEntity :list){
+                    if (active.getDivideId() == divideEntity.getDivideId()){
+                        AuditTeamNumber teamNumber = new AuditTeamNumber();
+                        teamNumber.setUserId(divideEntity.getAuditorId());
+                        teamNumber.setName(divideEntity.getAuditorName());
+                        userList.add(teamNumber);
+                    }
+                }
+                active.setUserList(userList);
+            }
+            //查询基本信息qs_audit_divide_rel
+            LambdaQueryWrapper<DivideRectificationRecord> queryWrapper1 = new LambdaQueryWrapper();
+            queryWrapper1.in(DivideRectificationRecord::getDivideId,fgIds);
+            List<DivideRectificationRecord> records = divideRectificationRecordService.list(queryWrapper1);
+            for (InternalAuditorActive active :pageInfo.getList()){
+                for (DivideRectificationRecord record :records){
+                    if (active.getDivideId() == record.getDivideId()){
+                        active.setRectificationRecord(record);
+                    }
                 }
             }
-        }
-        //查询基本信息qs_audit_divide_rel
-        LambdaQueryWrapper<DivideRectificationRecord> queryWrapper1 = new LambdaQueryWrapper();
-        queryWrapper1.in(DivideRectificationRecord::getDivideId,fgIds);
-        List<DivideRectificationRecord> records = divideRectificationRecordService.list(queryWrapper1);
-        for (InternalAuditorActive active :pageInfo.getList()){
-            for (DivideRectificationRecord record :records){
-                if (active.getDivideId() == record.getDivideId()){
-                    active.setRectificationRecord(record);
+            //基本信息
+            LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper2 = new LambdaQueryWrapper<>();
+            queryWrapper2.in(DivideAuditDetailRel::getDivideId,fgIds);
+            List<DivideAuditDetailRel> auditDetailRels = divideAuditDetailRelService.list(queryWrapper2);
+            for (InternalAuditorActive active :pageInfo.getList()){
+                for (DivideAuditDetailRel detailRel :auditDetailRels){
+                    if (active.getDivideId() == detailRel.getDivideId()){
+                        active.setDivideAuditDetailRel(detailRel);
+                    }
                 }
             }
+
         }
         return ResultUtil.success(pageInfo);
     }
@@ -535,7 +572,7 @@ public class QsAuditController {
         List<String> idsByUserIds = sysUserService.getDingIdsByUserIds(ids);
         for (String dingId :idsByUserIds){
             try {
-                dingNotifyUtils.OAWorkNotice(dingId,"部门负责人纠正完成通知",record.getDeptLeader(),"部门负责人："+record.getDeptLeader()+" 已完成纠正，请相关内审员及时处理");
+                dingNotifyUtils.OAWorkNotice(dingId,"部门负责人纠正修改完成通知",record.getDeptLeader(),"部门负责人："+record.getDeptLeader()+" 已完成纠正修改，请相关内审员及时处理");
             }catch (Exception e){
                 log.error("部门负责人完成整改纠正发送通知给内审员失败:{}",e);
             }

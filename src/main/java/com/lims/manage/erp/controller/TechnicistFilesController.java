@@ -202,7 +202,7 @@ public class TechnicistFilesController {
         }
         TechnicistFiles technicistFiles = JSON.parseObject(jsonParam, TechnicistFiles.class);
         technicistFiles.setUserId(ShiroUtils.getUserInfo().getUserId());
-        String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, file.getOriginalFilename());
+        String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, ShiroUtils.getUserInfo().getUserId()+file.getOriginalFilename());
         if (!StringUtils.isEmpty(upload)) {
             String uploadUrl = upload.substring(0, upload.indexOf("?"));
             technicistFiles.setFileUrl(uploadUrl);
@@ -257,7 +257,7 @@ public class TechnicistFilesController {
             if (!StringUtils.isEmpty(fileUrl)) {
                 technicistFilesService.delFileByUrl(fileUrl);
             }
-            String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, file.getOriginalFilename());
+            String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, ShiroUtils.getUserInfo().getUserId()+file.getOriginalFilename());
             if (!StringUtils.isEmpty(upload)) {
                 String uploadUrl = upload.substring(0, upload.indexOf("?"));
                 selectOne.setFileUrl(uploadUrl);

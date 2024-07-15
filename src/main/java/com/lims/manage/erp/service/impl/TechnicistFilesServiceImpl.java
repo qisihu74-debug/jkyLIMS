@@ -42,7 +42,7 @@ public class TechnicistFilesServiceImpl extends ServiceImpl<TechnicistFilesDao, 
         TechnicistFiles selectOne = this.baseMapper.selectOne(queryWrapper);
         if (selectOne == null){
             //插入
-            String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, file.getOriginalFilename());
+            String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, ShiroUtils.getUserInfo().getUserId()+file.getOriginalFilename());
             if (!StringUtils.isEmpty(upload)){
                 String uploadUrl = upload.substring(0, upload.indexOf("?"));
                 TechnicistFiles technicistFiles = new TechnicistFiles();
@@ -65,7 +65,7 @@ public class TechnicistFilesServiceImpl extends ServiceImpl<TechnicistFilesDao, 
             if (!StringUtils.isEmpty(fileUrl)){
                 delFileByUrl(fileUrl);
             }
-            String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, file.getOriginalFilename());
+            String upload = MinIoUtil.upload(BucketsConst.technicist_files, file, ShiroUtils.getUserInfo().getUserId()+file.getOriginalFilename());
             if (!StringUtils.isEmpty(upload)){
                 String uploadUrl = upload.substring(0, upload.indexOf("?"));
                 selectOne.setContent(file.getOriginalFilename().split("\\.")[0]);
