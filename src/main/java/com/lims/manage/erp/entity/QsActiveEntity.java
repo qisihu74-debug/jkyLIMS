@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lims.manage.erp.vo.DivideVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -55,7 +56,7 @@ public class QsActiveEntity {
      * 分工对象集合
      */
     @TableField(exist = false)
-    private List<DivideEntity> divideList;
+    private List<DivideVo> divideList;
     /**
      * 日程安排
      */

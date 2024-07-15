@@ -18,4 +18,21 @@ public interface ActiveService extends IService<QsActiveEntity> {
      */
     Result addQsActiveData(QsActiveEntity qsActiveEntity);
 
+    /**
+     * 更新内审活动
+     *
+     * @param qsActiveEntity
+     * @return
+     */
+    Result updateQsActiveData(QsActiveEntity qsActiveEntity);
+
+
+    /**
+     * 查询详情内审活动
+     *
+     * @param activeId
+     * @return
+     */
+    Result queryDetailsQsActiveData(String activeId);
+
 }

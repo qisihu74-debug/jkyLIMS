@@ -674,10 +674,35 @@ public class QsAuditController {
      * @param qsActiveEntity
      * @return
      */
-    @GetMapping("createInternalAuditManagement")
+    @PostMapping("createInternalAuditManagement")
     public Result createInternalAuditManagement(@RequestBody QsActiveEntity qsActiveEntity) {
 
         return activeService.addQsActiveData(qsActiveEntity);
+    }
+
+
+    /**
+     * 查询详情内审活动
+     *
+     * @param activeId
+     * @return
+     */
+    @GetMapping("queryDetailsQsActiveData")
+    public Result queryDetailsQsActiveData(String activeId) {
+
+        return activeService.queryDetailsQsActiveData(activeId);
+    }
+
+    /**
+     * 更新内审管理
+     *
+     * @param qsActiveEntity
+     * @return
+     */
+    @PostMapping("updateQsActiveData")
+    public Result updateQsActiveData(@RequestBody QsActiveEntity qsActiveEntity) {
+
+        return activeService.updateQsActiveData(qsActiveEntity);
     }
 
 }

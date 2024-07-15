@@ -3,6 +3,8 @@ package com.lims.manage.erp.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.AuditTeamNumber;
 
+import java.util.List;
+
 /**
  * @author gjl
  * @version V1.0
@@ -12,4 +14,11 @@ import com.lims.manage.erp.entity.AuditTeamNumber;
  * @Copyright © 河南交科院
  */
 public interface AuditTeamNumberService extends IService<AuditTeamNumber> {
+    /**
+     * 审核组员 更新：
+     *
+     * @param newAuditTeamList
+     * @param activeId
+     */
+    public void updateAuditTeamNumber(List<AuditTeamNumber> newAuditTeamList, Integer activeId);
 }
