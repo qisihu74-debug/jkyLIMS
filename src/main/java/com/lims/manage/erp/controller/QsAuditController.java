@@ -5,30 +5,17 @@ import com.aspose.cells.Cells;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.AduditBaseData;
-import com.lims.manage.erp.entity.AuditTeamNumber;
-import com.lims.manage.erp.entity.BaseTreeBuild;
-import com.lims.manage.erp.entity.DivideAuditDetail;
-import com.lims.manage.erp.entity.DivideAuditDetailRel;
-import com.lims.manage.erp.entity.DivideEntity;
-import com.lims.manage.erp.entity.DivideRectificationRecord;
-import com.lims.manage.erp.entity.InternalAuditorActive;
-import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.AduditBaseDataService;
-import com.lims.manage.erp.service.AuditTeamNumberService;
-import com.lims.manage.erp.service.DivideAuditDetailRelService;
-import com.lims.manage.erp.service.DivideAuditDetailService;
-import com.lims.manage.erp.service.DivideRectificationRecordService;
-import com.lims.manage.erp.service.DivideService;
-import com.lims.manage.erp.service.QsAuditService;
-import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -82,24 +69,27 @@ public class QsAuditController {
     private AuditTeamNumberService auditTeamNumberService;
     @Autowired
     private DivideService divideService;
+    @Autowired
+    private ActiveService activeService;
 
     /**
      * 技术质量部内审活动列表
+     *
      * @param pageNum
      * @param pageSize
      * @param name
      * @return
      */
     @GetMapping("internalAuditorActiveList")
-    public Result internalAuditorActiveList(Integer pageNum, Integer pageSize, String name){
-        if (pageNum == null || pageSize == null){
+    public Result internalAuditorActiveList(Integer pageNum, Integer pageSize, String name) {
+        if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少参数");
         }
         Long userId = ShiroUtils.getUserInfo().getUserId();
-        PageInfo<InternalAuditorActive> pageInfo = qsAuditService.internalAuditorActiveList(pageNum,pageSize,name,userId);
+        PageInfo<InternalAuditorActive> pageInfo = qsAuditService.internalAuditorActiveList(pageNum, pageSize, name, userId);
         //处理内审员
         List<Integer> ids = Lists.newArrayList();
-        for (InternalAuditorActive active :pageInfo.getList()){
+        for (InternalAuditorActive active : pageInfo.getList()) {
             ids.add(active.getDivideId());
         }
         //查询活动下的人员信息
@@ -598,7 +588,7 @@ public class QsAuditController {
     public Result internalAuditorRectification(@RequestBody DivideRectificationRecord record){
         if (StringUtils.isEmpty(record.getVerificationOfCorrectiveMeasures()) || StringUtils.isEmpty(record.getAuditorId())
                 || StringUtils.isEmpty(record.getAuditorName()) || record.getVerificationDate() == null
-                || record.getActiveId() == 0 || record.getDivideId() == 0){
+                || record.getActiveId() == 0 || record.getDivideId() == 0) {
             return ResultUtil.error("缺少参数");
         }
         //更新数据，更新状态为已完成（前提判断管理员是否完成整改）
@@ -609,10 +599,48 @@ public class QsAuditController {
         record.setState("已完成");
         divideRectificationRecordService.updateById(record);
         LambdaUpdateWrapper<DivideAuditDetailRel> updateWrapper = new LambdaUpdateWrapper();
-        updateWrapper.eq(DivideAuditDetailRel::getDivideId,record.getDivideId());
-        updateWrapper.set(DivideAuditDetailRel::getState,"已完成");
-        divideAuditDetailRelService.update(null,updateWrapper);
+        updateWrapper.eq(DivideAuditDetailRel::getDivideId, record.getDivideId());
+        updateWrapper.set(DivideAuditDetailRel::getState, "已完成");
+        divideAuditDetailRelService.update(null, updateWrapper);
         return ResultUtil.success("措施验证完成");
+    }
+
+
+    /**
+     * 内审管理列表
+     *
+     * @param qsActiveEntity
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("internalAuditManagementList")
+    public Result internalAuditManagementList(QsActiveEntity qsActiveEntity, @RequestParam(name = "pageNum", defaultValue = "1") Integer pageNum,
+                                              @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        // 效验登录人角色 是否能进行访问：
+
+        // 根据查询条件 进行搜索：
+        LambdaQueryWrapper<QsActiveEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(QsActiveEntity::getActiveId, QsActiveEntity::getName, QsActiveEntity::getStartTime, QsActiveEntity::getEndTime, QsActiveEntity::getState, QsActiveEntity::getEditorDate);
+        if (qsActiveEntity != null && StringUtils.isNotEmpty(qsActiveEntity.getName())) {
+            queryWrapper.like(QsActiveEntity::getName, qsActiveEntity.getName());
+        }
+        Page<QsActiveEntity> page = new Page<QsActiveEntity>(pageNum, pageSize);
+        IPage<QsActiveEntity> pageList = activeService.page(page, queryWrapper);
+        return ResultUtil.success(pageList);
+    }
+
+
+    /**
+     * 创建内审管理
+     *
+     * @param qsActiveEntity
+     * @return
+     */
+    @GetMapping("createInternalAuditManagement")
+    public Result createInternalAuditManagement(@RequestBody QsActiveEntity qsActiveEntity) {
+
+        return activeService.addQsActiveData(qsActiveEntity);
     }
 
 }
