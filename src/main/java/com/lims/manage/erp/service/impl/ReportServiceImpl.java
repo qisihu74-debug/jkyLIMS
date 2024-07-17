@@ -2147,11 +2147,11 @@ public class ReportServiceImpl implements ReportService {
                 break;
             case "4":
                 //0线上，1线下
-                reportMapper.updateOperateState(reportCode,0);
+                reportMapper.updateOperateState(reportCode,1);
                 flag = "线上审批改为线下成功";
                 break;
             case "5":
-                reportMapper.updateOperateState(reportCode,1);
+                reportMapper.updateOperateState(reportCode,0);
                 flag = "线下审批改为线上成功";
                 break;
             default:
