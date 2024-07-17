@@ -2,7 +2,10 @@ package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.QsActiveEntity;
+import com.lims.manage.erp.entity.QsAuditScheduleRelEntity;
 import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.vo.QsActiveVo;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Author: DLC
@@ -34,5 +37,29 @@ public interface ActiveService extends IService<QsActiveEntity> {
      * @return
      */
     Result queryDetailsQsActiveData(String activeId);
+
+    /**
+     * 返回内审基础信息
+     *
+     * @return
+     */
+    Result getInternalAuditBasics();
+
+    /**
+     * 开始进行内审活动
+     *
+     * @param qsActiveVo
+     * @return
+     */
+    Result startInternalAuditPlan(QsActiveVo qsActiveVo);
+
+    /**
+     * 发起会议：首次会议、末次会议
+     *
+     * @param qsAuditScheduleRelEntity
+     * @param file
+     * @return
+     */
+    Result initiateAMeeting(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file);
 
 }

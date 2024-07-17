@@ -38,6 +38,7 @@ import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.QsActiveVo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -92,6 +93,8 @@ public class QsAuditController {
     private DeptService deptService;
     @Autowired
     private ActiveService activeService;
+    @Autowired
+    private QsAuditScheduleRelService qsAuditScheduleRelService;
 
     /**
      * 技术质量部内审活动列表
@@ -680,6 +683,16 @@ public class QsAuditController {
         return activeService.addQsActiveData(qsActiveEntity);
     }
 
+    /**
+     * 返回内审基础信息
+     *
+     * @return
+     */
+    @GetMapping("getInternalAuditBasics")
+    public Result getInternalAuditBasics() {
+
+        return activeService.getInternalAuditBasics();
+    }
 
     /**
      * 查询详情内审活动
@@ -693,6 +706,51 @@ public class QsAuditController {
         return activeService.queryDetailsQsActiveData(activeId);
     }
 
+
+    /**
+     * 查询审核组长集合
+     *
+     * @return
+     */
+    @GetMapping("getAuditTeamLeaderList")
+    public Result getAuditTeamLeaderList() {
+
+        return sysUserService.getAuditTeamLeaderList();
+    }
+
+    /**
+     * 查询审核组员集合
+     *
+     * @return
+     */
+    @GetMapping("getCrewAssemblyList")
+    public Result getCrewAssemblyList() {
+
+        return sysUserService.getAuditTeamLeaderList();
+    }
+
+    /**
+     * 编制人集合
+     *
+     * @return
+     */
+    @GetMapping("getAssemblerPool")
+    public Result getAssemblerPool() {
+
+        return sysUserService.getAssemblerPool();
+    }
+
+    /**
+     * 受审部门 集合
+     *
+     * @return
+     */
+    @GetMapping("getTrialDepartmentList")
+    public Result getTrialDepartmentList() {
+
+        return deptService.getTrialDepartmentList();
+    }
+
     /**
      * 更新内审管理
      *
@@ -703,6 +761,73 @@ public class QsAuditController {
     public Result updateQsActiveData(@RequestBody QsActiveEntity qsActiveEntity) {
 
         return activeService.updateQsActiveData(qsActiveEntity);
+    }
+
+    /**
+     * 内审管理-开始
+     *
+     * @param qsActiveVo
+     * @return
+     */
+    @PostMapping("startInternalAuditPlan")
+    public Result startInternalAuditPlan(@RequestBody QsActiveVo qsActiveVo) {
+
+        return activeService.startInternalAuditPlan(qsActiveVo);
+    }
+
+    /**
+     * 发起会议：首次会议、末次会议
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @PostMapping("initiateAMeeting")
+    public Result initiateAMeeting(@RequestParam("json") String json, MultipartFile[] file) {
+        QsAuditScheduleRelEntity qsAuditScheduleRel = JSON.parseObject(json, QsAuditScheduleRelEntity.class);
+        return activeService.initiateAMeeting(qsAuditScheduleRel, file);
+    }
+
+    /**
+     * 获取 会议信息
+     *
+     * @return
+     */
+    @GetMapping("getMeetingList")
+    public Result getMeetingList(String activeId) {
+        LambdaQueryWrapper<QsAuditScheduleRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QsAuditScheduleRelEntity::getActiveId, activeId);
+        List<QsAuditScheduleRelEntity> list = qsAuditScheduleRelService.list(queryWrapper);
+        return ResultUtil.success(list);
+    }
+
+    /**
+     * 会议：查询主持人集合、记录人集合、出席人集合
+     *
+     * @param type
+     * @return
+     */
+    @GetMapping("getConferenceAssembly")
+    public Result getHostAssembly(String type) {
+        if (StringUtils.isEmpty(type)) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        return sysUserService.getAssemblerPool();
+    }
+
+
+    /**
+     * 提交内审总结附件
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @PostMapping("submitInternalAuditDocument")
+    public Result submitInternalAuditDocument(@RequestParam("json") String json, MultipartFile[] file) {
+        QsAuditScheduleRelEntity qsAuditScheduleRel = JSON.parseObject(json, QsAuditScheduleRelEntity.class);
+//        return activeService.initiateAMeeting(qsAuditScheduleRel, file);
+        return ResultUtil.success("成功");
     }
 
 }

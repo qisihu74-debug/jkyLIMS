@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.QsAuditScheduleEntity;
 import com.lims.manage.erp.mapper.QsAuditScheduleMapper;
 import com.lims.manage.erp.service.QsAuditScheduleService;
+import com.lims.manage.erp.util.DateUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,18 @@ public class QsAuditScheduleServiceImpl extends ServiceImpl<QsAuditScheduleMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateAuditSchedule(List<QsAuditScheduleEntity> newAuditScheduleEntityList, Integer activeId) {
+
+        if (CollectionUtil.isNotEmpty(newAuditScheduleEntityList)) {
+            for (QsAuditScheduleEntity qsAuditScheduleEntity : newAuditScheduleEntityList) {
+                // 进行 审核周期 拆分: auditTimeCycle
+                if (StringUtils.isNotEmpty(qsAuditScheduleEntity.getScheduleDateCycle())) {
+                    String[] times = qsAuditScheduleEntity.getScheduleDateCycle().split("~");
+                    // "2024-07-16" 转 Date 格式
+                    qsAuditScheduleEntity.setStartTime(DateUtil.timeFormat(times[0]));
+                    qsAuditScheduleEntity.setEndTime(DateUtil.timeFormat(times[1]));
+                }
+            }
+        }
 
         // 获取 对应日程 信息：
         LambdaQueryWrapper<QsAuditScheduleEntity> auditScheduleWrapper = new LambdaQueryWrapper<>();

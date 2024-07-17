@@ -4,25 +4,24 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lims.manage.erp.entity.AuditTeamNumber;
-import com.lims.manage.erp.entity.DivideEntity;
-import com.lims.manage.erp.entity.QsActiveEntity;
-import com.lims.manage.erp.entity.QsAuditScheduleEntity;
-import com.lims.manage.erp.mapper.ActiveMapper;
-import com.lims.manage.erp.mapper.AuditTeamNumberDao;
-import com.lims.manage.erp.mapper.DivideDao;
-import com.lims.manage.erp.mapper.QsAuditScheduleMapper;
+import com.lims.manage.erp.constant.BucketsConst;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.ActiveService;
-import com.lims.manage.erp.service.AuditTeamNumberService;
-import com.lims.manage.erp.service.DivideService;
-import com.lims.manage.erp.service.QsAuditScheduleService;
+import com.lims.manage.erp.service.*;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.MinIoUtil;
+import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.DivideVo;
+import com.lims.manage.erp.vo.QsActiveVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -46,11 +45,24 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
     private QsAuditScheduleService qsAuditScheduleService;
     @Autowired
     private DivideService divideService;
+    @Autowired
+    private TaskMapper taskMapper;
+    @Autowired
+    private QsAuditScheduleRelService qsAuditScheduleRelService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result addQsActiveData(QsActiveEntity qsActiveEntity) {
         // 进行保存内审表
+        // 创建时： state = “待开始”
+        qsActiveEntity.setState("待开始");
+        // 进行 审核周期 拆分: auditTimeCycle
+        if (StringUtils.isNotEmpty(qsActiveEntity.getAuditTimeCycle())) {
+            String[] times = qsActiveEntity.getAuditTimeCycle().split("~");
+            // "2024-07-16" 转 Date 格式
+            qsActiveEntity.setStartTime(DateUtil.timeFormat(times[0]));
+            qsActiveEntity.setEndTime(DateUtil.timeFormat(times[1]));
+        }
         this.baseMapper.insert(qsActiveEntity);
         Integer activeId = qsActiveEntity.getActiveId();
         System.out.println("内容输出 activeId == " + activeId);
@@ -81,6 +93,8 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
             for (DivideVo divideVo : qsActiveEntity.getDivideList()) {
                 // 活动id 根据指派的人员相同科室 进行一致。
                 for (DivideEntity divideEntity1 : divideVo.getDivideList()) {
+                    divideEntity1.setDeptId(divideVo.getDeptId());
+                    divideEntity1.setDeptName(divideVo.getDeptName());
                     divideEntity1.setDivideId(map.get(divideVo.getDeptId()));
                     divideEntity1.setActiveId(activeId);
                     divideDao.insert(divideEntity1);
@@ -91,6 +105,13 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         if (CollectionUtil.isNotEmpty(qsActiveEntity.getQsAuditScheduleEntityList())) {
             for (QsAuditScheduleEntity qsAuditScheduleEntity : qsActiveEntity.getQsAuditScheduleEntityList()) {
                 qsAuditScheduleEntity.setActiveId(activeId);
+                // 进行 周期 拆分: scheduleDateCycle
+                if (StringUtils.isNotEmpty(qsAuditScheduleEntity.getScheduleDateCycle())) {
+                    String[] times = qsAuditScheduleEntity.getScheduleDateCycle().split("~");
+                    // "2024-07-16" 转 Date 格式
+                    qsAuditScheduleEntity.setStartTime(DateUtil.timeFormat(times[0]));
+                    qsAuditScheduleEntity.setEndTime(DateUtil.timeFormat(times[1]));
+                }
                 qsAuditScheduleMapper.insert(qsAuditScheduleEntity);
             }
         }
@@ -108,6 +129,13 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
     @Transactional(rollbackFor = Exception.class)
     public Result updateQsActiveData(QsActiveEntity qsActiveEntity) {
         // 内审计划信息 更新：
+        // 进行 审核周期 拆分: auditTimeCycle
+        if (StringUtils.isNotEmpty(qsActiveEntity.getAuditTimeCycle())) {
+            String[] times = qsActiveEntity.getAuditTimeCycle().split("~");
+            // "2024-07-16" 转 Date 格式
+            qsActiveEntity.setStartTime(DateUtil.timeFormat(times[0]));
+            qsActiveEntity.setEndTime(DateUtil.timeFormat(times[1]));
+        }
         this.baseMapper.updateById(qsActiveEntity);
 
         // 审核组员 更新：
@@ -156,12 +184,17 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         QsActiveEntity qsActiveEntity = this.baseMapper.selectOne(queryWrapper);
         if (qsActiveEntity == null) {
             // 不存在
-            return null;
+            return ResultUtil.success(new QsActiveEntity());
         }
-        // 进行供返回数据
-        Map<String, Object> map = new HashMap<>();
 
         // 获取内审计划详情：
+        // 进行 审核周期 拆分: auditTimeCycle
+        if (qsActiveEntity.getStartTime() != null && qsActiveEntity.getEndTime() != null) {
+            // Date 转 "2024-07-16" 格式
+            String startTime = DateUtil.formatDate(qsActiveEntity.getStartTime());
+            String endTime = DateUtil.formatDate(qsActiveEntity.getEndTime());
+            qsActiveEntity.setAuditTimeCycle(startTime + "~" + endTime);
+        }
 
         //      1、评审组员:
         List<AuditTeamNumber> teamNumberList = new ArrayList<>();
@@ -211,7 +244,6 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
             qsActiveEntity.setDivideList(divideVoList);
         }
 
-
         //      3、日程 安排
         List<QsAuditScheduleEntity> auditScheduleList = new ArrayList<>();
         LambdaQueryWrapper<QsAuditScheduleEntity> auditScheduleWrapper = new LambdaQueryWrapper<>();
@@ -219,12 +251,142 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         // 排序： 按照scheduleId 排序 正序
         auditScheduleWrapper.orderByAsc(QsAuditScheduleEntity::getScheduleId);
         auditScheduleList = qsAuditScheduleMapper.selectList(auditScheduleWrapper);
+        if (CollectionUtil.isNotEmpty(auditScheduleList)) {
+            for (QsAuditScheduleEntity qsAuditScheduleEntity : auditScheduleList) {
+                if (qsAuditScheduleEntity.getStartTime() != null && qsAuditScheduleEntity.getEndTime() != null) {
+                    // Date 转 "2024-07-16" 格式
+                    String startTime = DateUtil.formatDate(qsAuditScheduleEntity.getStartTime());
+                    String endTime = DateUtil.formatDate(qsAuditScheduleEntity.getEndTime());
+                    qsAuditScheduleEntity.setScheduleDateCycle(startTime + "~" + endTime);
+                }
+            }
+        }
         qsActiveEntity.setQsAuditScheduleEntityList(auditScheduleList);
 
-        // 添加内审计划
-        map.put("internalAuditPlan", qsActiveEntity);
+        return ResultUtil.success(qsActiveEntity);
+    }
 
+    @Override
+    public Result getInternalAuditBasics() {
+        // 查询基础表 进行 返回数据 呈现
+        QsActiveEntity qsActiveEntity = new QsActiveEntity();
 
-        return ResultUtil.success(map);
+        // 查询基础信息
+        List<TestInitDataEntity> list = taskMapper.selectEntrustBasis(40);
+        qsActiveEntity.setPurpose(list.get(0).getRemark());
+        qsActiveEntity.setNature(list.get(1).getRemark());
+        qsActiveEntity.setRangeText(list.get(2).getRemark());
+        qsActiveEntity.setBasis(list.get(3).getRemark());
+        qsActiveEntity.setPoints(list.get(4).getRemark());
+        return ResultUtil.success(qsActiveEntity);
+    }
+
+    /**
+     * 开始进行内审计划
+     *
+     * @param qsActiveVo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result startInternalAuditPlan(QsActiveVo qsActiveVo) {
+        // 通过 内审id 和 状态类型 进行效验
+        QsActiveEntity qsActiveEntity = this.baseMapper.selectById(qsActiveVo.getActiveId());
+        if (qsActiveEntity == null) {
+            return ResultUtil.error("操作失败： 内审不存在");
+        }
+        Integer type = Integer.parseInt(qsActiveVo.getType());
+        switch (type) {
+            case 1:
+                // 开始执行
+                if (!qsActiveEntity.getState().equals("待开始")) {
+                    return ResultUtil.error("操作失败： " + qsActiveEntity.getName() + " 状态为 " + qsActiveEntity.getState());
+                }
+                // 更改状态为 "首次会议"
+                qsActiveEntity.setState("首次会议");
+                this.baseMapper.updateById(qsActiveEntity);
+                return ResultUtil.success("操作成功");
+        }
+
+        return null;
+    }
+
+    /**
+     * 发起会议：首次会议、末次会议
+     *
+     * @param qsAuditScheduleRelEntity
+     * @param file
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result initiateAMeeting(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file) {
+
+        // 效验 内审id的对应的 首次会议、末次会议 是否存在？存在就抛出异常：为空 继续执行
+        QsActiveEntity qsActiveEntity = this.baseMapper.selectById(qsAuditScheduleRelEntity.getActiveId());
+        if (qsActiveEntity == null) {
+            return ResultUtil.error("操作失败： 内审单不存在");
+        }
+        // 查询 会议信息 是否存在
+        LambdaQueryWrapper<QsAuditScheduleRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QsAuditScheduleRelEntity::getActiveId, qsAuditScheduleRelEntity.getActiveId());
+        if (qsAuditScheduleRelEntity.getType() == 1) {
+            qsAuditScheduleRelEntity.setMeetingType("首次会议");
+            // 完成 首次会议后：
+            qsActiveEntity.setState("内审检查");
+        } else {
+            qsAuditScheduleRelEntity.setMeetingType("末次会议");
+            // 完成 末次会议后：state =  "完成整改" or state =  "待总结"
+            qsActiveEntity.setState("完成整改");
+        }
+        queryWrapper.eq(QsAuditScheduleRelEntity::getMeetingType, qsAuditScheduleRelEntity.getMeetingType());
+        List<QsAuditScheduleRelEntity> list = qsAuditScheduleRelService.list(queryWrapper);
+        if (CollectionUtil.isNotEmpty(list)) {
+            return ResultUtil.error("操作失败：" + qsAuditScheduleRelEntity.getMeetingType() + "已存在");
+        }
+
+        // 处理附件 信息 多个 使用 逗号截取
+        StringBuffer stringBuilder = new StringBuffer();
+        if (file != null && file.length > 0) {
+            for (MultipartFile multipartFile : file) {
+                Long fileCode = GenID.getID();
+                String name = multipartFile.getOriginalFilename();
+                String[] strings = name.split("\\.");
+
+                String upload = MinIoUtil.upload(BucketsConst.internal_audit, multipartFile, fileCode + "." + strings[strings.length - 1]);
+                if (!org.springframework.util.StringUtils.isEmpty(upload)) {
+                    String[] fileUrls = upload.split("\\?");
+                    stringBuilder.append(fileUrls[0]);
+                    stringBuilder.append(",");
+                }
+            }
+            qsAuditScheduleRelEntity.setUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+        }
+
+        // 组员信息 进行遍历截取
+        if (CollectionUtil.isNotEmpty(qsAuditScheduleRelEntity.getAuditTeamList())) {
+            // 组员信息
+            StringBuffer groupMembersBuffer = new StringBuffer();
+            for (AuditTeamNumber auditTeamNumber : qsAuditScheduleRelEntity.getAuditTeamList()) {
+                groupMembersBuffer.append(auditTeamNumber.getUserId() + "&" + auditTeamNumber.getName() + ",");
+            }
+            qsAuditScheduleRelEntity.setAttendance(groupMembersBuffer.deleteCharAt(groupMembersBuffer.length() - 1).toString());
+        }
+
+        // 进行 会议周期 拆分: auditTimeCycle
+        if (StringUtils.isNotEmpty(qsAuditScheduleRelEntity.getMeetingCycle())) {
+            String[] times = qsAuditScheduleRelEntity.getMeetingCycle().split("~");
+            // "2024-07-16" 转 Date 格式
+            qsAuditScheduleRelEntity.setStartTime(DateUtil.timeFormat(times[0]));
+            qsAuditScheduleRelEntity.setEndTime(DateUtil.timeFormat(times[1]));
+        }
+
+        // 执行新增
+        qsAuditScheduleRelService.save(qsAuditScheduleRelEntity);
+
+        // 更改内审 状态：
+        this.baseMapper.updateById(qsActiveEntity);
+
+        return ResultUtil.success("操作成功");
     }
 }

@@ -9,6 +9,7 @@ import com.lims.manage.erp.vo.DivideVo;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -30,8 +31,13 @@ public class QsActiveEntity {
     private String nature;
     private String rangeText;
     private String basis;
-    private String group_leader_id;
+    private String groupLeaderId;
     private String groupLeaderName;
+    /**
+     * 审核周期
+     */
+    @TableField(exist = false)
+    private String auditTimeCycle;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date startTime;
@@ -51,16 +57,16 @@ public class QsActiveEntity {
      * 组员对象集合
      */
     @TableField(exist = false)
-    private List<AuditTeamNumber> auditTeamList;
+    private List<AuditTeamNumber> auditTeamList = new ArrayList<>();
     /**
      * 分工对象集合
      */
     @TableField(exist = false)
-    private List<DivideVo> divideList;
+    private List<DivideVo> divideList = new ArrayList<>();
     /**
      * 日程安排
      */
     @TableField(exist = false)
-    private List<QsAuditScheduleEntity> qsAuditScheduleEntityList;
+    private List<QsAuditScheduleEntity> qsAuditScheduleEntityList = new ArrayList<>();
 
 }

@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.vo.DingDeptVo;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -100,4 +101,7 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
             "\tLEFT JOIN sys_user_dept_middle AS t2 ON t1.id = t2.dept_id\n" +
             "\tWHERE t2.user_id = #{userId}")
     List<LabelValueVo> selectDepartments(@Param("userId") Long userId);
+
+    @Select("SELECT id as value,name as label FROM test_team")
+    List<LabelValueTeamVo> selectTrialDepartmentList();
 }

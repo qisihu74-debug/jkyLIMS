@@ -65,37 +65,20 @@ public class DateUtil {
         return 0L;
     }
 
-    public static Date getDateFromStr(String date){
+    public static final String GENERAL_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String GENERAL_DATE_SECOND_FORMAT = "yyyy-MM-dd  HH:mm:ss";
+    public static final String ZH_DATE_FORMAT = "yyyy年MM月dd日";
+
+    public static Date getDateFromStr(String date) {
         int year = Integer.parseInt(date.substring(0, 4)) - 1900;
         int month = Integer.parseInt(date.substring(4, 6)) - 1;
         int day = Integer.parseInt(date.substring(6, 8));
         return new Date(year, month, day);
     }
 
-    public static Date timeFormat(String day) {
-        try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");//定义一个formate
-            Date date = simpleDateFormat.parse(day);//将formate型转化成Date数据类型
-            return date;
-        }catch (Exception e){
-
-        }
-        return null;
-    }
-
-
-    /**
-     * 获取今天的日期 格式：20141202
-     * @return String
-     */
-    public static String getTodayString() {
-        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
-        String str = yyyyMMddHH_NOT_.format(new Date());
-        return str;
-    }
-
     /**
      * 获取昨天的日期 格式：20141201
+     *
      * @return String
      */
     public static String getYesterdayString() {
@@ -381,14 +364,33 @@ public class DateUtil {
         return resultMap;
     }
 
+    public static Date timeFormat(String day) {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");//定义一个formate
+            Date date = simpleDateFormat.parse(day);//将formate型转化成Date数据类型
+            return date;
+        } catch (Exception e) {
 
-    public static final String GENERAL_DATE_FORMAT="yyyy-MM-dd";
-    public static final String ZH_DATE_FORMAT="yyyy年MM月dd日";
+        }
+        return null;
+    }
+
 
     /**
-     * @desc 格式化日期
+     * 获取今天的日期 格式：20141202
+     *
+     * @return String
+     */
+    public static String getTodayString() {
+        SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
+        String str = yyyyMMddHH_NOT_.format(new Date());
+        return str;
+    }
+
+    /**
      * @param date
      * @return
+     * @desc 格式化日期
      */
     public static String formatDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat(GENERAL_DATE_FORMAT);
@@ -397,6 +399,7 @@ public class DateUtil {
 
     /**
      * 2023年10月10日
+     *
      * @param date
      * @return
      */

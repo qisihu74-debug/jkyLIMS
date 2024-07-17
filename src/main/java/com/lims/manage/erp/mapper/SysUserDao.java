@@ -3,6 +3,8 @@ package com.lims.manage.erp.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.SysUserTreeEntity;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
 import org.apache.ibatis.annotations.Mapper;
@@ -232,4 +234,20 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "\t\tWHERE\n" +
             "\t\t\tNAME = #{deptName} )")
     String getPositionByDeptName(@Param("deptName") String deptName);
+
+    /**
+     * 审核组长集合
+     *
+     * @return
+     */
+    @Select("SELECT user_id as value,name as label FROM sys_user ")
+    List<LabelValueTeamVo> selectAuditTeamLeaderList();
+
+    /**
+     * 编制人集合
+     *
+     * @return
+     */
+    @Select("SELECT user_id as value,name as label FROM sys_user ")
+    List<LabelValueTeamVo> selectAssemblerPool();
 }

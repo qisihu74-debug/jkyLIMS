@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DingUserEntity;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.DingDeptVo;
 import com.lims.manage.erp.vo.PagingToolVo;
 
@@ -169,4 +170,11 @@ public interface DeptService extends IService<DingDeptEntity> {
      * @return
      */
     Boolean updateDepartmentId(Long userId);
+
+    /**
+     * 受审部门集合
+     *
+     * @return
+     */
+    Result getTrialDepartmentList();
 }
