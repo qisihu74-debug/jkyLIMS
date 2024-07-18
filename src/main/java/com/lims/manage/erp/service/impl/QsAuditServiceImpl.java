@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.InternalAuditorActive;
 import com.lims.manage.erp.mapper.AduditBaseDataDao;
 import com.lims.manage.erp.mapper.QsAuditDao;
 import com.lims.manage.erp.service.QsAuditService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,10 +38,24 @@ public class QsAuditServiceImpl implements QsAuditService {
     }
 
     @Override
-    public List<AduditBaseData> getCheckBaseDataList() {
-        LambdaQueryWrapper<AduditBaseData> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.orderByAsc(AduditBaseData::getSort);
-        return aduditBaseDataDao.selectList(queryWrapper);
+    public PageInfo<AduditBaseData> getCheckBaseDataList(Integer pageNum, Integer pageSize, String type, String dir, String content, String method, String subject,Integer divideId) {
+        PageInfo<AduditBaseData> pageInfo = null;
+        if (StringUtils.isEmpty(subject)){
+            LambdaQueryWrapper<AduditBaseData> queryWrapper = new LambdaQueryWrapper();
+            queryWrapper.orderByAsc(AduditBaseData::getSort);
+            queryWrapper.eq(AduditBaseData::getType,type);
+            queryWrapper.like(StringUtils.isNotEmpty(dir),AduditBaseData::getDirectory,dir);
+            queryWrapper.like(StringUtils.isNotEmpty(content),AduditBaseData::getContent,content);
+            queryWrapper.like(StringUtils.isNotEmpty(method),AduditBaseData::getMethod,method);
+            PageHelper.startPage(pageNum,pageSize);
+            List<AduditBaseData> list = aduditBaseDataDao.selectList(queryWrapper);
+            pageInfo = new PageInfo<>(list);
+        }else {
+            PageHelper.startPage(pageNum,pageSize);
+            List<AduditBaseData> list = aduditBaseDataDao.selectListBySub(type,dir,content,method,subject,divideId);
+            pageInfo = new PageInfo<>(list);
+        }
+        return pageInfo;
     }
 
     @Override

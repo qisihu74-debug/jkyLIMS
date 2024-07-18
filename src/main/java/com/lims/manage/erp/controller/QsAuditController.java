@@ -163,15 +163,39 @@ public class QsAuditController {
      */
     @GetMapping("getCheckBaseDataList")
     public Result getCheckBaseDataList(Integer pageNum,Integer pageSize,String type,
-                                       String dir,String content,String method,String subject){
+                                       String dir,String content,String method,String subject,Integer divideId){
         if (pageNum == null || pageSize == null){
             return ResultUtil.error("缺少分页参数");
         }
+        if (StringUtils.isEmpty(type) || divideId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        if (!"CMA,CNAS".contains(type)){
+            return ResultUtil.error("类型参数不合法");
+        }
+        PageInfo<AduditBaseData> pageInfo = qsAuditService.getCheckBaseDataList(pageNum,pageSize,type,dir,content,method,subject,divideId);
+        return ResultUtil.success(pageInfo);
+    }
 
-
-        List<AduditBaseData> list = qsAuditService.getCheckBaseDataList();
-
-        return ResultUtil.success();
+    /**
+     * 检查结果获取
+     * @param divideId
+     * @return
+     */
+    @GetMapping("getCheckResult")
+    public Result getCheckResult(Integer divideId){
+        if (divideId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        LambdaQueryWrapper<DivideAuditDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DivideAuditDetail::getDivideId,divideId);
+        queryWrapper.eq(DivideAuditDetail::getOpinion,"不符合");
+        List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper);
+        if (CollectionUtils.isNotEmpty(list)){
+            return ResultUtil.success("需整改");
+        }else {
+            return ResultUtil.success("合格");
+        }
     }
 
     /**

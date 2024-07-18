@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.AduditBaseDataDao">
+    <select id="selectListBySub" resultType="com.lims.manage.erp.entity.AduditBaseData">
+        SELECT
+	qab.*, qad.findings,
+	qad.opinion,
+	qad.record
+FROM
+	qs_audit_base_data qab
+LEFT JOIN qs_audit_divide_detail qad ON qab.id = qad.directory_id
+WHERE
+	qab.type = #{type}
+AND qad.divide_id = #{divideId}
+AND qad.opinion = #{subject}
+<if test="dir != null and dir != ''">
+    AND qab.directory like CONCAT('%',#{dir},'%')
+</if>
+<if test="content != null and content != ''">
+    AND qab.content like CONCAT('%',#{content},'%')
+</if>
+<if test="method != null and method != ''">
+    AND qab.method like CONCAT('%',#{method},'%')
+</if>
+    </select>
+
+</mapper>

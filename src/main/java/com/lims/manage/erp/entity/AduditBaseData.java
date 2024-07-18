@@ -52,7 +52,12 @@ public class AduditBaseData {
     private int sort;
     @TableField(exist = false)
     private List<AduditBaseData> children;
-
+    @TableField(exist = false)
+    private String findings;
+    @TableField(exist = false)
+    private String opinion;
+    @TableField(exist = false)
+    private String record;
     public AduditBaseData(Integer id, Integer pid, String directory,String content,String method,String note,String type,int sort) {
         this.id = id;
         this.pid = pid;
