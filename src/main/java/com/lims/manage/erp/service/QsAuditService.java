@@ -4,8 +4,6 @@ import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.AduditBaseData;
 import com.lims.manage.erp.entity.InternalAuditorActive;
 
-import java.util.List;
-
 /**
  * @author gjl
  * @version V1.0
@@ -29,8 +27,15 @@ public interface QsAuditService {
     /**
      * 查询内审基础信息
      * @return
+     * @param pageNum
+     * @param pageSize
+     * @param type
+     * @param dir
+     * @param content
+     * @param method
+     * @param subject
      */
-    List<AduditBaseData> getCheckBaseDataList();
+    PageInfo<AduditBaseData> getCheckBaseDataList(Integer pageNum, Integer pageSize, String type, String dir, String content, String method, String subject,Integer divideId);
 
     /**
      * 查看活动状态完成情况

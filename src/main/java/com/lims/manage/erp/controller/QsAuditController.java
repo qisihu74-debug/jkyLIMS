@@ -13,8 +13,6 @@ import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.AduditBaseData;
 import com.lims.manage.erp.entity.AuditTeamNumber;
-import com.lims.manage.erp.entity.BaseTreeBuild;
-import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DivideAuditDetail;
 import com.lims.manage.erp.entity.DivideAuditDetailRel;
 import com.lims.manage.erp.entity.DivideEntity;
@@ -154,28 +152,50 @@ public class QsAuditController {
 
     /**
      * 开始检查前获取基础数据
+     * @param pageNum
+     * @param pageSize
+     * @param type
+     * @param dir
+     * @param content
+     * @param method
+     * @param subject
      * @return
      */
     @GetMapping("getCheckBaseDataList")
-    public Result getCheckBaseDataList(){
-        List<AduditBaseData> list = qsAuditService.getCheckBaseDataList();
-        //根据类型处理数据
-        List<AduditBaseData> cnasList = Lists.newArrayList();
-        List<AduditBaseData> cmaList = Lists.newArrayList();
-        for (AduditBaseData baseData :list){
-            if ("CNAS".equals(baseData.getType())){
-                cnasList.add(baseData);
-            }
-            if ("CMA".equals(baseData.getType())){
-                cmaList.add(baseData);
-            }
+    public Result getCheckBaseDataList(Integer pageNum,Integer pageSize,String type,
+                                       String dir,String content,String method,String subject,Integer divideId){
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数");
         }
-        List<AduditBaseData> cnasLis = BaseTreeBuild.buildTree(cnasList);
-        List<AduditBaseData> cmaLis = BaseTreeBuild.buildTree(cmaList);
-        Map<String,List<AduditBaseData>> map = new HashMap<>();
-        map.put("CNAS",cnasLis);
-        map.put("CMA",cmaLis);
-        return ResultUtil.success(map);
+        if (StringUtils.isEmpty(type) || divideId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        if (!"CMA,CNAS".contains(type)){
+            return ResultUtil.error("类型参数不合法");
+        }
+        PageInfo<AduditBaseData> pageInfo = qsAuditService.getCheckBaseDataList(pageNum,pageSize,type,dir,content,method,subject,divideId);
+        return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 检查结果获取
+     * @param divideId
+     * @return
+     */
+    @GetMapping("getCheckResult")
+    public Result getCheckResult(Integer divideId){
+        if (divideId == null){
+            return ResultUtil.error("缺少参数");
+        }
+        LambdaQueryWrapper<DivideAuditDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DivideAuditDetail::getDivideId,divideId);
+        queryWrapper.eq(DivideAuditDetail::getOpinion,"不符合");
+        List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper);
+        if (CollectionUtils.isNotEmpty(list)){
+            return ResultUtil.success("需整改");
+        }else {
+            return ResultUtil.success("合格");
+        }
     }
 
     /**
