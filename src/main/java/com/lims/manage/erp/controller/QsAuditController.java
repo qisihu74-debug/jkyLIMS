@@ -766,7 +766,7 @@ public class QsAuditController {
     @GetMapping("getCrewAssemblyList")
     public Result getCrewAssemblyList() {
 
-        return sysUserService.getAuditTeamLeaderList();
+        return sysUserService.getCrewAssemblyList();
     }
 
     /**
@@ -884,7 +884,11 @@ public class QsAuditController {
         if (StringUtils.isEmpty(type)) {
             return ResultUtil.error("缺少必填参数");
         }
-        return sysUserService.getAssemblerPool();
+        if (type.equals("1")) {
+            return sysUserService.getAuditTeamLeaderList();
+        } else {
+            return sysUserService.getCrewAssemblyList();
+        }
     }
 
 
