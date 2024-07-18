@@ -1419,6 +1419,9 @@ public class ReportController {
         if (reportCompleteTime == null || file == null || StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)){
             return ResultUtil.error("缺少参数");
         }
+        if (verifyer.equals(issuer)){
+            return ResultUtil.error("审核人和签发人不能是同一个人员");
+        }
         logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
         if (StringUtils.isEmpty(reportCode) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer) || org.apache.commons.lang3.StringUtils.isEmpty(inspector)){
             return ResultUtil.error("缺少参数！");
@@ -1498,6 +1501,9 @@ public class ReportController {
         if (StringUtils.isEmpty(inspector) || StringUtils.isEmpty(verifyer) || StringUtils.isEmpty(issuer)
                 ||StringUtils.isEmpty(sampleName) ||StringUtils.isEmpty(requestDate)){
             return ResultUtil.error("缺少参数");
+        }
+        if (verifyer.equals(issuer)){
+            return ResultUtil.error("审核人和签发人不能是同一个人员");
         }
         logger.debug("发起审批检测人:{},审核人:{},签发人:{}",inspector,verifyer,issuer);
         Boolean flag = reportService.onlineReportMergeSave(reportCode,verifyer.split("&")[0],issuer.split("&")[0]
