@@ -134,5 +134,20 @@ public interface SysUserService extends IService<SysUserEntity> {
     List<String> getDingIdsByUserIds(Set<Long> userIds);
 
     String getPositionByDeptName(String deptName);
+
+    /**
+     * 审核组长集合
+     */
+    Result getAuditTeamLeaderList();
+
+    /**
+     * 审核组员集合
+     */
+    Result getCrewAssemblyList();
+
+    /**
+     * 编制人集合
+     */
+    Result getAssemblerPool();
 }
 

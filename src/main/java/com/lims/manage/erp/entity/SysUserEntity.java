@@ -91,7 +91,7 @@ public class SysUserEntity implements Serializable {
 	/**
 	 * 0=存在 1=删除
 	 */
-	private Integer isDelete;
+//	private Integer isDelete;
 
 	@TableField(exist = false)
 	private Integer technicistId;

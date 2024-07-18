@@ -5,6 +5,8 @@ import com.aspose.cells.Cells;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
@@ -17,6 +19,7 @@ import com.lims.manage.erp.entity.DivideEntity;
 import com.lims.manage.erp.entity.DivideRectificationRecord;
 import com.lims.manage.erp.entity.InternalAuditorActive;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -29,9 +32,12 @@ import com.lims.manage.erp.service.DivideRectificationRecordService;
 import com.lims.manage.erp.service.DivideService;
 import com.lims.manage.erp.service.QsAuditService;
 import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.service.*;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.QsActiveVo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -46,11 +52,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author gjl
@@ -84,24 +86,29 @@ public class QsAuditController {
     private DivideService divideService;
     @Autowired
     private DeptService deptService;
+    @Autowired
+    private ActiveService activeService;
+    @Autowired
+    private QsAuditScheduleRelService qsAuditScheduleRelService;
 
     /**
      * 技术质量部内审活动列表
+     *
      * @param pageNum
      * @param pageSize
      * @param name
      * @return
      */
     @GetMapping("internalAuditorActiveList")
-    public Result internalAuditorActiveList(Integer pageNum, Integer pageSize, String name){
-        if (pageNum == null || pageSize == null){
+    public Result internalAuditorActiveList(Integer pageNum, Integer pageSize, String name) {
+        if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少参数");
         }
         Long userId = ShiroUtils.getUserInfo().getUserId();
-        PageInfo<InternalAuditorActive> pageInfo = qsAuditService.internalAuditorActiveList(pageNum,pageSize,name,userId);
+        PageInfo<InternalAuditorActive> pageInfo = qsAuditService.internalAuditorActiveList(pageNum, pageSize, name, userId);
         //处理内审员
         List<Integer> ids = Lists.newArrayList();
-        for (InternalAuditorActive active :pageInfo.getList()){
+        for (InternalAuditorActive active : pageInfo.getList()) {
             ids.add(active.getDivideId());
         }
         //查询活动下的人员信息
@@ -614,7 +621,7 @@ public class QsAuditController {
     public Result internalAuditorRectification(@RequestBody DivideRectificationRecord record){
         if (StringUtils.isEmpty(record.getVerificationOfCorrectiveMeasures()) || StringUtils.isEmpty(record.getAuditorId())
                 || StringUtils.isEmpty(record.getAuditorName()) || record.getVerificationDate() == null
-                || record.getActiveId() == 0 || record.getDivideId() == 0){
+                || record.getActiveId() == 0 || record.getDivideId() == 0) {
             return ResultUtil.error("缺少参数");
         }
         //更新数据，更新状态为已完成（前提判断管理员是否完成整改）
@@ -625,10 +632,227 @@ public class QsAuditController {
         record.setState("已完成");
         divideRectificationRecordService.updateById(record);
         LambdaUpdateWrapper<DivideAuditDetailRel> updateWrapper = new LambdaUpdateWrapper();
-        updateWrapper.eq(DivideAuditDetailRel::getDivideId,record.getDivideId());
-        updateWrapper.set(DivideAuditDetailRel::getState,"已完成");
-        divideAuditDetailRelService.update(null,updateWrapper);
+        updateWrapper.eq(DivideAuditDetailRel::getDivideId, record.getDivideId());
+        updateWrapper.set(DivideAuditDetailRel::getState, "已完成");
+        divideAuditDetailRelService.update(null, updateWrapper);
         return ResultUtil.success("措施验证完成");
+    }
+
+
+    /**
+     * 内审管理列表
+     *
+     * @param qsActiveEntity
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("internalAuditManagementList")
+    public Result internalAuditManagementList(QsActiveEntity qsActiveEntity, @RequestParam(name = "pageNum", defaultValue = "1") Integer pageNum,
+                                              @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        // 效验登录人角色 是否能进行访问：
+
+        // 根据查询条件 进行搜索：
+        LambdaQueryWrapper<QsActiveEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(QsActiveEntity::getActiveId, QsActiveEntity::getName, QsActiveEntity::getStartTime, QsActiveEntity::getEndTime, QsActiveEntity::getState, QsActiveEntity::getEditorDate);
+        if (qsActiveEntity != null && StringUtils.isNotEmpty(qsActiveEntity.getName())) {
+            queryWrapper.like(QsActiveEntity::getName, qsActiveEntity.getName());
+        }
+        Page<QsActiveEntity> page = new Page<QsActiveEntity>(pageNum, pageSize);
+        IPage<QsActiveEntity> pageList = activeService.page(page, queryWrapper);
+        return ResultUtil.success(pageList);
+    }
+
+
+    /**
+     * 创建内审管理
+     *
+     * @param qsActiveEntity
+     * @return
+     */
+    @PostMapping("createInternalAuditManagement")
+    public Result createInternalAuditManagement(@RequestBody QsActiveEntity qsActiveEntity) {
+
+        return activeService.addQsActiveData(qsActiveEntity);
+    }
+
+    /**
+     * 返回内审基础信息
+     *
+     * @return
+     */
+    @GetMapping("getInternalAuditBasics")
+    public Result getInternalAuditBasics() {
+
+        return activeService.getInternalAuditBasics();
+    }
+
+    /**
+     * 查询详情内审活动
+     *
+     * @param activeId
+     * @return
+     */
+    @GetMapping("queryDetailsQsActiveData")
+    public Result queryDetailsQsActiveData(String activeId) {
+
+        return activeService.queryDetailsQsActiveData(activeId);
+    }
+
+
+    /**
+     * 查询审核组长集合
+     *
+     * @return
+     */
+    @GetMapping("getAuditTeamLeaderList")
+    public Result getAuditTeamLeaderList() {
+
+        return sysUserService.getAuditTeamLeaderList();
+    }
+
+    /**
+     * 查询审核组员集合
+     *
+     * @return
+     */
+    @GetMapping("getCrewAssemblyList")
+    public Result getCrewAssemblyList() {
+
+        return sysUserService.getAuditTeamLeaderList();
+    }
+
+    /**
+     * 编制人集合
+     *
+     * @return
+     */
+    @GetMapping("getAssemblerPool")
+    public Result getAssemblerPool() {
+
+        return sysUserService.getAssemblerPool();
+    }
+
+    /**
+     * 受审部门 集合
+     *
+     * @return
+     */
+    @GetMapping("getTrialDepartmentList")
+    public Result getTrialDepartmentList() {
+
+        return deptService.getTrialDepartmentList();
+    }
+
+    /**
+     * 更新内审管理
+     *
+     * @param qsActiveEntity
+     * @return
+     */
+    @PostMapping("updateQsActiveData")
+    public Result updateQsActiveData(@RequestBody QsActiveEntity qsActiveEntity) {
+
+        return activeService.updateQsActiveData(qsActiveEntity);
+    }
+
+    /**
+     * 内审管理-开始
+     *
+     * @param qsActiveVo
+     * @return
+     */
+    @PostMapping("startInternalAuditPlan")
+    public Result startInternalAuditPlan(@RequestBody QsActiveVo qsActiveVo) {
+
+        return activeService.startInternalAuditPlan(qsActiveVo);
+    }
+
+    /**
+     * 发起会议：首次会议、末次会议
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @PostMapping("initiateAMeeting")
+    public Result initiateAMeeting(@RequestParam("json") String json, MultipartFile[] file) {
+        QsAuditScheduleRelEntity qsAuditScheduleRel = JSON.parseObject(json, QsAuditScheduleRelEntity.class);
+        return activeService.initiateAMeeting(qsAuditScheduleRel, file);
+    }
+
+    /**
+     * 获取 会议信息
+     *
+     * @param activeId
+     * @param type
+     * @return
+     */
+    @GetMapping("getMeetingList")
+    public Result getMeetingList(String activeId, String type) {
+        LambdaQueryWrapper<QsAuditScheduleRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QsAuditScheduleRelEntity::getActiveId, activeId);
+        if (type.equals("1")) {
+            queryWrapper.eq(QsAuditScheduleRelEntity::getMeetingType, "首次会议");
+        } else if (type.equals("2")) {
+            queryWrapper.eq(QsAuditScheduleRelEntity::getMeetingType, "末次会议");
+        }
+        queryWrapper.last("limit 1");
+        QsAuditScheduleRelEntity qsAuditScheduleRelEntity = qsAuditScheduleRelService.getOne(queryWrapper);
+        if (qsAuditScheduleRelEntity != null) {
+            // 处理 多组信息：
+            List<AuditTeamNumber> auditTeamList = new ArrayList<>();
+            if (StringUtils.isNotEmpty(qsAuditScheduleRelEntity.getAttendance())) {
+                String[] arrays = qsAuditScheduleRelEntity.getAttendance().split(",");
+                for (int i = 0; i < arrays.length; i++) {
+                    String[] userinfo = arrays[i].split("&");
+                    AuditTeamNumber auditTeamNumber = new AuditTeamNumber();
+                    auditTeamNumber.setUserId(userinfo[0]);
+                    auditTeamNumber.setName(userinfo[1]);
+                    auditTeamList.add(auditTeamNumber);
+                }
+            }
+            qsAuditScheduleRelEntity.setAuditTeamList(auditTeamList);
+
+            if (qsAuditScheduleRelEntity.getStartTime() != null && qsAuditScheduleRelEntity.getEndTime() != null) {
+                // Date 转 "2024-07-16 23:59:59" 格式
+                String startTime = DateUtil.formatDate(qsAuditScheduleRelEntity.getStartTime());
+                String endTime = DateUtil.formatDate(qsAuditScheduleRelEntity.getEndTime());
+                qsAuditScheduleRelEntity.setAttendance(startTime + "~" + endTime);
+            }
+
+            return ResultUtil.success(qsAuditScheduleRelEntity);
+        }
+        return ResultUtil.success(new QsAuditScheduleRelEntity());
+    }
+
+    /**
+     * 会议：查询主持人集合、记录人集合、出席人集合
+     *
+     * @param type
+     * @return
+     */
+    @GetMapping("getConferenceAssembly")
+    public Result getHostAssembly(String type) {
+        if (StringUtils.isEmpty(type)) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        return sysUserService.getAssemblerPool();
+    }
+
+
+    /**
+     * 提交内审总结附件
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @PostMapping("submitInternalAuditDocument")
+    public Result submitInternalAuditDocument(@RequestParam("json") String json, MultipartFile[] file) {
+        QsAuditScheduleRelEntity qsAuditScheduleRel = JSON.parseObject(json, QsAuditScheduleRelEntity.class);
+//        return activeService.initiateAMeeting(qsAuditScheduleRel, file);
+        return activeService.submitInternalAuditDocument(qsAuditScheduleRel, file);
     }
 
 }

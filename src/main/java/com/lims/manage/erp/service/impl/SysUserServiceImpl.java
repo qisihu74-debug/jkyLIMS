@@ -17,6 +17,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.UserInfoParamVo;
 import com.lims.manage.erp.vo.UserInfoVo;
@@ -388,5 +389,38 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
     @Override
     public String getPositionByDeptName(String deptName) {
         return sysUserDao.getPositionByDeptName(deptName);
+    }
+
+    /**
+     * 审核组长集合
+     */
+    @Override
+    public Result getAuditTeamLeaderList() {
+
+        List<LabelValueTeamVo> userList = sysUserDao.selectAuditTeamLeaderList();
+        return ResultUtil.success(userList);
+    }
+
+    /**
+     * 审核组员集合
+     *
+     * @return
+     */
+    @Override
+    public Result getCrewAssemblyList() {
+        List<LabelValueTeamVo> userList = sysUserDao.selectAuditTeamLeaderList();
+        return ResultUtil.success(userList);
+    }
+
+    /**
+     * 编制人集合
+     *
+     * @return
+     */
+    @Override
+    public Result getAssemblerPool() {
+
+        List<LabelValueTeamVo> userList = sysUserDao.selectAssemblerPool();
+        return ResultUtil.success(userList);
     }
 }

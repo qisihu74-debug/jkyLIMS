@@ -15,6 +15,8 @@ import com.lims.manage.erp.entity.SysRoleEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.UserDepartmentMiddleEntity;
 import com.lims.manage.erp.mapper.DingUsertDao;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysRoleService;
 import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.mapper.UserDepartmentMiddleMapper;
@@ -24,6 +26,8 @@ import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.DingDeptVo;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.service.DeptService;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.PagingToolVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -489,5 +493,12 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
             userDepartmentMiddleMapper.updateUserIsNull(sqlDingUserIds.get(0).getDingUserId());
         }
         return true;
+    }
+
+    @Override
+    public Result getTrialDepartmentList() {
+
+        List<LabelValueTeamVo> deptList = deptDao.selectTrialDepartmentList();
+        return ResultUtil.success(deptList);
     }
 }

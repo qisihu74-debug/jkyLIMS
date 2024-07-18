@@ -1,0 +1,74 @@
+package com.lims.manage.erp.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.lims.manage.erp.entity.QsActiveEntity;
+import com.lims.manage.erp.entity.QsAuditScheduleRelEntity;
+import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.vo.QsActiveVo;
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * @Author: DLC
+ * @Date: 2024/7/10 16:23
+ */
+public interface ActiveService extends IService<QsActiveEntity> {
+
+    /**
+     * 创建内审活动
+     *
+     * @param qsActiveEntity
+     * @return
+     */
+    Result addQsActiveData(QsActiveEntity qsActiveEntity);
+
+    /**
+     * 更新内审活动
+     *
+     * @param qsActiveEntity
+     * @return
+     */
+    Result updateQsActiveData(QsActiveEntity qsActiveEntity);
+
+
+    /**
+     * 查询详情内审活动
+     *
+     * @param activeId
+     * @return
+     */
+    Result queryDetailsQsActiveData(String activeId);
+
+    /**
+     * 返回内审基础信息
+     *
+     * @return
+     */
+    Result getInternalAuditBasics();
+
+    /**
+     * 开始进行内审活动
+     *
+     * @param qsActiveVo
+     * @return
+     */
+    Result startInternalAuditPlan(QsActiveVo qsActiveVo);
+
+    /**
+     * 发起会议：首次会议、末次会议
+     *
+     * @param qsAuditScheduleRelEntity
+     * @param file
+     * @return
+     */
+    Result initiateAMeeting(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file);
+
+    /**
+     * 提交内审总结附件
+     *
+     * @param qsAuditScheduleRelEntity
+     * @param file
+     * @return
+     */
+    Result submitInternalAuditDocument(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file);
+
+}

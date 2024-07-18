@@ -1969,23 +1969,24 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         // 比较任务单工时 与 现有检测项 工时 是否一致：
         for (Long key : taskWorkingHoursMap.keySet()) {
             StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append("\"序号\" + (i += 1) + \"key \" + key" + key);
+            i = i + 1;
+            stringBuffer.append("\"序号\" + (i += 1) == " + i + "+ \"key \" + key" + key);
             System.out.println(stringBuffer.toString());
             // 任务单工时集合
             List<TestTaskOrderWorkingHours> taskDataWorkingHoursList = taskWorkingHoursMap.get(key);
 
-            Date date = null;
-            //实现将字符串转成⽇期类型
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            try {
-                date = dateFormat.parse("2024-07-03 00:00:00");
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            if (taskDataWorkingHoursList.get(0).getCreateTime().getTime() >= date.getTime()) {
-                // for循环跳出
-                continue;
-            }
+//            Date date = null;
+//            //实现将字符串转成⽇期类型
+//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            try {
+//                date = dateFormat.parse("2024-07-03 00:00:00");
+//            } catch (ParseException e) {
+//                e.printStackTrace();
+//            }
+//            if (taskDataWorkingHoursList.get(0).getCreateTime().getTime() >= date.getTime()) {
+//                // for循环跳出
+//                continue;
+//            }
 
             // 比较当前任务单下检测项工时信息
             List<TestItemOrderWorkingHours> itemDataWorkingHoursList = itemWorkingHoursMap.get(key);
