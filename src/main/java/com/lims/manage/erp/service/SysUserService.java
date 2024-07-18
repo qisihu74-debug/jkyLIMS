@@ -149,5 +149,10 @@ public interface SysUserService extends IService<SysUserEntity> {
      * 编制人集合
      */
     Result getAssemblerPool();
+
+    /**
+     * 用户集合
+     */
+    Result selectUserList();
 }
 

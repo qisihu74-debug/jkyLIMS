@@ -423,4 +423,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
         List<LabelValueTeamVo> userList = sysUserDao.selectAssemblerPool();
         return ResultUtil.success(userList);
     }
+
+    @Override
+    public Result selectUserList() {
+
+        return ResultUtil.success(sysUserDao.selectUserList());
+    }
 }

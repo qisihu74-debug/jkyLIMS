@@ -66,6 +66,7 @@ public class DateUtil {
     }
 
     public static final String GENERAL_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String GENERAL_DATE_MINUTE_FORMAT = "yyyy-MM-dd HH:mm";
     public static final String GENERAL_DATE_SECOND_FORMAT = "yyyy-MM-dd  HH:mm:ss";
     public static final String ZH_DATE_FORMAT = "yyyy年MM月dd日";
 
@@ -375,6 +376,17 @@ public class DateUtil {
         return null;
     }
 
+    public static Date timeMinuteFormat(String day) {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");//定义一个formate
+            Date date = simpleDateFormat.parse(day);//将formate型转化成Date数据类型
+            return date;
+        } catch (Exception e) {
+
+        }
+        return null;
+    }
+
 
     /**
      * 获取今天的日期 格式：20141202
@@ -394,6 +406,16 @@ public class DateUtil {
      */
     public static String formatDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat(GENERAL_DATE_FORMAT);
+        return sdf.format(date);
+    }
+
+    /**
+     * @param date
+     * @return
+     * @desc 格式化日期
+     */
+    public static String formatMinuteDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(GENERAL_DATE_SECOND_FORMAT);
         return sdf.format(date);
     }
 

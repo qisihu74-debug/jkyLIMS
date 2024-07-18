@@ -10,10 +10,7 @@ import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.StringUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.DivideVo;
 import com.lims.manage.erp.vo.QsActiveVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,8 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
     private TaskMapper taskMapper;
     @Autowired
     private QsAuditScheduleRelService qsAuditScheduleRelService;
+    @Autowired
+    private SysUserDao sysUserDao;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -108,12 +107,20 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                 // 进行 周期 拆分: scheduleDateCycle
                 if (StringUtils.isNotEmpty(qsAuditScheduleEntity.getScheduleDateCycle())) {
                     String[] times = qsAuditScheduleEntity.getScheduleDateCycle().split("~");
-                    // "2024-07-16" 转 Date 格式
-                    qsAuditScheduleEntity.setStartTime(DateUtil.timeFormat(times[0]));
-                    qsAuditScheduleEntity.setEndTime(DateUtil.timeFormat(times[1]));
+                    // "2024-07-16 14:50" 转 Date 格式
+                    qsAuditScheduleEntity.setStartTime(DateUtil.timeMinuteFormat(times[0]));
+                    qsAuditScheduleEntity.setEndTime(DateUtil.timeMinuteFormat(times[1]));
                 }
                 qsAuditScheduleMapper.insert(qsAuditScheduleEntity);
             }
+        }
+
+        // 钉钉发送消息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        try {
+            methodForEachNotice(userInfo.getName(), qsActiveEntity, qsActiveEntity.getAuditTeamList());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return ResultUtil.success("创建内审活动成功");
@@ -164,6 +171,14 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         } else {
             // 日程信息 全部删除
             //
+        }
+
+        // 钉钉发送消息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        try {
+            methodForEachNotice(userInfo.getName(), qsActiveEntity, qsActiveEntity.getAuditTeamList());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return ResultUtil.success("变更内审活动成功");
@@ -254,9 +269,9 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         if (CollectionUtil.isNotEmpty(auditScheduleList)) {
             for (QsAuditScheduleEntity qsAuditScheduleEntity : auditScheduleList) {
                 if (qsAuditScheduleEntity.getStartTime() != null && qsAuditScheduleEntity.getEndTime() != null) {
-                    // Date 转 "2024-07-16" 格式
-                    String startTime = DateUtil.formatDate(qsAuditScheduleEntity.getStartTime());
-                    String endTime = DateUtil.formatDate(qsAuditScheduleEntity.getEndTime());
+                    // Date 转 "2024-07-16 14:50" 格式
+                    String startTime = DateUtil.formatMinuteDate(qsAuditScheduleEntity.getStartTime());
+                    String endTime = DateUtil.formatMinuteDate(qsAuditScheduleEntity.getEndTime());
                     qsAuditScheduleEntity.setScheduleDateCycle(startTime + "~" + endTime);
                 }
             }
@@ -308,7 +323,7 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                 return ResultUtil.success("操作成功");
         }
 
-        return null;
+        return ResultUtil.success("操作失败");
     }
 
     /**
@@ -330,18 +345,30 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         // 查询 会议信息 是否存在
         LambdaQueryWrapper<QsAuditScheduleRelEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QsAuditScheduleRelEntity::getActiveId, qsAuditScheduleRelEntity.getActiveId());
-        if (qsAuditScheduleRelEntity.getType() == 1) {
+        // 判断 数据 为空 = 首次会议
+        List<QsAuditScheduleRelEntity> list = qsAuditScheduleRelService.list(queryWrapper);
+        if (CollectionUtil.isEmpty(list)) {
             qsAuditScheduleRelEntity.setMeetingType("首次会议");
+            if (!qsActiveEntity.getState().equals("待开始")) {
+                // 内审单 = 首次会议 状态不一致 则抛出异常
+                return ResultUtil.error("操作失败： 内审单状态为" + qsActiveEntity.getState());
+            }
+
             // 完成 首次会议后：
             qsActiveEntity.setState("内审检查");
         } else {
             qsAuditScheduleRelEntity.setMeetingType("末次会议");
+
+            if (!qsActiveEntity.getState().equals("内审检查")) {
+                // 内审单 = 末次会议 状态不一致 则抛出异常
+                return ResultUtil.error("操作失败： 内审单状态为" + qsActiveEntity.getState());
+            }
             // 完成 末次会议后：state =  "完成整改" or state =  "待总结"
             qsActiveEntity.setState("完成整改");
         }
         queryWrapper.eq(QsAuditScheduleRelEntity::getMeetingType, qsAuditScheduleRelEntity.getMeetingType());
-        List<QsAuditScheduleRelEntity> list = qsAuditScheduleRelService.list(queryWrapper);
-        if (CollectionUtil.isNotEmpty(list)) {
+        List<QsAuditScheduleRelEntity> list2 = qsAuditScheduleRelService.list(queryWrapper);
+        if (CollectionUtil.isNotEmpty(list2)) {
             return ResultUtil.error("操作失败：" + qsAuditScheduleRelEntity.getMeetingType() + "已存在");
         }
 
@@ -386,7 +413,13 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
 
         // 更改内审 状态：
         this.baseMapper.updateById(qsActiveEntity);
-
+        // 钉钉发送消息
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        try {
+            methodStartMeeting(userInfo.getName(), qsActiveEntity, qsAuditScheduleRelEntity);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return ResultUtil.success("操作成功");
     }
 
@@ -423,4 +456,110 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
 
         return null;
     }
+
+    /**
+     * 创建评审:调用方法循环 通知信息
+     */
+    void methodForEachNotice(String userName, QsActiveEntity qsActiveEntity, List<AuditTeamNumber> auditTeamList) throws Exception {
+        // 进行钉钉发布消息操作
+        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
+
+        // 审核组长
+        StringBuffer titleBuffer = new StringBuffer();
+        titleBuffer.append("内审活动中指派您：" + qsActiveEntity.getGroupLeaderName() + "为" + "审核组长 ");
+        titleBuffer.append("内审名称为： " + qsActiveEntity.getName() + " 请及时操作");
+
+        // 获取 任务单下检测人信息 userId
+        LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUserEntity::getUserId, qsActiveEntity.getGroupLeaderId());
+        SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
+        // 钉钉id
+        String dingId = userDetails.getDingUserId();
+        dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), userName, null);
+
+        // 编制人
+        StringBuffer editorBuffer = new StringBuffer();
+        editorBuffer.append("内审活动中指派您：" + qsActiveEntity.getEditorName() + "为" + "编制人 ");
+        editorBuffer.append("内审名称为： " + qsActiveEntity.getName() + " 请及时操作");
+        // 获取 任务单下检测人信息 userId
+        LambdaQueryWrapper<SysUserEntity> queryWrapper2 = new LambdaQueryWrapper<>();
+        queryWrapper2.eq(SysUserEntity::getUserId, qsActiveEntity.getGroupLeaderId());
+        SysUserEntity userDetails2 = sysUserDao.selectOne(queryWrapper2);
+        // 钉钉id
+        String dingId2 = userDetails2.getDingUserId();
+        dingNotifyUtils.OAWorkNotice(dingId2, titleBuffer.toString(), userName, null);
+
+        // 组员信息列表
+        if (CollectionUtil.isNotEmpty(auditTeamList)) {
+            for (AuditTeamNumber auditTeamNumber : auditTeamList) {
+                // 获取 任务单下检测人信息 userId
+                LambdaQueryWrapper<SysUserEntity> queryWrapper3 = new LambdaQueryWrapper<>();
+                queryWrapper3.eq(SysUserEntity::getUserId, auditTeamNumber.getUserId());
+                SysUserEntity userDetails3 = sysUserDao.selectOne(queryWrapper3);
+                // 钉钉id
+                String dingId3 = userDetails3.getDingUserId();
+                StringBuffer crewBuffer = new StringBuffer();
+                crewBuffer.append("内审活动中指派您：" + auditTeamNumber.getName() + "为" + "组员 ");
+                crewBuffer.append("内审名称为： " + qsActiveEntity.getName() + " 请及时操作");
+                dingNotifyUtils.OAWorkNotice(dingId3, crewBuffer.toString(), userName, null);
+            }
+        }
+    }
+
+    /**
+     * 发起会议：首次会议、末次会议:调用方法循环 通知信息
+     */
+    void methodStartMeeting(String userName, QsActiveEntity qsActiveEntity, QsAuditScheduleRelEntity qsAuditScheduleRelEntity) throws Exception {
+        // 进行钉钉发布消息操作
+        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
+
+        // 主持人
+        StringBuffer titleBuffer = new StringBuffer();
+        titleBuffer.append("内审名称为： " + qsActiveEntity.getName());
+        titleBuffer.append("会议纪要为： " + qsAuditScheduleRelEntity.getMeetingType() + " ");
+        titleBuffer.append(qsAuditScheduleRelEntity.getHostName() + "为" + "主持人 " + " 请及时操作");
+
+        // 获取 任务单下检测人信息 userId
+        LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUserEntity::getUserId, qsAuditScheduleRelEntity.getHostUserId());
+        SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
+        // 钉钉id
+        String dingId = userDetails.getDingUserId();
+        dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), userName, null);
+
+        // 记录人
+        StringBuffer editorBuffer = new StringBuffer();
+        editorBuffer.append("内审名称为： " + qsActiveEntity.getName());
+        editorBuffer.append("会议纪要为： " + qsAuditScheduleRelEntity.getMeetingType() + " ");
+        editorBuffer.append(qsAuditScheduleRelEntity.getRecorderName() + "为" + "记录人 " + " 请及时操作");
+        // 获取 任务单下检测人信息 userId
+        LambdaQueryWrapper<SysUserEntity> queryWrapper2 = new LambdaQueryWrapper<>();
+        queryWrapper2.eq(SysUserEntity::getUserId, qsAuditScheduleRelEntity.getRecorderUserId());
+        SysUserEntity userDetails2 = sysUserDao.selectOne(queryWrapper2);
+        // 钉钉id
+        String dingId2 = userDetails2.getDingUserId();
+        dingNotifyUtils.OAWorkNotice(dingId2, titleBuffer.toString(), userName, null);
+
+        // 出席人信息列表
+        if (StringUtils.isNotEmpty(qsAuditScheduleRelEntity.getAttendance())) {
+            String[] arrays = qsAuditScheduleRelEntity.getAttendance().split(",");
+
+            for (int i = 0; i < arrays.length; i++) {
+                String[] userNames = arrays[i].split("&");
+
+                // 获取 任务单下检测人信息 userId
+                LambdaQueryWrapper<SysUserEntity> queryWrapper3 = new LambdaQueryWrapper<>();
+                queryWrapper3.eq(SysUserEntity::getUserId, userNames[0]);
+                SysUserEntity userDetails3 = sysUserDao.selectOne(queryWrapper3);
+                // 钉钉id
+                String dingId3 = userDetails3.getDingUserId();
+                StringBuffer crewBuffer = new StringBuffer();
+                crewBuffer.append("内审名称为： " + qsActiveEntity.getName());
+                crewBuffer.append("会议纪要为： " + qsAuditScheduleRelEntity.getMeetingType() + " ");
+                crewBuffer.append(userNames[1] + "为" + "出席人 " + " 请及时操作");
+                dingNotifyUtils.OAWorkNotice(dingId3, crewBuffer.toString(), userName, null);
+            }
+        }
+    }
+
 }
