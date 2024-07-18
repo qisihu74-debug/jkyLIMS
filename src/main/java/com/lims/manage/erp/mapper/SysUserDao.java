@@ -250,4 +250,12 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
      */
     @Select("SELECT user_id as value,name as label FROM sys_user ")
     List<LabelValueTeamVo> selectAssemblerPool();
+
+    /**
+     * 用户集合
+     *
+     * @return
+     */
+    @Select("SELECT user_id as value,name as label FROM sys_user ")
+    List<LabelValueTeamVo> selectUserList();
 }

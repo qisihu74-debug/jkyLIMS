@@ -9,6 +9,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.DeptService;
 import com.lims.manage.erp.service.DingUserService;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.PagingToolVo;
@@ -29,6 +30,8 @@ public class DeptController {
     private LogManagerService logManagerService;
     @Autowired
     private DingUserService dingUserService;
+    @Autowired
+    private SysUserService sysUserService;
 
     /**
      * 部门新增
@@ -344,4 +347,14 @@ public class DeptController {
         }
     }
 
+    /**
+     * 查询审核组员集合
+     *
+     * @return
+     */
+    @GetMapping("getUserList")
+    public Result getUserList() {
+
+        return sysUserService.selectUserList();
+    }
 }

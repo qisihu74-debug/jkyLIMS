@@ -10,10 +10,7 @@ import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.StringUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.DivideVo;
 import com.lims.manage.erp.vo.QsActiveVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,6 +112,8 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                 qsAuditScheduleMapper.insert(qsAuditScheduleEntity);
             }
         }
+
+        //
 
         return ResultUtil.success("创建内审活动成功");
     }
@@ -423,4 +422,20 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
 
         return null;
     }
+
+    /**
+     * 调用方法循环 通知信息
+     */
+    void methodForEachNotice(String userId, QsActiveEntity qsActiveEntity) throws Exception {
+
+        // 进行钉钉发布消息操作
+        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
+        StringBuffer titleBuffer = new StringBuffer();
+        titleBuffer.append("内审活动中指派您：" + qsActiveEntity.getGroupLeaderName() + "为" + "审核组长");
+        titleBuffer.append("内审名称为： " + qsActiveEntity.getName() + " 请及时操作");
+        dingNotifyUtils.OAWorkNotice(qsActiveEntity.getGroupLeaderId(), titleBuffer.toString(), userId, null);
+
+        dingNotifyUtils.OAWorkNotice(qsActiveEntity.getGroupLeaderId(), titleBuffer.toString(), userId, null);
+    }
+
 }

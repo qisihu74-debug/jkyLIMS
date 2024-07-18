@@ -102,6 +102,6 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
             "\tWHERE t2.user_id = #{userId}")
     List<LabelValueVo> selectDepartments(@Param("userId") Long userId);
 
-    @Select("SELECT id as value,name as label FROM test_team")
+    @Select("SELECT id as value,name as label FROM sys_dept")
     List<LabelValueTeamVo> selectTrialDepartmentList();
 }

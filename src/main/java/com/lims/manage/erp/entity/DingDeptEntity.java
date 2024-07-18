@@ -61,7 +61,15 @@ public class DingDeptEntity {
     /**
      * 修改时间
      */
-    @DateTimeFormat(pattern="yyyy-MM-dd")
-    @JsonFormat(pattern ="yyyy-MM-dd HH:mm:ss" , timezone ="GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
+    /**
+     * 负责人ID
+     */
+    private String userId;
+    /**
+     * 负责人名字
+     */
+    private String userName;
 }

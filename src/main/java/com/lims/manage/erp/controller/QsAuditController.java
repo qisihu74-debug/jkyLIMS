@@ -859,4 +859,15 @@ public class QsAuditController {
         return activeService.submitInternalAuditDocument(qsAuditScheduleRel, file);
     }
 
+    /**
+     * 获取 会议信息 -- 签到表
+     *
+     * @param type
+     * @return
+     */
+    @GetMapping("getConferenceUrl")
+    public Result getConferenceUrl(String type) {
+        return ResultUtil.success("https://minio.lims.design/internal-audit/008签到表.doc");
+    }
+
 }
