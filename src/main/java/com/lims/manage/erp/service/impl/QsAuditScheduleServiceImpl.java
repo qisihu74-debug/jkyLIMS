@@ -30,9 +30,9 @@ public class QsAuditScheduleServiceImpl extends ServiceImpl<QsAuditScheduleMappe
                 // 进行 审核周期 拆分: auditTimeCycle
                 if (StringUtils.isNotEmpty(qsAuditScheduleEntity.getScheduleDateCycle())) {
                     String[] times = qsAuditScheduleEntity.getScheduleDateCycle().split("~");
-                    // "2024-07-16" 转 Date 格式
-                    qsAuditScheduleEntity.setStartTime(DateUtil.timeFormat(times[0]));
-                    qsAuditScheduleEntity.setEndTime(DateUtil.timeFormat(times[1]));
+                    // "2024-07-16 14:50" 转 Date 格式
+                    qsAuditScheduleEntity.setStartTime(DateUtil.timeMinuteFormat(times[0]));
+                    qsAuditScheduleEntity.setEndTime(DateUtil.timeMinuteFormat(times[1]));
                 }
             }
         }
