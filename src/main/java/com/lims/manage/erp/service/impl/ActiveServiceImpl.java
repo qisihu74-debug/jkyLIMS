@@ -190,6 +190,13 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
             e.printStackTrace();
         }
 
+        // 钉钉发送消息-部门负责人通知
+        try {
+            methodnotifyDepartmentHead(userInfo.getName(), qsActiveEntity, qsActiveEntity.getDivideList());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return ResultUtil.success("变更内审活动成功");
     }
 
