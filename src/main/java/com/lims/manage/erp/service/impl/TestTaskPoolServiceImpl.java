@@ -251,6 +251,17 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (getValidationStatus.getCode() == null) {
             return getValidationStatus;
         }
+        // 当前登录人 不能是 复核人
+        for (SampleItemEntity sampleItemEntity : list) {
+            // 一致的话。进行返回数据 "郭家林&1647502446459100,邓喜旺&1647657004269101"
+            String[] arrays = sampleItemEntity.getReviewer().split(",");
+            for (int i = 0; i < arrays.length; i++) {
+                String[] userIds = arrays[i].split("&");
+                if (userIds[0].equals(userInfo.getUserId())) {
+                    return ResultUtil.error("操作失败！ 当前登录人不能是 复核人");
+                }
+            }
+        }
         Long entrustId = (Long) getValidationStatus.getData();
         // 通过委托单id 查询旧任务列表
         List<TaskProgressVo> oldTaskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);

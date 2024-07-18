@@ -35,6 +35,7 @@ import com.lims.manage.erp.service.DivideService;
 import com.lims.manage.erp.service.QsAuditService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.service.*;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -53,11 +54,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author gjl
@@ -791,14 +788,46 @@ public class QsAuditController {
     /**
      * 获取 会议信息
      *
+     * @param activeId
+     * @param type
      * @return
      */
     @GetMapping("getMeetingList")
-    public Result getMeetingList(String activeId) {
+    public Result getMeetingList(String activeId, String type) {
         LambdaQueryWrapper<QsAuditScheduleRelEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QsAuditScheduleRelEntity::getActiveId, activeId);
-        List<QsAuditScheduleRelEntity> list = qsAuditScheduleRelService.list(queryWrapper);
-        return ResultUtil.success(list);
+        if (type.equals("1")) {
+            queryWrapper.eq(QsAuditScheduleRelEntity::getMeetingType, "首次会议");
+        } else if (type.equals("2")) {
+            queryWrapper.eq(QsAuditScheduleRelEntity::getMeetingType, "末次会议");
+        }
+        queryWrapper.last("limit 1");
+        QsAuditScheduleRelEntity qsAuditScheduleRelEntity = qsAuditScheduleRelService.getOne(queryWrapper);
+        if (qsAuditScheduleRelEntity != null) {
+            // 处理 多组信息：
+            List<AuditTeamNumber> auditTeamList = new ArrayList<>();
+            if (StringUtils.isNotEmpty(qsAuditScheduleRelEntity.getAttendance())) {
+                String[] arrays = qsAuditScheduleRelEntity.getAttendance().split(",");
+                for (int i = 0; i < arrays.length; i++) {
+                    String[] userinfo = arrays[i].split("&");
+                    AuditTeamNumber auditTeamNumber = new AuditTeamNumber();
+                    auditTeamNumber.setUserId(userinfo[0]);
+                    auditTeamNumber.setName(userinfo[1]);
+                    auditTeamList.add(auditTeamNumber);
+                }
+            }
+            qsAuditScheduleRelEntity.setAuditTeamList(auditTeamList);
+
+            if (qsAuditScheduleRelEntity.getStartTime() != null && qsAuditScheduleRelEntity.getEndTime() != null) {
+                // Date 转 "2024-07-16 23:59:59" 格式
+                String startTime = DateUtil.formatDate(qsAuditScheduleRelEntity.getStartTime());
+                String endTime = DateUtil.formatDate(qsAuditScheduleRelEntity.getEndTime());
+                qsAuditScheduleRelEntity.setAttendance(startTime + "~" + endTime);
+            }
+
+            return ResultUtil.success(qsAuditScheduleRelEntity);
+        }
+        return ResultUtil.success(new QsAuditScheduleRelEntity());
     }
 
     /**
@@ -827,7 +856,7 @@ public class QsAuditController {
     public Result submitInternalAuditDocument(@RequestParam("json") String json, MultipartFile[] file) {
         QsAuditScheduleRelEntity qsAuditScheduleRel = JSON.parseObject(json, QsAuditScheduleRelEntity.class);
 //        return activeService.initiateAMeeting(qsAuditScheduleRel, file);
-        return ResultUtil.success("成功");
+        return activeService.submitInternalAuditDocument(qsAuditScheduleRel, file);
     }
 
 }

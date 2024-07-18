@@ -41,7 +41,7 @@ public class DivideServiceImpl extends ServiceImpl<DivideDao, DivideEntity> impl
         List<DivideEntity> oldDivideList = this.baseMapper.selectList(divideWrapper);
         // 删除不包含的 分工信息
         for (DivideEntity divideEntity : oldDivideList) {
-            Boolean falg = true;
+            Boolean falg = false;
             for (DivideVo divideVo : newDivideVoList) {
                 String[] arrays = divideVo.getDeptName().split("&");
                 if (divideEntity.getDeptId().equals(arrays[0])) {

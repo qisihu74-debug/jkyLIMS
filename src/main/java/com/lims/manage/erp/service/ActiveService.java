@@ -62,4 +62,13 @@ public interface ActiveService extends IService<QsActiveEntity> {
      */
     Result initiateAMeeting(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file);
 
+    /**
+     * 提交内审总结附件
+     *
+     * @param qsAuditScheduleRelEntity
+     * @param file
+     * @return
+     */
+    Result submitInternalAuditDocument(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file);
+
 }

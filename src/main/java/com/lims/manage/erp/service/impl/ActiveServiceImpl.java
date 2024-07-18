@@ -389,4 +389,38 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
 
         return ResultUtil.success("操作成功");
     }
+
+    @Override
+    public Result submitInternalAuditDocument(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file) {
+
+        // 效验 内审id的对应的 首次会议、末次会议 是否存在？存在就抛出异常：为空 继续执行
+        QsActiveEntity qsActiveEntity = this.baseMapper.selectById(qsAuditScheduleRelEntity.getActiveId());
+        if (qsActiveEntity == null) {
+            return ResultUtil.error("操作失败： 内审单不存在");
+        }
+        if (!qsActiveEntity.getState().equals("待总结")) {
+            return ResultUtil.error("操作失败：" + qsActiveEntity.getName() + " 状态为 " + qsActiveEntity.getState());
+        }
+
+        // 处理附件 信息 多个 使用 逗号截取
+        StringBuffer stringBuilder = new StringBuffer();
+        if (file != null && file.length > 0) {
+            for (MultipartFile multipartFile : file) {
+                Long fileCode = GenID.getID();
+                String name = multipartFile.getOriginalFilename();
+                String[] strings = name.split("\\.");
+
+                String upload = MinIoUtil.upload(BucketsConst.internal_audit, multipartFile, fileCode + "." + strings[strings.length - 1]);
+                if (!org.springframework.util.StringUtils.isEmpty(upload)) {
+                    String[] fileUrls = upload.split("\\?");
+                    stringBuilder.append(fileUrls[0]);
+                    stringBuilder.append(",");
+                }
+            }
+            qsAuditScheduleRelEntity.setUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+//            this.baseMapper.updateById(qsAuditScheduleRelEntity);
+        }
+
+        return null;
+    }
 }
