@@ -11,8 +11,6 @@ import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.AduditBaseData;
 import com.lims.manage.erp.entity.AuditTeamNumber;
-import com.lims.manage.erp.entity.BaseTreeBuild;
-import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DivideAuditDetail;
 import com.lims.manage.erp.entity.DivideAuditDetailRel;
 import com.lims.manage.erp.entity.DivideEntity;
@@ -147,28 +145,26 @@ public class QsAuditController {
 
     /**
      * 开始检查前获取基础数据
+     * @param pageNum
+     * @param pageSize
+     * @param type
+     * @param dir
+     * @param content
+     * @param method
+     * @param subject
      * @return
      */
     @GetMapping("getCheckBaseDataList")
-    public Result getCheckBaseDataList(){
-        List<AduditBaseData> list = qsAuditService.getCheckBaseDataList();
-        //根据类型处理数据
-        List<AduditBaseData> cnasList = Lists.newArrayList();
-        List<AduditBaseData> cmaList = Lists.newArrayList();
-        for (AduditBaseData baseData :list){
-            if ("CNAS".equals(baseData.getType())){
-                cnasList.add(baseData);
-            }
-            if ("CMA".equals(baseData.getType())){
-                cmaList.add(baseData);
-            }
+    public Result getCheckBaseDataList(Integer pageNum,Integer pageSize,String type,
+                                       String dir,String content,String method,String subject){
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数");
         }
-        List<AduditBaseData> cnasLis = BaseTreeBuild.buildTree(cnasList);
-        List<AduditBaseData> cmaLis = BaseTreeBuild.buildTree(cmaList);
-        Map<String,List<AduditBaseData>> map = new HashMap<>();
-        map.put("CNAS",cnasLis);
-        map.put("CMA",cmaLis);
-        return ResultUtil.success(map);
+
+
+        List<AduditBaseData> list = qsAuditService.getCheckBaseDataList();
+
+        return ResultUtil.success();
     }
 
     /**
