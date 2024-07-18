@@ -14,6 +14,7 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.DingDeptEntity;
 import com.lims.manage.erp.entity.DingUserEntity;
 import com.taobao.api.ApiException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,6 +114,7 @@ public class AccessTokenSingleton {
         OapiDepartmentListResponse rsp = client.execute(req, token);
         String jsonString = JSON.toJSONString(rsp.getDepartment());
         List<DingDeptEntity> list = JSONArray.parseArray(jsonString, DingDeptEntity.class);
+        logger.info("拉取钉钉部门数据:{}",JSON.toJSONString(list));
         return list;
     }
 
@@ -125,17 +127,41 @@ public class AccessTokenSingleton {
     public List<DingUserEntity> getUserList(String userUrl, String token, String deptUrl) throws ApiException{
         List<DingUserEntity> list = new ArrayList<DingUserEntity>();
         List<DingDeptEntity> list_department = this.getDeptList(deptUrl,token);
-        try {
-            for (int i=0;i<list_department.size();i++){
+        for (int i=0;i<list_department.size();i++){
+            System.out.println(list_department.get(i).getName());
+            List<DingUserEntity> entities = delUserList(list_department.get(i).getId(), userUrl, token);
+            list.addAll(entities);
+        }
+        logger.info("拉取钉钉人员数据数据:{}",JSON.toJSONString(list));
+        //去重
+        list = list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(DingUserEntity :: getUserid))), ArrayList::new));
+        return list;
+    }
+
+    /**
+     * 根据部门id获取下面的所有人员
+     * @param deptId
+     * @return
+     */
+    public List<DingUserEntity> delUserList(Long deptId,String userUrl,String token){
+        List<DingUserEntity> list = Lists.newArrayList();
+        long startIndex = 0L;
+        boolean flag = true;
+        while (flag){
+            try {
                 DingTalkClient client = new DefaultDingTalkClient(userUrl);
                 OapiUserListbypageRequest req = new OapiUserListbypageRequest();
                 req.setHttpMethod("GET");
-                req.setDepartmentId(list_department.get(i).getId());
-                req.setOffset(0L);
-                req.setSize(50L);
+                req.setDepartmentId(deptId);
+                req.setOffset(startIndex);
+                req.setSize(100L);
                 OapiUserListbypageResponse rsp = client.execute(req, token);
                 if (rsp.getErrcode() == 0){
-                    System.out.println(list_department.get(i).getName());
+                    if (CollectionUtils.isEmpty(rsp.getUserlist())){
+                        flag = false;
+                    }else {
+                        startIndex = startIndex+100L;
+                    }
                     for (int j=0;j<rsp.getUserlist().size();j++){
                         DingUserEntity taobaoUser = new DingUserEntity();
                         taobaoUser.setActive((rsp.getUserlist().get(j).getActive())?1:0);
@@ -163,28 +189,11 @@ public class AccessTokenSingleton {
                         list.add(taobaoUser);
                     }
                 }
+
+            } catch (ApiException e) {
+                logger.error("获取人员数据异常:{}",e);
             }
-        } catch (ApiException e) {
-            logger.error("获取人员数据异常:{}",e);
         }
-        //处理多个部门
-        /*List<DingUserEntity> newList = Lists.newArrayList();
-        for (DingUserEntity entity:list) {
-            String department = entity.getDepartment();
-            if (department.contains(",")){
-                String[] split = department.replace("[", "").replace("]", "").split(",");
-                for (String deptId:split) {
-                    entity.setDepartment(deptId);
-                    newList.add(entity);
-                }
-            }else {
-                entity.setDepartment(department.replace("[","").replace("]",""));
-                newList.add(entity);
-            }
-        }*/
-        //去重
-        list = list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(DingUserEntity :: getUserid))), ArrayList::new));
         return list;
     }
-
 }

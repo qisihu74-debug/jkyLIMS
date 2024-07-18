@@ -21,6 +21,7 @@ import com.lims.manage.erp.entity.InternalAuditorActive;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.enums.BusinessType;
+import com.lims.manage.erp.job.DingUserJob;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.AduditBaseDataService;
@@ -879,6 +880,12 @@ public class QsAuditController {
         return activeService.submitInternalAuditDocument(qsAuditScheduleRel, file);
     }
 
+    @Autowired
+    private DingUserJob job;
+    @GetMapping("test")
+    public void test(){
+        job.sync();
+    }
     /**
      * 获取 会议信息 -- 签到表
      *
