@@ -147,6 +147,17 @@ public class QsAuditController {
         LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper1 = new LambdaQueryWrapper<>();
         queryWrapper1.eq(DivideAuditDetailRel::getDivideId,divideId);
         DivideAuditDetailRel one = divideAuditDetailRelService.getOne(queryWrapper1);
+        //受审部门，内审员
+        LambdaQueryWrapper<DivideEntity> lambdaQueryWrapper = new LambdaQueryWrapper();
+        lambdaQueryWrapper.eq(DivideEntity::getDivideId,divideId);
+        List<DivideEntity> entityList = divideService.list(lambdaQueryWrapper);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (DivideEntity divideEntity :entityList){
+            stringBuilder.append(divideEntity.getAuditorName());
+            stringBuilder.append(",");
+        }
+        one.setDeptName(entityList.get(0).getDeptName());
+        one.setUserName(stringBuilder.toString().substring(0,stringBuilder.length()-1));
         one.setList(list);
         return ResultUtil.success(one);
     }
