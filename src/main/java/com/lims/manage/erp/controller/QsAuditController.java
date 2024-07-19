@@ -199,14 +199,17 @@ public class QsAuditController {
         if (divideId == null){
             return ResultUtil.error("缺少参数");
         }
+        Map<String,String> map = new HashMap<>();
         LambdaQueryWrapper<DivideAuditDetail> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DivideAuditDetail::getDivideId,divideId);
         queryWrapper.eq(DivideAuditDetail::getOpinion,"不符合");
         List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper);
         if (CollectionUtils.isNotEmpty(list)){
-            return ResultUtil.success("需整改");
+            map.put("result","需整改");
+            return ResultUtil.success(map);
         }else {
-            return ResultUtil.success("合格");
+            map.put("result","合格");
+            return ResultUtil.success(map);
         }
     }
 
@@ -238,7 +241,13 @@ public class QsAuditController {
             for (DivideAuditDetail detail:detailRel.getList()){
                 detail.setDivideId(detailRel.getDivideId());
             }
-            divideAuditDetailService.saveBatch(detailRel.getList());
+            LambdaQueryWrapper<DivideAuditDetail> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(DivideAuditDetail::getDivideId,detailRel.getList().get(0).getDivideId());
+            queryWrapper.eq(DivideAuditDetail::getDirectoryId,detailRel.getList().get(0).getDirectoryId());
+            DivideAuditDetail one = divideAuditDetailService.getOne(queryWrapper);
+            if (one == null){
+                divideAuditDetailService.saveBatch(detailRel.getList());
+            }
             //插入或者更新qs_audit_divide_rel
             DivideAuditDetailRel rel = new DivideAuditDetailRel();
             rel.setDivideId(detailRel.getDivideId());
@@ -258,16 +267,12 @@ public class QsAuditController {
     @PostMapping("submitCheck")
     @Transactional(rollbackFor = Exception.class)
     public Result submitCheck(@RequestBody DivideAuditDetailRel detailRel){
-        if (CollectionUtils.isEmpty(detailRel.getList())){
-            return ResultUtil.error("暂无填写审核项请重试！");
-        }
         if (StringUtils.isEmpty(detailRel.getNonComplianceDegree()) ||StringUtils.isEmpty(detailRel.getNonConformance())
                 || StringUtils.isEmpty(detailRel.getNonConformanceProgram()) || StringUtils.isEmpty(detailRel.getSubstandard())
                 ||StringUtils.isEmpty(detailRel.getCheckResult())){
             return ResultUtil.error("缺少检查结果相关信息");
         }
-        if (detailRel.getActiveId() == 0 || detailRel.getDivideId() == 0
-                ||detailRel.getList().get(0).getDirectoryId() == 0 || StringUtils.isEmpty(detailRel.getList().get(0).getOpinion())){
+        if (detailRel.getActiveId() == 0 || detailRel.getDivideId() == 0){
             return ResultUtil.error("缺少必要参数");
         }
         //查询活动状态，判断管理员是否完成检查
@@ -280,15 +285,6 @@ public class QsAuditController {
         }
         //内审检查提交，推送消息给管理员
         if ("内审检查".contains(state)){
-            for (DivideAuditDetail detail:detailRel.getList()){
-                detail.setDivideId(detailRel.getDivideId());
-            }
-            //删除旧的qs_audit_divide_detail数据
-            Map<String,Object> map = new HashMap<>();
-            map.put("divide_id",detailRel.getDivideId());
-            divideAuditDetailService.removeByMap(map);
-            //插入新的数据
-            divideAuditDetailService.saveBatch(detailRel.getList());
             //更新qs_audit_divide_rel，如果不存在不符合项状态为已完成，存在为检查完成
             if ("合格".equals(detailRel.getCheckResult())){
                 detailRel.setState("已完成");
