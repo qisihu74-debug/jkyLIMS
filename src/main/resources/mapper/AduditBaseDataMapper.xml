@@ -16,12 +16,24 @@ AND qad.opinion = #{subject}
 <if test="dir != null and dir != ''">
     AND qab.directory like CONCAT('%',#{dir},'%')
 </if>
-<if test="content != null and content != ''">
-    AND qab.content like CONCAT('%',#{content},'%')
-</if>
-<if test="method != null and method != ''">
-    AND qab.method like CONCAT('%',#{method},'%')
-</if>
+        <if test="content != null and content != ''">
+            AND qab.content like CONCAT('%',#{content},'%')
+        </if>
+        <if test="method != null and method != ''">
+            AND qab.method like CONCAT('%',#{method},'%')
+        </if>
+    </select>
+
+    <select id="selectmergingList" resultType="com.lims.manage.erp.entity.AduditBaseData">
+        SELECT
+        qab.*, qad.findings,
+        qad.opinion,
+        qad.record
+        FROM
+        qs_audit_base_data qab
+        LEFT JOIN qs_audit_divide_detail qad ON qab.id = qad.directory_id
+        WHERE
+        qad.divide_id = #{divideId}
     </select>
 
 </mapper>

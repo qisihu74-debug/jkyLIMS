@@ -26,47 +26,67 @@ public class DivideRectificationRecord {
     @TableId
     private int divideId;
     /**
-     *原因分析及纠正措施
+     * 原因分析及纠正措施
      */
     private String analysisAndCorrectiveMeasures;
     /**
-     *要求完成日期
+     * 要求完成日期
      */
     private Date requiredCompletionDate;
     /**
-     *部门负责人
+     * 要求完成日期-String
+     */
+    @TableField(exist = false)
+    private String requiredCompletionTime;
+    /**
+     * 部门负责人
      */
     private String deptLeader;
     /**
-     *实际完成日期
+     * 实际完成日期
      */
     private Date actualFinishingDate;
     /**
-     *纠正完成情况
+     * 实际完成日期 - string
+     */
+    @TableField(exist = false)
+    private String actualFinishingTime;
+    /**
+     * 纠正完成情况
      */
     private String correctionCompletionStatus;
     /**
-     *接收日期
+     * 接收日期
      */
     private Date receivedDate;
     /**
-     *纠正措施的验证
+     * 接收日期 - string
+     */
+    @TableField(exist = false)
+    private String receivedTime;
+    /**
+     * 纠正措施的验证
      */
     private String verificationOfCorrectiveMeasures;
     /**
-     *验证日期
+     * 验证日期
      */
     private Date verificationDate;
     /**
-     *内审员id
+     * 验证日期
+     */
+    @TableField(exist = false)
+    private String verificationTime;
+    /**
+     * 内审员id
      */
     private String auditorId;
     /**
-     *内审员姓名
+     * 内审员姓名
      */
     private String auditorName;
     /**
-     *附件url多个逗号分隔
+     * 附件url多个逗号分隔
      */
     private String url;
     /**
