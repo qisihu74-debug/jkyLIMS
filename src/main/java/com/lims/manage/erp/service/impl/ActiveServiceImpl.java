@@ -48,6 +48,8 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
     private QsAuditScheduleRelService qsAuditScheduleRelService;
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private DeptDao deptDao;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -123,6 +125,13 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
             e.printStackTrace();
         }
 
+        // 钉钉发送消息-部门负责人通知
+        try {
+            methodnotifyDepartmentHead(userInfo.getName(), qsActiveEntity, qsActiveEntity.getDivideList());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return ResultUtil.success("创建内审活动成功");
     }
 
@@ -177,6 +186,13 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         try {
             methodForEachNotice(userInfo.getName(), qsActiveEntity, qsActiveEntity.getAuditTeamList());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 钉钉发送消息-部门负责人通知
+        try {
+            methodnotifyDepartmentHead(userInfo.getName(), qsActiveEntity, qsActiveEntity.getDivideList());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -349,7 +365,7 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         List<QsAuditScheduleRelEntity> list = qsAuditScheduleRelService.list(queryWrapper);
         if (CollectionUtil.isEmpty(list)) {
             qsAuditScheduleRelEntity.setMeetingType("首次会议");
-            if (!qsActiveEntity.getState().equals("待开始")) {
+            if (!qsActiveEntity.getState().equals("首次会议")) {
                 // 内审单 = 首次会议 状态不一致 则抛出异常
                 return ResultUtil.error("操作失败： 内审单状态为" + qsActiveEntity.getState());
             }
@@ -455,6 +471,38 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         }
 
         return null;
+    }
+
+    /**
+     * 创建评审:部门负责人 调用方法循环 通知信息
+     */
+    void methodnotifyDepartmentHead(String userName, QsActiveEntity qsActiveEntity, List<DivideVo> divideList) throws Exception {
+        // 进行钉钉发布消息操作
+        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
+
+        // 组员信息列表
+        if (CollectionUtil.isNotEmpty(divideList)) {
+            for (DivideVo divideVo : divideList) {
+
+                // 获取部门负责人的 id
+                LambdaQueryWrapper<DingDeptEntity> deptWrapper = new LambdaQueryWrapper<>();
+                deptWrapper.eq(DingDeptEntity::getId, divideVo.getDeptId());
+                deptWrapper.last("LIMIT 1");
+                DingDeptEntity dingDeptEntity = deptDao.selectOne(deptWrapper);
+
+                // 获取 任务单下检测人信息 userId
+                LambdaQueryWrapper<SysUserEntity> queryWrapper3 = new LambdaQueryWrapper<>();
+                queryWrapper3.eq(SysUserEntity::getUserId, dingDeptEntity.getUserId());
+                queryWrapper3.last("LIMIT 1");
+                SysUserEntity userDetails3 = sysUserDao.selectOne(queryWrapper3);
+                // 钉钉id
+                String dingId3 = userDetails3.getDingUserId();
+                StringBuffer crewBuffer = new StringBuffer();
+                crewBuffer.append("受审部门为：" + dingDeptEntity.getName());
+                crewBuffer.append("内审名称为： " + qsActiveEntity.getName() + " 请及时操作");
+                dingNotifyUtils.OAWorkNotice(dingId3, crewBuffer.toString(), userName, null);
+            }
+        }
     }
 
     /**

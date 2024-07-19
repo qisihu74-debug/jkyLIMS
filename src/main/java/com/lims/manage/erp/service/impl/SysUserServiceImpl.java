@@ -408,7 +408,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
      */
     @Override
     public Result getCrewAssemblyList() {
-        List<LabelValueTeamVo> userList = sysUserDao.selectAuditTeamLeaderList();
+        List<LabelValueTeamVo> userList = sysUserDao.selectAssemblerPool();
         return ResultUtil.success(userList);
     }
 

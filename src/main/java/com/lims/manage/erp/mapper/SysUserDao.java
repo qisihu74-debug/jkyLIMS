@@ -240,7 +240,14 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
      *
      * @return
      */
-    @Select("SELECT user_id as value,name as label FROM sys_user ")
+    @Select("\tSELECT\n" +
+            "\tt1.user_id AS VALUE,\n" +
+            "\tt1.NAME AS label \n" +
+            "FROM\n" +
+            "\tsys_user AS t1\n" +
+            "\tLEFT JOIN sys_user_role AS t2 ON t1.user_id = t2.user_id \n" +
+            "WHERE\n" +
+            "\tt2.role_id = 101")
     List<LabelValueTeamVo> selectAuditTeamLeaderList();
 
     /**
@@ -248,7 +255,14 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
      *
      * @return
      */
-    @Select("SELECT user_id as value,name as label FROM sys_user ")
+    @Select("\tSELECT\n" +
+            "\tt1.user_id AS VALUE,\n" +
+            "\tt1.NAME AS label \n" +
+            "FROM\n" +
+            "\tsys_user AS t1\n" +
+            "\tLEFT JOIN sys_user_role AS t2 ON t1.user_id = t2.user_id \n" +
+            "WHERE\n" +
+            "\tt2.role_id = 77")
     List<LabelValueTeamVo> selectAssemblerPool();
 
     /**

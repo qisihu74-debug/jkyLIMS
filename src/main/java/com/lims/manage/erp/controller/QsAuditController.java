@@ -696,6 +696,17 @@ public class QsAuditController {
         }
         Page<QsActiveEntity> page = new Page<QsActiveEntity>(pageNum, pageSize);
         IPage<QsActiveEntity> pageList = activeService.page(page, queryWrapper);
+        if (CollectionUtils.isNotEmpty(pageList.getRecords())) {
+            for (QsActiveEntity qsActiveEntity1 : pageList.getRecords()) {
+                // 进行 审核周期 拆分: auditTimeCycle
+                if (qsActiveEntity1.getStartTime() != null && qsActiveEntity1.getEndTime() != null) {
+                    // Date 转 "2024-07-16" 格式
+                    String startTime = DateUtil.formatDate(qsActiveEntity1.getStartTime());
+                    String endTime = DateUtil.formatDate(qsActiveEntity1.getEndTime());
+                    qsActiveEntity1.setAuditTimeCycle(startTime + "~" + endTime);
+                }
+            }
+        }
         return ResultUtil.success(pageList);
     }
 
@@ -755,7 +766,7 @@ public class QsAuditController {
     @GetMapping("getCrewAssemblyList")
     public Result getCrewAssemblyList() {
 
-        return sysUserService.getAuditTeamLeaderList();
+        return sysUserService.getCrewAssemblyList();
     }
 
     /**
@@ -854,7 +865,7 @@ public class QsAuditController {
                 // Date 转 "2024-07-16 23:59:59" 格式
                 String startTime = DateUtil.formatDate(qsAuditScheduleRelEntity.getStartTime());
                 String endTime = DateUtil.formatDate(qsAuditScheduleRelEntity.getEndTime());
-                qsAuditScheduleRelEntity.setAttendance(startTime + "~" + endTime);
+                qsAuditScheduleRelEntity.setMeetingCycle(startTime + "~" + endTime);
             }
 
             return ResultUtil.success(qsAuditScheduleRelEntity);
@@ -873,7 +884,11 @@ public class QsAuditController {
         if (StringUtils.isEmpty(type)) {
             return ResultUtil.error("缺少必填参数");
         }
-        return sysUserService.getAssemblerPool();
+        if (type.equals("1")) {
+            return sysUserService.getAuditTeamLeaderList();
+        } else {
+            return sysUserService.getCrewAssemblyList();
+        }
     }
 
 
