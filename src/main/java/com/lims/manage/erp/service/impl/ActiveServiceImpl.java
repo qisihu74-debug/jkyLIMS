@@ -519,11 +519,13 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                     stringBuilder.append(",");
                 }
             }
-            qsAuditScheduleRelEntity.setUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
-//            this.baseMapper.updateById(qsAuditScheduleRelEntity);
+            qsActiveEntity.setUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            qsActiveEntity.setState("完成");
+            this.baseMapper.updateById(qsActiveEntity);
+            return ResultUtil.success("操作成功");
         }
 
-        return null;
+        return ResultUtil.error("附件不能为空");
     }
 
     @Override
