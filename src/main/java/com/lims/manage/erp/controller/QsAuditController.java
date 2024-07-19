@@ -397,57 +397,53 @@ public class QsAuditController {
         }
         Long userId = ShiroUtils.getUserInfo().getUserId();
         PageInfo<InternalAuditorActive> pageInfo = qsAuditService.deptLeaderActiveList(pageNum,pageSize,name,userId);
-        //处理内审员
-        List<Integer> fgIds = Lists.newArrayList();
 
-        for (InternalAuditorActive active :pageInfo.getList()){
-            fgIds.add(active.getDivideId());
-        }
-        //查询活动下的人员信息
-        if (CollectionUtils.isNotEmpty(fgIds)){
+        return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 获取整改详情
+     * @param divideId
+     * @return
+     */
+    @GetMapping("getDetail")
+    public Result getDetail(int divideId){
+        if (divideId == 0){
+            return ResultUtil.error("缺少参数");
+        }else {
+            InternalAuditorActive internalAuditorActive = new InternalAuditorActive();
+            //处理内审员
+            List<Integer> fgIds = Lists.newArrayList();
+            fgIds.add(divideId);
+            //查询活动下的人员信息
             LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper();
             queryWrapper.in(DivideEntity::getDivideId,fgIds);
             List<DivideEntity> list = divideService.list(queryWrapper);
-            for (InternalAuditorActive active :pageInfo.getList()){
-                List<AuditTeamNumber> userList = Lists.newArrayList();
-                for (DivideEntity divideEntity :list){
-                    if (active.getDivideId() == divideEntity.getDivideId()){
-                        AuditTeamNumber teamNumber = new AuditTeamNumber();
-                        teamNumber.setUserId(divideEntity.getAuditorId());
-                        teamNumber.setName(divideEntity.getAuditorName());
-                        userList.add(teamNumber);
-                    }
-                }
-                active.setUserList(userList);
+            List<AuditTeamNumber> userList = Lists.newArrayList();
+            for (DivideEntity divideEntity :list){
+                AuditTeamNumber teamNumber = new AuditTeamNumber();
+                teamNumber.setUserId(divideEntity.getAuditorId());
+                teamNumber.setName(divideEntity.getAuditorName());
+                userList.add(teamNumber);
             }
+            internalAuditorActive.setUserList(userList);
             //查询基本信息qs_audit_divide_rel
             LambdaQueryWrapper<DivideRectificationRecord> queryWrapper1 = new LambdaQueryWrapper();
             queryWrapper1.in(DivideRectificationRecord::getDivideId,fgIds);
             List<DivideRectificationRecord> records = divideRectificationRecordService.list(queryWrapper1);
-            for (InternalAuditorActive active :pageInfo.getList()){
-                for (DivideRectificationRecord record :records){
-                    if (active.getDivideId() == record.getDivideId()){
-                        active.setRectificationRecord(record);
-                    }
-                }
+            for (DivideRectificationRecord record :records){
+                internalAuditorActive.setRectificationRecord(record);
             }
             //基本信息
             LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper2 = new LambdaQueryWrapper<>();
             queryWrapper2.in(DivideAuditDetailRel::getDivideId,fgIds);
             List<DivideAuditDetailRel> auditDetailRels = divideAuditDetailRelService.list(queryWrapper2);
-            for (InternalAuditorActive active :pageInfo.getList()){
-                for (DivideAuditDetailRel detailRel :auditDetailRels){
-                    if (active.getDivideId() == detailRel.getDivideId()){
-                        active.setDivideAuditDetailRel(detailRel);
-                    }
-                }
+            for (DivideAuditDetailRel detailRel :auditDetailRels){
+                internalAuditorActive.setDivideAuditDetailRel(detailRel);
             }
-
+            return ResultUtil.success(internalAuditorActive);
         }
-        return ResultUtil.success(pageInfo);
     }
-
-
 
     /**
      * 部门负责人接收通知提交
