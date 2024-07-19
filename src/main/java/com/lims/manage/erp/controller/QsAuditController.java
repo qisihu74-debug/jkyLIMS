@@ -267,13 +267,20 @@ public class QsAuditController {
     @PostMapping("submitCheck")
     @Transactional(rollbackFor = Exception.class)
     public Result submitCheck(@RequestBody DivideAuditDetailRel detailRel){
-        if (StringUtils.isEmpty(detailRel.getNonComplianceDegree()) ||StringUtils.isEmpty(detailRel.getNonConformance())
-                || StringUtils.isEmpty(detailRel.getNonConformanceProgram()) || StringUtils.isEmpty(detailRel.getSubstandard())
-                ||StringUtils.isEmpty(detailRel.getCheckResult())){
-            return ResultUtil.error("缺少检查结果相关信息");
-        }
         if (detailRel.getActiveId() == 0 || detailRel.getDivideId() == 0){
             return ResultUtil.error("缺少必要参数");
+        }
+        //判断是否合格
+        LambdaQueryWrapper<DivideAuditDetail> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(DivideAuditDetail::getDivideId,detailRel.getDivideId());
+        queryWrapper1.eq(DivideAuditDetail::getOpinion,"不符合");
+        List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper1);
+        if (CollectionUtils.isNotEmpty(list)){
+            if (StringUtils.isEmpty(detailRel.getNonComplianceDegree()) ||StringUtils.isEmpty(detailRel.getNonConformance())
+                    || StringUtils.isEmpty(detailRel.getNonConformanceProgram()) || StringUtils.isEmpty(detailRel.getSubstandard())
+                    ||StringUtils.isEmpty(detailRel.getCheckResult())){
+                return ResultUtil.error("缺少检查结果相关信息");
+            }
         }
         //查询活动状态，判断管理员是否完成检查
         String state = qsAuditService.getStateByActiveId(detailRel.getActiveId());
@@ -285,9 +292,25 @@ public class QsAuditController {
         }
         //内审检查提交，推送消息给管理员
         if ("内审检查".contains(state)){
+            boolean flag = true;
             //更新qs_audit_divide_rel，如果不存在不符合项状态为已完成，存在为检查完成
             if ("合格".equals(detailRel.getCheckResult())){
                 detailRel.setState("已完成");
+                //判断活动下次分工是否都已完成 TODO
+//                List<String> strings = activeService.getDiviDeStates(detailRel.getActiveId(),detailRel.getDivideId());
+//                for (String s:strings){
+//                    if (!"已完成".equals(s)){
+//                        flag = false;
+//                        break;
+//                    }
+//                }
+//                if (flag){
+//                    //更新主表状态
+//                    LambdaUpdateWrapper<QsActiveEntity> updateWrapper = new LambdaUpdateWrapper();
+//                    updateWrapper.eq(QsActiveEntity::getActiveId,detailRel.getActiveId());
+//                    updateWrapper.set(QsActiveEntity::getState,"");
+//                    activeService.update(null,updateWrapper);
+//                }
             }else {
                 detailRel.setState("检查完成");
             }

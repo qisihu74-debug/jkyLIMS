@@ -473,6 +473,11 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         return null;
     }
 
+    @Override
+    public List<String> getDiviDeStates(int activeId, int divideId) {
+        return this.baseMapper.getDiviDeStates(activeId,divideId);
+    }
+
     /**
      * 创建评审:部门负责人 调用方法循环 通知信息
      */
