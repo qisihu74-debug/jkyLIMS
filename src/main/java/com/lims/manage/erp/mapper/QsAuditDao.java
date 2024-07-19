@@ -37,6 +37,7 @@ public interface QsAuditDao {
             + "<if test=\"name != null and name.trim().length() > 0\">"
             + " AND qaa.name LIKE CONCAT('%', #{name}, '%')"
             + "</if>"
+            + " ORDER BY qaa.editor_date DESC"
             + "</script>")
     List<InternalAuditorActive> internalAuditorActiveList(@Param("name") String name, @Param("userId") Long userId);
 

@@ -7,6 +7,8 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.QsActiveVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * @Author: DLC
  * @Date: 2024/7/10 16:23
@@ -71,6 +73,7 @@ public interface ActiveService extends IService<QsActiveEntity> {
      */
     Result submitInternalAuditDocument(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file);
 
+    List<String> getDiviDeStates(int activeId, int divideId);
     /**
      * 内审检查 根据内审ID 展示 详情
      *

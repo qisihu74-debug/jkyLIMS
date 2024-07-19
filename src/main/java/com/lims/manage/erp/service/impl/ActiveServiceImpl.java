@@ -526,6 +526,11 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         return null;
     }
 
+    @Override
+    public List<String> getDiviDeStates(int activeId, int divideId) {
+        return this.baseMapper.getDiviDeStates(activeId,divideId);
+    }
+
     /**
      * @param activeId
      * @param type     = 1 内审检查 根据内审ID 展示 详情 、 type = 2 问题整改详情（展示整改详情，不展示 检查记录）
