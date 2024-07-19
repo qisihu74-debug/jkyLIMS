@@ -694,6 +694,8 @@ public class QsAuditController {
         if (qsActiveEntity != null && StringUtils.isNotEmpty(qsActiveEntity.getName())) {
             queryWrapper.like(QsActiveEntity::getName, qsActiveEntity.getName());
         }
+        // 内审排序-逆序
+        queryWrapper.orderByDesc(QsActiveEntity::getActiveId);
         Page<QsActiveEntity> page = new Page<QsActiveEntity>(pageNum, pageSize);
         IPage<QsActiveEntity> pageList = activeService.page(page, queryWrapper);
         if (CollectionUtils.isNotEmpty(pageList.getRecords())) {
