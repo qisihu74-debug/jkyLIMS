@@ -12,6 +12,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.DivideVo;
+import com.lims.manage.erp.vo.InternalAuditDetailsVo;
 import com.lims.manage.erp.vo.QsActiveVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,12 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
     private SysUserDao sysUserDao;
     @Autowired
     private DeptDao deptDao;
+    @Autowired
+    private AduditBaseDataDao aduditBaseDataDao;
+    @Autowired
+    private DivideAuditDetailRelService divideAuditDetailRelService;
+    @Autowired
+    private DivideRectificationRecordDao divideRectificationRecordDao;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -471,6 +478,186 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         }
 
         return null;
+    }
+
+    /**
+     * @param activeId
+     * @param type     = 1 内审检查 根据内审ID 展示 详情 、 type = 2 问题整改详情（展示整改详情，不展示 检查记录）
+     * @return
+     */
+    @Override
+    public Result getInternalAuditInspectionDetails(String activeId, Integer type) {
+        // 判断内审id 是否存在：
+        LambdaQueryWrapper<QsActiveEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QsActiveEntity::getActiveId, activeId);
+        queryWrapper.last("LIMIT 1");
+        QsActiveEntity qsActiveEntity = this.baseMapper.selectOne(queryWrapper);
+        if (qsActiveEntity == null) {
+            // 不存在
+            return ResultUtil.error("查询失败，内审单不存在");
+        }
+
+        // 获取分工id 集合
+        LambdaQueryWrapper<DivideEntity> divideWrapper = new LambdaQueryWrapper<>();
+        divideWrapper.eq(DivideEntity::getActiveId, activeId);
+        List<DivideEntity> list = divideDao.selectList(divideWrapper);
+
+        // 进行整合 组员信息
+        if (CollectionUtil.isNotEmpty(list)) {
+
+            // 进行分组展示 key = deptId value = 分工集合
+            Map<String, List<DivideEntity>> map = new HashMap<>();
+            for (DivideEntity divideEntity : list) {
+                // 进行分组
+                if (map.get(divideEntity.getDeptId()) == null) {
+                    List<DivideEntity> divideEntities = new ArrayList<>();
+                    divideEntities.add(divideEntity);
+                    map.put(divideEntity.getDeptId(), divideEntities);
+                } else {
+                    List<DivideEntity> divideEntities = map.get(divideEntity.getDeptId());
+                    divideEntities.add(divideEntity);
+                    map.put(divideEntity.getDeptId(), divideEntities);
+                }
+            }
+
+            // 待返回数据集合
+            List<InternalAuditDetailsVo> dataSet = new ArrayList<>();
+
+            // 部门id 集合
+            List<Long> deptIds = new ArrayList<>();
+
+            /**
+             * 分工 id集合
+             */
+            List<Integer> divideIds = new ArrayList<>();
+
+            // 处理map 数据
+            for (String key : map.keySet()) {
+                // 分组下的数据集合
+                List<DivideEntity> divideEntities = map.get(key);
+
+                // 数据集
+                InternalAuditDetailsVo auditDetailsVo = new InternalAuditDetailsVo();
+                // 内审员集合
+                StringBuffer auditorNameBuffer = new StringBuffer();
+                for (DivideEntity divideEntity : divideEntities) {
+                    // 获取内审员 名称顺序： 无序
+                    auditorNameBuffer.append(divideEntity.getAuditorName() + ",");
+                }
+                // 内审员名字 多个使用逗号拼接
+                auditDetailsVo.setAuditorName(auditorNameBuffer.deleteCharAt(auditorNameBuffer.length() - 1).toString());
+                // 对应的 分组ID
+                auditDetailsVo.setDivideId(divideEntities.get(0).getDivideId());
+                divideIds.add(divideEntities.get(0).getDivideId());
+
+                // 对应的部门ID
+                auditDetailsVo.setDeptId(divideEntities.get(0).getDeptId());
+                // 对应部门名称
+                auditDetailsVo.setDeptName(divideEntities.get(0).getDeptName());
+
+                // 部门id 集合
+                deptIds.add(Long.valueOf(divideEntities.get(0).getDeptId()));
+                // 内审检查 详情
+                if (type == 1) {
+                    // 检查记录集合
+                    List<AduditBaseData> aduditBaseDataList = aduditBaseDataDao.selectmergingList(divideEntities.get(0).getDivideId());
+                    auditDetailsVo.setAduditBaseDataList(aduditBaseDataList);
+                }
+
+                dataSet.add(auditDetailsVo);
+            }
+
+            // 通过部门id集合 获取 负责人名字
+            LambdaQueryWrapper<DingDeptEntity> deptWrapper = new LambdaQueryWrapper<>();
+            deptWrapper.in(DingDeptEntity::getId, deptIds);
+            List<DingDeptEntity> deptList = deptDao.selectList(deptWrapper);
+            for (InternalAuditDetailsVo internalAuditDetailsVo : dataSet) {
+                // 比较 deptId 获取 部门负责人名字
+                for (DingDeptEntity deptEntity : deptList) {
+                    if (internalAuditDetailsVo.getDeptId().equals(deptEntity.getId())) {
+                        internalAuditDetailsVo.setUserName(deptEntity.getUserName());
+                    }
+                }
+            }
+
+            // 根据分工id集合 进行整理符合项信息集合
+            LambdaQueryWrapper<DivideAuditDetailRel> queryWrapper1 = new LambdaQueryWrapper<>();
+            queryWrapper1.in(DivideAuditDetailRel::getDivideId, divideIds);
+            List<DivideAuditDetailRel> divideAuditDetailRels = divideAuditDetailRelService.list(queryWrapper1);
+            for (InternalAuditDetailsVo internalAuditDetailsVo : dataSet) {
+                for (DivideAuditDetailRel divideAuditDetailRel : divideAuditDetailRels) {
+
+                    // 进行赋值
+                    if (divideAuditDetailRel.getDivideId() == divideAuditDetailRel.getDivideId()) {
+                        // 不符合项
+                        internalAuditDetailsVo.setNonConformance(divideAuditDetailRel.getNonConformance());
+                        // 不符合程度
+                        internalAuditDetailsVo.setNonComplianceDegree(divideAuditDetailRel.getNonComplianceDegree());
+                        // 检查结果
+                        internalAuditDetailsVo.setCheckResult(divideAuditDetailRel.getCheckResult());
+                        // 不符合程序
+                        internalAuditDetailsVo.setNonConformanceProgram(divideAuditDetailRel.getNonConformanceProgram());
+                        // 不符合标准
+                        internalAuditDetailsVo.setSubstandard(divideAuditDetailRel.getSubstandard());
+                        // 状态
+                        internalAuditDetailsVo.setState(divideAuditDetailRel.getState());
+                        // 操作时间
+                        if (divideAuditDetailRel.getCheckDate() != null) {
+                            // Date 转 "2024-07-16" 格式
+                            String startTime = DateUtil.formatDate(divideAuditDetailRel.getCheckDate());
+                            internalAuditDetailsVo.setOperatingTime(startTime);
+                        }
+                    }
+                }
+            }
+
+            // 问题纠正日期展示
+            if (type == 2) {
+                // 根据分组id 集合
+                LambdaQueryWrapper<DivideRectificationRecord> divideRectificationRecordWrapper = new LambdaQueryWrapper<>();
+                divideRectificationRecordWrapper.in(DivideRectificationRecord::getDivideId, divideIds);
+                List<DivideRectificationRecord> divideRectificationRecords = divideRectificationRecordDao.selectList(divideRectificationRecordWrapper);
+                // 补充 问题反馈信息
+                for (InternalAuditDetailsVo internalAuditDetailsVo : dataSet) {
+                    for (DivideRectificationRecord divideRectificationRecord : divideRectificationRecords) {
+                        // 补充进 问题纠正中
+                        if (internalAuditDetailsVo.getDivideId() == divideRectificationRecord.getDivideId()) {
+
+                            // Date 转 string
+                            if (divideRectificationRecord.getReceivedDate() != null) {
+                                // Date 转 "2024-07-16" 格式
+                                String time1 = DateUtil.formatDate(divideRectificationRecord.getReceivedDate());
+                                divideRectificationRecord.setReceivedTime(time1);
+                            }
+
+                            if (divideRectificationRecord.getVerificationDate() != null) {
+                                // Date 转 "2024-07-16" 格式
+                                String time2 = DateUtil.formatDate(divideRectificationRecord.getVerificationDate());
+                                divideRectificationRecord.setVerificationTime(time2);
+                            }
+
+                            if (divideRectificationRecord.getRequiredCompletionDate() != null) {
+                                // Date 转 "2024-07-16" 格式
+                                String time3 = DateUtil.formatDate(divideRectificationRecord.getRequiredCompletionDate());
+                                divideRectificationRecord.setRequiredCompletionTime(time3);
+                            }
+
+                            if (divideRectificationRecord.getActualFinishingDate() != null) {
+                                // Date 转 "2024-07-16" 格式
+                                String time4 = DateUtil.formatDate(divideRectificationRecord.getActualFinishingDate());
+                                divideRectificationRecord.setActualFinishingTime(time4);
+                            }
+
+                            internalAuditDetailsVo.setDivideRectificationRecord(divideRectificationRecord);
+                        }
+                    }
+                }
+            }
+
+            return ResultUtil.success(dataSet);
+        }
+
+        return ResultUtil.success(new InternalAuditDetailsVo());
     }
 
     /**

@@ -27,4 +27,11 @@ public interface AduditBaseDataDao extends BaseMapper<AduditBaseData> {
      */
     List<AduditBaseData> selectListBySub(@Param("type") String type, @Param("dir") String dir, @Param("content") String content,
                                          @Param("method") String method, @Param("subject") String subject, @Param("divideId") Integer divideId);
+
+    /**
+     * 查询合并两表数据集合
+     *
+     * @param divideId
+     */
+    List<AduditBaseData> selectmergingList(@Param("divideId") Integer divideId);
 }

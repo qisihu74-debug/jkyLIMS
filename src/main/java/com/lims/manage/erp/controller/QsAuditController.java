@@ -923,4 +923,28 @@ public class QsAuditController {
         return ResultUtil.success("https://minio.lims.design/internal-audit/008签到表.doc");
     }
 
+    /**
+     * 内审检查 根据内审ID 展示 详情
+     *
+     * @param activeId
+     * @return
+     */
+    @GetMapping("getInternalAuditInspectionDetails")
+    public Result getInternalAuditInspectionDetails(String activeId) {
+
+        return activeService.getInternalAuditInspectionDetails(activeId, 1);
+    }
+
+    /**
+     * 内审检查 根据内审ID 展示详情 - 包括 整改结果
+     *
+     * @param activeId
+     * @return
+     */
+    @GetMapping("getDetailsOfRectificationResults")
+    public Result getDetailsOfRectificationResults(String activeId) {
+
+        return activeService.getInternalAuditInspectionDetails(activeId, 2);
+    }
+
 }
