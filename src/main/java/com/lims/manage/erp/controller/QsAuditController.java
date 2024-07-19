@@ -222,7 +222,7 @@ public class QsAuditController {
             return ResultUtil.error("暂无填写审核项请重试！");
         }
         if (detailRel.getActiveId() == 0 || detailRel.getDivideId() == 0
-                ||detailRel.getList().get(0).getDirectoryId() == 0 || StringUtils.isEmpty(detailRel.getList().get(0).getOpinion())){
+                ||detailRel.getList().get(0).getDirectoryId() == 0){
             return ResultUtil.error("缺少必要参数");
         }
         //查询活动状态，判断管理员是否完成检查
