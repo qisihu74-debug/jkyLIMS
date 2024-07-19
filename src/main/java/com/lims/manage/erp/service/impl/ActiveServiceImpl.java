@@ -344,6 +344,52 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                 qsActiveEntity.setState("首次会议");
                 this.baseMapper.updateById(qsActiveEntity);
                 return ResultUtil.success("操作成功");
+            case 2:
+                // 内审检查
+                if (!qsActiveEntity.getState().equals("内审检查")) {
+                    return ResultUtil.error("操作失败： " + qsActiveEntity.getName() + " 状态为 " + qsActiveEntity.getState());
+                }
+                if (StringUtils.isNotEmpty(qsActiveVo.getHastenWork())) {
+                    // 钉钉发送消息
+
+                    SysUserEntity userInfo = ShiroUtils.getUserInfo();
+                    try {
+                        // 内审检查： 催办
+                        methodHastenWorkMeeting(userInfo.getName(), "内审检查", qsActiveEntity);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return ResultUtil.success("操作成功");
+                }
+                if (StringUtils.isNotEmpty(qsActiveVo.getOperationComplete())) {
+                    // 内审检查：操作完成  更改状态为 "末次会议"
+                    qsActiveEntity.setState("末次会议");
+                    this.baseMapper.updateById(qsActiveEntity);
+                    return ResultUtil.success("操作成功");
+                }
+            case 3:
+                // 完成整改
+                if (!qsActiveEntity.getState().equals("问题整改")) {
+                    return ResultUtil.error("操作失败： " + qsActiveEntity.getName() + " 状态为 " + qsActiveEntity.getState());
+                }
+                if (StringUtils.isNotEmpty(qsActiveVo.getHastenWork())) {
+                    // 钉钉发送消息
+
+                    SysUserEntity userInfo = ShiroUtils.getUserInfo();
+                    try {
+                        // 内审检查： 催办
+                        methodHastenWorkMeeting(userInfo.getName(), "问题整改", qsActiveEntity);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return ResultUtil.success("操作成功");
+                }
+                if (StringUtils.isNotEmpty(qsActiveVo.getOperationComplete())) {
+                    // 完成整改：操作完成  更改状态为 "待总结"
+                    qsActiveEntity.setState("待总结");
+                    this.baseMapper.updateById(qsActiveEntity);
+                    return ResultUtil.success("操作成功");
+                }
         }
 
         return ResultUtil.success("操作失败");
@@ -797,4 +843,41 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         }
     }
 
+    /**
+     * 根据内审id 进行催办:调用方法循环 通知信息
+     */
+    void methodHastenWorkMeeting(String userName, String type, QsActiveEntity qsActiveEntity) throws Exception {
+        // 进行钉钉发布消息操作
+        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
+
+        // 通过内审id 获取 对应的部门id 及 负责人 进行催办
+
+        //      2、评审分工：
+        LambdaQueryWrapper<DivideEntity> divideWrapper = new LambdaQueryWrapper<>();
+        divideWrapper.eq(DivideEntity::getActiveId, qsActiveEntity.getActiveId());
+        List<DivideEntity> divideList = divideDao.selectList(divideWrapper);
+
+        for (DivideEntity divideEntity : divideList) {
+            // 通过部门id集合 获取 负责人名字
+            LambdaQueryWrapper<DingDeptEntity> deptWrapper = new LambdaQueryWrapper<>();
+            deptWrapper.in(DingDeptEntity::getId, divideEntity.getDeptId());
+            deptWrapper.last("limit 1");
+            DingDeptEntity dingDeptEntity = deptDao.selectOne(deptWrapper);
+            // 获取 任务单下检测人信息 userId
+            LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SysUserEntity::getUserId, dingDeptEntity.getUserId());
+            SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
+            // 钉钉id
+            String dingId = userDetails.getDingUserId();
+
+            // 发送内容
+            StringBuffer titleBuffer = new StringBuffer();
+            titleBuffer.append("内审名称为： " + qsActiveEntity.getName());
+            titleBuffer.append("在 " + type + "中 部门负责人： " + userDetails.getName() + "  请尽快完成检查");
+            String time = DateUtil.formatMinuteDate(new Date());
+            titleBuffer.append("催办时间为 " + time);
+
+            dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), userName, null);
+        }
+    }
 }
