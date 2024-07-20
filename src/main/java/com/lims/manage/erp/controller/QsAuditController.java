@@ -280,6 +280,13 @@ public class QsAuditController {
         if (detailRel.getActiveId() == 0 || detailRel.getDivideId() == 0){
             return ResultUtil.error("缺少必要参数");
         }
+        //判断
+        LambdaQueryWrapper<DivideAuditDetail> auditDetailLambdaQueryWrapper = new LambdaQueryWrapper();
+        auditDetailLambdaQueryWrapper.eq(DivideAuditDetail::getDivideId,detailRel.getDivideId());
+        List<DivideAuditDetail> details = divideAuditDetailService.list(auditDetailLambdaQueryWrapper);
+        if (CollectionUtils.isEmpty(details)){
+            return ResultUtil.error("检查项还未操作，请先完成检查");
+        }
         //判断是否合格
         LambdaQueryWrapper<DivideAuditDetail> queryWrapper1 = new LambdaQueryWrapper<>();
         queryWrapper1.eq(DivideAuditDetail::getDivideId,detailRel.getDivideId());
