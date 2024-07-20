@@ -110,6 +110,7 @@ public class QsAuditController {
         //处理内审员
         List<Integer> ids = Lists.newArrayList();
         for (InternalAuditorActive active : pageInfo.getList()) {
+            active.setAuditTimeCycle(DateUtil.formatDate(active.getStartTime())+"~"+DateUtil.formatDate(active.getEndTime()));
             ids.add(active.getDivideId());
         }
         //查询活动下的人员信息
@@ -279,6 +280,13 @@ public class QsAuditController {
     public Result submitCheck(@RequestBody DivideAuditDetailRel detailRel){
         if (detailRel.getActiveId() == 0 || detailRel.getDivideId() == 0){
             return ResultUtil.error("缺少必要参数");
+        }
+        //判断
+        LambdaQueryWrapper<DivideAuditDetail> auditDetailLambdaQueryWrapper = new LambdaQueryWrapper();
+        auditDetailLambdaQueryWrapper.eq(DivideAuditDetail::getDivideId,detailRel.getDivideId());
+        List<DivideAuditDetail> details = divideAuditDetailService.list(auditDetailLambdaQueryWrapper);
+        if (CollectionUtils.isEmpty(details)){
+            return ResultUtil.error("检查项还未操作，请先完成检查");
         }
         //判断是否合格
         LambdaQueryWrapper<DivideAuditDetail> queryWrapper1 = new LambdaQueryWrapper<>();
