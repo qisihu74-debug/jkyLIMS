@@ -645,7 +645,7 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
             for (InternalAuditDetailsVo internalAuditDetailsVo : dataSet) {
                 // 比较 deptId 获取 部门负责人名字
                 for (DingDeptEntity deptEntity : deptList) {
-                    if (internalAuditDetailsVo.getDeptId().equals(deptEntity.getId())) {
+                    if (internalAuditDetailsVo.getDeptId().equals(deptEntity.getId().toString())) {
                         internalAuditDetailsVo.setUserName(deptEntity.getUserName());
                     }
                 }
