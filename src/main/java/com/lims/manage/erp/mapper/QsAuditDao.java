@@ -21,7 +21,7 @@ import java.util.List;
 public interface QsAuditDao {
 
     @Select("<script>"
-            + "SELECT"
+            + "SELECT DISTINCT"
             + " qaa.active_id,"
             + " qad.dept_name,"
             + " qad.divide_id,"
