@@ -702,6 +702,8 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                             }
 
                             internalAuditDetailsVo.setDivideRectificationRecord(divideRectificationRecord);
+                        } else {
+                            internalAuditDetailsVo.setDivideRectificationRecord(new DivideRectificationRecord());
                         }
                     }
                 }
