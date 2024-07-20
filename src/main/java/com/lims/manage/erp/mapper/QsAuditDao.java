@@ -62,6 +62,7 @@ public interface QsAuditDao {
             + " LEFT JOIN qs_divide_rectification_record qdr ON qad.divide_id = qdr.divide_id"
             + " LEFT JOIN sys_dept dept ON qad.dept_name = dept.name"
             + " WHERE dept.user_id = #{userId}"
+            + " AND qdr.divide_id IS NOT NULL"
             + "<if test=\"name != null and name.trim().length() > 0\">"
             + " AND qaa.name LIKE CONCAT('%', #{name}, '%')"
             + "</if>"

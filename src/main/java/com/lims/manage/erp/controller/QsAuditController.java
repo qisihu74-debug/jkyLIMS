@@ -159,6 +159,9 @@ public class QsAuditController {
             stringBuilder.append(divideEntity.getAuditorName());
             stringBuilder.append(",");
         }
+        if (one == null){
+            one = new DivideAuditDetailRel();
+        }
         one.setDeptName(entityList.get(0).getDeptName());
         one.setUserName(stringBuilder.toString().substring(0,stringBuilder.length()-1));
         one.setList(list);
