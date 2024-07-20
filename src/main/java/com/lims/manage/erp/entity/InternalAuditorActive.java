@@ -71,4 +71,6 @@ public class InternalAuditorActive {
     private DivideRectificationRecord rectificationRecord;
     @TableField(exist = false)
     private DivideAuditDetailRel divideAuditDetailRel;
+    @TableField(exist = false)
+    private String auditTimeCycle;
 }

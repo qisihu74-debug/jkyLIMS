@@ -73,6 +73,9 @@ public class QsAuditServiceImpl implements QsAuditService {
         PageHelper.startPage(pageNum,pageSize);
         List<InternalAuditorActive> list = qsAuditDao.deptLeaderActiveList(name,userId);
         PageInfo<InternalAuditorActive> pageInfo = new PageInfo<>(list);
+        for (InternalAuditorActive active : pageInfo.getList()) {
+            active.setAuditTimeCycle(active.getStartTime()+"~"+active.getEndTime());
+        }
         return pageInfo;
     }
 }
