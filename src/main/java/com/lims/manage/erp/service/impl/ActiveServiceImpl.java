@@ -71,10 +71,18 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
             qsActiveEntity.setStartTime(DateUtil.timeFormat(times[0]));
             qsActiveEntity.setEndTime(DateUtil.timeFormat(times[1]));
         }
+        // 评审分工的 新增-效验
+        if (CollectionUtil.isNotEmpty(qsActiveEntity.getDivideList())) {
+            Set<String> deptSet = new HashSet<>();
+            for (DivideVo divideVo : qsActiveEntity.getDivideList()) {
+                deptSet.add(divideVo.getDeptId());
+            }
+            if (deptSet.size() != qsActiveEntity.getDivideList().size()) {
+                return ResultUtil.error("操作失败，请检查 评审分工");
+            }
+        }
         this.baseMapper.insert(qsActiveEntity);
         Integer activeId = qsActiveEntity.getActiveId();
-        System.out.println("内容输出 activeId == " + activeId);
-
         // 进行 内审组员的批量保存
         if (CollectionUtil.isNotEmpty(qsActiveEntity.getAuditTeamList())) {
             for (AuditTeamNumber auditTeamNumber : qsActiveEntity.getAuditTeamList()) {
@@ -158,6 +166,16 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
             // "2024-07-16" 转 Date 格式
             qsActiveEntity.setStartTime(DateUtil.timeFormat(times[0]));
             qsActiveEntity.setEndTime(DateUtil.timeFormat(times[1]));
+        }
+        // 评审分工的 新增-效验
+        if (CollectionUtil.isNotEmpty(qsActiveEntity.getDivideList())) {
+            Set<String> deptSet = new HashSet<>();
+            for (DivideVo divideVo : qsActiveEntity.getDivideList()) {
+                deptSet.add(divideVo.getDeptId());
+            }
+            if (deptSet.size() != qsActiveEntity.getDivideList().size()) {
+                return ResultUtil.error("操作失败，请检查 评审分工");
+            }
         }
         this.baseMapper.updateById(qsActiveEntity);
 
@@ -428,12 +446,12 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         } else {
             qsAuditScheduleRelEntity.setMeetingType("末次会议");
 
-            if (!qsActiveEntity.getState().equals("内审检查")) {
+            if (!qsActiveEntity.getState().equals("末次会议")) {
                 // 内审单 = 末次会议 状态不一致 则抛出异常
                 return ResultUtil.error("操作失败： 内审单状态为" + qsActiveEntity.getState());
             }
             // 完成 末次会议后：state =  "完成整改" or state =  "待总结"
-            qsActiveEntity.setState("完成整改");
+            qsActiveEntity.setState("问题整改");
         }
         queryWrapper.eq(QsAuditScheduleRelEntity::getMeetingType, qsAuditScheduleRelEntity.getMeetingType());
         List<QsAuditScheduleRelEntity> list2 = qsAuditScheduleRelService.list(queryWrapper);
@@ -672,6 +690,11 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                 List<DivideRectificationRecord> divideRectificationRecords = divideRectificationRecordDao.selectList(divideRectificationRecordWrapper);
                 // 补充 问题反馈信息
                 for (InternalAuditDetailsVo internalAuditDetailsVo : dataSet) {
+                    if (CollectionUtil.isEmpty(divideAuditDetailRels)) {
+                        internalAuditDetailsVo.setDivideRectificationRecord(new DivideRectificationRecord());
+                        // 整改对象 = null 状态 = 0
+                        internalAuditDetailsVo.setProblemRectificationState("0");
+                    }
                     for (DivideRectificationRecord divideRectificationRecord : divideRectificationRecords) {
                         // 补充进 问题纠正中
                         if (internalAuditDetailsVo.getDivideId() == divideRectificationRecord.getDivideId()) {
@@ -702,8 +725,23 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                             }
 
                             internalAuditDetailsVo.setDivideRectificationRecord(divideRectificationRecord);
+                            // 设置优先级
+                            if (divideRectificationRecord.getState().equals("整改通知")) {
+                                internalAuditDetailsVo.setProblemRectificationState("0");
+                            }
+                            if (divideRectificationRecord.getState().equals("等待纠正")) {
+                                internalAuditDetailsVo.setProblemRectificationState("1");
+                            }
+                            if (divideRectificationRecord.getState().equals("等待验证")) {
+                                internalAuditDetailsVo.setProblemRectificationState("3");
+                            }
+                            if (divideRectificationRecord.getState().equals("已完成")) {
+                                internalAuditDetailsVo.setProblemRectificationState("2");
+                            }
                         } else {
                             internalAuditDetailsVo.setDivideRectificationRecord(new DivideRectificationRecord());
+                            // 整改对象 = null 状态 = 0
+                            internalAuditDetailsVo.setProblemRectificationState("0");
                         }
                     }
                 }

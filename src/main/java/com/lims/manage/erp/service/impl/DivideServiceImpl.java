@@ -43,8 +43,7 @@ public class DivideServiceImpl extends ServiceImpl<DivideDao, DivideEntity> impl
         for (DivideEntity divideEntity : oldDivideList) {
             Boolean falg = false;
             for (DivideVo divideVo : newDivideVoList) {
-                String[] arrays = divideVo.getDeptName().split("&");
-                if (divideEntity.getDeptId().equals(arrays[0])) {
+                if (divideEntity.getDeptId().equals(divideVo.getDeptId())) {
                     falg = true;
                 }
             }
@@ -71,16 +70,15 @@ public class DivideServiceImpl extends ServiceImpl<DivideDao, DivideEntity> impl
                     map.put(divideEntity.getDeptId() + "&" + divideEntity.getDeptName(), entityList);
                 }
             }
+            // 获取当前 最大id +1.
+            QueryWrapper<DivideEntity> entityLambdaQueryChainWrapper = new QueryWrapper<>();
+            entityLambdaQueryChainWrapper.select("IFNULL(max( divide_id ) + 1,1) as divide_id");
+            entityLambdaQueryChainWrapper.last("limit 1");
+            DivideEntity divideEntity = this.baseMapper.selectOne(entityLambdaQueryChainWrapper);
+            Integer divideId = divideEntity.getDivideId();
 
             // 比较 更新数据
             for (DivideVo divideVo : newDivideVoList) {
-                // 获取当前 最大id +1.
-                QueryWrapper<DivideEntity> entityLambdaQueryChainWrapper = new QueryWrapper<>();
-                entityLambdaQueryChainWrapper.select("IFNULL(max( divide_id ) + 1,1) as divide_id");
-                entityLambdaQueryChainWrapper.last("limit 1");
-                DivideEntity divideEntity = this.baseMapper.selectOne(entityLambdaQueryChainWrapper);
-                Integer divideId = divideEntity.getDivideId();
-
                 if (map.get(divideVo.getDeptId() + "&" + divideVo.getDeptName()) == null) {
                     // 这组信息 是需要新增的
 
@@ -96,13 +94,26 @@ public class DivideServiceImpl extends ServiceImpl<DivideDao, DivideEntity> impl
                     }
                     divideId = divideId + 1;
                 } else {
-//                    String[] arrays = divideVo.getDeptName().split("&");
-                    // 进行更新操作
-                    for (DivideEntity divideEntity1 : divideVo.getDivideList()) {
-                        divideEntity1.setDivideId(divideVo.getDivideId());
-                        divideEntity1.setActiveId(divideVo.getActiveId());
-                        divideEntity1.setDeptId(divideVo.getDeptId());
-                        divideEntity1.setDeptName(divideVo.getDeptName());
+                    // 分组id 下 信息 进行新增 更新 或 删除
+
+                    // 删除旧数据
+                    LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper<>();
+                    queryWrapper.eq(DivideEntity::getDeptId, divideVo.getDeptId());
+                    queryWrapper.eq(DivideEntity::getActiveId, activeId);
+                    List<DivideEntity> oldUserDivideList = this.baseMapper.selectList(queryWrapper);
+                    if (CollectionUtil.isNotEmpty(oldUserDivideList)) {
+                        for (DivideEntity divideEntity1 : oldUserDivideList) {
+                            Boolean falg = false;
+                            for (DivideEntity divideEntity2 : divideVo.getDivideList()) {
+                                if (divideEntity2.getId() != null && divideEntity1.getId().equals(divideEntity2.getId())) {
+                                    falg = true;
+                                }
+                            }
+                            if (!falg) {
+                                // 删除数据
+                                this.baseMapper.deleteById(divideEntity1.getId());
+                            }
+                        }
                     }
                     // 执行新增 or 更新
                     saveOrUpdateBatch(divideVo.getDivideList());

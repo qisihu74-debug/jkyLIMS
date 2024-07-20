@@ -1,5 +1,6 @@
 package com.lims.manage.erp.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.lims.manage.erp.entity.AduditBaseData;
 import com.lims.manage.erp.entity.DivideRectificationRecord;
 import lombok.Data;
@@ -63,6 +64,10 @@ public class InternalAuditDetailsVo {
      * '检查待开始','检查中','检查完成','措施验证','已完成'
      */
     private String state;
+    /**
+     * 0整改通知、1=原因分析及纠正、2=纠正完成、3=措施验证
+     */
+    private String problemRectificationState;
 
     /**
      * 审核员姓名
