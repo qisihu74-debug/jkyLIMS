@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.InternalAuditorActive;
 import com.lims.manage.erp.mapper.AduditBaseDataDao;
 import com.lims.manage.erp.mapper.QsAuditDao;
 import com.lims.manage.erp.service.QsAuditService;
+import com.lims.manage.erp.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,7 +75,7 @@ public class QsAuditServiceImpl implements QsAuditService {
         List<InternalAuditorActive> list = qsAuditDao.deptLeaderActiveList(name,userId);
         PageInfo<InternalAuditorActive> pageInfo = new PageInfo<>(list);
         for (InternalAuditorActive active : pageInfo.getList()) {
-            active.setAuditTimeCycle(active.getStartTime()+"~"+active.getEndTime());
+            active.setAuditTimeCycle(DateUtil.formatDate(active.getStartTime())+"~"+DateUtil.formatDate(active.getEndTime()));
         }
         return pageInfo;
     }

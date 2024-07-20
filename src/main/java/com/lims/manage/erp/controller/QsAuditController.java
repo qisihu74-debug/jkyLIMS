@@ -110,7 +110,7 @@ public class QsAuditController {
         //处理内审员
         List<Integer> ids = Lists.newArrayList();
         for (InternalAuditorActive active : pageInfo.getList()) {
-            active.setAuditTimeCycle(active.getStartTime()+"~"+active.getEndTime());
+            active.setAuditTimeCycle(DateUtil.formatDate(active.getStartTime())+"~"+DateUtil.formatDate(active.getEndTime()));
             ids.add(active.getDivideId());
         }
         //查询活动下的人员信息
