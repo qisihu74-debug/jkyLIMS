@@ -113,20 +113,22 @@ public class QsAuditController {
             ids.add(active.getDivideId());
         }
         //查询活动下的人员信息
-        LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.in(DivideEntity::getDivideId,ids);
-        List<DivideEntity> list = divideService.list(queryWrapper);
-        for (InternalAuditorActive active :pageInfo.getList()){
-            List<AuditTeamNumber> userList = Lists.newArrayList();
-            for (DivideEntity divideEntity :list){
-                if (active.getDivideId() == divideEntity.getDivideId()){
-                    AuditTeamNumber teamNumber = new AuditTeamNumber();
-                    teamNumber.setUserId(divideEntity.getAuditorId());
-                    teamNumber.setName(divideEntity.getAuditorName());
-                    userList.add(teamNumber);
+        if (CollectionUtils.isNotEmpty(ids)){
+            LambdaQueryWrapper<DivideEntity> queryWrapper = new LambdaQueryWrapper();
+            queryWrapper.in(DivideEntity::getDivideId,ids);
+            List<DivideEntity> list = divideService.list(queryWrapper);
+            for (InternalAuditorActive active :pageInfo.getList()){
+                List<AuditTeamNumber> userList = Lists.newArrayList();
+                for (DivideEntity divideEntity :list){
+                    if (active.getDivideId() == divideEntity.getDivideId()){
+                        AuditTeamNumber teamNumber = new AuditTeamNumber();
+                        teamNumber.setUserId(divideEntity.getAuditorId());
+                        teamNumber.setName(divideEntity.getAuditorName());
+                        userList.add(teamNumber);
+                    }
                 }
+                active.setUserList(userList);
             }
-            active.setUserList(userList);
         }
         return ResultUtil.success(pageInfo);
     }
@@ -247,6 +249,14 @@ public class QsAuditController {
             DivideAuditDetail one = divideAuditDetailService.getOne(queryWrapper);
             if (one == null){
                 divideAuditDetailService.saveBatch(detailRel.getList());
+            }else {
+                LambdaUpdateWrapper<DivideAuditDetail> updateWrapper = new LambdaUpdateWrapper();
+                updateWrapper.eq(DivideAuditDetail::getDivideId,detailRel.getList().get(0).getDivideId());
+                updateWrapper.eq(DivideAuditDetail::getDirectoryId,detailRel.getList().get(0).getDirectoryId());
+                updateWrapper.set(DivideAuditDetail::getFindings,detailRel.getList().get(0).getFindings());
+                updateWrapper.set(DivideAuditDetail::getOpinion,detailRel.getList().get(0).getOpinion());
+                updateWrapper.set(DivideAuditDetail::getRecord,detailRel.getList().get(0).getRecord());
+                divideAuditDetailService.update(updateWrapper);
             }
             //插入或者更新qs_audit_divide_rel
             DivideAuditDetailRel rel = new DivideAuditDetailRel();
@@ -309,7 +319,7 @@ public class QsAuditController {
 //                    LambdaUpdateWrapper<QsActiveEntity> updateWrapper = new LambdaUpdateWrapper();
 //                    updateWrapper.eq(QsActiveEntity::getActiveId,detailRel.getActiveId());
 //                    updateWrapper.set(QsActiveEntity::getState,"");
-//                    activeService.update(null,updateWrapper);
+//                    activeService.update(null,updateWraqqper);
 //                }
             }else {
                 detailRel.setState("检查完成");
@@ -522,10 +532,17 @@ public class QsAuditController {
                 }
             }
         }
-        record.setUrl(stringBuilder.toString().substring(0,stringBuilder.length()-1));
+        if (stringBuilder.length()>=1){
+            record.setUrl(stringBuilder.toString().substring(0,stringBuilder.length()-1));
+        }
         //更新状态为等待纠正
         record.setState("等待验证");
         divideRectificationRecordService.updateById(record);
+        //内审员措施验证
+        LambdaUpdateWrapper<DivideAuditDetailRel> lambdaUpdateWrapper = new LambdaUpdateWrapper();
+        lambdaUpdateWrapper.eq(DivideAuditDetailRel::getDivideId,record.getDivideId());
+        lambdaUpdateWrapper.set(DivideAuditDetailRel::getState,"措施验证");
+        divideAuditDetailRelService.update(null,lambdaUpdateWrapper);
         //钉钉通知内审员,根据活动id查询内审员id集合
         Set<Long> ids = new HashSet<>();
         LambdaQueryWrapper<AuditTeamNumber> numberLambdaQueryWrapper = new LambdaQueryWrapper();

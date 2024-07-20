@@ -3,7 +3,9 @@ package com.lims.manage.erp.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -32,6 +34,8 @@ public class DivideRectificationRecord {
     /**
      * 要求完成日期
      */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date requiredCompletionDate;
     /**
      * 要求完成日期-String
@@ -45,6 +49,8 @@ public class DivideRectificationRecord {
     /**
      * 实际完成日期
      */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date actualFinishingDate;
     /**
      * 实际完成日期 - string
@@ -58,6 +64,8 @@ public class DivideRectificationRecord {
     /**
      * 接收日期
      */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date receivedDate;
     /**
      * 接收日期 - string
@@ -71,6 +79,8 @@ public class DivideRectificationRecord {
     /**
      * 验证日期
      */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date verificationDate;
     /**
      * 验证日期
