@@ -202,19 +202,20 @@ public class QsAuditController {
      */
     @GetMapping("getCheckResult")
     public Result getCheckResult(Integer divideId){
-        if (divideId == null){
+        if (divideId == null) {
             return ResultUtil.error("缺少参数");
         }
-        Map<String,String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         LambdaQueryWrapper<DivideAuditDetail> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(DivideAuditDetail::getDivideId,divideId);
-        queryWrapper.eq(DivideAuditDetail::getOpinion,"不符合");
+        queryWrapper.eq(DivideAuditDetail::getDivideId, divideId);
+        queryWrapper.eq(DivideAuditDetail::getOpinion, "不符合").or().
+                eq(DivideAuditDetail::getOpinion, "基本符合").or().eq(DivideAuditDetail::getOpinion, "缺此项");
         List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper);
-        if (CollectionUtils.isNotEmpty(list)){
-            map.put("result","需整改");
+        if (CollectionUtils.isNotEmpty(list)) {
+            map.put("result", "需整改");
             return ResultUtil.success(map);
-        }else {
-            map.put("result","合格");
+        } else {
+            map.put("result", "合格");
             return ResultUtil.success(map);
         }
     }
