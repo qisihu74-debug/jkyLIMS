@@ -659,7 +659,7 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                 for (DivideAuditDetailRel divideAuditDetailRel : divideAuditDetailRels) {
 
                     // 进行赋值
-                    if (divideAuditDetailRel.getDivideId() == divideAuditDetailRel.getDivideId()) {
+                    if (internalAuditDetailsVo.getDivideId() == divideAuditDetailRel.getDivideId()) {
                         // 不符合项
                         internalAuditDetailsVo.setNonConformance(divideAuditDetailRel.getNonConformance());
                         // 不符合程度
@@ -866,7 +866,7 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         SysUserEntity userDetails2 = sysUserDao.selectOne(queryWrapper2);
         // 钉钉id
         String dingId2 = userDetails2.getDingUserId();
-        dingNotifyUtils.OAWorkNotice(dingId2, titleBuffer.toString(), userName, null);
+        dingNotifyUtils.OAWorkNotice(dingId2, editorBuffer.toString(), userName, null);
 
         // 出席人信息列表
         if (StringUtils.isNotEmpty(qsAuditScheduleRelEntity.getAttendance())) {
