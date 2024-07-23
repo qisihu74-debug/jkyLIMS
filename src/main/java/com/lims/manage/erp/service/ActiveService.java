@@ -1,12 +1,16 @@
 package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lims.manage.erp.entity.AduditBaseData;
 import com.lims.manage.erp.entity.QsActiveEntity;
 import com.lims.manage.erp.entity.QsAuditScheduleRelEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.QsActiveVo;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -74,6 +78,7 @@ public interface ActiveService extends IService<QsActiveEntity> {
     Result submitInternalAuditDocument(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file);
 
     List<String> getDiviDeStates(int activeId, int divideId);
+
     /**
      * 内审检查 根据内审ID 展示 详情
      *
@@ -82,5 +87,14 @@ public interface ActiveService extends IService<QsActiveEntity> {
      * @return
      */
     Result getInternalAuditInspectionDetails(String activeId, Integer type);
+
+    /**
+     * 填充数据
+     *
+     * @param divideId
+     * @param object
+     * @return
+     */
+    XWPFDocument downloadEntrust(String divideId, InputStream object, List<AduditBaseData> aduditBaseDataList) throws IOException;
 
 }

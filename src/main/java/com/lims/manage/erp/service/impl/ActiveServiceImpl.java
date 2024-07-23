@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
@@ -14,11 +15,17 @@ import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.DivideVo;
 import com.lims.manage.erp.vo.InternalAuditDetailsVo;
 import com.lims.manage.erp.vo.QsActiveVo;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -753,6 +760,64 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         }
 
         return ResultUtil.success(new InternalAuditDetailsVo());
+    }
+
+    @Override
+    public XWPFDocument downloadEntrust(String divideId, InputStream object, List<AduditBaseData> aduditBaseDataList) throws IOException {
+        XWPFDocument doc = null;
+        doc = new XWPFDocument(object);
+        List<XWPFTable> tables = doc.getTables();
+
+
+        Map<String, AduditBaseData> map = new HashMap<>();
+        for (AduditBaseData aduditBaseData : aduditBaseDataList) {
+            map.put(aduditBaseData.getDirectory(), aduditBaseData);
+        }
+
+        // 进行逐行 对比 内容： 进行输入。
+        for (int j = 0; j < tables.size(); j++) {
+            List<XWPFTableRow> rows = tables.get(j).getRows();
+
+            for (XWPFTableRow row : rows) {
+                List<XWPFTableCell> cells = row.getTableCells();
+                System.out.println("每一列 中 第一个格 内容 = " + cells.get(0).getText());
+                if (map.get(cells.get(0).getText()) != null) {
+                    // 进行赋值：
+                    AduditBaseData data = map.get(cells.get(0).getText());
+                    // 目录层级 则 不参与 填报 type = CMA
+                    if (data.getContent() != null && data.getMethod() != null && data.getType().equals("CMA")) {
+                        if (data.getType().equals("CMA")) {
+                            // 填写内容： 审核记录
+                            cells.get(3).setText(data.getFindings());
+                            // 填报 审核意见 进行区分（符合4、基本符合05、不符合06、缺此项07、不适用08）
+                            switch (data.getOpinion()) {
+                                case "符合":
+                                    cells.get(4).setText(data.getOpinion());
+                                    break;
+                                case "基本符合":
+                                    cells.get(5).setText(data.getOpinion());
+                                    break;
+                                case "不符合":
+                                    cells.get(6).setText(data.getOpinion());
+                                    break;
+                                case "不适用":
+                                    cells.get(7).setText(data.getOpinion());
+                                    break;
+                            }
+                            //评审发现
+                            cells.get(9).setText(data.getRecord());
+                        }
+                        if (data.getType().equals("CNAS")) {
+                            // 填写内容： 审核记录
+                            cells.get(2).setText(data.getFindings());
+                            //评审发现
+                            cells.get(3).setText(data.getRecord());
+                        }
+                    }
+                }
+            }
+        }
+        return doc;
     }
 
     /**

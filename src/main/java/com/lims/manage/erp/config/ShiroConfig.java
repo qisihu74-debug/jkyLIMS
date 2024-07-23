@@ -80,8 +80,10 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/technicistFile/previewResume", "anon");
         filterChainDefinitionMap.put("/technicistFile/downloadFile", "anon");
         filterChainDefinitionMap.put("/task/downloadEntrust_two", "anon");
+        filterChainDefinitionMap.put("/task/previewEntrust", "anon");
+        filterChainDefinitionMap.put("/task/downloadEntrust", "anon");
         filterChainDefinitionMap.put("/entrust/previewEntrust", "anon");
-        filterChainDefinitionMap.put("/report_approval/onlineReport","anon");
+        filterChainDefinitionMap.put("/report_approval/onlineReport", "anon");
         filterChainDefinitionMap.put("/task/previewOriginalRecord", "anon");
         filterChainDefinitionMap.put("/testInstrument/exportInstrumentRecord", "anon");
         filterChainDefinitionMap.put("/testInstrument/batchExportInstrumentRecord", "anon");

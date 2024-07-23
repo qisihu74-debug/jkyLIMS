@@ -81,12 +81,12 @@ public class PoiConfig {
             List<XWPFTableCell> cells = row.getTableCells();
             for (XWPFTableCell cell : cells) {
                 //判断单元格是否需要替换
-                if(checkText(cell.getText())){
+                if (checkText(cell.getText())) {
                     List<XWPFParagraph> paragraphs = cell.getParagraphs();
                     for (XWPFParagraph paragraph : paragraphs) {
                         List<XWPFRun> runs = paragraph.getRuns();
                         for (XWPFRun run : runs) {
-                            run.setText(changeValue(run.toString(), textMap),0);
+                            run.setText(changeValue(run.toString(), textMap), 0);
                         }
                     }
                 }

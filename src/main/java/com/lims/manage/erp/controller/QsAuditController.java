@@ -22,6 +22,7 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.job.DingUserJob;
+import com.lims.manage.erp.mapper.AduditBaseDataDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.AduditBaseDataService;
@@ -34,15 +35,16 @@ import com.lims.manage.erp.service.DivideService;
 import com.lims.manage.erp.service.QsAuditService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.service.*;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.DingNotifyUtils;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.QsActiveVo;
+import com.lims.manage.erp.vo.TaskDetailInfoVo;
+import io.minio.MinioClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +55,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -91,6 +99,8 @@ public class QsAuditController {
     private ActiveService activeService;
     @Autowired
     private QsAuditScheduleRelService qsAuditScheduleRelService;
+    @Autowired
+    private AduditBaseDataDao aduditBaseDataDao;
 
     /**
      * 技术质量部内审活动列表
@@ -197,20 +207,25 @@ public class QsAuditController {
 
     /**
      * 检查结果获取
+     *
      * @param divideId
      * @return
      */
     @GetMapping("getCheckResult")
-    public Result getCheckResult(Integer divideId){
+    public Result getCheckResult(Integer divideId) {
         if (divideId == null) {
             return ResultUtil.error("缺少参数");
         }
         Map<String, String> map = new HashMap<>();
         LambdaQueryWrapper<DivideAuditDetail> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DivideAuditDetail::getDivideId, divideId);
-        queryWrapper.eq(DivideAuditDetail::getOpinion, "不符合").or().
-                eq(DivideAuditDetail::getOpinion, "基本符合").or().eq(DivideAuditDetail::getOpinion, "缺此项")
-                .or().eq(DivideAuditDetail::getOpinion, "Y`").or().eq(DivideAuditDetail::getOpinion, "N").or().eq(DivideAuditDetail::getOpinion, "N/A");
+        queryWrapper.last("\tand( opinion = \"不符合\"\n" +
+                "\tor opinion = \"基本符合\"\n" +
+                "\tor opinion = \"缺此项\"\n" +
+                "\tor opinion = \"Y`\"\n" +
+                "\tor opinion = \"N\"\n" +
+                "\tor opinion = \"N/A\")");
+
         List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper);
         if (CollectionUtils.isNotEmpty(list)) {
             map.put("result", "需整改");
@@ -994,4 +1009,75 @@ public class QsAuditController {
         return activeService.getInternalAuditInspectionDetails(activeId, 2);
     }
 
+    /**
+     * 根据 分组id 进行下载 检测记录表
+     *
+     * @param divideId
+     * @param response
+     */
+    @GetMapping("downloadEntrust")
+    public void downloadEntrust(String divideId, HttpServletResponse response) {
+        try {
+            MinioClient client = MinIoUtil.minioClient;
+            // 进行 测试数据
+            // 获取 分组Id 填报的 检查记录信息
+            List<AduditBaseData> aduditBaseDataList = aduditBaseDataDao.selectmergingList(Integer.valueOf(divideId));
+            String objectName = "";
+            if (aduditBaseDataList.get(0).getType().equals("CMA")) {
+                objectName = "037-RBT214-2017内部审核检查表-2019.10.docx";
+            } else {
+                objectName = "038-核查表 CNAS-CL01（认可准则）-2019.10.doc";
+            }
+            InputStream object = client.getObject("internal-audit", objectName);
+            XWPFDocument doc = null;
+            doc = activeService.downloadEntrust(divideId, object, aduditBaseDataList);
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            // 获取 分组列表
+            LambdaQueryWrapper<AduditBaseData> queryWrapper = new LambdaQueryWrapper<>();
+            response.setHeader("Content-Disposition", "attachment;fileName=" + "检测记录表" + ".docx");
+            OutputStream outputStream = response.getOutputStream();
+            doc.write(outputStream);
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 根据 分组id 进行下载 检测记录表
+     *
+     * @param divideId
+     * @param response
+     */
+    @GetMapping("previewEntrust")
+    public void previewEntrust(String divideId, HttpServletResponse response) {
+        try {
+            MinioClient client = MinIoUtil.minioClient;
+            // 进行 测试数据
+            // 获取 分组Id 填报的 检查记录信息
+            List<AduditBaseData> aduditBaseDataList = aduditBaseDataDao.selectmergingList(Integer.valueOf(divideId));
+            String objectName = "";
+            if (aduditBaseDataList.get(0).getType().equals("CMA")) {
+                objectName = "037-RBT214-2017内部审核检查表-2019.10.docx";
+            } else {
+                objectName = "038-核查表 CNAS-CL01（认可准则）-2019.10.doc";
+            }
+            InputStream object = client.getObject("internal-audit", objectName);
+            XWPFDocument doc = null;
+            doc = activeService.downloadEntrust(divideId, object, aduditBaseDataList);
+            //相应pdf
+            ByteArrayOutputStream b1 = AsposeUtil.word2pdf4(doc);
+            InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+            ServletOutputStream outputStream = response.getOutputStream();
+            int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+            inputStream.close();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
