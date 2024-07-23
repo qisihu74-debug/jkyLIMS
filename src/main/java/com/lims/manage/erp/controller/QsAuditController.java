@@ -209,7 +209,8 @@ public class QsAuditController {
         LambdaQueryWrapper<DivideAuditDetail> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DivideAuditDetail::getDivideId, divideId);
         queryWrapper.eq(DivideAuditDetail::getOpinion, "不符合").or().
-                eq(DivideAuditDetail::getOpinion, "基本符合").or().eq(DivideAuditDetail::getOpinion, "缺此项");
+                eq(DivideAuditDetail::getOpinion, "基本符合").or().eq(DivideAuditDetail::getOpinion, "缺此项")
+                .or().eq(DivideAuditDetail::getOpinion, "Y`").or().eq(DivideAuditDetail::getOpinion, "N").or().eq(DivideAuditDetail::getOpinion, "N/A");
         List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper);
         if (CollectionUtils.isNotEmpty(list)) {
             map.put("result", "需整改");

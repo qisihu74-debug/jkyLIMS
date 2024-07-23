@@ -57,6 +57,8 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
     private DivideAuditDetailRelService divideAuditDetailRelService;
     @Autowired
     private DivideRectificationRecordDao divideRectificationRecordDao;
+    @Autowired
+    private DivideAuditDetailRelDao divideAuditDetailRelDao;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -904,27 +906,67 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         divideWrapper.eq(DivideEntity::getActiveId, qsActiveEntity.getActiveId());
         List<DivideEntity> divideList = divideDao.selectList(divideWrapper);
 
+        Map<Integer, List<DivideEntity>> divideMap = new HashMap<>();
+
         for (DivideEntity divideEntity : divideList) {
-            // 通过部门id集合 获取 负责人名字
-            LambdaQueryWrapper<DingDeptEntity> deptWrapper = new LambdaQueryWrapper<>();
-            deptWrapper.in(DingDeptEntity::getId, divideEntity.getDeptId());
-            deptWrapper.last("limit 1");
-            DingDeptEntity dingDeptEntity = deptDao.selectOne(deptWrapper);
-            // 获取 任务单下检测人信息 userId
-            LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(SysUserEntity::getUserId, dingDeptEntity.getUserId());
-            SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
-            // 钉钉id
-            String dingId = userDetails.getDingUserId();
+            if (divideMap.get(divideEntity.getDivideId()) != null) {
+                List<DivideEntity> divideEntityList = divideMap.get(divideEntity.getDivideId());
+                divideEntityList.add(divideEntity);
+                divideMap.put(divideEntity.getDivideId(), divideEntityList);
+            } else {
+                List<DivideEntity> divideEntityList = new ArrayList<>();
+                divideEntityList.add(divideEntity);
+                divideMap.put(divideEntity.getDivideId(), divideEntityList);
+            }
+        }
+//        for (DivideEntity divideEntity : divideList) {
+        for (Integer divideKey : divideMap.keySet()) {
+            List<DivideEntity> divideEntitys = divideMap.get(divideKey);
 
-            // 发送内容
-            StringBuffer titleBuffer = new StringBuffer();
-            titleBuffer.append("内审名称为： " + qsActiveEntity.getName());
-            titleBuffer.append("在 " + type + "中 部门负责人： " + userDetails.getName() + "  请尽快完成检查");
-            String time = DateUtil.formatMinuteDate(new Date());
-            titleBuffer.append("催办时间为 " + time);
+            // 通过分工id 获取 对应的状态 != "已完成" 则 内审员 一并催办
+            LambdaQueryWrapper<DivideAuditDetailRel> divideAuditDetailWrapper = new LambdaQueryWrapper<>();
+            divideAuditDetailWrapper.eq(DivideAuditDetailRel::getDivideId, divideEntitys.get(0).getDivideId());
+            DivideAuditDetailRel divideAuditDetai = divideAuditDetailRelDao.selectOne(divideAuditDetailWrapper);
+            if (!divideAuditDetai.getState().equals("已完成")) {
+                // 对应的 部门-内审员 得到 催办信息
+                for (DivideEntity divideEntity : divideEntitys) {
+                    // 获取  userId
+                    LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+                    queryWrapper.eq(SysUserEntity::getUserId, divideEntity.getAuditorId());
+                    SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
+                    // 钉钉id
+                    String dingId = userDetails.getDingUserId();
 
-            dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), userName, null);
+                    // 发送内容
+                    StringBuffer titleBuffer = new StringBuffer();
+                    titleBuffer.append("内审名称为： " + qsActiveEntity.getName());
+                    titleBuffer.append("在 " + type + "中 " + divideEntity.getDeptName() + "  担任 内审员： " + userDetails.getName() + "  请尽快完成检查");
+                    String time = DateUtil.formatMinuteDate(new Date());
+                    titleBuffer.append("催办时间为 " + time);
+
+                    dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), userName, null);
+                }
+                // 通过部门id集合 获取 负责人名字
+                LambdaQueryWrapper<DingDeptEntity> deptWrapper = new LambdaQueryWrapper<>();
+                deptWrapper.in(DingDeptEntity::getId, divideEntitys.get(0).getDeptId());
+                deptWrapper.last("limit 1");
+                DingDeptEntity dingDeptEntity = deptDao.selectOne(deptWrapper);
+                // 获取 任务单下检测人信息 userId
+                LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(SysUserEntity::getUserId, dingDeptEntity.getUserId());
+                SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
+                // 钉钉id
+                String dingId = userDetails.getDingUserId();
+
+                // 发送内容
+                StringBuffer titleBuffer = new StringBuffer();
+                titleBuffer.append("内审名称为： " + qsActiveEntity.getName());
+                titleBuffer.append("在 " + type + "中 部门负责人： " + userDetails.getName() + "  请尽快完成检查");
+                String time = DateUtil.formatMinuteDate(new Date());
+                titleBuffer.append("催办时间为 " + time);
+
+                dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), userName, null);
+            }
         }
     }
 }
