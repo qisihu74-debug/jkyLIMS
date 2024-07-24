@@ -227,12 +227,12 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "\tsys_user\n" +
             "WHERE\n" +
             "\tuser_id = (\n" +
-            "\t\tSELECT\n" +
+            "\t\tSELECT DISTINCT\n" +
             "\t\t\tuser_id\n" +
             "\t\tFROM\n" +
             "\t\t\tsys_dept\n" +
             "\t\tWHERE\n" +
-            "\t\t\tNAME = #{deptName} )")
+            "\t\t\tNAME = #{deptName} AND user_id is not null LIMIT 1 )")
     String getPositionByDeptName(@Param("deptName") String deptName);
 
     /**
