@@ -311,7 +311,12 @@ public class QsAuditController {
         //判断是否合格
         LambdaQueryWrapper<DivideAuditDetail> queryWrapper1 = new LambdaQueryWrapper<>();
         queryWrapper1.eq(DivideAuditDetail::getDivideId,detailRel.getDivideId());
-        queryWrapper1.eq(DivideAuditDetail::getOpinion,"不符合");
+        queryWrapper1.last("\tand( opinion = \"不符合\"\n" +
+                "\tor opinion = \"基本符合\"\n" +
+                "\tor opinion = \"缺此项\"\n" +
+                "\tor opinion = \"Y`\"\n" +
+                "\tor opinion = \"N\"\n" +
+                "\tor opinion = \"N/A\")");
         List<DivideAuditDetail> list = divideAuditDetailService.list(queryWrapper1);
         if (CollectionUtils.isNotEmpty(list)){
             if (StringUtils.isEmpty(detailRel.getNonComplianceDegree()) ||StringUtils.isEmpty(detailRel.getNonConformance())
@@ -334,21 +339,6 @@ public class QsAuditController {
             //更新qs_audit_divide_rel，如果不存在不符合项状态为已完成，存在为检查完成
             if ("合格".equals(detailRel.getCheckResult())){
                 detailRel.setState("已完成");
-                //判断活动下次分工是否都已完成 TODO
-//                List<String> strings = activeService.getDiviDeStates(detailRel.getActiveId(),detailRel.getDivideId());
-//                for (String s:strings){
-//                    if (!"已完成".equals(s)){
-//                        flag = false;
-//                        break;
-//                    }
-//                }
-//                if (flag){
-//                    //更新主表状态
-//                    LambdaUpdateWrapper<QsActiveEntity> updateWrapper = new LambdaUpdateWrapper();
-//                    updateWrapper.eq(QsActiveEntity::getActiveId,detailRel.getActiveId());
-//                    updateWrapper.set(QsActiveEntity::getState,"");
-//                    activeService.update(null,updateWraqqper);
-//                }
             }else {
                 detailRel.setState("检查完成");
             }
@@ -368,7 +358,7 @@ public class QsAuditController {
                 DivideRectificationRecord record = new DivideRectificationRecord();
                 record.setDivideId(detailRel.getDivideId());
                 record.setState("整改通知");
-                divideRectificationRecordService.save(record);
+                divideRectificationRecordService.saveOrUpdate(record);
                 //获取部门负责人（部长/所长/主任）,通知部门负责人接收整改通知
                 String dingId = sysUserService.getPositionByDeptName(detailRel.getDeptName());
                 if (StringUtils.isNotEmpty(dingId)){
