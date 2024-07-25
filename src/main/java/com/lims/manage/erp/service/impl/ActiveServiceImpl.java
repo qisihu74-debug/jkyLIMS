@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lims.manage.erp.config.PoiConfig;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
@@ -26,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -560,6 +558,7 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         return this.baseMapper.getDiviDeStates(activeId,divideId);
     }
 
+
     /**
      * @param activeId
      * @param type     = 1 内审检查 根据内审ID 展示 详情 、 type = 2 问题整改详情（展示整改详情，不展示 检查记录）
@@ -578,15 +577,13 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
         }
 
         // 获取分工id 集合
-        LambdaQueryWrapper<DivideEntity> divideWrapper = new LambdaQueryWrapper<>();
-        divideWrapper.eq(DivideEntity::getActiveId, activeId);
-        List<DivideEntity> list = divideDao.selectList(divideWrapper);
+        List<DivideEntity> list = divideDao.selectDivideList(activeId);
 
         // 进行整合 组员信息
         if (CollectionUtil.isNotEmpty(list)) {
 
             // 进行分组展示 key = deptId value = 分工集合
-            Map<String, List<DivideEntity>> map = new HashMap<>();
+            Map<String, List<DivideEntity>> map = new TreeMap<>();
             for (DivideEntity divideEntity : list) {
                 // 进行分组
                 if (map.get(divideEntity.getDeptId()) == null) {
@@ -704,10 +701,11 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                         // 整改对象 = null 状态 = 0
                         internalAuditDetailsVo.setProblemRectificationState("0");
                     }
+                    boolean flag = false;
                     for (DivideRectificationRecord divideRectificationRecord : divideRectificationRecords) {
                         // 补充进 问题纠正中
                         if (internalAuditDetailsVo.getDivideId() == divideRectificationRecord.getDivideId()) {
-
+                            flag = true;
                             // Date 转 string
                             if (divideRectificationRecord.getReceivedDate() != null) {
                                 // Date 转 "2024-07-16" 格式
@@ -747,15 +745,17 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
                             if (divideRectificationRecord.getState().equals("已完成")) {
                                 internalAuditDetailsVo.setProblemRectificationState("2");
                             }
-                        } else {
-                            internalAuditDetailsVo.setDivideRectificationRecord(new DivideRectificationRecord());
-                            // 整改对象 = null 状态 = 0
-                            internalAuditDetailsVo.setProblemRectificationState("0");
                         }
+                    }
+                    if (!flag) {
+                        internalAuditDetailsVo.setDivideRectificationRecord(new DivideRectificationRecord());
+                        // 整改对象 = null 状态 = 0
+                        internalAuditDetailsVo.setProblemRectificationState("0");
                     }
                 }
             }
-
+            // 使用Collections.reverse()方法来逆序List
+            Collections.reverse(dataSet);
             return ResultUtil.success(dataSet);
         }
 

@@ -45,4 +45,17 @@ public interface SysUserRoleDao extends BaseMapper<SysUserRoleEntity> {
             "WHERE\n" +
             "\tt1.user_id = #{userId}")
     List<LabelValueVo> getRolesByUserId(@Param("userId") Long userId);
+
+    /**
+     * 查询最高 管理者
+     *
+     * @return
+     */
+    @Select("SELECT DISTINCT\n" +
+            "\tuser_id \n" +
+            "FROM\n" +
+            "\tsys_user_role \n" +
+            "WHERE\n" +
+            "\trole_id = 999")
+    List<Long> selectTopManagement();
 }
