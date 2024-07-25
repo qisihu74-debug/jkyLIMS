@@ -157,7 +157,7 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
             "\tt1.role_name = '盖章人'")
     List<String> getDingIdByRoleName();
 
-    @Select("SELECT\n" +
+    @Select("SELECT DISTINCT\n" +
             "\tt1.user_id \n" +
             "FROM\n" +
             "\tsys_user t1\n" +
