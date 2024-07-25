@@ -134,7 +134,7 @@ public class UserController {
         }
         // 效验账号格式
         if (!AccountValidatorUtil.isUsername(vo.getUsername())) {
-            return ResultUtil.error("用户名不符合定义 字母开头应大于五位");
+            return ResultUtil.error("用户名不符合定义");
         }
         // 效验手机号格式
         if (!AccountValidatorUtil.isMobile(vo.getMobile())) {
@@ -150,6 +150,19 @@ public class UserController {
         if (sysUserDao.getOne(vo.getUsername()) != null) {
             return ResultUtil.error("当前账号已存在");
         }
+        if (CollectionUtil.isNotEmpty(vo.getRoleIdsLong())) {
+            for (Long roleId : vo.getRoleIdsLong()) {
+                if (roleId == 999) {
+                    // 查询 最高管理者角色 拥有
+                    List<Long> topManagementList = sysUserRoleDao.selectTopManagement();
+                    if (CollectionUtil.isNotEmpty(topManagementList)) {
+                        return ResultUtil.error("创建失败： 最高管理者角色 已经被授权");
+                    }
+                }
+            }
+        }
+
+
         vo.setUserId(GenID.getID());
         RegisterUserInfoVo userInfoVo = new RegisterUserInfoVo();
         // 处理部门信息
@@ -336,7 +349,7 @@ public class UserController {
         }
         // 效验账号格式
         if (!AccountValidatorUtil.isUsername(vo.getUsername())) {
-            return ResultUtil.error("用户名不符合定义 字母开头应大于五位");
+            return ResultUtil.error("用户名不符合定义");
         }
         // 效验手机号格式
         if (!AccountValidatorUtil.isMobile(vo.getMobile())) {
@@ -368,6 +381,19 @@ public class UserController {
                 // 钉钉用户id 存在其他使用人
                 if (!sysUserService.getTheUserList(vo.getDingUserId())) {
                     return ResultUtil.error("使用人 已拥有账号");
+                }
+            }
+        }
+        if (CollectionUtil.isNotEmpty(vo.getRoleIdsLong())) {
+            for (Long roleId : vo.getRoleIdsLong()) {
+                if (roleId == 999) {
+                    // 查询 最高管理者角色 拥有
+                    List<Long> topManagementList = sysUserRoleDao.selectTopManagement();
+                    if (CollectionUtil.isNotEmpty(topManagementList)) {
+                        if (!topManagementList.get(0).equals(vo.getUserId())) {
+                            return ResultUtil.error("编辑失败： 最高管理者角色 已经被授权");
+                        }
+                    }
                 }
             }
         }
