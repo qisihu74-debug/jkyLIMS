@@ -9,6 +9,7 @@ import com.lims.manage.erp.vo.DingDeptVo;
 import com.lims.manage.erp.vo.PagingToolVo;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author gjl
@@ -177,4 +178,10 @@ public interface DeptService extends IService<DingDeptEntity> {
      * @return
      */
     Result getTrialDepartmentList();
+
+    /**
+     * 获取部门负责人ids
+     * @return
+     */
+    Set<Long> getDingIds();
 }

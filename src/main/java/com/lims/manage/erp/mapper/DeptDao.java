@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author gjl
@@ -104,4 +105,7 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
 
     @Select("SELECT id as value,name as label FROM sys_dept")
     List<LabelValueTeamVo> selectTrialDepartmentList();
+
+    @Select("select user_id from sys_dept where user_id is not null")
+    Set<Long> getDingIds();
 }

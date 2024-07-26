@@ -501,4 +501,9 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
         List<LabelValueTeamVo> deptList = deptDao.selectTrialDepartmentList();
         return ResultUtil.success(deptList);
     }
+
+    @Override
+    public Set<Long> getDingIds() {
+        return deptDao.getDingIds();
+    }
 }
