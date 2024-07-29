@@ -76,19 +76,25 @@ public class QsMrActiveEntity {
      */
     private String approverName;
     /**
-     *状态：待开始，进行中，已完成
+     * 状态：待开始，进行中，已完成
      */
     private String state;
     /**
-     *管理评审总结,如果多个逗号隔开
+     * 管理评审总结,如果多个逗号隔开
      */
     private String fileUrl;
-    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd")
-    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date time;
     /**
      * 内容纲要列表信息
      */
     @TableField(exist = false)
     private List<ActiveContentEntity> list;
+
+    /**
+     * 部门列表附件信息
+     */
+    @TableField(exist = false)
+    private List<ActiveDetailsEntity> departmentDetails;
 }

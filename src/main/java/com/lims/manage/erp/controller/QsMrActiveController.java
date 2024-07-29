@@ -6,14 +6,12 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.ActiveContentEntity;
+import com.lims.manage.erp.entity.ActiveDetailsEntity;
 import com.lims.manage.erp.entity.QsMrActiveEntity;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.ActiveContentService;
-import com.lims.manage.erp.service.DeptService;
-import com.lims.manage.erp.service.QsMrActiveService;
-import com.lims.manage.erp.service.SysUserService;
+import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.StringUtils;
@@ -55,26 +53,29 @@ public class QsMrActiveController {
     private SysUserService sysUserService;
     @Autowired
     private DingNotifyUtils dingNotifyUtils;
+    @Autowired
+    private ActiveDetailsService activeDetailsService;
 
     /**
      * 分页查询管理评审列表
+     *
      * @param pageNum
      * @param pageSize
      * @return
      */
     @GetMapping("list")
-    public Result list(Integer pageNum,Integer pageSize){
-        if (pageNum == null || pageSize == null){
+    public Result list(Integer pageNum, Integer pageSize) {
+        if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少分页参数");
         }
-        PageHelper.startPage(pageNum,pageSize);
+        PageHelper.startPage(pageNum, pageSize);
         LambdaQueryWrapper<QsMrActiveEntity> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.orderByDesc(QsMrActiveEntity::getTime);
         List<QsMrActiveEntity> list = qsMrActiveService.list(queryWrapper);
         PageInfo<QsMrActiveEntity> pageInfo = new PageInfo<>(list);
         //查询内容纲要
         List<Integer> ids = Lists.newArrayList();
-        for (QsMrActiveEntity entity :pageInfo.getList()){
+        for (QsMrActiveEntity entity : pageInfo.getList()) {
             ids.add(entity.getActiveId());
         }
         if (CollectionUtils.isNotEmpty(ids)){
@@ -180,22 +181,48 @@ public class QsMrActiveController {
                 LambdaQueryWrapper<QsMrActiveEntity> queryWrapper = new LambdaQueryWrapper<>();
                 queryWrapper.eq(QsMrActiveEntity::getReviewName,entity.getReviewName());
                 QsMrActiveEntity one = qsMrActiveService.getOne(queryWrapper);
-                if (one != null){
+                if (one != null) {
                     return ResultUtil.error("此管理评审已存在");
                 }
             }
         }
         qsMrActiveService.updateById(entity);
         List<ActiveContentEntity> list = entity.getList();
-        for (ActiveContentEntity activeContentEntity :list){
+        for (ActiveContentEntity activeContentEntity : list) {
             activeContentEntity.setActiveId(entity.getActiveId());
         }
         //删除旧数据
-        Map<String,Object> map = new HashMap<>();
-        map.put("active_id",entity.getActiveId());
+        Map<String, Object> map = new HashMap<>();
+        map.put("active_id", entity.getActiveId());
         activeContentService.removeByMap(map);
         activeContentService.saveBatch(list);
-        return ResultUtil.success("变更成功",null);
+        return ResultUtil.success("变更成功", null);
     }
 
+    /**
+     * 管理评审详情
+     *
+     * @return
+     */
+    @GetMapping("details")
+    public Result details(String activeId) {
+        // 获取 管理计划详情
+        QsMrActiveEntity byId = qsMrActiveService.getById(activeId);
+        if (byId == null) {
+            return ResultUtil.error(null);
+        }
+        // 获取 内容纲要 列表
+        LambdaQueryWrapper<ActiveContentEntity> contentQueryWrapper = new LambdaQueryWrapper<>();
+        contentQueryWrapper.eq(ActiveContentEntity::getActiveId, activeId);
+        List<ActiveContentEntity> activeContentList = activeContentService.list(contentQueryWrapper);
+        byId.setList(activeContentList);
+
+        //  部门信息 上传附件详情
+        LambdaQueryWrapper<ActiveDetailsEntity> detailsQueryWrapper = new LambdaQueryWrapper<>();
+        detailsQueryWrapper.eq(ActiveDetailsEntity::getActiveId, activeId);
+        List<ActiveDetailsEntity> activeDetailsList = activeDetailsService.list(detailsQueryWrapper);
+        byId.setDepartmentDetails(activeDetailsList);
+
+        return ResultUtil.success(byId);
+    }
 }
