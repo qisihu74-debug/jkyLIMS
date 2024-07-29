@@ -75,6 +75,9 @@ public class QsMrActiveEntity {
      *批准人姓名
      */
     private String approverName;
+    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private Date approverDate;
     /**
      *状态：待开始，进行中，已完成
      */
