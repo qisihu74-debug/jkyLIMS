@@ -25,7 +25,7 @@ public class ActiveDetailsEntity {
     /**
      * 部门id
      */
-    private Integer deptId;
+    private String deptId;
     /**
      * 部门名称
      */

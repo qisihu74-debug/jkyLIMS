@@ -505,19 +505,20 @@ public class QsAuditController {
 
     /**
      * 部门负责人完成纠正
+     *
      * @param json
-     * @param files
+     * @param file
      * @return
      */
     @Log(title = "部门负责人完成纠正", businessType = BusinessType.INSERT)
     @PostMapping("completeCorrection")
-    public Result completeCorrection(@RequestParam("json") String json, MultipartFile[] files) {
+    public Result completeCorrection(@RequestParam("json") String json, MultipartFile[] file) {
         DivideRectificationRecord record = JSON.parseObject(json, DivideRectificationRecord.class);
         if (StringUtils.isEmpty(record.getCorrectionCompletionStatus()) || record.getActualFinishingDate() == null
                 || StringUtils.isEmpty(record.getDeptLeader())) {
             return ResultUtil.error("缺少检查结果相关信息");
         }
-        if (files == null){
+        if (file == null) {
             return ResultUtil.error("请上传整改报告");
         }
         //查询活动状态，判断管理员是否完成检查
@@ -534,15 +535,15 @@ public class QsAuditController {
         }
         //文件上传，要求是pdf文档
         StringBuilder stringBuilder = new StringBuilder();
-        for (MultipartFile file: files){
+        for (MultipartFile multipartFile : file) {
             if (file != null) {
-                String filename = file.getOriginalFilename();
+                String filename = multipartFile.getOriginalFilename();
                 String[] split = filename.split("\\.");
                 if (!"pdf".equals(split[split.length - 1])) {
                     return ResultUtil.error("文件类型不正确，请上传正确的文件类型");
                 }
                 //上传附件
-                String upload = MinIoUtil.upload(BucketsConst.internal_audit, file, file.getOriginalFilename());
+                String upload = MinIoUtil.upload(BucketsConst.internal_audit, multipartFile, multipartFile.getOriginalFilename());
                 if (!org.springframework.util.StringUtils.isEmpty(upload)) {
                     String uploadUrl = upload.substring(0, upload.indexOf("?"));
                     stringBuilder.append(uploadUrl);

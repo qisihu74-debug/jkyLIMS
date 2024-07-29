@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -7,29 +8,27 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.ActiveContentEntity;
 import com.lims.manage.erp.entity.ActiveDetailsEntity;
+import com.lims.manage.erp.entity.QsAuditScheduleRelEntity;
 import com.lims.manage.erp.entity.QsMrActiveEntity;
 import com.lims.manage.erp.enums.BusinessType;
+import com.lims.manage.erp.http.RestUtil;
+import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DingNotifyUtils;
 import com.lims.manage.erp.util.StringUtils;
+import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.QsActiveVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author gjl
@@ -55,6 +54,8 @@ public class QsMrActiveController {
     private DingNotifyUtils dingNotifyUtils;
     @Autowired
     private ActiveDetailsService activeDetailsService;
+    @Autowired
+    private DeptDao deptDao;
 
     /**
      * 分页查询管理评审列表
@@ -127,17 +128,29 @@ public class QsMrActiveController {
         activeContentService.saveBatch(list);
         //通知所有部门负责人
         Set<Long> ids = deptService.getDingIds();
-        if (CollectionUtils.isNotEmpty(ids)){
+        if (CollectionUtils.isNotEmpty(ids)) {
             List<String> idsByUserIds = sysUserService.getDingIdsByUserIds(ids);
-            for (String dingId :idsByUserIds){
+            for (String dingId : idsByUserIds) {
                 try {
-                    dingNotifyUtils.OAWorkNotice(dingId,entity.getReviewName(),entity.getReviewHost(),"管理评审已发布，请相关人员在"+ DateUtil.formatDate(entity.getReviewTime()) +"前提交材料");
-                }catch (Exception e){
-                    log.error("管理评审创建后钉钉通知失败："+dingId);
+                    dingNotifyUtils.OAWorkNotice(dingId, entity.getReviewName(), entity.getReviewHost(), "管理评审已发布，请相关人员在" + DateUtil.formatDate(entity.getReviewTime()) + "前提交材料");
+                } catch (Exception e) {
+                    log.error("管理评审创建后钉钉通知失败：" + dingId);
                 }
             }
         }
-        return ResultUtil.success("添加成功",null);
+        // 进行批量新增 管理评审部门
+        List<LabelValueTeamVo> deptList = deptDao.selectmrActiveDepartmentList();
+        List<ActiveDetailsEntity> activeDetailsEntities = new ArrayList<>();
+        for (LabelValueTeamVo teamVo : deptList) {
+            ActiveDetailsEntity activeDetailsEntity = new ActiveDetailsEntity();
+            activeDetailsEntity.setDeptId(teamVo.getValue());
+            activeDetailsEntity.setDeptName(teamVo.getLabel());
+            activeDetailsEntity.setActiveId(entity.getActiveId());
+            activeDetailsEntities.add(activeDetailsEntity);
+        }
+        activeDetailsService.saveBatch(activeDetailsEntities);
+
+        return ResultUtil.success("添加成功", null);
     }
 
     /**
@@ -224,5 +237,78 @@ public class QsMrActiveController {
         byId.setDepartmentDetails(activeDetailsList);
 
         return ResultUtil.success(byId);
+    }
+
+    /**
+     * 管理评审-开始
+     *
+     * @param qsActiveVo
+     * @return
+     */
+    @PostMapping("startInternalAuditPlan")
+    @Transactional(rollbackFor = Exception.class)
+    public Result startInternalAuditPlan(@RequestBody QsActiveVo qsActiveVo) {
+
+        // 搜索 内审id1 状态 及 是否存在
+        LambdaQueryWrapper<QsMrActiveEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QsMrActiveEntity::getActiveId, qsActiveVo.getActiveId());
+        QsMrActiveEntity activeDetails = qsMrActiveService.getOne(queryWrapper);
+        if (activeDetails == null) {
+            return ResultUtil.error("计划不存在");
+        }
+        if (!activeDetails.getState().equals("待开始")) {
+            return ResultUtil.error("状态 为 " + activeDetails.getState());
+        }
+        activeDetails.setState("进行中");
+        qsMrActiveService.updateById(activeDetails);
+        return ResultUtil.success("操作成功");
+    }
+
+    /**
+     * 提交管理评审总结
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @PostMapping("submitInternalAuditDocument")
+    public Result submitInternalAuditDocument(@RequestParam("json") String json, MultipartFile[] file) {
+        QsMrActiveEntity qsAuditScheduleRel = JSON.parseObject(json, QsMrActiveEntity.class);
+        return qsMrActiveService.submitInternalAuditDocument(qsAuditScheduleRel, file);
+    }
+
+    /**
+     * 部门负责人 上传材料
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @PostMapping("uploadMaterial")
+    public Result uploadMaterial(@RequestParam("json") String json, MultipartFile[] file) {
+        ActiveDetailsEntity qsAuditScheduleRel = JSON.parseObject(json, ActiveDetailsEntity.class);
+        return activeDetailsService.uploadMaterial(qsAuditScheduleRel, file);
+    }
+
+    /**
+     * 催办
+     *
+     * @param activeDetailsEntity
+     * @return
+     */
+    @PostMapping("hastenWork")
+    public Result hastenWork(@RequestBody ActiveDetailsEntity activeDetailsEntity) {
+        return activeDetailsService.hastenWork(activeDetailsEntity);
+    }
+
+    /**
+     * 获取 管理评审部门
+     *
+     * @return
+     */
+    @GetMapping("getActiveDepartmentList")
+    public Result getActiveDepartmentList() {
+        List<LabelValueTeamVo> deptList = deptDao.selectmrActiveDepartmentList();
+        return ResultUtil.success(deptList);
     }
 }

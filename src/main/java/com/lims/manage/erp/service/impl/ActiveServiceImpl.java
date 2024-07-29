@@ -64,6 +64,8 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
     private DivideRectificationRecordDao divideRectificationRecordDao;
     @Autowired
     private DivideAuditDetailRelDao divideAuditDetailRelDao;
+    @Autowired
+    private DingNotifyUtils dingNotifyUtils;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -518,6 +520,7 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result submitInternalAuditDocument(QsAuditScheduleRelEntity qsAuditScheduleRelEntity, MultipartFile[] file) {
 
         // 效验 内审id的对应的 首次会议、末次会议 是否存在？存在就抛出异常：为空 继续执行
@@ -824,9 +827,6 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
      * 创建评审:部门负责人 调用方法循环 通知信息
      */
     void methodnotifyDepartmentHead(String userName, QsActiveEntity qsActiveEntity, List<DivideVo> divideList) throws Exception {
-        // 进行钉钉发布消息操作
-        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
-
         // 组员信息列表
         if (CollectionUtil.isNotEmpty(divideList)) {
             for (DivideVo divideVo : divideList) {
@@ -856,9 +856,6 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
      * 创建评审:调用方法循环 通知信息
      */
     void methodForEachNotice(String userName, QsActiveEntity qsActiveEntity, List<AuditTeamNumber> auditTeamList) throws Exception {
-        // 进行钉钉发布消息操作
-        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
-
         // 审核组长
         StringBuffer titleBuffer = new StringBuffer();
         titleBuffer.append("内审活动中指派您：" + qsActiveEntity.getGroupLeaderName() + "为" + "审核组长 ");
@@ -905,9 +902,6 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
      * 发起会议：首次会议、末次会议:调用方法循环 通知信息
      */
     void methodStartMeeting(String userName, QsActiveEntity qsActiveEntity, QsAuditScheduleRelEntity qsAuditScheduleRelEntity) throws Exception {
-        // 进行钉钉发布消息操作
-        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
-
         // 主持人
         StringBuffer titleBuffer = new StringBuffer();
         titleBuffer.append("内审名称为： " + qsActiveEntity.getName());
@@ -961,8 +955,6 @@ public class ActiveServiceImpl extends ServiceImpl<ActiveMapper, QsActiveEntity>
      * 根据内审id 进行催办:调用方法循环 通知信息
      */
     void methodHastenWorkMeeting(String userName, String type, QsActiveEntity qsActiveEntity) throws Exception {
-        // 进行钉钉发布消息操作
-        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
 
         // 通过内审id 获取 对应的部门id 及 负责人 进行催办
 
