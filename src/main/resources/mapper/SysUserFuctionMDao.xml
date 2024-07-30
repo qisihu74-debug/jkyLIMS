@@ -22,6 +22,7 @@ WHERE
         DISTINCT function_id as functionId,
         NAME AS treeName,
         function_pid as functionPid,
+        kanban_name kanbanName,
         sort,
         data_type,
         menu_value,

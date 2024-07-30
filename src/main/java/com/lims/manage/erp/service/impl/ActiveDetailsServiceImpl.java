@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.constant.BucketsConst;
 import com.lims.manage.erp.entity.ActiveDetailsEntity;
@@ -76,7 +77,7 @@ public class ActiveDetailsServiceImpl extends ServiceImpl<ActiveDetailsDao, Acti
         }
         //  进行比对 获取业务受理人id
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if (!userInfo.getUserId().equals(dingDeptEntity.getUserId())) {
+        if (!userInfo.getUserId().toString().equals(dingDeptEntity.getUserId())) {
             return ResultUtil.error("操作失败 " + dingDeptEntity.getName() + " 部门负责人为 " + dingDeptEntity.getUserName());
         }
 
@@ -96,7 +97,10 @@ public class ActiveDetailsServiceImpl extends ServiceImpl<ActiveDetailsDao, Acti
                 }
             }
             detailsEntity.setFileUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
-            this.baseMapper.updateById(detailsEntity);
+            LambdaUpdateWrapper<ActiveDetailsEntity> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(ActiveDetailsEntity::getActiveId, activeDetailsEntity.getActiveId());
+            updateWrapper.eq(ActiveDetailsEntity::getDeptId, activeDetailsEntity.getDeptId());
+            this.baseMapper.update(detailsEntity, updateWrapper);
             return ResultUtil.success("操作成功");
         }
         return ResultUtil.error("附件不能为空");

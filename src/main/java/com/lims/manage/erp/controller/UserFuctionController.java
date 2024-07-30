@@ -201,21 +201,28 @@ public class UserFuctionController {
     @Transactional(rollbackFor = Exception.class)
     public Result addMenu(@RequestBody TreeFunction treeFunction) {
 
+        // 开发人员 才能够编辑或新增
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        Boolean flag = sysUserFuctionService.getAccountInformation(userInfo.getUserId());
+        if (!flag) {
+            return ResultUtil.error("新增失败，请拥有开发角色");
+        }
+
         // 最大id +1
         LambdaQueryWrapper<SysFunction> queryWrapper = new LambdaQueryWrapper<SysFunction>();
         queryWrapper.orderByDesc(SysFunction::getFunctionId);
         queryWrapper.last("limit 1");
         SysFunction sysFunctionMaxId = fuctionDao.selectOne(queryWrapper);
         if (treeFunction != null && treeFunction.getMenuValue() != null) {
-            // if 菜单类型 oneMenu（一级菜单） menu（菜单名） 进行效验
-            if (treeFunction.getDataType() != null && (treeFunction.getDataType().equals("oneMenu") || treeFunction.getDataType().equals("menu"))) {
-                LambdaQueryWrapper<SysFunction> fuctionWrapper = new LambdaQueryWrapper<SysFunction>();
-                fuctionWrapper.eq(SysFunction::getMenuValue, treeFunction.getMenuValue());
-                List<SysFunction> functionList = fuctionDao.selectList(fuctionWrapper);
-                if (CollectionUtil.isNotEmpty(functionList)) {
-                    return ResultUtil.error("新增失败，菜单标志符唯一性");
-                }
+//            // if 菜单类型 oneMenu（一级菜单） menu（菜单名） 进行效验
+//            if (treeFunction.getDataType() != null && (treeFunction.getDataType().equals("oneMenu") || treeFunction.getDataType().equals("menu"))) {
+            LambdaQueryWrapper<SysFunction> fuctionWrapper = new LambdaQueryWrapper<SysFunction>();
+            fuctionWrapper.eq(SysFunction::getMenuValue, treeFunction.getMenuValue());
+            List<SysFunction> functionList = fuctionDao.selectList(fuctionWrapper);
+            if (CollectionUtil.isNotEmpty(functionList)) {
+                return ResultUtil.error("新增失败，菜单标志符唯一性");
             }
+//            }
         }
         treeFunction.setFunctionId(sysFunctionMaxId != null ? sysFunctionMaxId.getFunctionId() + 1 : 1);
         SysFunction sysFunction = new SysFunction(treeFunction);
@@ -232,17 +239,25 @@ public class UserFuctionController {
     @PostMapping("/edit")
     @Transactional(rollbackFor = Exception.class)
     public Result editMenu(@RequestBody TreeFunction treeFunction) {
+
+        // 开发人员 才能够编辑或新增
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        Boolean flag = sysUserFuctionService.getAccountInformation(userInfo.getUserId());
+        if (!flag) {
+            return ResultUtil.error("编辑失败，请拥有开发角色");
+        }
+
         if (treeFunction != null && treeFunction.getMenuValue() != null) {
             // if 菜单类型 oneMenu（一级菜单） menu（菜单名） 进行效验
-            if (treeFunction.getDataType() != null && (treeFunction.getDataType().equals("oneMenu") || treeFunction.getDataType().equals("menu"))) {
-                LambdaQueryWrapper<SysFunction> fuctionWrapper = new LambdaQueryWrapper<SysFunction>();
-                fuctionWrapper.eq(SysFunction::getMenuValue, treeFunction.getMenuValue());
-                fuctionWrapper.ne(SysFunction::getFunctionId, treeFunction.getFunctionId());
-                List<SysFunction> functionList = fuctionDao.selectList(fuctionWrapper);
-                if (CollectionUtil.isNotEmpty(functionList)) {
-                    return ResultUtil.error("编辑失败，菜单标志符保持唯一性");
-                }
+//            if (treeFunction.getDataType() != null && (treeFunction.getDataType().equals("oneMenu") || treeFunction.getDataType().equals("menu"))) {
+            LambdaQueryWrapper<SysFunction> fuctionWrapper = new LambdaQueryWrapper<SysFunction>();
+            fuctionWrapper.eq(SysFunction::getMenuValue, treeFunction.getMenuValue());
+            fuctionWrapper.ne(SysFunction::getFunctionId, treeFunction.getFunctionId());
+            List<SysFunction> functionList = fuctionDao.selectList(fuctionWrapper);
+            if (CollectionUtil.isNotEmpty(functionList)) {
+                return ResultUtil.error("编辑失败，菜单标志符保持唯一性");
             }
+//            }
         }
         SysFunction sysFunction = new SysFunction(treeFunction);
         fuctionDao.updateById(sysFunction);
