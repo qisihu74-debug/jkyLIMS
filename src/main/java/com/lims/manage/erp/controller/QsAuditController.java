@@ -62,6 +62,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author gjl
@@ -611,16 +612,36 @@ public class QsAuditController {
         //文件上传，要求是pdf文档
         StringBuilder stringBuilder = new StringBuilder();
         if (files != null){
+            String recordUrl = record.getUrl();
+            //编辑后的url
+            String[] split1 = recordUrl.split(",");
+            List<String> newist = Arrays.asList(split1);
             //删除旧文件
             DivideRectificationRecord byId = divideRectificationRecordService.getById(record.getDivideId());
             if (StringUtils.isNotEmpty(byId.getUrl())){
+                //原url
                 String[] split = byId.getUrl().split(",");
-                for (String url :split){
+                List<String> oldList = Arrays.asList(split);
+                //编辑后少了做删除
+                List<String> stringList = oldList.stream()
+                        .filter(element -> !newist.contains(element))
+                        .collect(Collectors.toList());
+                //删除取消的文件
+                for (String url:stringList){
                     String[] strings = url.split("\\/");
                     String bluckName = strings[3];
                     String fileName = strings[4];
                     MinIoUtil.deleteFile(bluckName,fileName);
                 }
+                //处理url
+                List<String> collect = oldList.stream()
+                        .filter(newist::contains)
+                        .collect(Collectors.toList());
+                for (String s:collect){
+                    stringBuilder.append(s);
+                    stringBuilder.append(",");
+                }
+
             }
             for (MultipartFile file: files){
                 if (file != null) {
