@@ -586,12 +586,12 @@ public class QsAuditController {
     /**
      * 部门负责人修改
      * @param json
-     * @param files
+     * @param file
      * @return
      */
     @Log(title = "部门负责人修改整改休息", businessType = BusinessType.INSERT)
     @PostMapping("editCorrection")
-    public Result editCorrection(@RequestParam("json") String json, MultipartFile[] files) {
+    public Result editCorrection(@RequestParam("json") String json, MultipartFile[] file) {
         DivideRectificationRecord record = JSON.parseObject(json, DivideRectificationRecord.class);
         if (StringUtils.isEmpty(record.getCorrectionCompletionStatus()) || record.getActualFinishingDate() == null
                 || StringUtils.isEmpty(record.getDeptLeader())) {
@@ -611,7 +611,7 @@ public class QsAuditController {
         }
         //文件上传，要求是pdf文档
         StringBuilder stringBuilder = new StringBuilder();
-        if (files != null){
+        if (file != null){
             String recordUrl = record.getUrl();
             //编辑后的url
             String[] split1 = recordUrl.split(",");
@@ -643,15 +643,15 @@ public class QsAuditController {
                 }
 
             }
-            for (MultipartFile file: files){
-                if (file != null) {
-                    String filename = file.getOriginalFilename();
+            for (MultipartFile file1: file){
+                if (file1 != null) {
+                    String filename = file1.getOriginalFilename();
                     String[] split = filename.split("\\.");
                     if (!"pdf".equals(split[split.length - 1])) {
                         return ResultUtil.error("文件类型不正确，请上传正确的文件类型");
                     }
                     //上传附件
-                    String upload = MinIoUtil.upload(BucketsConst.internal_audit, file, file.getOriginalFilename());
+                    String upload = MinIoUtil.upload(BucketsConst.internal_audit, file1, file1.getOriginalFilename());
                     if (!org.springframework.util.StringUtils.isEmpty(upload)) {
                         String uploadUrl = upload.substring(0, upload.indexOf("?"));
                         stringBuilder.append(uploadUrl);
