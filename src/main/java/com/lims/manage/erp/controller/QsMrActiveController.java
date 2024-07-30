@@ -271,7 +271,7 @@ public class QsMrActiveController {
      * @param file
      * @return
      */
-    @PostMapping("submitInternalAuditDocument")
+    @PostMapping("submitManagementReviewDocuments")
     public Result submitInternalAuditDocument(@RequestParam("json") String json, MultipartFile[] file) {
         QsMrActiveEntity qsAuditScheduleRel = JSON.parseObject(json, QsMrActiveEntity.class);
         return qsMrActiveService.submitInternalAuditDocument(qsAuditScheduleRel, file);

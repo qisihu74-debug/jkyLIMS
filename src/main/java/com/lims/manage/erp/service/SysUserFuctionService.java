@@ -88,4 +88,11 @@ public interface SysUserFuctionService {
      */
     Result getReturnPermissionSet(Long userId);
 
+    /**
+     * 获取账号信息 -- 当拥有 开发者权限 发挥 true
+     *
+     * @return
+     */
+    Boolean getAccountInformation(Long userId);
+
 }

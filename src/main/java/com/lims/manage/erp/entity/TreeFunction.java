@@ -42,6 +42,10 @@ public class TreeFunction {
      */
     private String concatenatedText;
     /**
+     * 看板
+     */
+    private String kanbanName;
+    /**
      * 菜单对应权限
      */
     private List<SysMenuEntity> menuEntityList = new ArrayList<>();

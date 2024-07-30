@@ -3,6 +3,7 @@ package com.lims.manage.erp.mapper;
 import com.lims.manage.erp.entity.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -95,4 +96,22 @@ public interface SysRoleFuncMenuDao {
      * @return
      */
     List<Long> getFunctionIdByRoleIdS(Long roleId);
+
+    /**
+     * 根据userId 和 角色 = 111 返回·对应信息
+     *
+     * @param userId
+     * @return
+     */
+    @Select("SELECT * FROM sys_user_role WHERE role_id  = 111 and user_id = #{userId} limit 1")
+    SysRoleFunction selectAccountInformation(@Param("userId") Long userId);
+
+    /**
+     * 通过roleId 得到 角色所属的 菜单项集合包括父级id。
+     *
+     * @param roleId
+     * @return
+     */
+    List<SysRoleFunctionParent> selectSetMenuRoleId(Long roleId);
+
 }
