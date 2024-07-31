@@ -109,16 +109,20 @@ public interface DeptDao extends BaseMapper<DingDeptEntity> {
     @Select("select user_id from sys_dept where user_id is not null")
     Set<Long> getDingIds();
 
+    /**
+     * 获取部门信息  部门负责人不为空
+     *
+     * @return
+     */
     @Select("SELECT\n" +
-            "\tt2.id as value,\n" +
-            "\tt2.NAME as label \n" +
+            "\tid AS \n" +
+            "VALUE\n" +
+            "\t,\n" +
+            "\tNAME AS label \n" +
             "FROM\n" +
-            "\ttest_init_data AS t1\n" +
-            "\tLEFT JOIN sys_dept AS t2 ON t1.remark = t2.id \n" +
+            "\tsys_dept \n" +
             "WHERE\n" +
-            "\ttype = 102 \n" +
-            "\tAND t1.remark IS NOT NULL \n" +
-            "ORDER BY\n" +
-            "\tserial_number ASC")
+            "\tuser_id IS NOT NULL\n" +
+            "\tORDER BY serial_number asc")
     List<LabelValueTeamVo> selectmrActiveDepartmentList();
 }

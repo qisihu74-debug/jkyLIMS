@@ -8,8 +8,10 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.ActiveContentEntity;
 import com.lims.manage.erp.entity.ActiveDetailsEntity;
+import com.lims.manage.erp.entity.ActiveDetailsFileUrlEntity;
 import com.lims.manage.erp.entity.QsMrActiveEntity;
 import com.lims.manage.erp.enums.BusinessType;
+import com.lims.manage.erp.mapper.ActiveDetailsFileUrlDao;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -60,6 +62,8 @@ public class QsMrActiveController {
     private ActiveDetailsService activeDetailsService;
     @Autowired
     private DeptDao deptDao;
+    @Autowired
+    private ActiveDetailsFileUrlDao activeDetailsFileUrlDao;
 
     /**
      * 分页查询管理评审列表
@@ -91,7 +95,7 @@ public class QsMrActiveController {
                 for (QsMrActiveEntity entity :pageInfo.getList()){
                     List<ActiveContentEntity> entityList = Lists.newArrayList();
                     for (ActiveContentEntity contentEntity :list1){
-                        if (entity.getActiveId().intValue() == contentEntity.getActiveId().intValue()){
+                        if (entity.getActiveId().intValue() == contentEntity.getActiveId().intValue()) {
                             entityList.add(contentEntity);
                         }
                     }
@@ -101,24 +105,37 @@ public class QsMrActiveController {
         return ResultUtil.success(pageInfo);
     }
 
+
+    /**
+     * 返回管理评审基础信息
+     *
+     * @return
+     */
+    @GetMapping("getManagementBasics")
+    public Result getManagementBasics() {
+
+        return qsMrActiveService.getManagementBasics();
+    }
+
     /**
      * 创建管理评审
+     *
      * @param entity
      * @return
      */
     @Log(title = "创建管理评审", businessType = BusinessType.INSERT)
     @PostMapping("add")
     @Transactional(rollbackFor = Exception.class)
-    public Result add(@RequestBody QsMrActiveEntity entity){
+    public Result add(@RequestBody QsMrActiveEntity entity) {
         if (StringUtils.isEmpty(entity.getApproverName()) || StringUtils.isEmpty(entity.getReviewPurpose())
                 || entity.getReviewTime() == null || StringUtils.isEmpty(entity.getReviewPlace())
                 || StringUtils.isEmpty(entity.getReviewHost()) || StringUtils.isEmpty(entity.getParticipants())
                 || StringUtils.isEmpty(entity.getEditorName()) || StringUtils.isEmpty(entity.getApproverName())
-                || CollectionUtils.isEmpty(entity.getList())){
+                || CollectionUtils.isEmpty(entity.getList())) {
             return ResultUtil.error("缺少参数");
         }
         LambdaQueryWrapper<QsMrActiveEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(QsMrActiveEntity::getReviewName,entity.getReviewName());
+        queryWrapper.eq(QsMrActiveEntity::getReviewName, entity.getReviewName());
         QsMrActiveEntity one = qsMrActiveService.getOne(queryWrapper);
         if (one != null){
             return ResultUtil.error("此管理评审已存在");
@@ -142,7 +159,7 @@ public class QsMrActiveController {
                 }
             }
         }
-        // 进行批量新增 管理评审部门
+        // 进行批量新增 管理评审部门 - 部门负责人不为空
         List<LabelValueTeamVo> deptList = deptDao.selectmrActiveDepartmentList();
         List<ActiveDetailsEntity> activeDetailsEntities = new ArrayList<>();
         for (LabelValueTeamVo teamVo : deptList) {
@@ -238,6 +255,24 @@ public class QsMrActiveController {
         LambdaQueryWrapper<ActiveDetailsEntity> detailsQueryWrapper = new LambdaQueryWrapper<>();
         detailsQueryWrapper.eq(ActiveDetailsEntity::getActiveId, activeId);
         List<ActiveDetailsEntity> activeDetailsList = activeDetailsService.list(detailsQueryWrapper);
+
+        // 部门中附件信息
+        LambdaQueryWrapper<ActiveDetailsFileUrlEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ActiveDetailsFileUrlEntity::getActiveId, activeId);
+        List<ActiveDetailsFileUrlEntity> activeDetailsFileUrlEntities = activeDetailsFileUrlDao.selectList(queryWrapper);
+        if (CollectionUtils.isNotEmpty(activeDetailsList) && CollectionUtils.isNotEmpty(activeDetailsFileUrlEntities)) {
+            for (ActiveDetailsEntity activeDetailsEntity : activeDetailsList) {
+                StringBuffer stringBuffer = new StringBuffer();
+                for (ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity : activeDetailsFileUrlEntities) {
+                    if (activeDetailsEntity.getActiveDetailId() == activeDetailsFileUrlEntity.getActiveDetailId()) {
+                        stringBuffer.append(activeDetailsFileUrlEntity.getFileUrl() + ",");
+                    }
+                }
+                if (stringBuffer.length() >= 1) {
+                    activeDetailsEntity.setFileUrl(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+                }
+            }
+        }
         byId.setDepartmentDetails(activeDetailsList);
 
         return ResultUtil.success(byId);
@@ -295,6 +330,18 @@ public class QsMrActiveController {
     }
 
     /**
+     * 部门负责人 删除上传材料
+     *
+     * @param activeDetailsFileUrlEntity
+     * @return
+     */
+    @PostMapping("removeFile")
+    public Result removeFile(@RequestBody ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity) {
+
+        return null;
+    }
+
+    /**
      * 催办
      *
      * @param activeDetailsEntity
@@ -314,6 +361,18 @@ public class QsMrActiveController {
     public Result getActiveDepartmentList() {
         List<LabelValueTeamVo> deptList = deptDao.selectmrActiveDepartmentList();
         return ResultUtil.success(deptList);
+    }
+
+    /**
+     * 根据登录人回显评审部门列表及附件信息
+     *
+     * @param activeId 内审活动id
+     * @return
+     */
+    @GetMapping("getDepartmentAndFile")
+    public Result getDepartmentAndFile(String activeId) {
+
+        return activeDetailsService.getDepartmentAndFile(activeId);
     }
 
     /**

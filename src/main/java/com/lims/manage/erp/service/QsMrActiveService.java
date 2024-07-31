@@ -23,4 +23,11 @@ public interface QsMrActiveService extends IService<QsMrActiveEntity> {
      * @return
      */
     Result submitInternalAuditDocument(QsMrActiveEntity qsMrActiveEntity, MultipartFile[] file);
+
+    /**
+     * 返回管理评审基础信息
+     *
+     * @return
+     */
+    Result getManagementBasics();
 }

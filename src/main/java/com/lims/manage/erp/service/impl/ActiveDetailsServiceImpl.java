@@ -1,27 +1,25 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.constant.BucketsConst;
-import com.lims.manage.erp.entity.ActiveDetailsEntity;
-import com.lims.manage.erp.entity.DingDeptEntity;
-import com.lims.manage.erp.entity.QsMrActiveEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.mapper.ActiveDetailsDao;
-import com.lims.manage.erp.mapper.DeptDao;
-import com.lims.manage.erp.mapper.QsMrActiveDao;
-import com.lims.manage.erp.mapper.SysUserDao;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ActiveDetailsService;
 import com.lims.manage.erp.util.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 部门信息 上传附件详情
@@ -45,6 +43,8 @@ public class ActiveDetailsServiceImpl extends ServiceImpl<ActiveDetailsDao, Acti
     private DingNotifyUtils dingNotifyUtils;
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private ActiveDetailsFileUrlDao activeDetailsFileUrlDao;
 
     /**
      * 部门负责人 上传材料
@@ -81,34 +81,116 @@ public class ActiveDetailsServiceImpl extends ServiceImpl<ActiveDetailsDao, Acti
             return ResultUtil.error("操作失败 " + dingDeptEntity.getName() + " 部门负责人为 " + dingDeptEntity.getUserName());
         }
 
-        // 处理附件 信息 多个 使用 逗号截取
-        StringBuffer stringBuilder = new StringBuffer();
         if (file != null && file.length > 0) {
             for (MultipartFile multipartFile : file) {
-                Long fileCode = GenID.getID();
-                String name = multipartFile.getOriginalFilename();
-                String[] strings = name.split("\\.");
+                String nameSuffix = multipartFile.getOriginalFilename().split("\\.")[1];
+                if (nameSuffix.equals("png") || nameSuffix.equals("jpg") || nameSuffix.equals("pdf")) {
 
-                String upload = MinIoUtil.upload(BucketsConst.manage_audit, multipartFile, fileCode + "." + strings[strings.length - 1]);
-                if (!org.springframework.util.StringUtils.isEmpty(upload)) {
-                    String[] fileUrls = upload.split("\\?");
-                    stringBuilder.append(fileUrls[0]);
-                    stringBuilder.append(",");
+                } else {
+                    return ResultUtil.error("上传材料 应该为 png、jpg、pdf");
                 }
             }
-            if (detailsEntity.getFileUrl() != null) {
-                detailsEntity.setFileUrl(detailsEntity.getFileUrl() + "," + stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
-            } else {
-                detailsEntity.setFileUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            for (MultipartFile multipartFile : file) {
+                ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity = new ActiveDetailsFileUrlEntity();
+                Long fileCode = GenID.getID();
+                String filename = fileCode + "_" + multipartFile.getOriginalFilename();
+                String upload = MinIoUtil.upload(BucketsConst.manage_audit, multipartFile, filename);
+                if (!org.springframework.util.StringUtils.isEmpty(upload)) {
+                    String[] fileUrls = upload.split("\\?");
+                    activeDetailsFileUrlEntity.setFileUrl(fileUrls[0]);
+                    activeDetailsFileUrlEntity.setFileUrlName(filename);
+                    activeDetailsFileUrlEntity.setActiveId(activeDetailsEntity.getActiveId());
+                    activeDetailsFileUrlEntity.setActiveDetailId(detailsEntity.getActiveDetailId());
+                    activeDetailsFileUrlDao.insert(activeDetailsFileUrlEntity);
+                }
             }
-
-            LambdaUpdateWrapper<ActiveDetailsEntity> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(ActiveDetailsEntity::getActiveId, activeDetailsEntity.getActiveId());
-            updateWrapper.eq(ActiveDetailsEntity::getDeptId, activeDetailsEntity.getDeptId());
-            this.baseMapper.update(detailsEntity, updateWrapper);
             return ResultUtil.success("操作成功");
         }
         return ResultUtil.error("附件不能为空");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result removeFile(ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity) {
+        LambdaQueryWrapper<ActiveDetailsEntity> detailsWrapper = new LambdaQueryWrapper<>();
+        detailsWrapper.eq(ActiveDetailsEntity::getActiveId, activeDetailsFileUrlEntity.getActiveId());
+        detailsWrapper.eq(ActiveDetailsEntity::getActiveDetailId, activeDetailsFileUrlEntity.getActiveDetailId());
+        ActiveDetailsEntity detailsEntity = this.baseMapper.selectOne(detailsWrapper);
+        if (detailsEntity == null) {
+            return ResultUtil.error("操作失败，部门不存在");
+        }
+
+        // 验证当前登录人 是否为 部门负责人
+        LambdaQueryWrapper<DingDeptEntity> deptWrapper = new LambdaQueryWrapper<>();
+        deptWrapper.eq(DingDeptEntity::getId, detailsEntity.getDeptId());
+        DingDeptEntity dingDeptEntity = deptDao.selectOne(deptWrapper);
+        if (dingDeptEntity == null) {
+            return ResultUtil.error("部门不存在");
+        }
+        if (dingDeptEntity.getUserId() == null) {
+            return ResultUtil.error(dingDeptEntity.getName() + " 部门负责人为空 ");
+        }
+        //  进行比对 获取业务受理人id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!userInfo.getUserId().toString().equals(dingDeptEntity.getUserId())) {
+            return ResultUtil.error("操作失败 " + dingDeptEntity.getName() + " 部门负责人为 " + dingDeptEntity.getUserName());
+        }
+        // 读取 附件 进行移除。
+        LambdaQueryWrapper<ActiveDetailsFileUrlEntity> entityLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        entityLambdaQueryWrapper.eq(ActiveDetailsFileUrlEntity::getId, activeDetailsFileUrlEntity.getId());
+        ActiveDetailsFileUrlEntity detailsFileUrlEntity = activeDetailsFileUrlDao.selectOne(entityLambdaQueryWrapper);
+        if (detailsFileUrlEntity != null) {
+            String[] arrays = detailsFileUrlEntity.getFileUrl().split("/");
+            MinIoUtil.deleteFile(arrays[arrays.length - 2], arrays[arrays.length - 1]);
+        }
+        activeDetailsFileUrlDao.deleteById(activeDetailsFileUrlEntity.getId());
+        return ResultUtil.success("操作成功");
+    }
+
+    /**
+     * 根据登录人回显评审部门列表及附件信息
+     *
+     * @param activeId 活动id
+     * @return
+     */
+    @Override
+    public Result getDepartmentAndFile(String activeId) {
+
+        //  进行比对 获取业务受理人id
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+
+        // 查询当前登录人 是否拥有部门管理者信息
+        LambdaQueryWrapper<DingDeptEntity> deptWrapper = new LambdaQueryWrapper<>();
+        deptWrapper.eq(DingDeptEntity::getUserId, userInfo.getUserId());
+        List<DingDeptEntity> deptList = deptDao.selectList(deptWrapper);
+        if (CollectionUtil.isEmpty(deptList)) {
+            return ResultUtil.error("操作失败 当前账号 无部门负责人信息");
+        }
+        // 返回部门信息 及 附件信息
+
+        //  部门信息 上传附件详情
+        LambdaQueryWrapper<ActiveDetailsEntity> detailsQueryWrapper = new LambdaQueryWrapper<>();
+        detailsQueryWrapper.eq(ActiveDetailsEntity::getActiveId, activeId);
+        List<ActiveDetailsEntity> activeDetailsList = this.baseMapper.selectList(detailsQueryWrapper);
+
+        // 部门中附件信息
+        LambdaQueryWrapper<ActiveDetailsFileUrlEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ActiveDetailsFileUrlEntity::getActiveId, activeId);
+        List<ActiveDetailsFileUrlEntity> activeDetailsFileUrlEntities = activeDetailsFileUrlDao.selectList(queryWrapper);
+
+        if (CollectionUtils.isNotEmpty(activeDetailsList) && CollectionUtils.isNotEmpty(activeDetailsFileUrlEntities)) {
+            for (ActiveDetailsEntity activeDetailsEntity : activeDetailsList) {
+                List<ActiveDetailsFileUrlEntity> activeDetailsFileUrls = new ArrayList<>();
+                for (ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity : activeDetailsFileUrlEntities) {
+                    if (activeDetailsEntity.getActiveDetailId() == activeDetailsFileUrlEntity.getActiveDetailId()) {
+                        activeDetailsFileUrls.add(activeDetailsFileUrlEntity);
+                    }
+                }
+                activeDetailsEntity.setActiveDetailsFileUrls(activeDetailsFileUrls);
+            }
+        }
+
+        return ResultUtil.success(activeDetailsList);
     }
 
     /**
