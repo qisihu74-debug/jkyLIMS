@@ -96,7 +96,12 @@ public class ActiveDetailsServiceImpl extends ServiceImpl<ActiveDetailsDao, Acti
                     stringBuilder.append(",");
                 }
             }
-            detailsEntity.setFileUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            if (detailsEntity.getFileUrl() != null) {
+                detailsEntity.setFileUrl(detailsEntity.getFileUrl() + "," + stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            } else {
+                detailsEntity.setFileUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            }
+
             LambdaUpdateWrapper<ActiveDetailsEntity> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(ActiveDetailsEntity::getActiveId, activeDetailsEntity.getActiveId());
             updateWrapper.eq(ActiveDetailsEntity::getDeptId, activeDetailsEntity.getDeptId());

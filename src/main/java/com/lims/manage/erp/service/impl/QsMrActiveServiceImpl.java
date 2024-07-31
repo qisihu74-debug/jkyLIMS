@@ -56,7 +56,11 @@ public class QsMrActiveServiceImpl extends ServiceImpl<QsMrActiveDao, QsMrActive
                     stringBuilder.append(",");
                 }
             }
-            entity.setFileUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            if (entity.getFileUrl() != null) {
+                entity.setFileUrl(entity.getFileUrl() + "," + stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            } else {
+                entity.setFileUrl(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
+            }
             entity.setState("已完成");
             this.baseMapper.updateById(entity);
             return ResultUtil.success("操作成功");

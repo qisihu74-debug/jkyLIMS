@@ -21,11 +21,13 @@ import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -337,14 +339,32 @@ public class QsMrActiveController {
                     outputStream.close();
                     break;
                 case "xlsx":
-                case "xls":
                     //相应pdf
                     ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(inputStream, arrays[arrays.length - 1]);
                     InputStream inputStreamxls = FileAndFolderUtil.parseOut(b1);
-                    int i1 = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+                    int i1 = IOUtils.copy(inputStreamxls, outputStream);   // copy流数据,i为字节数
                     inputStream.close();
                     outputStream.close();
+                    inputStreamxls.close();
+                    b1.close();
                     break;
+                case "docx":
+                    XWPFDocument document = new XWPFDocument(inputStream);
+                    //相应pdf
+                    ByteArrayOutputStream b2 = AsposeUtil.word2pdf4(document);
+                    InputStream inputStreamdoc = FileAndFolderUtil.parseOut(b2);
+                    ServletOutputStream outputStreamdoc = response.getOutputStream();
+                    int i2 = IOUtils.copy(inputStreamdoc, outputStreamdoc);   // copy流数据,i为字节数
+                    inputStream.close();
+                    outputStream.close();
+                    b2.close();
+                    inputStreamdoc.close();
+                    outputStreamdoc.close();
+                    break;
+                default:
+                    int in = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+                    inputStream.close();
+                    outputStream.close();
             }
 
         } catch (Exception e) {
