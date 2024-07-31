@@ -83,17 +83,9 @@ public class ActiveDetailsServiceImpl extends ServiceImpl<ActiveDetailsDao, Acti
 
         if (file != null && file.length > 0) {
             for (MultipartFile multipartFile : file) {
-                String nameSuffix = multipartFile.getOriginalFilename().split("\\.")[1];
-                if (nameSuffix.equals("png") || nameSuffix.equals("jpg") || nameSuffix.equals("pdf")) {
-
-                } else {
-                    return ResultUtil.error("上传材料 应该为 png、jpg、pdf");
-                }
-            }
-            for (MultipartFile multipartFile : file) {
                 ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity = new ActiveDetailsFileUrlEntity();
                 Long fileCode = GenID.getID();
-                String filename = fileCode + "_" + multipartFile.getOriginalFilename();
+                String filename = fileCode + "." + multipartFile.getOriginalFilename().split("\\.")[1];
                 String upload = MinIoUtil.upload(BucketsConst.manage_audit, multipartFile, filename);
                 if (!org.springframework.util.StringUtils.isEmpty(upload)) {
                     String[] fileUrls = upload.split("\\?");
@@ -167,28 +159,39 @@ public class ActiveDetailsServiceImpl extends ServiceImpl<ActiveDetailsDao, Acti
             return ResultUtil.error("操作失败 当前账号 无部门负责人信息");
         }
         // 返回部门信息 及 附件信息
-
+        List<Long> deptIds = new ArrayList<>();
+        for (DingDeptEntity deptEntity : deptList) {
+            deptIds.add(deptEntity.getId());
+        }
         //  部门信息 上传附件详情
         LambdaQueryWrapper<ActiveDetailsEntity> detailsQueryWrapper = new LambdaQueryWrapper<>();
         detailsQueryWrapper.eq(ActiveDetailsEntity::getActiveId, activeId);
+        detailsQueryWrapper.in(ActiveDetailsEntity::getDeptId, deptIds);
         List<ActiveDetailsEntity> activeDetailsList = this.baseMapper.selectList(detailsQueryWrapper);
-
-        // 部门中附件信息
-        LambdaQueryWrapper<ActiveDetailsFileUrlEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ActiveDetailsFileUrlEntity::getActiveId, activeId);
-        List<ActiveDetailsFileUrlEntity> activeDetailsFileUrlEntities = activeDetailsFileUrlDao.selectList(queryWrapper);
-
-        if (CollectionUtils.isNotEmpty(activeDetailsList) && CollectionUtils.isNotEmpty(activeDetailsFileUrlEntities)) {
+        if (CollectionUtil.isNotEmpty(activeDetailsList)) {
+            List<Integer> activeDetailIds = new ArrayList<>();
             for (ActiveDetailsEntity activeDetailsEntity : activeDetailsList) {
-                List<ActiveDetailsFileUrlEntity> activeDetailsFileUrls = new ArrayList<>();
-                for (ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity : activeDetailsFileUrlEntities) {
-                    if (activeDetailsEntity.getActiveDetailId() == activeDetailsFileUrlEntity.getActiveDetailId()) {
-                        activeDetailsFileUrls.add(activeDetailsFileUrlEntity);
+                activeDetailIds.add(activeDetailsEntity.getActiveDetailId());
+            }
+            // 部门中附件信息
+            LambdaQueryWrapper<ActiveDetailsFileUrlEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ActiveDetailsFileUrlEntity::getActiveId, activeId);
+            queryWrapper.in(ActiveDetailsFileUrlEntity::getActiveDetailId, activeDetailIds);
+            List<ActiveDetailsFileUrlEntity> activeDetailsFileUrlEntities = activeDetailsFileUrlDao.selectList(queryWrapper);
+
+            if (CollectionUtils.isNotEmpty(activeDetailsFileUrlEntities)) {
+                for (ActiveDetailsEntity activeDetailsEntity : activeDetailsList) {
+                    List<ActiveDetailsFileUrlEntity> activeDetailsFileUrls = new ArrayList<>();
+                    for (ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity : activeDetailsFileUrlEntities) {
+                        if (activeDetailsEntity.getActiveDetailId() == activeDetailsFileUrlEntity.getActiveDetailId()) {
+                            activeDetailsFileUrls.add(activeDetailsFileUrlEntity);
+                        }
                     }
+                    activeDetailsEntity.setActiveDetailsFileUrls(activeDetailsFileUrls);
                 }
-                activeDetailsEntity.setActiveDetailsFileUrls(activeDetailsFileUrls);
             }
         }
+
 
         return ResultUtil.success(activeDetailsList);
     }

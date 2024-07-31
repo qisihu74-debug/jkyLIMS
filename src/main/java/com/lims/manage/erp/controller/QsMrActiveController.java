@@ -79,7 +79,7 @@ public class QsMrActiveController {
         }
         PageHelper.startPage(pageNum, pageSize);
         LambdaQueryWrapper<QsMrActiveEntity> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.orderByDesc(QsMrActiveEntity::getTime);
+        queryWrapper.orderByDesc(QsMrActiveEntity::getActiveId);
         List<QsMrActiveEntity> list = qsMrActiveService.list(queryWrapper);
         PageInfo<QsMrActiveEntity> pageInfo = new PageInfo<>(list);
         //查询内容纲要
@@ -338,7 +338,7 @@ public class QsMrActiveController {
     @PostMapping("removeFile")
     public Result removeFile(@RequestBody ActiveDetailsFileUrlEntity activeDetailsFileUrlEntity) {
 
-        return null;
+        return activeDetailsService.removeFile(activeDetailsFileUrlEntity);
     }
 
     /**
