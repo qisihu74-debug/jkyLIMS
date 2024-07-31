@@ -8,28 +8,29 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.annotation.Log;
 import com.lims.manage.erp.entity.ActiveContentEntity;
 import com.lims.manage.erp.entity.ActiveDetailsEntity;
-import com.lims.manage.erp.entity.QsAuditScheduleRelEntity;
 import com.lims.manage.erp.entity.QsMrActiveEntity;
 import com.lims.manage.erp.enums.BusinessType;
-import com.lims.manage.erp.http.RestUtil;
 import com.lims.manage.erp.mapper.DeptDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.DingNotifyUtils;
-import com.lims.manage.erp.util.StringUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.LabelValueTeamVo;
 import com.lims.manage.erp.vo.QsActiveVo;
+import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author gjl
@@ -312,4 +313,54 @@ public class QsMrActiveController {
         List<LabelValueTeamVo> deptList = deptDao.selectmrActiveDepartmentList();
         return ResultUtil.success(deptList);
     }
+
+    /**
+     * 根据 url 预览数据
+     *
+     * @param url
+     * @param response
+     */
+    @GetMapping("previewEntrust")
+    public void previewEntrust(String url, HttpServletResponse response) {
+
+        String[] arrays = url.split("/");
+        // 读取文件后缀：
+        try {
+            String nameSuffix = arrays[arrays.length - 1].split("\\.")[1];
+            MinioClient client = MinIoUtil.minioClient;
+            InputStream inputStream = client.getObject(arrays[arrays.length - 2], arrays[arrays.length - 1]);
+            OutputStream outputStream = response.getOutputStream();
+            switch (nameSuffix) {
+                case "pdf":
+                    int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+                    inputStream.close();
+                    outputStream.close();
+                    break;
+                case "xlsx":
+                case "xls":
+                    //相应pdf
+                    ByteArrayOutputStream b1 = PDFHelper3.excel2pdf2(inputStream, arrays[arrays.length - 1]);
+                    InputStream inputStreamxls = FileAndFolderUtil.parseOut(b1);
+                    int i1 = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+                    inputStream.close();
+                    outputStream.close();
+                    break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 最高管理者 账号
+     *
+     * @return
+     */
+    @GetMapping("getTopManagement")
+    public Result getTopManagement() {
+
+        return sysUserService.getTopManagement();
+    }
+
 }

@@ -85,6 +85,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/audit/downloadEntrust", "anon");
         filterChainDefinitionMap.put("/audit/previewEntrust", "anon");
         filterChainDefinitionMap.put("/entrust/previewEntrust", "anon");
+        filterChainDefinitionMap.put("/mrActive/previewEntrust", "anon");
         filterChainDefinitionMap.put("/report_approval/onlineReport", "anon");
         filterChainDefinitionMap.put("/task/previewOriginalRecord", "anon");
         filterChainDefinitionMap.put("/testInstrument/exportInstrumentRecord", "anon");

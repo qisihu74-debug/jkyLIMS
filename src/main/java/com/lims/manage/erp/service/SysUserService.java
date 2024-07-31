@@ -154,5 +154,13 @@ public interface SysUserService extends IService<SysUserEntity> {
      * 用户集合
      */
     Result selectUserList();
+
+    /**
+     * 最高管理者 账号
+     *
+     * @return
+     */
+    Result getTopManagement();
+
 }
 

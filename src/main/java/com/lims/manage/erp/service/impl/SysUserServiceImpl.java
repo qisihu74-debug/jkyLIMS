@@ -429,4 +429,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
         return ResultUtil.success(sysUserDao.selectUserList());
     }
+
+    /**
+     * 最高管理者 账号
+     *
+     * @return
+     */
+    @Override
+    public Result getTopManagement() {
+        return ResultUtil.success(sysUserDao.selectTopManagement());
+    }
 }
