@@ -799,7 +799,7 @@
             <if test="paymentCount != null and paymentCount!=''">count_price=#{paymentCount},</if>
                 present_information=#{presentInformation},
             <if test="acceptanceDate != null">acceptance_date=#{acceptanceDate},</if>
-            <if test="team != null">team=#{team},</if>
+            team=#{team},
             <if test="state != null">state=#{state},</if>
             <if test="remark != null and remark!=''">remark=#{remark},</if>
             <if test="fileUrl != null and fileUrl!=''">file_url=#{fileUrl},</if>
