@@ -18,8 +18,18 @@ import java.util.List;
  */
 public interface TestCheckItemTeamRelService extends IService<TestCheckItemTeamRel> {
     IPage<TestCheckItemTeamRelVo> getPageList(Page<TestCheckItemTeamRelVo> page, QueryWrapper<TestCheckItemTeamRel> queryWrapper);
+
     Result addTestCheckItemTeamRel(TestCheckItemTeamRel testCheckItemTeamRel);
+
     Result updTestCheckItemTeamRel(TestCheckItemTeamRel testCheckItemTeamRel);
+
     Result delTestCheckItemTeamRel(List<Long> idList);
+
+    /**
+     * 更新检测项所属团队信息
+     *
+     * @return
+     */
+    Result updateTeamDetectionItems();
 }
 

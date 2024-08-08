@@ -18,4 +18,8 @@ public class TestCheckItemTeamRelVo {
     private String teamName;
     //检验项名称
     private String checkItemName;
+    /**
+     * 优先级
+     */
+    private String priority;
 }

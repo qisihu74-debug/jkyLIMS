@@ -14,12 +14,16 @@
         <result property="teamId" column="team_id" jdbcType="INTEGER"/>
         <result property="productId" column="product_id" jdbcType="INTEGER"/>
         <result property="productName" column="productName" jdbcType="VARCHAR"/>
+        <result property="priority" column="priority" jdbcType="VARCHAR"/>
         <result property="checkItemName" column="checkItemName" jdbcType="VARCHAR"/>
         <result property="teamName" column="teamName" jdbcType="VARCHAR"/>
     </resultMap>
 
     <select id="getPageList" resultMap="TestCheckItemTeamRelVoMap">
-        SELECT r.*,
+        SELECT r.id,
+               r.check_item_id,
+               r.team_id,
+               r.priority,
                p.product_name AS productName,
                i.check_item_name AS checkItemName,
                t.name AS teamName

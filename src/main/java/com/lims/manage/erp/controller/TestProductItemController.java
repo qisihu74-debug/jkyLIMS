@@ -255,14 +255,14 @@ public class TestProductItemController extends ApiController {
     @GetMapping("removeUnvilableUrl")
     public void removeUnvilableUrl(){
         List<TestOriginalRecordTemplate> list = service.list();
-        for (TestOriginalRecordTemplate template :list){
+        for (TestOriginalRecordTemplate template : list) {
             String upload = template.getFileUrl();
             String uploadUrl = upload.substring(0, upload.indexOf("?"));
             String[] strings = uploadUrl.split("\\/");
             String bluckName = strings[3];
             String fileName = strings[4];
             Boolean aBoolean = MinIoUtil.checkFileExist(bluckName, fileName);
-            System.out.println("地址是："+uploadUrl+" 结果是否存在"+aBoolean);
+            System.out.println("地址是：" + uploadUrl + " 结果是否存在" + aBoolean);
         }
     }
 }

@@ -326,7 +326,7 @@
         t1.address_name addressName,
         t1.type,
         t3.id AS task_id,
-        t3.task_code,
+        GROUP_CONCAT( IFNULL( t3.task_code, "——" ) SEPARATOR ',' ) AS task_code,
         IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustNo,
         IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
         t2.task_source,
@@ -352,7 +352,7 @@
             and t2.entrustment_no LIKE CONCAT('%',#{entrustNo},'%')
         </if>
         <if test="taskCode!=null and taskCode!='' ">
-            and t3.task_code LIKE CONCAT('%',#{taskCode},'%')
+            and t2.id IN ( SELECT entrustment_id FROM test_task WHERE task_code LIKE CONCAT( '%',#{taskCode}, '%' ) )
         </if>
         <if test="taskSource!=null and taskSource!='' ">
             and t2.task_source LIKE CONCAT('%',#{taskSource},'%')
@@ -372,7 +372,7 @@
         t1.address_name addressName,
         t1.type,
         t3.id AS task_id,
-        t3.task_code,
+        GROUP_CONCAT( IFNULL( t3.task_code, "——" ) SEPARATOR ',' ) AS task_code,
         IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustNo,
         IFNULL( CONCAT( t2.entrust_category_type, t2.entrustment_no ), t2.entrustment_no ) AS entrustmentNostr,
         t2.task_source,
@@ -394,7 +394,7 @@
             and t2.entrustment_no LIKE CONCAT('%',#{entrustNo},'%')
         </if>
         <if test="taskCode!=null and taskCode!='' ">
-            and t3.task_code LIKE CONCAT('%',#{taskCode},'%')
+            and t2.id IN ( SELECT entrustment_id FROM test_task WHERE task_code LIKE CONCAT( '%',#{taskCode}, '%' ) )
         </if>
         <if test="taskSource!=null and taskSource!='' ">
             and t2.task_source LIKE CONCAT('%',#{taskSource},'%')
