@@ -495,10 +495,30 @@ public class DeptServiceImpl extends ServiceImpl<DeptDao, DingDeptEntity> implem
         return true;
     }
 
+    /**
+     * 受审部门集合
+     *
+     * @return
+     */
     @Override
     public Result getTrialDepartmentList() {
 
-        List<LabelValueTeamVo> deptList = deptDao.selectTrialDepartmentList();
+//        List<LabelValueTeamVo> deptList = deptDao.selectTrialDepartmentList();
+        LambdaQueryWrapper<DingDeptEntity> deptWrapper = new LambdaQueryWrapper<>();
+        deptWrapper.isNotNull(DingDeptEntity::getUserId);
+        deptWrapper.isNotNull(DingDeptEntity::getUserName);
+        List<DingDeptEntity> deptList = deptDao.selectList(deptWrapper);
+        if (CollectionUtil.isNotEmpty(deptList)) {
+            List<LabelValueTeamVo> returnDeptList = new ArrayList<>();
+            for (DingDeptEntity dingDeptEntity : deptList) {
+                LabelValueTeamVo labelValueTeamVo = new LabelValueTeamVo();
+                labelValueTeamVo.setLabel(dingDeptEntity.getName());
+                labelValueTeamVo.setValue(dingDeptEntity.getId().toString());
+                returnDeptList.add(labelValueTeamVo);
+            }
+            return ResultUtil.success(returnDeptList);
+        }
+
         return ResultUtil.success(deptList);
     }
 

@@ -1,9 +1,12 @@
 package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * 部门信息 上传附件详情
@@ -18,6 +21,10 @@ import lombok.Data;
 @Data
 @TableName("qs_mr_active_detail")
 public class ActiveDetailsEntity {
+
+    @TableId(type = IdType.AUTO)
+    private Integer activeDetailId;
+
     /**
      * 内审活动id
      */
@@ -34,5 +41,10 @@ public class ActiveDetailsEntity {
      * 附件
      */
     private String fileUrl;
+    /**
+     * 部门评审附件集合
+     */
+    @TableField(exist = false)
+    List<ActiveDetailsFileUrlEntity> activeDetailsFileUrls;
 
 }
