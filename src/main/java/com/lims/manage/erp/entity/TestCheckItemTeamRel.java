@@ -3,7 +3,10 @@ package com.lims.manage.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -12,7 +15,8 @@ import java.io.Serializable;
  * @author makejava
  * @since 2022-03-18 10:01:57
  */
-@SuppressWarnings("serial")
+@Data
+@TableName("test_check_item_team_rel")
 public class TestCheckItemTeamRel extends Model<TestCheckItemTeamRel> {
     //主键
     @TableId(type = IdType.AUTO)
@@ -24,38 +28,14 @@ public class TestCheckItemTeamRel extends Model<TestCheckItemTeamRel> {
     //产品ID
     private Integer productId;
 
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getCheckItemId() {
-        return checkItemId;
-    }
-
-    public void setCheckItemId(Integer checkItemId) {
-        this.checkItemId = checkItemId;
-    }
-
-    public Integer getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
-
-    public Integer getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Integer productId) {
-        this.productId = productId;
-    }
+    /**
+     * 团队名称
+     */
+    private String teamName;
+    /**
+     * 优先级
+     */
+    private String priority;
 
     public TestCheckItemTeamRel() {
     }

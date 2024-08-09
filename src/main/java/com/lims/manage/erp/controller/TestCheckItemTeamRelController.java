@@ -12,6 +12,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestCheckItemTeamRelService;
 import com.lims.manage.erp.vo.TestCheckItemTeamRelVo;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -106,11 +107,24 @@ public class TestCheckItemTeamRelController extends ApiController {
      */
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {
-        if (idList.size()!=0){
+        if (idList.size() != 0) {
             return this.testCheckItemTeamRelService.delTestCheckItemTeamRel(idList);
-        }else {
+        } else {
             return ResultUtil.error("数据为空");
         }
+    }
+
+    /**
+     * 更新检测项所属团队信息
+     */
+    @GetMapping("/updateTeamDetectionItems")
+    @Transactional(rollbackFor = Exception.class)
+    public Result updateTeamDetectionItems() {
+
+        Result result = testCheckItemTeamRelService.updateTeamDetectionItems();
+        List<TestCheckItemTeamRel> teamRelArrayList = (List<TestCheckItemTeamRel>) result.getData();
+        testCheckItemTeamRelService.saveBatch(teamRelArrayList);
+        return ResultUtil.success("操作成功");
     }
 }
 

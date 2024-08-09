@@ -644,7 +644,7 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
 
     @Override
     public void updateHourById(Integer id, Integer hour) {
-        testProductItemDao.updateHourById(id,hour);
+        testProductItemDao.updateHourById(id, hour);
     }
 }
 

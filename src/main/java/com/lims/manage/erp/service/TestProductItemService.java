@@ -61,6 +61,7 @@ public interface TestProductItemService extends IService<TestProductItem> {
 
     /**
      * 返回基础信息
+     *
      * @return
      */
     Map<String, List<LabelValueVo>> returnEntrustData();
