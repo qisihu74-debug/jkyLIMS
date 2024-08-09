@@ -1237,8 +1237,8 @@ public class TaskController {
         bean.setUserId(ShiroUtils.getUserInfo().getUserId());
         Integer teamId = testTechnicistDao.getSealer(bean.getUserId());
         if (teamId != null){
-            Integer id = testTechnicistDao.getPidById(teamId);
-            bean.setTeamId(id);
+            //Integer id = testTechnicistDao.getPidById(teamId);
+            bean.setTeamId(teamId);
             PageInfo<TestTaskPool> pageInfo = taskService.taskHall(bean);
             return ResultUtil.success(pageInfo);
         }else {
