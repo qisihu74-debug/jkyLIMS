@@ -312,6 +312,10 @@ public class EntrustAddVo {
      */
     private String auditState;
     /**
+     * 操作类型0线上编辑的报告，1线下编辑的报告
+     */
+    private Integer operateType;
+    /**
      * 流转信息数据
      */
     private List<TestEntrustedTaskRelEntity> taskList;
