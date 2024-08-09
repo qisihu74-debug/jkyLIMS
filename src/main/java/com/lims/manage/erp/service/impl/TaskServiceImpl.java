@@ -2497,7 +2497,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         if (bean.getTeamId() == null){
             list = taskMapper.taskHallByAdm();
         }else {
-            list = taskMapper.taskHall(bean);
+            list = taskMapper.taskHall1(bean);
         }
         PageInfo<TestTaskPool> pageInfo = new PageInfo<>(list);
         return pageInfo;

@@ -1488,6 +1488,97 @@
         order by t1.id desc
     </select>
 
+    <select id="taskHall1" resultType="com.lims.manage.erp.entity.TestTaskPool">
+        SELECT DISTINCT
+        t1.id,
+        t1.sn,
+        t1.alias_name,
+        t1.entrustment_id AS entrustmentId,
+        t1.price,
+        t1.receive_id,
+        t1.required_completion_time AS requiredCompletionTime,
+        t1.task_flow_req AS taskFlowReq,
+        t1.publisher,
+        t1.publish_date AS publishDate,
+        t4.team,
+        t4.entrustment_no,
+        IFNULL(t1.task_list_status, 0) AS task_list_status
+        FROM
+        test_task_pool t1
+        INNER JOIN test_entrusted_info t4 ON t1.entrustment_id = t4.id
+        INNER JOIN (
+        WITH RECURSIVE cte AS (
+        SELECT
+        1 AS n,
+        MAX(
+        CHAR_LENGTH(sample) - CHAR_LENGTH(REPLACE(sample, ',', '')) + 1
+        ) AS max_samples,
+        MAX(
+        CHAR_LENGTH(product_id) - CHAR_LENGTH(REPLACE(product_id, ',', '')) + 1
+        ) AS max_products
+        FROM
+        test_task_pool
+        UNION ALL
+        SELECT
+        n + 1,
+        max_samples,
+        max_products
+        FROM
+        cte
+        WHERE
+        n &lt;= GREATEST(max_samples, max_products)
+        ) SELECT
+        t.id,
+        t.sn,
+        t.entrustment_id,
+        t.price,
+        t.required_completion_time,
+        t.task_flow_req,
+        t.publisher,
+        t.publish_date,
+        t.receive_id,
+        SUBSTRING_INDEX(
+        SUBSTRING_INDEX(t.sample, ',', c.n),
+        ',',
+        - 1
+        ) AS sample,
+        SUBSTRING_INDEX(
+        SUBSTRING_INDEX(t.product_id, ',', c.n),
+        ',',
+        - 1
+        ) AS productId
+        FROM
+        test_task_pool t
+        JOIN cte c ON c.n &lt;= CHAR_LENGTH(t.sample) - CHAR_LENGTH(REPLACE(t.sample, ',', '')) + 1
+        AND c.n &lt;= CHAR_LENGTH(t.product_id) - CHAR_LENGTH(
+        REPLACE (t.product_id, ',', '')
+        ) + 1
+        ) tba ON t4.id = tba.entrustment_id
+        INNER JOIN test_check_item_team_rel ttr ON ttr.product_id = tba.productId
+        WHERE
+        ttr.team_id = #{item.teamId}
+        AND t1.receive_id IS NULL
+        AND t1.sample IS NOT NULL
+        <if test="item.sampleName != null and item.sampleName != ''">
+            AND t1.sample LIKE CONCAT('%', #{item.sampleName}, '%')
+        </if>
+        <if test="item.publisher != null and item.publisher != ''">
+            AND t1.publisher LIKE CONCAT('%', #{item.publisher}, '%')
+        </if>
+        <if test="item.requireStartTime != null and item.requireEndTime != null">
+            And t1.required_completion_time &gt;=#{item.requireStartTime}
+            and t1.required_completion_time &lt;= #{item.requireEndTime}
+        </if>
+        <if test="item.publishStartTime != null and item.publishEndTime != null">
+            And t1.publish_date &gt;=#{item.publishStartTime}
+            and t1.publish_date &lt;= #{item.publishEndTime}
+        </if>
+        <if test="item.entrustmentNo != null and item.entrustmentNo != ''">
+            AND t4.entrustment_no LIKE CONCAT('%', #{item.entrustmentNo}, '%')
+        </if>
+        order by t1.id desc
+    </select>
+
     <select id="myTaskList" resultType="com.lims.manage.erp.entity.TestTaskPool">
         SELECT distinct
         tb1.id,

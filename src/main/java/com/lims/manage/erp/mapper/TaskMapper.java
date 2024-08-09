@@ -581,6 +581,8 @@ public interface TaskMapper extends BaseMapper {
 
     List<TestTaskPool> taskHall(@Param("item") ReqTaskPool item);
 
+    List<TestTaskPool> taskHall1(@Param("item") ReqTaskPool item);
+
     List<TestTaskPool> myTaskList(@Param("item") ReqTaskPool bean);
 
     /**
