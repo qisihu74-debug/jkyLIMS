@@ -205,10 +205,25 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         Long userId = ShiroUtils.getUserInfo().getUserId();
         Long teamId = teamMapper.getTeamIdByUid(userId);
 
-        // 新增样品信息下检测项
-        List<SampleEntity> addNewSamplesAndItems = new ArrayList<>();
         // 3： 通过委托单id 查看检测项列表。
         List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+
+        // 进行每组检测项进行处理
+        sortTheListOfDetectionItems(itemList, teamRelList, teamId, sampleList);
+
+        return ResultUtil.success(sampleList);
+    }
+
+    /**
+     * 进行每组检测项进行处理
+     *
+     * @param itemList
+     * @param teamRelList
+     * @param teamId
+     * @param sampleList
+     */
+    private void sortTheListOfDetectionItems(List<SampleItemEntity> itemList, List<TestCheckItemTeamRel> teamRelList, Long teamId, List<SampleEntity> sampleList) {
+
         // 遍历检测项 与团队之间的关系：
         if (CollectionUtil.isNotEmpty(itemList) && CollectionUtil.isNotEmpty(teamRelList)) {
             // key = checkItemId、value = 所属检测项团队
@@ -228,21 +243,85 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             // 委托单下 检测项列表 遍历
             for (SampleItemEntity sampleItemEntity : itemList) {
                 // 当前检测项 存在团队 进行处理
-                if (CollectionUtil.isNotEmpty(itemlistMap.get(sampleItemEntity.getCheckItemId())) && sampleItemEntity.getTaskId() == null) {
-                    List<TestCheckItemTeamRel> itemTeamRels = itemlistMap.get(sampleItemEntity.getCheckItemId());
+                List<TestCheckItemTeamRel> itemTeamRels = itemlistMap.get(sampleItemEntity.getCheckItemId().intValue());
+                if (CollectionUtil.isNotEmpty(itemTeamRels) && sampleItemEntity.getTaskId() == null) {
+                    if (itemTeamRels.size() == 1) {
+                        // 条数唯一
+                        if (teamId.equals(itemTeamRels.get(0).getTeamId().longValue())) {
+                            sampleItemEntity.setPriority("1");
+                            sampleItemEntity.setTeamName(itemTeamRels.get(0).getTeamName());
+                        } else {
+                            sampleItemEntity.setPriority(null);
+                            sampleItemEntity.setTeamName(itemTeamRels.get(0).getTeamName());
+                        }
+                        // 符合条件 跳出本次for 循环
+                        continue;
+                    }
                     // 设置排序优先级
                     Collections.sort(itemTeamRels, Comparator.comparing(TestCheckItemTeamRel::getPriority));
+                    // 多个情况下 进行排序优先操作
                     for (TestCheckItemTeamRel teamRel : itemTeamRels) {
-                        // 设置检测团队优先级 ： 当前团队与检测项相等 && 优先级不为空 优先级 = 1
-                        if (teamId.equals(teamRel.getTeamId()) && (teamRel.getPriority() != null && teamRel.getPriority().equals("1"))) {
+                        // 设置检测团队优先级 ： 当前团队与检测项团队相等 && 优先级不为空 优先级 = 1
+                        if (teamId.equals(teamRel.getTeamId().longValue()) && (teamRel.getPriority() != null && teamRel.getPriority().equals("1"))) {
                             sampleItemEntity.setPriority("1");
                             sampleItemEntity.setTeamName(teamRel.getTeamName());
+                            // 符合条件 跳出本次for 循环
+                            continue;
+                        }
+                    }
+                    // 默认优先级
+                    for (TestCheckItemTeamRel teamRel : itemTeamRels) {
+                        if (teamRel.getPriority() != null && teamRel.getPriority().equals("1") && sampleItemEntity.getTeamName() == null) {
+                            sampleItemEntity.setPriority(null);
+                            sampleItemEntity.setTeamName(teamRel.getTeamName());
+                            // 符合条件 跳出本次for 循环
+                            continue;
+                        }
+                    }
+                    // 默认优先级
+                    for (TestCheckItemTeamRel teamRel : itemTeamRels) {
+                        if (teamId.equals(teamRel.getTeamId().longValue()) && sampleItemEntity.getTeamName() == null) {
+                            sampleItemEntity.setPriority("1");
+                            sampleItemEntity.setTeamName(teamRel.getTeamName());
+                            // 符合条件 跳出本次for 循环
+                            continue;
                         }
                     }
                 }
             }
         }
-        return null;
+
+        // 进行检测项 与样品信息 归类:
+        if (CollectionUtil.isNotEmpty(itemList) && CollectionUtil.isNotEmpty(sampleList)) {
+            for (SampleEntity sampleEntity : sampleList) {
+                List<SampleItemEntity> sampleItemEntities = new ArrayList<>();
+                // 新增检测项中 taskId = null的。
+                List<SampleItemEntity> addNewSampleItemEntities = new ArrayList<>();
+                // 遍历检测项数据 存放至 样品中
+                if (CollectionUtil.isNotEmpty(itemList)) {
+                    for (SampleItemEntity sampleItemEntity : itemList) {
+                        if (sampleItemEntity.getSampleId().equals(sampleEntity.getId())) {
+                            sampleItemEntities.add(sampleItemEntity);
+                        }
+                    }
+                }
+                sampleEntity.setSampleCheckItem(sampleItemEntities);
+                // 样品外观描述 不为null
+                sampleEntity.setOutwardDescribe(sampleEntity.getOutwardDescribe() == null ? "-" : sampleEntity.getOutwardDescribe());
+                SampleEntity sampleData = new SampleEntity();
+                sampleData.setId(sampleEntity.getId());
+                sampleData.setSampleCode(sampleEntity.getSampleCode());
+                sampleData.setSampleName(sampleEntity.getSampleName());
+                sampleData.setAliasName(sampleEntity.getAliasName());
+                sampleData.setSpecs(sampleEntity.getSpecs());
+                sampleData.setBatchNumber(sampleEntity.getBatchNumber());
+                sampleData.setManufacturer(sampleEntity.getManufacturer());
+                sampleData.setSampleOrigin(sampleEntity.getSampleOrigin());
+                sampleData.setOutward(sampleEntity.getOutward());
+                sampleData.setOutwardDescribe(sampleEntity.getOutwardDescribe());
+                sampleData.setSampleCheckItem(addNewSampleItemEntities);
+            }
+        }
     }
 
     private void methodForEachTaskHallDetails(SampleItemEntity sampleItemEntity, List<TestCheckItemsTaskRel> itemsTaskRels) {
