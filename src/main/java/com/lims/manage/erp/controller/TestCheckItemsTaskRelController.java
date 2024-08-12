@@ -39,6 +39,18 @@ public class TestCheckItemsTaskRelController {
     }
 
     /**
+     * 任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
+     *
+     * @param poolId
+     * @param entrustId
+     * @return
+     */
+    @GetMapping("/getTaskDetectionItemDetails")
+    public Result getTaskDetectionItemDetails(Long poolId, Long entrustId) {
+        return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId);
+    }
+
+    /**
      * 任务大厅 领取任务单
      *
      * @param sampleItemJsonVo

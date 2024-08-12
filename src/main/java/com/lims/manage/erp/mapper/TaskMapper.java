@@ -689,12 +689,12 @@ public interface TaskMapper extends BaseMapper {
     List<LabelValueVo> getAllTeamUser();
 
     /**
-     * 获取团队成员信息
+     * 获取团队成员信息及部门名称
      *
-     * @param teamIds
+     * @param teamId
      * @return
      */
-    List<LabelValueVo> getTeamMemberInformation(List<Integer> teamIds);
+    List<LabelValueVo> selectTeamMemberInformation(Long teamId);
 
     /**
      * 返回全部科室人员信息

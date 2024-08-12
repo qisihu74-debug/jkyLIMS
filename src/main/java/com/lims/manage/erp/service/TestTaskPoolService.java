@@ -26,6 +26,15 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
     Result taskHallDetailsDisplay(Long poolId, Long entrustId);
 
     /**
+     * 任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
+     *
+     * @param poolId
+     * @param entrustId
+     * @return
+     */
+    Result getTaskDetectionItemDetails(Long poolId, Long entrustId);
+
+    /**
      * 任务大厅 领取任务单
      *
      * @param list

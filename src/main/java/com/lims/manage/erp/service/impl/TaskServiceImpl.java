@@ -2587,4 +2587,37 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         }
         return ResultUtil.success(new ArrayList<>());
     }
+
+    /**
+     * 获取当前团队成员信息
+     *
+     * @return
+     */
+    @Override
+    public Result getTeamMemberInformation() {
+
+        // 1、效验登录人信息
+        if (ShiroUtils.getUserInfo() != null) {
+            TeamVo returnSet = new TeamVo();
+
+            // 2、获取当前登录人所在部门
+            Long userId = ShiroUtils.getUserInfo().getUserId();
+            Long teamId = teamMapper.getTeamIdByUid(userId);
+            if (teamId == null) {
+                returnSet.setTeamVo(null);
+            } else {
+                // 3、获取当前团队成员
+                List<LabelValueVo> teamVos = taskMapper.selectTeamMemberInformation(teamId);
+                returnSet.setTeamVo(teamVos);
+            }
+
+            // 报告制作人
+            List<LabelValueVo> reviewVo = taskMapper.getAllTeamNAMEUser();
+
+            returnSet.setReviewVo(reviewVo);
+            return ResultUtil.success(returnSet);
+        }
+
+        return ResultUtil.error(502, "token过期！");
+    }
 }

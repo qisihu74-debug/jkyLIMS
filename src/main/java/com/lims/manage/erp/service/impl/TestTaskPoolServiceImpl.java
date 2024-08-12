@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -52,6 +53,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     private SysRoleDao sysRoleDao;
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private TestCheckItemTeamRelDao testCheckItemTeamRelDao;
 
     /**
      * 任务大厅 展示详情数据
@@ -167,6 +170,79 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             jsonObject.put("sampler", null);
         }
         return ResultUtil.success(jsonObject);
+    }
+
+    /**
+     * 任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
+     *
+     * @param poolId
+     * @param entrustId
+     * @return
+     */
+    @Override
+    public Result getTaskDetectionItemDetails(Long poolId, Long entrustId) {
+        // 进行构造数据 返回。
+        // 1、 展示模拟任务单号
+        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskPool::getId, poolId);
+        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
+        // 任务单模拟单据
+        TestTaskPool detailedData = taskPoolMapper.selectOne(queryWrapper);
+        if (detailedData == null) {
+            return ResultUtil.error("查看失败： 预任务单不存在");
+        }
+
+        // 2、 展示每组下样品列表
+        List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
+        // 委托单id下的产品id
+        List<Integer> productIds = new ArrayList<>();
+        productIds = sampleList.stream().filter(SampleEntity -> SampleEntity.getProductId() != null).map(SampleEntity::getProductId).collect(Collectors.toList());
+        LambdaQueryWrapper<TestCheckItemTeamRel> checkItemTeamRelWrapper = new LambdaQueryWrapper<>();
+        checkItemTeamRelWrapper.in(TestCheckItemTeamRel::getProductId, productIds);
+        // 产品中存在的团队与检测项关系
+        List<TestCheckItemTeamRel> teamRelList = testCheckItemTeamRelDao.selectList(checkItemTeamRelWrapper);
+        // 获取当前登录人所属团队
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        Long teamId = teamMapper.getTeamIdByUid(userId);
+
+        // 新增样品信息下检测项
+        List<SampleEntity> addNewSamplesAndItems = new ArrayList<>();
+        // 3： 通过委托单id 查看检测项列表。
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+        // 遍历检测项 与团队之间的关系：
+        if (CollectionUtil.isNotEmpty(itemList) && CollectionUtil.isNotEmpty(teamRelList)) {
+            // key = checkItemId、value = 所属检测项团队
+            Map<Integer, List<TestCheckItemTeamRel>> itemlistMap = new HashMap<>();
+            for (TestCheckItemTeamRel checkItemTeamRel : teamRelList) {
+//                 当前检测项与检测项模版数据比较时 存在
+                if (itemlistMap.get(checkItemTeamRel.getCheckItemId()) == null) {
+                    List<TestCheckItemTeamRel> itemEntities = new ArrayList<>();
+                    itemEntities.add(checkItemTeamRel);
+                    itemlistMap.put(checkItemTeamRel.getCheckItemId(), itemEntities);
+                } else {
+                    List<TestCheckItemTeamRel> itemEntities = itemlistMap.get(checkItemTeamRel.getCheckItemId());
+                    itemEntities.add(checkItemTeamRel);
+                    itemlistMap.put(checkItemTeamRel.getCheckItemId(), itemEntities);
+                }
+            }
+            // 委托单下 检测项列表 遍历
+            for (SampleItemEntity sampleItemEntity : itemList) {
+                // 当前检测项 存在团队 进行处理
+                if (CollectionUtil.isNotEmpty(itemlistMap.get(sampleItemEntity.getCheckItemId())) && sampleItemEntity.getTaskId() == null) {
+                    List<TestCheckItemTeamRel> itemTeamRels = itemlistMap.get(sampleItemEntity.getCheckItemId());
+                    // 设置排序优先级
+                    Collections.sort(itemTeamRels, Comparator.comparing(TestCheckItemTeamRel::getPriority));
+                    for (TestCheckItemTeamRel teamRel : itemTeamRels) {
+                        // 设置检测团队优先级 ： 当前团队与检测项相等 && 优先级不为空 优先级 = 1
+                        if (teamId.equals(teamRel.getTeamId()) && (teamRel.getPriority() != null && teamRel.getPriority().equals("1"))) {
+                            sampleItemEntity.setPriority("1");
+                            sampleItemEntity.setTeamName(teamRel.getTeamName());
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void methodForEachTaskHallDetails(SampleItemEntity sampleItemEntity, List<TestCheckItemsTaskRel> itemsTaskRels) {

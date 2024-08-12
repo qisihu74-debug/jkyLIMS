@@ -151,6 +151,8 @@ public class TestCheckItemTeamRelServiceImpl extends ServiceImpl<TestCheckItemTe
                     // 设置优先级: 多个情况下 首次设置优先级为 1
                     if (i == 0) {
                         data.setPriority("1");
+                    } else {
+                        data.setPriority("2");
                     }
                     teamRelArrayList.add(data);
                 }

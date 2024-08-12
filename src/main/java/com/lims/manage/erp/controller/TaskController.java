@@ -327,6 +327,17 @@ public class TaskController {
     }
 
     /**
+     * 任务大厅-返回团队成员信息
+     *
+     * @return
+     */
+    @RequestMapping("getTeamMemberInformation")
+    public Result getTeamMemberInformation() {
+
+        return taskService.getTeamMemberInformation();
+    }
+
+    /**
      * 返回 团队姓名
      *
      * @return
