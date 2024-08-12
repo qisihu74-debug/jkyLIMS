@@ -295,6 +295,10 @@ public class EntrustEntity {
      * 是否保留
      */
     private String isReserve;
+    /**
+     * 操作类型0线上编辑的报告，1线下编辑的报告
+     */
+    private Integer operateType;
 
 
     public EntrustEntity(Long id, Integer entrustmentNo, String entrustType, String entrustPeople, String entrustPhone,
@@ -388,6 +392,7 @@ public class EntrustEntity {
         this.systemPrice=vo.getSystemPrice();
         this.presentInformation=vo.getPresentInformation();
         this.reportReceivingUnit = vo.getReportReceivingUnit();
+        this.operateType = vo.getOperateType();
     }
 
 

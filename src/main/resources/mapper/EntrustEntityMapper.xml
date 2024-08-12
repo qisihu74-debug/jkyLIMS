@@ -59,7 +59,8 @@
                entrust_category,
                operating_personnel,
                is_reserve,
-               audit_state
+               audit_state,
+               operate_type
         from test_entrusted_info
         where id = #{id}
     </select>
@@ -703,7 +704,8 @@
                                         entrust_category_type,
                                         create_time,
                                         operating_personnel,
-                                        is_reserve)
+                                        is_reserve,
+                                        operate_type)
         values (#{id},
                 #{entrustmentNo},
                 #{entrustType},
@@ -760,7 +762,8 @@
                 #{entrustCategoryType},
                 #{createTime},
                 #{operatingPersonnel},
-                #{isReserve})
+                #{isReserve},
+                #{operateType})
 
     </insert>
     <select id="GetDelegateInformation" resultType="String">
@@ -836,6 +839,7 @@
             addressee=#{addressee},
             mobile=#{mobile},
             report_receiving_unit=#{reportReceivingUnit},
+            operate_type=#{operateType},
         </trim>
             where id = #{id}
             <if test="entrustmentNo!=null">

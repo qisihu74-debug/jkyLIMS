@@ -28,6 +28,7 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -161,6 +162,11 @@ public class UserController {
                 }
             }
         }
+        // 查询此账号是否存在
+        DingUserEntity sysDingUserData = dingUserService.getById(vo.getDingUserId());
+        if (sysDingUserData == null) {
+            return ResultUtil.error("使用人不存在！，请重新选择使用人");
+        }
 
 
         vo.setUserId(GenID.getID());
@@ -190,6 +196,9 @@ public class UserController {
         }
         entity.setTime(new Timestamp(new Date(System.currentTimeMillis()).getTime()));
         entity.setUserId(vo.getUserId());
+        if (StringUtils.isNotEmpty(sysDingUserData.getName())) {
+            entity.setName(sysDingUserData.getName());
+        }
         sysUserService.save(entity);
         // 角色信息
         if (vo.getRoleIdsLong() != null && vo.getRoleIdsLong().size() > 0) {

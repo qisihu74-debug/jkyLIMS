@@ -1721,4 +1721,22 @@
             AND #{stopDate} >= receive_time
         </if>
     </select>
+
+    <select id="getTeamMemberInformation" resultType="com.lims.manage.erp.vo.LabelValueVo">
+        SELECT
+        t2.user_id as value,
+        t2.NAME as label,
+        t3.NAME as text
+        FROM
+        test_technicist AS t1
+        LEFT JOIN sys_user AS t2 ON t1.user_id = t2.user_id
+        LEFT JOIN test_team AS t3 ON t1.team_id = t3.id
+        WHERE
+        team_id IN
+        <foreach collection='teamIds' item='id' open='(' separator=',' close=')'>
+            #{id}
+        </foreach>
+        ORDER BY
+        t1.update_time DESC
+    </select>
 </mapper>
