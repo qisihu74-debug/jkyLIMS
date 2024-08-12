@@ -54,14 +54,6 @@ public interface ReportService {
     PageInfo reportDownloadList(Integer pageNum,Integer pageSize,String search);
 
     /**
-     * 提交审批
-     * @param id
-     * @param name 报告提交申请人
-     * @return
-     */
-    Boolean getReportSubmit(Long id,String name);
-
-    /**
      * 提交审批—— 二次
      * @return
      */
@@ -82,14 +74,6 @@ public interface ReportService {
      * @return
      */
     ReportSampleDetailVo getReportList_history_details(Long recordId,Long taskId);
-
-    /**
-     * 查询委托单--报告制作详情
-     *
-     * @param id
-     * @return
-     */
-    ReportDetailVo getReportDetail1(Long id);
 
     /**
      * 查询委托单--报告制作详情--科室
@@ -441,7 +425,6 @@ public interface ReportService {
 
     Boolean onlineReportMergeSave(String reportCode, String s, String s1, long parseLong, long parseLong1, String inspector);
 
-    PageInfo onlineMakeReport(Integer pageNum,Integer pageSize,String search);
     PageInfo onlineMakeReport1023(Integer pageNum,Integer pageSize,String search);
 
     Boolean submitEditReport(ReportEditReq bean);
