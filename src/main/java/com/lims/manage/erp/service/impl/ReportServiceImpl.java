@@ -265,7 +265,7 @@ public class ReportServiceImpl implements ReportService {
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
         //List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         //根据当前登录人获取所属团队和旧团队集合
-        List<Long> userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
+        List<Integer> userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
 
         List<ReportListVo> list = null;
         if (CollectionUtils.isEmpty(userTeamIds)){
@@ -344,7 +344,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public PageInfo reportDownloadListHistory(String search, Integer pageNum, Integer pageSize) {
         //List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        List<Long> userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
+        List<Integer> userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
         List<ReportListVo> list = null;
         if (CollectionUtils.isEmpty(userTeamIds)){
             String s = sysUserDao.checkSysAndAdmRole(ShiroUtils.getUserInfo().getUserId());
@@ -1035,7 +1035,7 @@ public class ReportServiceImpl implements ReportService {
         List<ReportRecordEntity> list = null;
         //每个团队看子集大团队任务产生的报告列表
         Long userId = ShiroUtils.getUserInfo().getUserId();
-        List<Integer> ids = Lists.newArrayList();
+        List<Integer> userTeamIds = Lists.newArrayList();
         //校验用户id是否分配团队
         Integer teamId = testTechnicistDao.getSealer(userId);
         if (teamId == null){
@@ -1049,16 +1049,17 @@ public class ReportServiceImpl implements ReportService {
             }
         }else {
             if (teamId > 0) {
-                //获取顶级团队
-                Long topTeamId = this.getTopDepartment((long) teamId);
-                //获取顶级团队下的所有下级团队
-                if (topTeamId == null) {
-                    topTeamId = (long) teamId;
-                }
-                List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
-                for (TeamTreeStructureEntity entity : chirds) {
-                    ids.add(Integer.valueOf(entity.getId() + ""));
-                }
+//                //获取顶级团队
+//                Long topTeamId = this.getTopDepartment((long) teamId);
+//                //获取顶级团队下的所有下级团队
+//                if (topTeamId == null) {
+//                    topTeamId = (long) teamId;
+//                }
+//                List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
+                  userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
+//                for (TeamTreeStructureEntity entity : chirds) {
+//                    ids.add(Integer.valueOf(entity.getId() + ""));
+//                }
             }
             //根据用户id判断用户角色是否是盖章人，盖章人查看所有数据，其它人员查看自己本团队数据
             String byId = sysUserDao.checkRoleById(userId);
@@ -1066,15 +1067,15 @@ public class ReportServiceImpl implements ReportService {
                 if ("1".equals(state)){
                     state = "2";
                 }
-                ids = null;
+                userTeamIds = null;
             }else {
-                if (ids.size() <= 0){
-                    ids = null;
+                if (userTeamIds.size() <= 0){
+                    userTeamIds = null;
                 }
             }
             PageHelper.startPage(pageNum, pageSize);
             //TODO 兼容中间报告
-            list = entityMapper.getSealList(search, reportType, state, reportTypeStatus, ids);
+            list = entityMapper.getSealList(search, reportType, state, reportTypeStatus, userTeamIds);
         }
         if (CollectionUtil.isNotEmpty(list)){
             for (ReportRecordEntity recordEntity : list) {
@@ -3850,16 +3851,7 @@ public class ReportServiceImpl implements ReportService {
         //校验用户id是否分配团队
         Integer teamId = testTechnicistDao.getSealer(userId);
         if (teamId != null) {
-            //获取顶级团队
-            Long topTeamId = this.getTopDepartment((long) teamId);
-            if (topTeamId == null) {
-                topTeamId = (long) teamId;
-            }
-            //获取顶级团队下的所有下级团队
-            List<TeamTreeStructureEntity> chirds = teamMapper.getChirds(topTeamId);
-            for (TeamTreeStructureEntity entity : chirds) {
-                ids.add(Integer.valueOf(entity.getId() + ""));
-            }
+           ids = teamMapper.getTeamIdsByUserId(userId);
         }
         String byId = sysUserDao.checkRoleById(userId);
         String s = sysUserDao.checkSysAndAdmRole(userId);
