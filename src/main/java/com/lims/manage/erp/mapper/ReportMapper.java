@@ -33,17 +33,10 @@ public interface ReportMapper {
      */
     List<ReportListVo> getReportList2(@Param("deptIds") List<Long> deptIds,@Param("taskCode") String taskCode);
 
-    /**
-     * 在线报告制作列表
-     * @param deptIds
-     * @param taskCode
-     * @return
-     */
-    List<ReportListVo> getReportListOnline(@Param("deptIds") List<Long> deptIds,@Param("taskCode") String taskCode,@Param("userId") String userId);
     List<ReportListVo> getReportListOnline1023(@Param("taskCode") String taskCode,@Param("userId") String userId);
 
     List<ReportListVo> reportDownloadList(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
-    List<ReportListVo> reportDownloadList0512(@Param("deptIds") List<Long> deptIds,@Param("reportCode") String reportCode);
+    List<ReportListVo> reportDownloadList0512(@Param("userId") Long userId,@Param("reportCode") String reportCode);
 
     /**
      * 查询委托下样品名字
@@ -111,7 +104,6 @@ public interface ReportMapper {
     List<ReportListVo> getReportList_history(ReportListVo reportListVo);
 
     List<ReportListVo> reportDownloadListHistory(ReportListVo reportListVo);
-    List<ReportListVo> reportDownloadListHistory0512(ReportListVo reportListVo);
 
     /**
      * 获取历史详情
@@ -533,4 +525,5 @@ public interface ReportMapper {
             "\tAND t2.issuer_time IS NOT NULL\n" +
             "\tLIMIT 1 ")
     ReportRecordEntity queryReportDetailsByTaskKey(@Param("taskId") Long taskId);
+
 }

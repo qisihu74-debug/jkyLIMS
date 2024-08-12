@@ -263,7 +263,10 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
-        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        //List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        //根据当前登录人获取所属团队和旧团队集合
+        List<Long> userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
+
         List<ReportListVo> list = null;
         if (CollectionUtils.isEmpty(userTeamIds)){
             String byId = sysUserDao.checkSysAndAdmRole(ShiroUtils.getUserInfo().getUserId());
@@ -277,7 +280,7 @@ public class ReportServiceImpl implements ReportService {
         }else {
             PageHelper.clearPage();
             PageHelper.startPage(pageNum, pageSize);
-            list = reportMapper.reportDownloadList0512(userTeamIds, search);
+            list = reportMapper.reportDownloadList0512(ShiroUtils.getUserInfo().getUserId(), search);
         }
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
             for (ReportListVo reportListVo : list) {
@@ -303,46 +306,6 @@ public class ReportServiceImpl implements ReportService {
         }else {
             return new PageInfo<ReportListVo>();
         }
-    }
-
-    /**
-     * 提交审批
-     *
-     * @param id
-     * @param name 报告提交申请人
-     * @return
-     */
-    @Transactional
-    @Override
-    public Boolean getReportSubmit(Long id, String name) {
-//        // 根据委托单id 查询报告信息 state=1
-//        ReportRecordEntity reportData = recordEntityMapper.getReportEntrust(id);
-//        if(reportData.getState().equals("1")){
-//            // 修改状态
-//            reportData.setReportCompleteTime(new Date());
-//            reportData.setApplicant(name);
-//             recordEntityMapper.updateByEntrustIdSelective(reportData);
-//            // 根据任务单主键 获取委托单主键 更改委托单状态
-//            EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
-//            if(entrustBaseInfo.getState()!=null&&entrustBaseInfo.getState()<7){
-//                taskMapper.updateEntrustById(entrustBaseInfo.getId(),7);
-//            }
-//            return true;
-//        }
-//        return false;
-        // 修改状态 提交审批 直接进行改状态 state=3
-        ReportRecordEntity reportData = new ReportRecordEntity();
-        reportData.setReportCompleteTime(new Date());
-        reportData.setApplicant(name);
-        reportData.setState("3");
-        recordEntityMapper.updateByEntrustIdSelective(reportData);
-        // 根据任务单主键 获取委托单主键 更改委托单状态
-        EntrustAddVo entrustBaseInfo = entrustEntityMapper.selectByKeyId(id);
-        if (entrustBaseInfo.getState() != null && entrustBaseInfo.getState() < 7) {
-            taskMapper.updateEntrustById(entrustBaseInfo.getId(), 7);
-        }
-        return true;
-
     }
 
     @Override
@@ -380,7 +343,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo reportDownloadListHistory(String search, Integer pageNum, Integer pageSize) {
-        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        //List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        List<Long> userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
         List<ReportListVo> list = null;
         if (CollectionUtils.isEmpty(userTeamIds)){
             String s = sysUserDao.checkSysAndAdmRole(ShiroUtils.getUserInfo().getUserId());
@@ -396,7 +360,7 @@ public class ReportServiceImpl implements ReportService {
             PageHelper.startPage(pageNum, pageSize);
             ReportListVo reportListVo = new ReportListVo();
             reportListVo.setReportCode(search);
-            reportListVo.setDeptIds(userTeamIds);
+            reportListVo.setUserId(ShiroUtils.getUserInfo().getUserId());
             list = reportMapper.reportDownloadListHistory(reportListVo);
         }
         if (CollectionUtil.isNotEmpty(list)){
@@ -479,11 +443,6 @@ public class ReportServiceImpl implements ReportService {
         List<ReportCheckItemDetailVo> checkItemList = reportMapper.getReportCheckItemListByRecordId(recordId, taskId);
         reportSampleDetailVo.setCheckItems(checkItemList);
         return reportSampleDetailVo;
-    }
-
-    @Override
-    public ReportDetailVo getReportDetail1(Long id) {
-        return reportMapper.getReportDetail1(id);
     }
 
     @Override
@@ -4680,23 +4639,6 @@ public class ReportServiceImpl implements ReportService {
             FileAndFolderUtil.delete(del);
         }
         return url.substring(0, url.indexOf("?"));
-    }
-
-    @Override
-    public PageInfo onlineMakeReport(Integer pageNum, Integer pageSize, String search) {
-        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
-        PageHelper.startPage(pageNum, pageSize);
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        Long userId = userInfo.getUserId();
-        List<ReportListVo> list = reportMapper.getReportListOnline(userTeamIds, search,userId+"");
-        for (ReportListVo reportListVo : list) {
-            List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
-            reportListVo.setSampleInfos(sampleInfos);
-//            List<LabelValueVo> makeReportSampleInfos = reportMapper.getMakeReportSampleInfos(reportListVo.getId(),reportListVo.getTaskId());
-//            reportListVo.setMakeReportSampleInfos(makeReportSampleInfos);
-        }
-        PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
-        return pageInfo;
     }
 
     @Override
