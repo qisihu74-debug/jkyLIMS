@@ -315,5 +315,5 @@ public interface TeamMapper extends BaseMapper {
             "\t\t\tWHERE\n" +
             "\t\t\t\tuser_id = #{userId}\n" +
             "\t\t)")
-    List<Long> getTeamIdsByUserId(@Param("userId") Long userId);
+    List<Integer> getTeamIdsByUserId(@Param("userId") Long userId);
 }
