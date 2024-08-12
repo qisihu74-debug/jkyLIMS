@@ -263,7 +263,10 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
-        List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        //List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
+        //根据当前登录人获取所属团队和旧团队集合
+        List<Long> userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
+
         List<ReportListVo> list = null;
         if (CollectionUtils.isEmpty(userTeamIds)){
             String byId = sysUserDao.checkSysAndAdmRole(ShiroUtils.getUserInfo().getUserId());
@@ -272,12 +275,14 @@ public class ReportServiceImpl implements ReportService {
             }else {
                 PageHelper.clearPage();
                 PageHelper.startPage(pageNum, pageSize);
-                list = reportMapper.reportDownloadList0512(null, search);
+                //list = reportMapper.reportDownloadList0512(null, search);
+                list = reportMapper.reportDownloadList0512ByUserId(ShiroUtils.getUserInfo().getUserId(), search);
             }
         }else {
             PageHelper.clearPage();
             PageHelper.startPage(pageNum, pageSize);
-            list = reportMapper.reportDownloadList0512(userTeamIds, search);
+            //list = reportMapper.reportDownloadList0512(userTeamIds, search);
+            list = reportMapper.reportDownloadList0512ByUserId(ShiroUtils.getUserInfo().getUserId(), search);
         }
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
             for (ReportListVo reportListVo : list) {

@@ -533,4 +533,13 @@ public interface ReportMapper {
             "\tAND t2.issuer_time IS NOT NULL\n" +
             "\tLIMIT 1 ")
     ReportRecordEntity queryReportDetailsByTaskKey(@Param("taskId") Long taskId);
+
+    /**
+     * 查询报告制作列表根据报告制作人
+     * @param userId
+     * @param reportCode
+     * @return
+     */
+    List<ReportListVo> reportDownloadList0512ByUserId(@Param("userId") Long userId,@Param("reportCode") String reportCode);
+
 }

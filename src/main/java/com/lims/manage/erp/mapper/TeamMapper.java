@@ -294,4 +294,26 @@ public interface TeamMapper extends BaseMapper {
 
     @Select("SELECT team_id FROM test_technicist WHERE user_id = #{userId}")
     Long getTeamByUserId(@Param("userId")Long userId);
+
+    @Select("SELECT\n" +
+            "\tteam_id\n" +
+            "FROM\n" +
+            "\ttest_technicist\n" +
+            "WHERE\n" +
+            "\tuser_id = #{userId}\n" +
+            "UNION ALL\n" +
+            "\tSELECT\n" +
+            "\t\told_team_id\n" +
+            "\tFROM\n" +
+            "\t\ttest_team_rel\n" +
+            "\tWHERE\n" +
+            "\t\tnew_team_id = (\n" +
+            "\t\t\tSELECT\n" +
+            "\t\t\t\tteam_id\n" +
+            "\t\t\tFROM\n" +
+            "\t\t\t\ttest_technicist\n" +
+            "\t\t\tWHERE\n" +
+            "\t\t\t\tuser_id = #{userId}\n" +
+            "\t\t)")
+    List<Long> getTeamIdsByUserId(@Param("userId") Long userId);
 }
