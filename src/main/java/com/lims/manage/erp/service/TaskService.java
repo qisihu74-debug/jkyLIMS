@@ -306,4 +306,12 @@ public interface TaskService {
      * @return
      */
     Result getTeamMemberInformation();
+
+    /**
+     * 比较任务单创建时间：区分团队信息是否拆分
+     *
+     * @param entrustId
+     * @return
+     */
+    Result compareTaskListCreationInformation(Long entrustId);
 }

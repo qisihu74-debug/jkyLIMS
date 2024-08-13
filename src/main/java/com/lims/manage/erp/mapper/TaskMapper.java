@@ -731,4 +731,12 @@ public interface TaskMapper extends BaseMapper {
             "WHERE\n" +
             "\tentrustment_id IN ( SELECT entrustment_id FROM test_task WHERE id IN ( SELECT task_id FROM test_task_order_working_hours GROUP BY task_id ) )")
     List<Long> getreportIdszzzz();
+
+    /**
+     * 通过委托单ID 获取任务单信息
+     *
+     * @param entrustId
+     * @return
+     */
+    List<TaskVo> selectTaskCreateTimeList(@Param("entrustId") Long entrustId, @Param("teamId") Integer teamId);
 }

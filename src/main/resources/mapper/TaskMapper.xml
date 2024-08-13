@@ -1736,4 +1736,21 @@
         ORDER BY
         t1.update_time DESC
     </select>
+
+    <select id="selectTaskCreateTimeList" resultType="com.lims.manage.erp.vo.TaskVo">
+        SELECT
+        id,
+        entrustment_id AS entrustmentId,
+        task_code AS taskCode,
+        create_time AS createTime,
+        dept_id
+        FROM
+        test_task
+        WHERE
+        entrustment_id = 4763792861774710
+        <if test="teamId!=null">
+            AND dept_id = #{teamId}
+        </if>
+
+    </select>
 </mapper>

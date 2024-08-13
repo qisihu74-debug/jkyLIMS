@@ -585,17 +585,29 @@ public interface SampleEntityMapper {
 
     /**
      * 批量新增样品流转记录
+     *
      * @param sampleCirculationRecord
      * @return
      */
-    int batchSaveSampleCirculationRecord(@Param("records")List<SampleCirculationRecord> sampleCirculationRecord);
+    int batchSaveSampleCirculationRecord(@Param("records") List<SampleCirculationRecord> sampleCirculationRecord);
 
     /**
      * 检测项主键集合 获取样品数据
+     *
      * @param itemIds
      * @return
      */
     List<SampleEntity> getSampleOutwardDescribeList(@Param("itemIds") List<Integer> itemIds);
 
     List<SampleDetailVo> downloadNewSampleTab20231227();
+
+
+    /**
+     * 通过样品id 获取检测项信息
+     *
+     * @param sampleId
+     * @return
+     */
+    @Select("SELECT id,sample_id as sampleId,dept_id FROM  test_entrusted_sample_checkitem_rel WHERE sample_id = #{sampleId}")
+    List<SampleItemInstrumentEntity> selectSampleTestInformation(@Param("sampleId") Integer sampleId);
 }

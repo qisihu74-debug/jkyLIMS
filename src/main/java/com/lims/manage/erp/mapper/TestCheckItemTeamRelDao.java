@@ -34,5 +34,14 @@ public interface TestCheckItemTeamRelDao extends BaseMapper<TestCheckItemTeamRel
             " WHERE team_name is not null")
     List<TestCheckItemTeamRelVo> selectCheckItemTeamRelList();
 
+    /**
+     * 通过 teamId 获取 对应的 旧部门id关系
+     *
+     * @param teamId
+     * @return
+     */
+    @Select("\t\t\t\tSELECT old_team_id FROM test_team_rel WHERE new_team_id = 2\n")
+    List<Integer> selectTeamIdRel(@Param("teamId") Integer teamId);
+
 }
 

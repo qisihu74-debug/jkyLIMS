@@ -3,9 +3,12 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestTaskPoolService;
+import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.SampleItemJsonVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +28,8 @@ public class TestCheckItemsTaskRelController {
 
     @Autowired
     private TestTaskPoolService testTaskPoolService;
+    @Autowired
+    private TaskService taskService;
 
     /**
      * 任务大厅 展示详情数据
@@ -35,36 +40,66 @@ public class TestCheckItemsTaskRelController {
      */
     @GetMapping("/taskHallDetailsDisplay")
     public Result taskHallDetailsDisplay(Long poolId, Long entrustId) {
+
+        // 比较任务单创建时间：区分团队信息是否拆分
+        Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId);
+
+        if (taskVerificationInformation.getData() == null) {
+            // 任务单不存在:任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
+            return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId);
+        } else {
+            // 提示信息
+            String promptMessage = (String) taskVerificationInformation.getData();
+            if (promptMessage.equals("newTask")) {
+                // 我的任务单 返回检测项信息
+                return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId);
+            }
+        }
+        // 检测项信息
         return testTaskPoolService.taskHallDetailsDisplay(poolId, entrustId);
     }
 
     /**
-     * 任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
-     *
-     * @param poolId
-     * @param entrustId
-     * @return
-     */
-    @GetMapping("/getTaskDetectionItemDetails")
-    public Result getTaskDetectionItemDetails(Long poolId, Long entrustId) {
-        return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId);
-    }
-
-    /**
-     * 任务大厅 领取任务单
+     * 领取任务单： 1、区分新任务单创建 1.1、新任务单修改 2、旧任务单执行旧操作
      *
      * @param sampleItemJsonVo
      * @return
      */
     @RequestMapping("/taskCollection")
     public Result taskCollection(@RequestBody SampleItemJsonVo sampleItemJsonVo) {
-//    public Result taskCollection(@RequestBody List<SampleItemEntity> list) {
-//    public Result taskCollection(@RequestParam("json") String json) {
+
         List<SampleItemEntity> list = sampleItemJsonVo.getList();
         if (CollectionUtil.isEmpty(list)) {
             return ResultUtil.error("数据不能为空");
         }
-        return testTaskPoolService.addTaskCollection(list);
+
+        // 登录人
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 任务大厅or修改时验证
+        Result getValidationStatus = testTaskPoolService.verifyTheTaskListStatus(list, userInfo.getUserId());
+        if (getValidationStatus.getCode() == null) {
+            return getValidationStatus;
+        }
+        Long entrustId = (Long) getValidationStatus.getData();
+
+        // 比较任务单创建时间：区分团队信息是否拆分
+        Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId);
+
+        if (taskVerificationInformation.getData() == null) {
+            // 任务单不存在:任务大厅 - 领取
+            return null;
+        } else {
+            // 提示信息
+            String promptMessage = (String) taskVerificationInformation.getData();
+            if (promptMessage.equals("oldTask")) {
+                // 执行 任务单旧操作
+                return testTaskPoolService.addTaskCollection(list, entrustId, userInfo);
+            }
+        }
+
+        // 通过 当前登录人所属团队 及委托单id 查询任务单存在 则修改，否则是更新
+
+        return null;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.lims.manage.erp.entity.SampleItemEntity;
+import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
 import com.lims.manage.erp.entity.TestTaskPool;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -40,7 +41,7 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @param list
      * @return
      */
-    Result addTaskCollection(List<SampleItemEntity> list);
+    Result addTaskCollection(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo);
 
     /**
      * 试验检测：任务单判断是否为 new创建。
@@ -51,6 +52,17 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @return
      */
     Result testDetectionTasks(Long taskId, List<Integer> items, Integer type);
+
+    /**
+     * 任务大厅or修改时验证任务单真伪
+     * 1、通过通过检测项主键 获取 委托单是否存在
+     * 2、查询当前领单人 是否为 授权角色id = 66
+     *
+     * @param list   任务大厅传递数据
+     * @param userId 登录人id
+     * @return 抛出error 直接抛出，success 传递 entrustId
+     */
+    Result verifyTheTaskListStatus(List<SampleItemEntity> list, Long userId);
 
 
 }
