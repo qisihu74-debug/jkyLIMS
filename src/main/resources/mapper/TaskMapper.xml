@@ -1599,6 +1599,7 @@
         LEFT JOIN test_task tb2 ON tb1.id = tb2.pool_id
         WHERE
         tb1.receive_id LIKE CONCAT('%', #{item.userId}, '%')
+        AND tb1.receive_date is not null
         <if test="item.sampleName != null and item.sampleName != ''">
             AND tb1.sample LIKE CONCAT('%', #{item.sampleName}, '%')
         </if>
