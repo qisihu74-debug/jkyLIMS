@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -21,27 +22,7 @@ import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.vo.CheckItemInfoVo;
-import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.ExcelInsertVo;
-import com.lims.manage.erp.vo.LabelValueTeamVo;
-import com.lims.manage.erp.vo.LabelValueVo;
-import com.lims.manage.erp.vo.OriginalRecordDataVo;
-import com.lims.manage.erp.vo.OriginalRecordParamVo;
-import com.lims.manage.erp.vo.PagingToolVo;
-import com.lims.manage.erp.vo.PersonInfoVo;
-import com.lims.manage.erp.vo.ReceiveSampleListVo;
-import com.lims.manage.erp.vo.ReceiveSampleParamVo;
-import com.lims.manage.erp.vo.ReviewVo;
-import com.lims.manage.erp.vo.SampleDetailVo;
-import com.lims.manage.erp.vo.SamplePrivateInfoVo;
-import com.lims.manage.erp.vo.TaskDetailInfoVo;
-import com.lims.manage.erp.vo.TaskListParamVo;
-import com.lims.manage.erp.vo.TaskListVo;
-import com.lims.manage.erp.vo.TaskStatsItemVo;
-import com.lims.manage.erp.vo.TaskStatsVo;
-import com.lims.manage.erp.vo.TeamVo;
-import com.lims.manage.erp.vo.TemplateSampleVo;
+import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
@@ -2586,5 +2567,61 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             return ResultUtil.success(userList);
         }
         return ResultUtil.success(new ArrayList<>());
+    }
+
+    /**
+     * 获取当前团队成员信息
+     *
+     * @return
+     */
+    @Override
+    public Result getTeamMemberInformation() {
+
+        // 1、效验登录人信息
+        if (ShiroUtils.getUserInfo() != null) {
+            TeamVo returnSet = new TeamVo();
+
+            // 2、获取当前登录人所在部门
+            Long userId = ShiroUtils.getUserInfo().getUserId();
+            Long teamId = teamMapper.getTeamIdByUid(userId);
+            if (teamId == null) {
+                returnSet.setTeamVo(null);
+            } else {
+                // 3、获取当前团队成员
+                List<LabelValueVo> teamVos = taskMapper.selectTeamMemberInformation(teamId);
+                returnSet.setTeamVo(teamVos);
+            }
+
+            // 报告制作人
+            List<LabelValueVo> reviewVo = taskMapper.getAllTeamNAMEUser();
+
+            returnSet.setReviewVo(reviewVo);
+            return ResultUtil.success(returnSet);
+        }
+
+        return ResultUtil.error(502, "token过期！");
+    }
+
+    @Override
+    public Result compareTaskListCreationInformation(Long entrustId) {
+        // 通过委托单ID 获取任务列表
+        List<TaskVo> taskList = taskMapper.selectTaskCreateTimeList(entrustId, null);
+        if (CollectionUtil.isEmpty(taskList)) {
+            return ResultUtil.success(null);
+        }
+        // 获取系统设置的任务单创建时间
+        List<TestInitDataEntity> taskCreateTimeData = taskMapper.selectEntrustBasis(102);
+        String createTime = taskCreateTimeData.get(0).getRemark();
+
+        // 比较任务单创建时间：判断当前创建为新团队创建还是 旧团队创建
+        for (TaskVo taskVo : taskList) {
+            Date creatTime = DateUtil.timeMinuteFormat(createTime);
+            if (taskVo.getCreateTime().before(creatTime)) {
+                return ResultUtil.success("oldTask");
+            } else {
+                return ResultUtil.success("newTask");
+            }
+        }
+        return ResultUtil.success(null);
     }
 }

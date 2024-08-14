@@ -299,4 +299,19 @@ public interface TaskService {
      * 返回 辅助人员 用户信息
      */
     Result getAuxiliaryPersonnelInformation();
+
+    /**
+     * 获取当前团队成员信息
+     *
+     * @return
+     */
+    Result getTeamMemberInformation();
+
+    /**
+     * 比较任务单创建时间：区分团队信息是否拆分
+     *
+     * @param entrustId
+     * @return
+     */
+    Result compareTaskListCreationInformation(Long entrustId);
 }

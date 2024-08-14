@@ -689,12 +689,12 @@ public interface TaskMapper extends BaseMapper {
     List<LabelValueVo> getAllTeamUser();
 
     /**
-     * 获取团队成员信息
+     * 获取团队成员信息及部门名称
      *
-     * @param teamIds
+     * @param teamId
      * @return
      */
-    List<LabelValueVo> getTeamMemberInformation(List<Integer> teamIds);
+    List<LabelValueVo> selectTeamMemberInformation(Long teamId);
 
     /**
      * 返回全部科室人员信息
@@ -731,4 +731,12 @@ public interface TaskMapper extends BaseMapper {
             "WHERE\n" +
             "\tentrustment_id IN ( SELECT entrustment_id FROM test_task WHERE id IN ( SELECT task_id FROM test_task_order_working_hours GROUP BY task_id ) )")
     List<Long> getreportIdszzzz();
+
+    /**
+     * 通过委托单ID 获取任务单信息
+     *
+     * @param entrustId
+     * @return
+     */
+    List<TaskVo> selectTaskCreateTimeList(@Param("entrustId") Long entrustId, @Param("teamId") Integer teamId);
 }

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -52,6 +53,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     private SysRoleDao sysRoleDao;
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private TestCheckItemTeamRelDao testCheckItemTeamRelDao;
 
     /**
      * 任务大厅 展示详情数据
@@ -169,6 +172,205 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         return ResultUtil.success(jsonObject);
     }
 
+    /**
+     * 任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
+     *
+     * @param poolId
+     * @param entrustId
+     * @return
+     */
+    @Override
+    public Result getTaskDetectionItemDetails(Long poolId, Long entrustId) {
+        // 进行构造数据 返回。
+        // 1、 展示模拟任务单号
+        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskPool::getId, poolId);
+        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
+        // 任务单模拟单据
+        TestTaskPool detailedData = taskPoolMapper.selectOne(queryWrapper);
+        if (detailedData == null) {
+            return ResultUtil.error("查看失败： 预任务单不存在");
+        }
+
+        // 2、 展示每组下样品列表
+        List<SampleEntity> sampleList = sampleEntityMapper.selectSampleListGroup(entrustId);
+        // 委托单id下的产品id集合
+        List<Integer> productIds = new ArrayList<>();
+        productIds = sampleList.stream().filter(SampleEntity -> SampleEntity.getProductId() != null).map(SampleEntity::getProductId).collect(Collectors.toList());
+        LambdaQueryWrapper<TestCheckItemTeamRel> checkItemTeamRelWrapper = new LambdaQueryWrapper<>();
+        checkItemTeamRelWrapper.in(TestCheckItemTeamRel::getProductId, productIds);
+        // 产品中存在的团队与检测项关系
+        List<TestCheckItemTeamRel> teamRelList = testCheckItemTeamRelDao.selectList(checkItemTeamRelWrapper);
+        // 获取当前登录人所属团队
+        Long userId = ShiroUtils.getUserInfo().getUserId();
+        Long teamId = teamMapper.getTeamIdByUid(userId);
+
+        // 3： 通过委托单id 查看检测项列表。
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+
+        // 进行每组检测项进行处理
+        sortTheListOfDetectionItems(itemList, teamRelList, teamId, sampleList);
+
+        JSONObject jsonObject = new JSONObject();
+        // 流水号任务单信息
+        jsonObject.put("testTaskPool", detailedData);
+        // 样品信息
+        jsonObject.put("samples", sampleList);
+        // 新增样品信息下检测项
+//        jsonObject.put("addNewSamples", addNewSamples);
+        // 领样人
+//        if (CollectionUtil.isNotEmpty(taskProgressVos)) {
+//            jsonObject.put("sampler", taskProgressVos.get(0).getSampler());
+//        } else {
+//            jsonObject.put("sampler", null);
+//        }
+        return ResultUtil.success(jsonObject);
+    }
+
+    /**
+     * 进行每组检测项进行处理
+     *
+     * @param itemList
+     * @param teamRelList
+     * @param teamId
+     * @param sampleList
+     */
+    private void sortTheListOfDetectionItems(List<SampleItemEntity> itemList, List<TestCheckItemTeamRel> teamRelList, Long teamId, List<SampleEntity> sampleList) {
+
+        // 遍历检测项 与团队之间的关系：
+        if (CollectionUtil.isNotEmpty(itemList) && CollectionUtil.isNotEmpty(teamRelList)) {
+            // key = checkItemId、value = 所属检测项团队
+            Map<Integer, List<TestCheckItemTeamRel>> itemlistMap = new HashMap<>();
+            for (TestCheckItemTeamRel checkItemTeamRel : teamRelList) {
+//                 当前检测项与检测项模版数据比较时 存在
+                if (itemlistMap.get(checkItemTeamRel.getCheckItemId()) == null) {
+                    List<TestCheckItemTeamRel> itemEntities = new ArrayList<>();
+                    itemEntities.add(checkItemTeamRel);
+                    itemlistMap.put(checkItemTeamRel.getCheckItemId(), itemEntities);
+                } else {
+                    List<TestCheckItemTeamRel> itemEntities = itemlistMap.get(checkItemTeamRel.getCheckItemId());
+                    itemEntities.add(checkItemTeamRel);
+                    itemlistMap.put(checkItemTeamRel.getCheckItemId(), itemEntities);
+                }
+            }
+            // 委托单下 检测项列表 遍历
+            for (SampleItemEntity sampleItemEntity : itemList) {
+                // 当前检测项 存在团队 进行处理
+                List<TestCheckItemTeamRel> itemTeamRels = itemlistMap.get(sampleItemEntity.getCheckItemId().intValue());
+                if (CollectionUtil.isNotEmpty(itemTeamRels) && sampleItemEntity.getTaskId() == null) {
+                    if (itemTeamRels.size() == 1) {
+                        // 条数唯一
+                        if (teamId.equals(itemTeamRels.get(0).getTeamId().longValue())) {
+                            sampleItemEntity.setPriority("1");
+                        } else {
+                            sampleItemEntity.setPriority(null);
+                            sampleItemEntity.setTeamName(itemTeamRels.get(0).getTeamName());
+                        }
+                        // 符合条件 跳出本次for 循环
+                        continue;
+                    }
+                    // 设置排序优先级
+                    Collections.sort(itemTeamRels, Comparator.comparing(TestCheckItemTeamRel::getPriority));
+                    // 多个情况下 进行排序优先操作
+                    for (TestCheckItemTeamRel teamRel : itemTeamRels) {
+                        // 设置检测团队优先级 ： 当前团队与检测项团队相等 && 优先级不为空 优先级 = 1
+                        if (teamId.equals(teamRel.getTeamId().longValue()) && (teamRel.getPriority() != null && teamRel.getPriority().equals("1"))) {
+                            sampleItemEntity.setPriority("1");
+                            sampleItemEntity.setTeamName(teamRel.getTeamName());
+                            // 符合条件 跳出本次for 循环
+                            continue;
+                        }
+                    }
+                    // 默认优先级
+                    for (TestCheckItemTeamRel teamRel : itemTeamRels) {
+                        if (teamRel.getPriority() != null && teamRel.getPriority().equals("1") && sampleItemEntity.getTeamName() == null) {
+                            sampleItemEntity.setPriority(null);
+                            sampleItemEntity.setTeamName(teamRel.getTeamName());
+                            // 符合条件 跳出本次for 循环
+                            continue;
+                        }
+                    }
+                    // 默认优先级
+                    for (TestCheckItemTeamRel teamRel : itemTeamRels) {
+                        if (teamId.equals(teamRel.getTeamId().longValue()) && sampleItemEntity.getTeamName() == null) {
+                            sampleItemEntity.setPriority("1");
+                            sampleItemEntity.setTeamName(teamRel.getTeamName());
+                            // 符合条件 跳出本次for 循环
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 进行检测项 与样品信息 归类:
+        if (CollectionUtil.isNotEmpty(itemList) && CollectionUtil.isNotEmpty(sampleList)) {
+            for (SampleEntity sampleEntity : sampleList) {
+                // 当前样品属于配合比原材时： 配合比实验交叉参数默认分配给已拥有配合比实验的团队
+                Boolean falg = false;
+                if (sampleEntity.getPid() != null) {
+
+                    // 通过样品父级pid 查询 返回团队id
+                    falg = verifyMixRatioSampleInformation(sampleEntity.getPid(), teamId);
+                    for (SampleItemEntity sampleItemEntity : itemList) {
+                        if (falg) {
+                            sampleItemEntity.setPriority("1");
+                        } else {
+                            // 所有检测项不可领取：需要配合比试验团队领取后才行
+                            sampleItemEntity.setPriority(null);
+                            sampleItemEntity.setTeamName(null);
+                        }
+                    }
+                }
+                List<SampleItemEntity> sampleItemEntities = new ArrayList<>();
+                // 遍历检测项数据 存放至 样品中
+                if (CollectionUtil.isNotEmpty(itemList)) {
+                    for (SampleItemEntity sampleItemEntity : itemList) {
+                        if (sampleItemEntity.getSampleId().equals(sampleEntity.getId())) {
+                            sampleItemEntities.add(sampleItemEntity);
+                        }
+                    }
+                }
+                sampleEntity.setSampleCheckItem(sampleItemEntities);
+                // 样品外观描述 不为null
+                sampleEntity.setOutwardDescribe(sampleEntity.getOutwardDescribe() == null ? "-" : sampleEntity.getOutwardDescribe());
+            }
+        }
+    }
+
+    /**
+     * 验证配合比样品信息
+     *
+     * @param pid
+     * @param teamId
+     */
+    public Boolean verifyMixRatioSampleInformation(Integer pid, Long teamId) {
+
+        List<SampleItemInstrumentEntity> itemList = sampleEntityMapper.selectSampleTestInformation(pid);
+        if (CollectionUtil.isNotEmpty(itemList)) {
+            SampleItemInstrumentEntity sampleItemInstrumentEntity = itemList.get(0);
+            if (sampleItemInstrumentEntity.getDeptId() != null) {
+                // 检测项所属id 与 当前部门id 匹配的话
+                if (sampleItemInstrumentEntity.getDeptId().equals(teamId.intValue())) {
+                    return true;
+                }
+
+                // 通过当前 teamId 获取 deptIds
+                List<Integer> oldTeamIds = testCheckItemTeamRelDao.selectTeamIdRel(teamId.intValue());
+                if (CollectionUtil.isNotEmpty(oldTeamIds)) {
+                    for (Integer oldTeamId : oldTeamIds) {
+                        if (sampleItemInstrumentEntity.getDeptId().equals(oldTeamId)) {
+                            return true;
+                        }
+                    }
+                }
+
+            }
+            return false;
+        }
+        return false;
+    }
+
     private void methodForEachTaskHallDetails(SampleItemEntity sampleItemEntity, List<TestCheckItemsTaskRel> itemsTaskRels) {
         // （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
         // 检测人
@@ -243,14 +445,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Result addTaskCollection(List<SampleItemEntity> list) {
-        // 登录人
-        SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        // 任务大厅or修改时验证
-        Result getValidationStatus = verifyTheTaskListStatus(list, userInfo.getUserId());
-        if (getValidationStatus.getCode() == null) {
-            return getValidationStatus;
-        }
+    public synchronized Result addTaskCollection(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo) {
         // 当前登录人 不能是 复核人
         for (SampleItemEntity sampleItemEntity : list) {
             // 一致的话。进行返回数据 "郭家林&1647502446459100,邓喜旺&1647657004269101"
@@ -262,7 +457,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 }
             }
         }
-        Long entrustId = (Long) getValidationStatus.getData();
         // 通过委托单id 查询旧任务列表
         List<TaskProgressVo> oldTaskProgressVos = taskMapper.getTaskStateByEntrustId(entrustId);
         // 通过委托单 获取流水任务单详情
@@ -282,12 +476,13 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         // 判断旧任务单列表 == null：领取
         if (CollectionUtils.isEmpty(oldTaskProgressVos)) {
             // 领取任务单
-            return getATaskList(list, entrustId, teamCollection.get(0), testTaskPool, oldTaskProgressVos, userInfo);
+            return createTaskList(list, entrustId, teamCollection.get(0), testTaskPool, oldTaskProgressVos, userInfo);
         } else {
             // 修改任务单： 直接修改即可
             return updateTaskList(oldTaskProgressVos, list, userInfo, entrustId, testTaskPool);
         }
     }
+
 
     /**
      * 任务大厅or修改时验证任务单真伪
@@ -298,6 +493,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      * @param userId 登录人id
      * @return 抛出error 直接抛出，success 传递 entrustId
      */
+    @Override
     public Result verifyTheTaskListStatus(List<SampleItemEntity> list, Long userId) {
         // 通过检测项主键 获取 委托单id
         Long entrustId = taskPoolMapper.selectEntrustmentId(list.get(0).getItemIds().get(0));
@@ -356,7 +552,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      * @return 返回操作信息
      */
     @Transactional(rollbackFor = Exception.class)
-    public Result getATaskList(List<SampleItemEntity> list, Long entrustId, Long teamId, TestTaskPool testTaskPool, List<TaskProgressVo> oldTaskProgressVos, SysUserEntity userInfo) {
+    public Result createTaskList(List<SampleItemEntity> list, Long entrustId, Long teamId, TestTaskPool testTaskPool, List<TaskProgressVo> oldTaskProgressVos, SysUserEntity userInfo) {
         // TODO: 2024年6月6日： 审核发布时 指向合并或者是拆分。
         // 判定 true = 新任务单，false = 旧任务单 null
         Boolean taskListStatus = false;

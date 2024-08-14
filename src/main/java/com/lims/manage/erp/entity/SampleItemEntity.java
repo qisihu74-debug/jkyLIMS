@@ -188,4 +188,15 @@ public class SampleItemEntity {
     @TableField(exist = false)
     private double taskPrice;
 
+    /**
+     * 团队名称
+     */
+    @TableField(exist = false)
+    private String teamName;
+    /**
+     * 优先级
+     */
+    @TableField(exist = false)
+    private String priority;
+
 }

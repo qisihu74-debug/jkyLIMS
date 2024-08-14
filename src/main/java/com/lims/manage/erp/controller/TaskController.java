@@ -288,33 +288,29 @@ public class TaskController {
         return ResultUtil.error(678, "领取失败！");
     }
 
-//    /**
-//     * 返回 团队姓名 前后端已废弃 （丁）
-//     *
-//     * @return
-//     */
-//    @RequestMapping("getTeamUserName")
-//    public Result getTeamUserName() {
-//        if (ShiroUtils.getUserInfo() != null) {
-//            // 抢单人
-//            List<LabelValueTeamVo> returnList = taskService.getTeamUserName(ShiroUtils.getUserInfo().getUserId());
-//            if (returnList != null && returnList.isEmpty()) {
-//                return ResultUtil.error(204, "数据为空！");
-//            }
-//            return ResultUtil.success(returnList);
-//        }
-//        return ResultUtil.error(502, "token过期！");
-//    }
     /**
-     * 返回 团队姓名 通过委托单id下样品名称是否匹配进行过滤
+     * 任务单领取及修改时 返回 团队姓名
+     * 通过委托单id获取任务单创建时间 比较数据 是否需要进行过滤
      *
      * @return
      */
     @RequestMapping("getEntrustTeamUserName")
     public Result getEntrustTeamUserName(Long entrustId) {
         if (ShiroUtils.getUserInfo() != null) {
-//            TeamVo returnList = taskService.getEntrustTeamUserName(ShiroUtils.getUserInfo().getUserId(),entrustId);
-//            return ResultUtil.success(returnList);
+
+            // 比较任务单创建时间：区分团队信息是否拆分
+            Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId);
+
+            if (taskVerificationInformation.getData() == null) {
+                // 任务单不存在
+                return taskService.getTeamMemberInformation();
+            } else {
+                // 提示信息
+                String promptMessage = (String) taskVerificationInformation.getData();
+                if (promptMessage.equals("newTask")) {
+                    return taskService.getTeamMemberInformation();
+                }
+            }
             TeamVo returnList = new TeamVo();
             List<LabelValueVo> teamVos0 = taskMapper.getAllTeamUser();
             // 报告制作人、辅助人员、实习生，见习生。不考虑团队。
@@ -324,6 +320,17 @@ public class TaskController {
             return ResultUtil.success(returnList);
         }
         return ResultUtil.error(502, "token过期！");
+    }
+
+    /**
+     * 任务大厅-返回团队成员信息
+     *
+     * @return
+     */
+    @RequestMapping("getTeamMemberInformation")
+    public Result getTeamMemberInformation() {
+
+        return taskService.getTeamMemberInformation();
     }
 
     /**
