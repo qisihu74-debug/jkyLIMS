@@ -1747,7 +1747,7 @@
         FROM
         test_task
         WHERE
-        entrustment_id = 4763792861774710
+        entrustment_id = #{entrustId}
         <if test="teamId!=null">
             AND dept_id = #{teamId}
         </if>

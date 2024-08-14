@@ -64,5 +64,14 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      */
     Result verifyTheTaskListStatus(List<SampleItemEntity> list, Long userId);
 
+    /**
+     * 任务单领取
+     *
+     * @param list
+     * @param entrustId
+     * @param userInfo
+     * @return
+     */
+    Result addNewTicket(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo);
 
 }

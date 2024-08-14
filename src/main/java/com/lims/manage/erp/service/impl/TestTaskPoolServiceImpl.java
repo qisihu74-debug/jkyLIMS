@@ -518,6 +518,38 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     }
 
     /**
+     * 任务单领取
+     *
+     * @param list
+     * @param entrustId
+     * @param userInfo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public synchronized Result addNewTicket(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo) {
+        // 通过委托单 获取流水任务单详情
+        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
+        TestTaskPool testTaskPool = taskPoolMapper.selectOne(queryWrapper);
+        if (testTaskPool == null) {
+            return ResultUtil.error("领取失败： 当前流水号任务单不存在");
+        }
+        // 验证领取人对应科室信息
+        Result verifyTeamCollection = verifyClaimBaseConditions(userInfo.getUserId());
+        if (verifyTeamCollection.getCode() == null) {
+            return verifyTeamCollection;
+        }
+        List<Long> teamCollection = (List<Long>) verifyTeamCollection.getData();
+        // TODO: 2024年1月3日  任务生成规则根据签发人所属团队走   = 授权操作人 = 领取人。
+        //    规则：人员跨部门可以选。 （新的任务单号 生成时、只有一个单号。）
+        newAddTask(list, entrustId, teamCollection.get(0), testTaskPool);
+        // 调用方法 进行 更新流水号任务单信息
+//        methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+        return ResultUtil.success("领取成功");
+    }
+
+    /**
      * 验证领取人对应科室信息
      * <p>
      * userId 用户id
@@ -1731,6 +1763,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateItemStatus(SampleItemEntity addSampleItemEntity, List<SampleItemEntity> list) {
+        List<Integer> itemIds = new ArrayList<>();
         // key = itemId 、value = bitValue
         HashMap<Integer, Integer> itemMap = new HashMap<>();
         for (int i = 0; i < list.size(); i++) {
@@ -1738,13 +1771,14 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             for (Integer itemId : sampleItemEntity.getItemIds()) {
                 int zhi = 1 + i;
                 itemMap.put(itemId, zhi);
+                itemIds.add(itemId);
             }
         }
         // 登录人
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         //更新检测项分配的部门和任务单号
         List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
-        for (Integer itemId : addSampleItemEntity.getItemIds()) {
+        for (Integer itemId : itemIds) {
             CheckItemDeptVo checkItemDeptVo = new CheckItemDeptVo();
             checkItemDeptVo.setTaskId(addSampleItemEntity.getTaskId());
             checkItemDeptVo.setId(itemId);

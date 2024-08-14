@@ -87,7 +87,7 @@ public class TestCheckItemsTaskRelController {
 
         if (taskVerificationInformation.getData() == null) {
             // 任务单不存在:任务大厅 - 领取
-            return null;
+            return testTaskPoolService.addNewTicket(list, entrustId, userInfo);
         } else {
             // 提示信息
             String promptMessage = (String) taskVerificationInformation.getData();
