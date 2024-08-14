@@ -299,7 +299,7 @@ public class TaskController {
         if (ShiroUtils.getUserInfo() != null) {
 
             // 比较任务单创建时间：区分团队信息是否拆分
-            Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId);
+            Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId, null);
 
             if (taskVerificationInformation.getData() == null) {
                 // 任务单不存在

@@ -55,6 +55,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     private SysUserDao sysUserDao;
     @Autowired
     private TestCheckItemTeamRelDao testCheckItemTeamRelDao;
+    @Autowired
+    private TestDetectionDao testDetectionDao;
 
     /**
      * 任务大厅 展示详情数据
@@ -131,6 +133,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 if (CollectionUtil.isNotEmpty(itemList)) {
                     for (SampleItemEntity sampleItemEntity : itemList) {
                         if (sampleItemEntity.getSampleId().equals(sampleEntity.getId())) {
+                            // 全部可选 可分组
+                            sampleItemEntity.setPriority("1");
                             sampleItemEntities.add(sampleItemEntity);
                             if (CollectionUtil.isNotEmpty(taskProgressVos) && sampleItemEntity.getTaskId() == null) {
                                 addNewSampleItemEntities.add(sampleItemEntity);
@@ -445,7 +449,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Result addTaskCollection(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo) {
+    public synchronized Result addTaskCollection(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo, Long teamId) {
         // 当前登录人 不能是 复核人
         for (SampleItemEntity sampleItemEntity : list) {
             // 一致的话。进行返回数据 "郭家林&1647502446459100,邓喜旺&1647657004269101"
@@ -466,17 +470,12 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (testTaskPool == null) {
             return ResultUtil.error("领取失败： 当前流水号任务单不存在");
         }
-        // 验证领取人对应科室信息
-        Result verifyTeamCollection = verifyClaimBaseConditions(userInfo.getUserId());
-        if (verifyTeamCollection.getCode() == null) {
-            return verifyTeamCollection;
-        }
-        List<Long> teamCollection = (List<Long>) verifyTeamCollection.getData();
+
         // 领取任务单： 1、合并任务单 2、拆分任务单
         // 判断旧任务单列表 == null：领取
         if (CollectionUtils.isEmpty(oldTaskProgressVos)) {
             // 领取任务单
-            return createTaskList(list, entrustId, teamCollection.get(0), testTaskPool, oldTaskProgressVos, userInfo);
+            return createTaskList(list, entrustId, teamId, testTaskPool, oldTaskProgressVos, userInfo);
         } else {
             // 修改任务单： 直接修改即可
             return updateTaskList(oldTaskProgressVos, list, userInfo, entrustId, testTaskPool);
@@ -527,7 +526,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Result addNewTicket(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo) {
+    public synchronized Result addNewTicket(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo, Long teamId) {
         // 通过委托单 获取流水任务单详情
         LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
@@ -535,18 +534,70 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (testTaskPool == null) {
             return ResultUtil.error("领取失败： 当前流水号任务单不存在");
         }
-        // 验证领取人对应科室信息
-        Result verifyTeamCollection = verifyClaimBaseConditions(userInfo.getUserId());
-        if (verifyTeamCollection.getCode() == null) {
-            return verifyTeamCollection;
+
+        // 领取时：检测项所属部门需要为空
+        List<SampleItemInstrumentEntity> itemList = testDetectionDao.getTestEntrustedSampleCheckitemRelDetailList(list.get(0).getItemIds());
+        if (CollectionUtil.isEmpty(itemList)) {
+            return ResultUtil.error("领取失败，当前检测项不存在");
         }
-        List<Long> teamCollection = (List<Long>) verifyTeamCollection.getData();
+        for (SampleItemInstrumentEntity sampleItemInstrumentEntity : itemList) {
+            if (sampleItemInstrumentEntity.getDeptId() != null) {
+                return ResultUtil.error("领取失败，当前检测项 " + sampleItemInstrumentEntity.getCheckItemName() + " 已经被 " + sampleItemInstrumentEntity.getDeptId() + "团队 领取 请重新领取！");
+            }
+        }
+
+
         // TODO: 2024年1月3日  任务生成规则根据签发人所属团队走   = 授权操作人 = 领取人。
         //    规则：人员跨部门可以选。 （新的任务单号 生成时、只有一个单号。）
-        newAddTask(list, entrustId, teamCollection.get(0), testTaskPool);
+        newAddTask(list, entrustId, teamId, testTaskPool);
+
+
+        // 所有检测项 全部分配完毕 则 流转时间 更新
+        List<String> checkNames = taskPoolMapper.selectCheckitemRelAboutTaskList(entrustId);
+        if (CollectionUtil.isEmpty(checkNames)) {
+            testTaskPool.setReceiveDate(new Date());
+        }
+
         // 调用方法 进行 更新流水号任务单信息
-//        methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+        methodUpdateTaskPool(entrustId, testTaskPool);
         return ResultUtil.success("领取成功");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public synchronized Result updateNewTicket(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo, Long teamId) {
+        // 通过委托单 获取流水任务单详情
+        LambdaQueryWrapper<TestTaskPool> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskPool::getEntrustmentId, entrustId);
+        TestTaskPool testTaskPool = taskPoolMapper.selectOne(queryWrapper);
+        if (testTaskPool == null) {
+            return ResultUtil.error("修改失败： 当前流水号任务单不存在");
+        }
+
+        // 领取时：检测项所属部门需要为空
+        List<SampleItemInstrumentEntity> itemList = testDetectionDao.getTestEntrustedSampleCheckitemRelDetailList(list.get(0).getItemIds());
+        if (CollectionUtil.isEmpty(itemList)) {
+            return ResultUtil.error("修改失败，当前检测项不存在");
+        }
+        for (SampleItemInstrumentEntity sampleItemInstrumentEntity : itemList) {
+            if (sampleItemInstrumentEntity.getDeptId() != null && !sampleItemInstrumentEntity.getDeptId().equals(teamId)) {
+                return ResultUtil.error("修改失败，当前检测项 " + sampleItemInstrumentEntity.getCheckItemName() + " 已经被 " + sampleItemInstrumentEntity.getDeptId() + "团队 领取 请重新领取！");
+            }
+        }
+        //TODO： 执行我的任务 修改即可
+        // 更新 领取任务单
+        TaskProgressVo taskProgressVo = new TaskProgressVo();
+        // 通过委托单id 和部门id 获取任务单id 及领样人、部门信息
+        List<TaskVo> taskList = taskMapper.selectTaskCreateTimeList(entrustId, teamId.intValue());
+        TaskVo taskVo = taskList.get(0);
+        taskProgressVo.setTaskId(taskVo.getId());
+        taskProgressVo.setDeptId(taskVo.getDeptId().intValue());
+        taskProgressVo.setSampler(taskVo.getSampler());
+
+        newUpdateTask(list, entrustId, taskProgressVo);
+        // 调用方法 进行 更新流水号任务单信息
+        methodUpdateTaskPool(entrustId, testTaskPool);
+        return ResultUtil.success("更新成功");
     }
 
     /**
@@ -598,11 +649,13 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             //    规则：人员跨部门可以选。 （新的任务单号 生成时、只有一个单号。）
             newAddTask(list, entrustId, teamId, testTaskPool);
             // 调用方法 进行 更新流水号任务单信息
-            methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+            testTaskPool.setReceiveDate(new Date());
+            methodUpdateTaskPool(entrustId, testTaskPool);
         } else if (!taskListStatus && list.size() == 1) {
             newAddTask(list, entrustId, teamId, testTaskPool);
             // 调用方法 进行 更新流水号任务单信息
-            methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+            testTaskPool.setReceiveDate(new Date());
+            methodUpdateTaskPool(entrustId, testTaskPool);
         } else {
             // TODO： 执行 旧操作 下列操作 全为旧操作
             // 通过委托单id 查看检测项列表。
@@ -627,7 +680,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 }
             }
             // 调用方法 进行 更新流水号任务单信息
-            methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+            methodUpdateTaskPool(entrustId, testTaskPool);
         }
         return ResultUtil.success("领取成功");
     }
@@ -657,7 +710,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 // 更新 领取任务单
                 newUpdateTask(list, entrustId, oldTaskProgressVos.get(0));
                 // 调用方法 进行 更新流水号任务单信息
-                methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+                methodUpdateTaskPool(entrustId, testTaskPool);
                 return ResultUtil.success("更新成功");
             }
         } else {
@@ -697,7 +750,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 }
             }
             // 调用方法 进行 更新流水号任务单信息
-            methodUpdateTaskPool(entrustId, testTaskPool, userInfo);
+            methodUpdateTaskPool(entrustId, testTaskPool);
         }
         return ResultUtil.success("操作成功");
     }
@@ -942,11 +995,17 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         return null;
     }
 
-    void methodUpdateTaskPool(Long entrustId, TestTaskPool testTaskPool, SysUserEntity userInfo) {
+    void methodUpdateTaskPool(Long entrustId, TestTaskPool testTaskPool) {
         // 领取成功后： 补充流水号任务单信息
         // 通过委托单id 查询任务列表
         List<TaskProgressVo> taskProgress2Vos = taskMapper.getTaskStateByEntrustId(entrustId);
+        // 任务单号
         StringBuffer taskCodeBuffer = new StringBuffer();
+        // 领取人id
+        StringBuffer receiveIdBuffer = new StringBuffer();
+        // 领取人名字
+        StringBuffer receiveNameBuffer = new StringBuffer();
+        List<Long> userIds = new ArrayList<>();
         //计算本单价格
         double taskPrice = 0L;
         for (TaskProgressVo taskProgressVo : taskProgress2Vos) {
@@ -954,17 +1013,28 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             taskCodeBuffer.append(taskProgressVo.getTaskCode() + "&" + taskProgressVo.getTaskId() + ",");
             // 获取价格
             taskPrice += taskProgressVo.getTaskPrice();
+            // 领取人id
+            receiveIdBuffer.append(taskProgressVo.getReceiver() + ",");
+            userIds.add(Long.valueOf(taskProgressVo.getReceiver()));
         }
+
         // 任务单编号
         testTaskPool.setTaskCode(taskCodeBuffer.deleteCharAt(taskCodeBuffer.length() - 1).toString());
         // 本单费用
         testTaskPool.setPrice(String.valueOf(taskPrice));
         // 领取人id
-        testTaskPool.setReceiveId(userInfo.getUserId());
+        testTaskPool.setReceiveId(receiveIdBuffer.deleteCharAt(receiveIdBuffer.length() - 1).toString());
+
         // 领取人（当前登陆人员）
-        testTaskPool.setReceiveName(userInfo.getName());
-        // 领取时间
-        testTaskPool.setReceiveDate(new Date());
+        LambdaQueryWrapper<SysUserEntity> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.in(SysUserEntity::getUserId, userIds);
+        List<SysUserEntity> userList = sysUserDao.selectList(userWrapper);
+        StringBuffer userNameBuffer = new StringBuffer();
+        for (SysUserEntity sysUserEntity : userList) {
+            userNameBuffer.append(sysUserEntity.getName() + ",");
+        }
+        testTaskPool.setReceiveName(userNameBuffer.deleteCharAt(userNameBuffer.length() - 1).toString());
+
         LambdaQueryWrapper<TestTaskPool> queryWrapper1 = new LambdaQueryWrapper<>();
         queryWrapper1.eq(TestTaskPool::getId, testTaskPool.getId());
         taskPoolMapper.update(testTaskPool, queryWrapper1);

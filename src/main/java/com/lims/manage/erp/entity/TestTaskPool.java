@@ -97,7 +97,7 @@ public class TestTaskPool implements Serializable {
     /**
      * 领取人id
      */
-    private Long receiveId;
+    private String receiveId;
 
     /**
      * 领取人（当前登陆人员）

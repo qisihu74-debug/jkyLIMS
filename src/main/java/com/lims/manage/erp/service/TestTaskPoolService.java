@@ -41,7 +41,7 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @param list
      * @return
      */
-    Result addTaskCollection(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo);
+    Result addTaskCollection(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo, Long teamId);
 
     /**
      * 试验检测：任务单判断是否为 new创建。
@@ -72,6 +72,24 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @param userInfo
      * @return
      */
-    Result addNewTicket(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo);
+    Result addNewTicket(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo, Long teamId);
+
+    /**
+     * 任务单更新
+     *
+     * @param list
+     * @param entrustId
+     * @param userInfo
+     * @return
+     */
+    Result updateNewTicket(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo, Long teamId);
+
+    /**
+     * 验证领取人对应科室信息
+     *
+     * @param userId
+     * @return
+     */
+    Result verifyClaimBaseConditions(Long userId);
 
 }

@@ -2603,9 +2603,9 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     }
 
     @Override
-    public Result compareTaskListCreationInformation(Long entrustId) {
+    public Result compareTaskListCreationInformation(Long entrustId, Integer teamId) {
         // 通过委托单ID 获取任务列表
-        List<TaskVo> taskList = taskMapper.selectTaskCreateTimeList(entrustId, null);
+        List<TaskVo> taskList = taskMapper.selectTaskCreateTimeList(entrustId, teamId);
         if (CollectionUtil.isEmpty(taskList)) {
             return ResultUtil.success(null);
         }

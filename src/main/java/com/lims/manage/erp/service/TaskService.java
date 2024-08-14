@@ -309,9 +309,10 @@ public interface TaskService {
 
     /**
      * 比较任务单创建时间：区分团队信息是否拆分
+     * 验证任务单信息：通过委托单id 和 部门id 得出是领取，还是修改
      *
      * @param entrustId
      * @return
      */
-    Result compareTaskListCreationInformation(Long entrustId);
+    Result compareTaskListCreationInformation(Long entrustId, Integer teamId);
 }

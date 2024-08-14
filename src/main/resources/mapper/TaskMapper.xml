@@ -1743,7 +1743,8 @@
         entrustment_id AS entrustmentId,
         task_code AS taskCode,
         create_time AS createTime,
-        dept_id
+        dept_id,
+        sampler
         FROM
         test_task
         WHERE

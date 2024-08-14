@@ -46,4 +46,13 @@ public interface TestTaskPoolMapper extends BaseMapper<TestTaskPool> {
             "\tlimit 1")
     Long selectEntrustmentId(@Param("itemId") Integer itemId);
 
+    @Select("SELECT\n" +
+            "\tcheck_item_name \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel \n" +
+            "WHERE\n" +
+            "\tentrust_id = #{entrustId} \n" +
+            "\tAND task_id IS NULL")
+    List<String> selectCheckitemRelAboutTaskList(@Param("entrustId") Long entrustId);
+
 }

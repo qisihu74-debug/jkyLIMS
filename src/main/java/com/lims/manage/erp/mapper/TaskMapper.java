@@ -733,9 +733,10 @@ public interface TaskMapper extends BaseMapper {
     List<Long> getreportIdszzzz();
 
     /**
-     * 通过委托单ID 获取任务单信息
+     * 通过委托单ID 及部门id 获取任务单信息
      *
      * @param entrustId
+     * @param teamId
      * @return
      */
     List<TaskVo> selectTaskCreateTimeList(@Param("entrustId") Long entrustId, @Param("teamId") Integer teamId);

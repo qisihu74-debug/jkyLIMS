@@ -42,7 +42,7 @@ public class TestCheckItemsTaskRelController {
     public Result taskHallDetailsDisplay(Long poolId, Long entrustId) {
 
         // 比较任务单创建时间：区分团队信息是否拆分
-        Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId);
+        Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId, null);
 
         if (taskVerificationInformation.getData() == null) {
             // 任务单不存在:任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
@@ -75,31 +75,38 @@ public class TestCheckItemsTaskRelController {
 
         // 登录人
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        // 任务大厅or修改时验证
+        // 任务大厅or修改时 验证信息
         Result getValidationStatus = testTaskPoolService.verifyTheTaskListStatus(list, userInfo.getUserId());
         if (getValidationStatus.getCode() == null) {
             return getValidationStatus;
         }
         Long entrustId = (Long) getValidationStatus.getData();
+        // 验证领取人对应科室信息
+        Result verifyTeamCollection = testTaskPoolService.verifyClaimBaseConditions(userInfo.getUserId());
+        if (verifyTeamCollection.getCode() == null) {
+            return verifyTeamCollection;
+        }
+        List<Long> teamCollection = (List<Long>) verifyTeamCollection.getData();
+        Long teamId = teamCollection.get(0);
 
         // 比较任务单创建时间：区分团队信息是否拆分
-        Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId);
+        Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId, teamId.intValue());
 
         if (taskVerificationInformation.getData() == null) {
             // 任务单不存在:任务大厅 - 领取
-            return testTaskPoolService.addNewTicket(list, entrustId, userInfo);
+            return testTaskPoolService.addNewTicket(list, entrustId, userInfo, teamId);
         } else {
             // 提示信息
             String promptMessage = (String) taskVerificationInformation.getData();
             if (promptMessage.equals("oldTask")) {
                 // 执行 任务单旧操作
-                return testTaskPoolService.addTaskCollection(list, entrustId, userInfo);
+                return testTaskPoolService.addTaskCollection(list, entrustId, userInfo, teamId);
             }
         }
 
         // 通过 当前登录人所属团队 及委托单id 查询任务单存在 则修改，否则是更新
 
-        return null;
+        return testTaskPoolService.updateNewTicket(list, entrustId, userInfo, teamId);
     }
 
 }
