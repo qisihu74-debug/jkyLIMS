@@ -41,18 +41,27 @@ public class TestCheckItemsTaskRelController {
     @GetMapping("/taskHallDetailsDisplay")
     public Result taskHallDetailsDisplay(Long poolId, Long entrustId) {
 
+        // 登录人
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        // 验证领取人对应科室信息
+        Result verifyTeamCollection = testTaskPoolService.verifyClaimBaseConditions(userInfo.getUserId());
+        if (verifyTeamCollection.getCode() == null) {
+            return verifyTeamCollection;
+        }
+        List<Long> teamCollection = (List<Long>) verifyTeamCollection.getData();
+        Long teamId = teamCollection.get(0);
         // 比较任务单创建时间：区分团队信息是否拆分
         Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId, null);
 
         if (taskVerificationInformation.getData() == null) {
             // 任务单不存在:任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
-            return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId);
+            return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId, null);
         } else {
             // 提示信息
             String promptMessage = (String) taskVerificationInformation.getData();
             if (promptMessage.equals("newTask")) {
                 // 我的任务单 返回检测项信息
-                return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId);
+                return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId, promptMessage);
             }
         }
         // 检测项信息
@@ -90,7 +99,7 @@ public class TestCheckItemsTaskRelController {
         Long teamId = teamCollection.get(0);
 
         // 比较任务单创建时间：区分团队信息是否拆分
-        Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId, teamId.intValue());
+        Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId, null);
 
         if (taskVerificationInformation.getData() == null) {
             // 任务单不存在:任务大厅 - 领取
@@ -100,7 +109,12 @@ public class TestCheckItemsTaskRelController {
             String promptMessage = (String) taskVerificationInformation.getData();
             if (promptMessage.equals("oldTask")) {
                 // 执行 任务单旧操作
-                return testTaskPoolService.addTaskCollection(list, entrustId, userInfo, teamId);
+                return testTaskPoolService.updateTaskCollection(list, entrustId, userInfo);
+            }
+            Result NewOrUpdated = taskService.compareTaskListCreationInformation(entrustId, teamId.intValue());
+            if (NewOrUpdated.getData() == null) {
+                // 任务单不存在:任务大厅 - 领取
+                return testTaskPoolService.addNewTicket(list, entrustId, userInfo, teamId);
             }
         }
 
