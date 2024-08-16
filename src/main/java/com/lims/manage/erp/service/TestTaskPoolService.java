@@ -33,7 +33,7 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @param entrustId
      * @return
      */
-    Result getTaskDetectionItemDetails(Long poolId, Long entrustId);
+    Result getTaskDetectionItemDetails(Long poolId, Long entrustId, String promptMessage);
 
     /**
      * 任务大厅 领取任务单
@@ -42,6 +42,14 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @return
      */
     Result addTaskCollection(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo, Long teamId);
+
+    /**
+     * 我的任务 修改任务单
+     *
+     * @param list
+     * @return
+     */
+    Result updateTaskCollection(List<SampleItemEntity> list, Long entrustId, SysUserEntity userInfo);
 
     /**
      * 试验检测：任务单判断是否为 new创建。

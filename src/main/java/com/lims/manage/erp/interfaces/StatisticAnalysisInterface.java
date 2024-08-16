@@ -309,16 +309,21 @@ public class StatisticAnalysisInterface {
         bean.setSTime(startDate);
         bean.setETime(stopDate);
         List<HourCount> list = testCheckItemsTaskRelService.exportHours(bean);
-        if (!CollectionUtils.isEmpty(list)){
+        for (HourCount hourCount : list) {
+            if (hourCount.getDeptName() == null) {
+                System.out.println(hourCount);
+            }
+        }
+        if (!CollectionUtils.isEmpty(list)) {
             List<HourCount> sortList = list.stream()
                     .sorted(Comparator.comparing(HourCount::getDeptName))
                     .collect(Collectors.toList());
             InputStream fileStream = MinIoUtil.getFileStream(BucketsConst.controlled_documents, "jifen.xlsx");
             try {
                 Workbook workbook = new Workbook(fileStream);
-                testCheckItemsTaskRelService.handExcelData(sortList,workbook,bean,response);
+                testCheckItemsTaskRelService.handExcelData(sortList, workbook, bean, response);
             } catch (Exception e) {
-                log.error("导出积分统计表失败:{}",e);
+                log.error("导出积分统计表失败:{}", e);
             }
         }
     }
