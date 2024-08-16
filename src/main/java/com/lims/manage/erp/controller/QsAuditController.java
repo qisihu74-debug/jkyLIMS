@@ -540,7 +540,7 @@ public class QsAuditController {
             if (file != null) {
                 String filename = multipartFile.getOriginalFilename();
                 String[] split = filename.split("\\.");
-                if (!"pdf".equals(split[split.length - 1])) {
+                if (!"pdf、png、jpg、jpeg".contains(split[split.length - 1])) {
                     return ResultUtil.error("文件类型不正确，请上传正确的文件类型");
                 }
                 //上传附件
@@ -647,7 +647,7 @@ public class QsAuditController {
                 if (file1 != null) {
                     String filename = file1.getOriginalFilename();
                     String[] split = filename.split("\\.");
-                    if (!"pdf".equals(split[split.length - 1])) {
+                    if (!"pdf、png、jpg、jpeg".equals(split[split.length - 1])) {
                         return ResultUtil.error("文件类型不正确，请上传正确的文件类型");
                     }
                     //上传附件
