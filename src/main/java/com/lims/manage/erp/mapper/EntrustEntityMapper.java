@@ -18,6 +18,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -835,4 +836,14 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select("select COUNT(*) from test_report_record where entrust_id = #{id}")
     Integer midReportExit(@Param("id") Long id);
+
+    @Select({"<script>",
+            " SELECT ",
+            " id,operate_type",
+            " FROM test_entrusted_info WHERE id in ",
+            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+            "#{item}",
+            "</foreach>",
+            "</script>"})
+    List<EntrustEntity> getReportSealTypesByIds(List<Long> items);
 }
