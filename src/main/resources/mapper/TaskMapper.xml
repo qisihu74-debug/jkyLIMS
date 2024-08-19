@@ -1558,7 +1558,7 @@
         WHERE
         ttr.team_id = #{item.teamId}
         AND t1.receive_date IS NULL
-        AND t1.receive_id NOT LIKE CONCAT('%', #{item.userId}, '%')
+        AND (t1.receive_id NOT LIKE CONCAT('%', #{item.userId}, '%')) OR t1.receive_id IS NULL
         AND t1.sample IS NOT NULL
         <if test="item.sampleName != null and item.sampleName != ''">
             AND t1.sample LIKE CONCAT('%', #{item.sampleName}, '%')
