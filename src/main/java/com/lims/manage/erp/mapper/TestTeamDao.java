@@ -73,14 +73,14 @@ IPage<TestTeamVo> getListPage(IPage<TestTeamVo> page, @Param(Constants.WRAPPER) 
      */
     List<TaskStatisticsVo> getRoleUserInformation(TaskStatisticsVo taskStatisticsVo);
 
-    @Select({"<script>",
-            " SELECT DISTINCT ",
-            " id,name",
-            " FROM test_team WHERE id in ",
-            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
-            "#{item.pid}",
-            "</foreach>",
-            "</script>"})
-    List<TestTeam> getTeamsByPids(@Param("items") List<HourCount> items);
+//    @Select({"<script>",
+//            " SELECT DISTINCT ",
+//            " id,name",
+//            " FROM test_team WHERE id in ",
+//            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+//            "#{item.pid}",
+//            "</foreach>",
+//            "</script>"})
+//    List<TestTeam> getTeamsByPids(@Param("items") List<HourCount> items);
 }
 

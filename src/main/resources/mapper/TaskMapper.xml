@@ -1558,6 +1558,7 @@
         WHERE
         ttr.team_id = #{item.teamId}
         AND t1.receive_date IS NULL
+        AND t1.receive_id NOT LIKE CONCAT('%', #{item.userId}, '%')
         AND t1.sample IS NOT NULL
         <if test="item.sampleName != null and item.sampleName != ''">
             AND t1.sample LIKE CONCAT('%', #{item.sampleName}, '%')
@@ -1599,7 +1600,6 @@
         LEFT JOIN test_task tb2 ON tb1.id = tb2.pool_id
         WHERE
         tb1.receive_id LIKE CONCAT('%', #{item.userId}, '%')
-        AND tb1.receive_date is not null
         <if test="item.sampleName != null and item.sampleName != ''">
             AND tb1.sample LIKE CONCAT('%', #{item.sampleName}, '%')
         </if>
