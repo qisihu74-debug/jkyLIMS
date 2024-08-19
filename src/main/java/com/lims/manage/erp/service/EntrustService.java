@@ -424,4 +424,11 @@ public interface EntrustService {
      * @return
      */
     List<String> getUrlListById(Long entrustId);
+
+    /**
+     * 根据委托单id查询委托报告的盖章类型
+     * @param ids
+     * @return
+     */
+    List<EntrustEntity> getReportSealTypesByIds(List<Long> ids);
 }

@@ -6122,7 +6122,13 @@ public class EntrustServiceImpl implements EntrustService {
     public List<String> getUrlListById(Long entrustId) {
         return entityMapper.getUrlListById(entrustId);
     }
-//    @Transactional(rollbackFor = Exception.class)
+
+    @Override
+    public List<EntrustEntity> getReportSealTypesByIds(List<Long> ids) {
+        return entityMapper.getReportSealTypesByIds(ids);
+    }
+
+    //    @Transactional(rollbackFor = Exception.class)
     public Result entrustApprovedMethod(EntrustAddVo entrustDetails,long entrustId){
         // 效验后： 针对预委托单进行审核通过操作 更新委托单
         EntrustEntity basisInfo = new EntrustEntity();

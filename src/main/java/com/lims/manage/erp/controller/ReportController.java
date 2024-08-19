@@ -13,6 +13,7 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.AlertEntity;
 import com.lims.manage.erp.entity.ApproveInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
@@ -339,7 +340,21 @@ public class ReportController {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少必要的参数！");
         }
-        PageInfo pageInfo = reportService.sealList(search, pageNum, pageSize, reportType,state,reportTypeStatus);
+        PageInfo<ReportRecordEntity> pageInfo = reportService.sealList(search, pageNum, pageSize, reportType,state,reportTypeStatus);
+        //设置委托中指定的盖章类型0线上报告，1线下报告
+        List<Long> ids = Lists.newArrayList();
+        for (ReportRecordEntity entity: pageInfo.getList()){
+            ids.add(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        }
+        List<EntrustEntity> list = entrustService.getReportSealTypesByIds(ids);
+        for (ReportRecordEntity entity: pageInfo.getList()){
+            Long entrustId = entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId();
+            for (EntrustEntity entrustEntity :list){
+                if (entrustId.equals(entrustEntity.getId())){
+                    entity.setOperateType(entrustEntity.getOperateType()==null?0:entrustEntity.getOperateType());
+                }
+            }
+        }
         return ResultUtil.success(pageInfo);
     }
 
@@ -1147,6 +1162,20 @@ public class ReportController {
             endDate = DateUtil.getDayEndMs(endDate);
         }
         PageInfo<ReportRecordEntity> pageInfo = reportService.historyList(search,reportType,sealType,pageNum,pageSize,startDate,endDate);
+        //设置委托中指定的盖章类型0线上报告，1线下报告
+        List<Long> ids = Lists.newArrayList();
+        for (ReportRecordEntity entity: pageInfo.getList()){
+            ids.add(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        }
+        List<EntrustEntity> list = entrustService.getReportSealTypesByIds(ids);
+        for (ReportRecordEntity entity: pageInfo.getList()){
+            Long entrustId = entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId();
+            for (EntrustEntity entrustEntity :list){
+                if (entrustId.equals(entrustEntity.getId())){
+                    entity.setOperateType(entrustEntity.getOperateType()==null?0:entrustEntity.getOperateType());
+                }
+            }
+        }
         return ResultUtil.success(pageInfo);
     }
 
