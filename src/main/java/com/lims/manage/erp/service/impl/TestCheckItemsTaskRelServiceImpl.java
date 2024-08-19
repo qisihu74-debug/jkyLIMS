@@ -89,6 +89,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     private TestItemOrderWorkingHoursService testItemOrderWorkingHoursService;
     @Autowired
     private LogManagerService logManagerService;
+    @Autowired
+    private TeamMapper teamMapper;
 
     @Override
     public IPage<WorkHourStatisticVo> getWorkHoursList(Page<WorkHourStatisticVo> page, Map<String, Object> paramMap) {
@@ -1424,18 +1426,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         List<HourCount> hourCounts = testTaskOrderWorkingHoursMapper.exportHours(bean.getStartDate(), bean.getStopDate());
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(hourCounts)) {
             //处理部门名称
-            List<TestTeam> list = testTeamDao.getTeamsByPids(hourCounts);
+            //兼容旧团队
+            //List<TestTeam> list = teamMapper.getTeamsByUserId(ShiroUtils.getUserInfo().getUserId());
+            //List<TestTeam> list = testTeamDao.getTeamsByPids(hourCounts);
             for (HourCount hourCount : hourCounts) {
                 hourCount.setDoubleHours(Double.parseDouble(hourCount.getHours()));
-                for (TestTeam team : list) {
-                    if (hourCount.getPid() != null) {
-                        if (hourCount.getPid().equals(team.getId())) {
-                            hourCount.setDeptName(team.getName());
-                        }
-                    } else {
-                        hourCount.setDeptName("辅助人员");
-                        hourCount.setPid(1000);
-                    }
+                if (StringUtils.isEmpty(hourCount.getTeamName())){
+                    hourCount.setDeptName("辅助人员");
+                }else {
+                    hourCount.setDeptName(hourCount.getTeamName());
                 }
             }
             //计算部门总积分
@@ -1481,7 +1480,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             if ("辅助人员".equals(hourCount.getDeptName())) {
                 cells.get("F" + index).setValue("辅助人员");
             } else {
-                cells.get("F" + index).setValue(hourCount.getDeptName() + "-" + hourCount.getTeamName());
+                cells.get("F" + index).setValue(hourCount.getDeptName());
             }
             cells.get("G" + index).setValue(hourCount.getDoubleHours());
             cells.get("H" + index).setValue(hourCount.getPercentage());

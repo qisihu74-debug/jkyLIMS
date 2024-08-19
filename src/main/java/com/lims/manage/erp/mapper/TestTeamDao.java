@@ -82,15 +82,5 @@ IPage<TestTeamVo> getListPage(IPage<TestTeamVo> page, @Param(Constants.WRAPPER) 
             "</foreach>",
             "</script>"})
     List<TestTeam> getTeamsByPids(@Param("items") List<HourCount> items);
-
-    @Select({"<script>",
-            " SELECT DISTINCT ",
-            " id,pid",
-            " FROM test_team WHERE id in ",
-            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
-            "#{item.teamId}",
-            "</foreach>",
-            "</script>"})
-    List<TestTeam> getTeamPidsByIds(@Param("items") List<HourCount> items);
 }
 

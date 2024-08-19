@@ -309,11 +309,6 @@ public class StatisticAnalysisInterface {
         bean.setSTime(startDate);
         bean.setETime(stopDate);
         List<HourCount> list = testCheckItemsTaskRelService.exportHours(bean);
-        for (HourCount hourCount : list) {
-            if (hourCount.getDeptName() == null) {
-                System.out.println(hourCount);
-            }
-        }
         if (!CollectionUtils.isEmpty(list)) {
             List<HourCount> sortList = list.stream()
                     .sorted(Comparator.comparing(HourCount::getDeptName))

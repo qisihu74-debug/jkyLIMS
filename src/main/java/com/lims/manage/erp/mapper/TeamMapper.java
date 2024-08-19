@@ -316,4 +316,30 @@ public interface TeamMapper extends BaseMapper {
             "\t\t\t\tuser_id = #{userId}\n" +
             "\t\t)")
     List<Integer> getTeamIdsByUserId(@Param("userId") Long userId);
+
+    @Select("SELECT\n" +
+            "\ttt.team_id As id,\n" +
+            "\ttm. NAME As name\n" +
+            "FROM\n" +
+            "\ttest_technicist tt\n" +
+            "LEFT JOIN test_team tm ON tt.team_id = tm.id\n" +
+            "WHERE\n" +
+            "\ttt.user_id = #{userId}\n" +
+            "UNION ALL\n" +
+            "\tSELECT\n" +
+            "\t\ttr.old_team_id,\n" +
+            "\t\ttm. NAME\n" +
+            "\tFROM\n" +
+            "\t\ttest_team_rel tr\n" +
+            "\tLEFT JOIN test_team tm ON tr.new_team_id = tm.id\n" +
+            "\tWHERE\n" +
+            "\t\tnew_team_id = (\n" +
+            "\t\t\tSELECT\n" +
+            "\t\t\t\tteam_id\n" +
+            "\t\t\tFROM\n" +
+            "\t\t\t\ttest_technicist\n" +
+            "\t\t\tWHERE\n" +
+            "\t\t\t\tuser_id = #{userId}\n" +
+            "\t\t)")
+    List<TestTeam> getTeamsByUserId(@Param("userId") Long userId);
 }
