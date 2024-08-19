@@ -839,11 +839,21 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select({"<script>",
             " SELECT ",
-            " id,operate_type",
+            " id,IFNULL(operate_type,0)",
             " FROM test_entrusted_info WHERE id in ",
             "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
             "#{item}",
             "</foreach>",
             "</script>"})
-    List<EntrustEntity> getReportSealTypesByIds(List<Long> items);
+    List<EntrustEntity> getReportSealTypesByIds(@Param("items") List<Long> items);
+
+    @Select({"<script>",
+            " SELECT ",
+            " IFNULL(operate_type,0)",
+            " FROM test_entrusted_info WHERE id in ",
+            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+            "#{item}",
+            "</foreach>",
+            "</script>"})
+    List<Integer> getOperateResultByEntrustIds(@Param("items") List<String> items);
 }
