@@ -327,7 +327,10 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (taskId != null) {
             // 委托单下 检测项列表 遍历
             for (SampleItemEntity sampleItemEntity : itemList) {
-
+                // 检测项已领取，不是当前团队 则标记为空
+                if (sampleItemEntity.getTaskId() != null && !sampleItemEntity.getTechnicistId().equals(teamId)) {
+                    sampleItemEntity.setPriority(null);
+                }
                 // 3.2：通过任务单id 查看检测项下指派人员信息。
                 LambdaQueryWrapper<TestCheckItemsTaskRel> taskRelLambdaQueryWrapper = new LambdaQueryWrapper<>();
                 taskRelLambdaQueryWrapper.eq(TestCheckItemsTaskRel::getTaskId, taskId);
