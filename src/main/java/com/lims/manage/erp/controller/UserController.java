@@ -167,6 +167,10 @@ public class UserController {
         if (sysDingUserData == null) {
             return ResultUtil.error("使用人不存在！，请重新选择使用人");
         }
+        // 钉钉用户id 存在其他使用人
+        if (!sysUserService.getTheUserList(vo.getDingUserId())) {
+            return ResultUtil.error("使用人 已拥有账号");
+        }
 
 
         vo.setUserId(GenID.getID());
@@ -469,10 +473,10 @@ public class UserController {
             sysUserRoleDao.removeOldRole(sysUserEntity.getUserId());
             // 更新 用户与使用人之间的部门关系
             deptService.updateDepartmentId(sysUserEntity.getUserId());
-            return ResultUtil.success("删除角色成功");
+            return ResultUtil.success("删除用户成功");
         }
         logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + ShiroUtils.getUserInfo().getUsername() + "删除系统用户ID【" + sysUserEntity.getUserId() + "】", Const.SYS_MANAGER_LOG, false);
-        return ResultUtil.error("删除角色失败");
+        return ResultUtil.error("删除用户失败");
     }
 
     /**

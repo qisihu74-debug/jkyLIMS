@@ -349,6 +349,16 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 }
             }
         }
+        // 当前所属团队未领取任务单时
+        if (taskId == null) {
+            // 委托单下 检测项列表 遍历
+            for (SampleItemEntity sampleItemEntity : itemList) {
+                // 检测项已领取，不是当前团队 则标记为空
+                if (sampleItemEntity.getTaskId() != null && !sampleItemEntity.getTechnicistId().equals(teamId)) {
+                    sampleItemEntity.setPriority(null);
+                }
+            }
+        }
 
         // 进行检测项 与样品信息 归类:
         if (CollectionUtil.isNotEmpty(itemList) && CollectionUtil.isNotEmpty(sampleList)) {
