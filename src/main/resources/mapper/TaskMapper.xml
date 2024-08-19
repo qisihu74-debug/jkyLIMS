@@ -316,7 +316,6 @@
                  LEFT JOIN test_method t7 ON t5.method_id = t7.id
                  left join test_product_item t8 on t5.check_item_id = t8.check_item_id
         where t1.id = #{taskId} and t5.task_id = #{taskId}
-        and t9.id in (t1.dept_id )
     </select>
     <select id="getInstrumentEntityList" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">
         SELECT
