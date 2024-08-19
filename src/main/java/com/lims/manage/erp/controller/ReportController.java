@@ -1804,7 +1804,12 @@ public class ReportController {
         if (CollectionUtils.isEmpty(ids)){
             return ResultUtil.error("缺少参数");
         }
-        Map<String,String> map = entrustService.getOperateResultByEntrustIds(ids);
+        List<ReportRecordEntity> entrustIds = reportService.getEntrustIdsByIds(ids);
+        List<String> entrIds = Lists.newArrayList();
+        for (ReportRecordEntity entity :entrustIds){
+            entrIds.add(""+(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId()));
+        }
+        Map<String,String> map = entrustService.getOperateResultByEntrustIds(entrIds);
         return ResultUtil.success(map);
     }
 }

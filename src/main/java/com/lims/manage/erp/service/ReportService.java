@@ -3,6 +3,7 @@ package com.lims.manage.erp.service;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.ApproveInfo;
 import com.lims.manage.erp.entity.ConclusionEntity;
+import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
 import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QrCodeAuthRes;
@@ -477,4 +478,6 @@ public interface ReportService {
     String getReportCode(Long entrustmentId);
 
     Boolean isExist(String reportCode);
+
+    List<ReportRecordEntity> getEntrustIdsByIds(List<String> ids);
 }
