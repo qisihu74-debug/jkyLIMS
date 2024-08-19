@@ -2165,6 +2165,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<ReportRecordEntity> getEntrustIdsByIds(List<String> ids) {
+        return recordEntityMapper.getEntrustIdsByIds(ids);
+    }
+
+    @Override
     public QiYueSuoResponse createbycategory(QiYueSuoReqBean reqBean) {
         //设置文档标识
         List<ReportRecordEntity> entity = Lists.newArrayList();

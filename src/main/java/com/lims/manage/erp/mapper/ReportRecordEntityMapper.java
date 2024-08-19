@@ -1,6 +1,7 @@
 package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.entity.ApproveInfo;
+import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReserveCodeEntity;
@@ -615,4 +616,14 @@ public interface ReportRecordEntityMapper {
     String getReportCode(Long entrustmentId);
 
     int getReportCodeSize(String reportCode);
+
+    @Select({"<script>",
+            " SELECT ",
+            " entrustment_id,entrust_id",
+            " FROM test_report_record WHERE id in ",
+            "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
+            "#{item}",
+            "</foreach>",
+            "</script>"})
+    List<ReportRecordEntity> getEntrustIdsByIds(@Param("items") List<String> items);
 }
