@@ -6128,6 +6128,20 @@ public class EntrustServiceImpl implements EntrustService {
         return entityMapper.getReportSealTypesByIds(ids);
     }
 
+    @Override
+    public Map<String, String> getOperateResultByEntrustIds(List<String> ids) {
+        Map<String,String> map = new HashMap<>();
+        List<Integer> list = entityMapper.getOperateResultByEntrustIds(ids);
+        boolean allOnes = list.stream().allMatch(n -> n.equals(1));
+        boolean allMatch = list.stream().allMatch(n -> n.equals(0));
+        if (allOnes || allMatch){
+            map.put("result","操作类型相同");
+        }else {
+            map.put("result","操作类型不同");
+        }
+        return map;
+    }
+
     //    @Transactional(rollbackFor = Exception.class)
     public Result entrustApprovedMethod(EntrustAddVo entrustDetails,long entrustId){
         // 效验后： 针对预委托单进行审核通过操作 更新委托单

@@ -431,4 +431,6 @@ public interface EntrustService {
      * @return
      */
     List<EntrustEntity> getReportSealTypesByIds(List<Long> ids);
+
+    Map<String, String> getOperateResultByEntrustIds(List<String> ids);
 }

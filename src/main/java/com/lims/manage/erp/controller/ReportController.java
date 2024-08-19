@@ -1793,4 +1793,18 @@ public class ReportController {
             return ResultUtil.success(formalReportCode);
         }
     }
+
+    /**
+     * 根据委托单ids获取是否是同一操作类型
+     * @param ids
+     * @return
+     */
+    @PostMapping("getOperateResultByEntrustIds")
+    public Result getOperateResultByEntrustIds(@RequestBody List<String> ids){
+        if (CollectionUtils.isEmpty(ids)){
+            return ResultUtil.error("缺少参数");
+        }
+        Map<String,String> map = entrustService.getOperateResultByEntrustIds(ids);
+        return ResultUtil.success(map);
+    }
 }
