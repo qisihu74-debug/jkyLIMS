@@ -342,16 +342,18 @@ public class ReportController {
         }
         PageInfo<ReportRecordEntity> pageInfo = reportService.sealList(search, pageNum, pageSize, reportType,state,reportTypeStatus);
         //设置委托中指定的盖章类型0线上报告，1线下报告
-        List<Long> ids = Lists.newArrayList();
-        for (ReportRecordEntity entity: pageInfo.getList()){
-            ids.add(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
-        }
-        List<EntrustEntity> list = entrustService.getReportSealTypesByIds(ids);
-        for (ReportRecordEntity entity: pageInfo.getList()){
-            Long entrustId = entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId();
-            for (EntrustEntity entrustEntity :list){
-                if (entrustId.equals(entrustEntity.getId())){
-                    entity.setOperateType(entrustEntity.getOperateType()==null?0:entrustEntity.getOperateType());
+        if (CollectionUtils.isNotEmpty(pageInfo.getList())){
+            List<Long> ids = Lists.newArrayList();
+            for (ReportRecordEntity entity: pageInfo.getList()){
+                ids.add(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+            }
+            List<EntrustEntity> list = entrustService.getReportSealTypesByIds(ids);
+            for (ReportRecordEntity entity: pageInfo.getList()){
+                Long entrustId = entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId();
+                for (EntrustEntity entrustEntity :list){
+                    if (entrustId.equals(entrustEntity.getId())){
+                        entity.setOperateType(entrustEntity.getOperateType()==null?0:entrustEntity.getOperateType());
+                    }
                 }
             }
         }
