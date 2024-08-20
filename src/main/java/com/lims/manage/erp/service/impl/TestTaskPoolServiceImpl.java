@@ -135,6 +135,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                         if (sampleItemEntity.getSampleId().equals(sampleEntity.getId())) {
                             // 全部可选 可分组
                             sampleItemEntity.setPriority("1");
+                            sampleItemEntity.setCheckBox("1");
                             sampleItemEntities.add(sampleItemEntity);
                             if (CollectionUtil.isNotEmpty(taskProgressVos) && sampleItemEntity.getTaskId() == null) {
                                 addNewSampleItemEntities.add(sampleItemEntity);
@@ -597,8 +598,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         if (testTaskPool == null) {
             return ResultUtil.error("领取失败： 当前流水号任务单不存在");
         }
-        // 修改任务单： 直接修改即可
-        return updateTaskList(oldTaskProgressVos, list, userInfo, entrustId, testTaskPool);
+        // 修改任务单： 直接修改即可-不需要再新增任务单信息
+        return updateTaskList1(oldTaskProgressVos, list, userInfo, entrustId, testTaskPool);
 
     }
 
@@ -872,6 +873,53 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             // 调用方法 进行 更新流水号任务单信息
             methodUpdateTaskPool(entrustId, testTaskPool);
         }
+        return ResultUtil.success("操作成功");
+    }
+
+
+    /**
+     * 我的任务 更新任务单信息
+     *
+     * @param oldTaskProgressVos 任务单列表
+     * @param list               传递信息
+     * @param userInfo           用户信息
+     * @param entrustId          委托单id
+     * @param testTaskPool       流水号任务单
+     * @return 返回信息
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Result updateTaskList1(List<TaskProgressVo> oldTaskProgressVos, List<SampleItemEntity> list, SysUserEntity userInfo, Long entrustId, TestTaskPool testTaskPool) {
+        // 遍历
+        for (TaskProgressVo taskProgressVo : oldTaskProgressVos) {
+            if (taskProgressVo.getReceiver() != null && !taskProgressVo.getReceiver().equals(userInfo.getUserId().toString())) {
+                return ResultUtil.error("领取失败： 领单人与任务单存在的领单人不符合");
+            }
+        }
+
+        if (oldTaskProgressVos.size() == 1) {
+            // TODO： 判断任务单状态 task_list_status = 任务单状态：!=null 任务生成规则根据签发人所属团队走
+            // 更新 领取任务单
+            newUpdateTask(list, entrustId, oldTaskProgressVos.get(0));
+            // 调用方法 进行 更新流水号任务单信息
+            methodUpdateTaskPool(entrustId, testTaskPool);
+            return ResultUtil.success("更新成功");
+        }
+        // 通过委托单id 查看检测项列表。
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+
+
+        // 进行遍历输出
+        for (SampleItemEntity sampleItemEntity : list) {
+            // 通过报告制作人 确认科室
+            List<Long> userIds = new ArrayList<>();
+            String[] names = sampleItemEntity.getReportProducer().split(",");
+            for (int i = 0; i < names.length; i++) {
+                userIds.add(Long.valueOf(names[i].split("&")[1]));
+            }
+            // 获取所属科室及之前的科室
+
+        }
+
         return ResultUtil.success("操作成功");
     }
 

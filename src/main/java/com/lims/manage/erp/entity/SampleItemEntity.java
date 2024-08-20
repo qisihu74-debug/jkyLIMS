@@ -199,4 +199,10 @@ public class SampleItemEntity {
     @TableField(exist = false)
     private String priority;
 
+    /**
+     * 选中框
+     */
+    @TableField(exist = false)
+    private String checkBox;
+
 }
