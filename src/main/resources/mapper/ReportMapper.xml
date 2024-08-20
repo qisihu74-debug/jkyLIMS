@@ -435,6 +435,7 @@ INNER JOIN test_entrusted_sample_checkitem_rel t3 ON t2.id = t3.task_id
 WHERE
 	t2.report_complete = 2
 AND (t3.state = 3 OR t3.mid_state = 1)
+AND (t4.state &lt;= 2 or t4.state is null)
 AND (
 	t2.report_producer LIKE CONCAT('%', #{userId}, '%')
 	OR t2.dept_id IN (
