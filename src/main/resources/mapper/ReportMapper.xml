@@ -430,6 +430,7 @@
 	COUNT(t3.state) number
 FROM
 	test_entrusted_info t1
+INNER JOIN test_report_record t4 ON t1.id = t4.entrustment_id
 INNER JOIN test_task t2 ON t2.entrustment_id = t1.id
 INNER JOIN test_entrusted_sample_checkitem_rel t3 ON t2.id = t3.task_id
 WHERE
