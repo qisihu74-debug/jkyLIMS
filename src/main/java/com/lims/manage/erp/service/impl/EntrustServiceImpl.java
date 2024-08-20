@@ -6130,20 +6130,35 @@ public class EntrustServiceImpl implements EntrustService {
 
     @Override
     public Map<String, String> getOperateResultByEntrustIds(List<String> ids) {
-        Map<String,String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         List<Integer> list = entityMapper.getOperateResultByEntrustIds(ids);
         boolean allOnes = list.stream().allMatch(n -> n.equals(1));
         boolean allMatch = list.stream().allMatch(n -> n.equals(0));
-        if (allOnes || allMatch){
-            map.put("result","操作类型相同");
-        }else {
-            map.put("result","操作类型不同");
+        if (allOnes || allMatch) {
+            map.put("result", "操作类型相同");
+        } else {
+            map.put("result", "操作类型不同");
         }
         return map;
     }
 
+    @Override
+    public Result getTaskSource() {
+
+        List<TestInitDataEntity> dataList = taskMapper.selectEntrustBasis(25);
+        List<LabelValueVo> taskSource = Lists.newArrayList();
+        for (int i = 0; i < dataList.size(); i++) {
+            TestInitDataEntity testInitDataEntity = dataList.get(i);
+            LabelValueVo vo = new LabelValueVo();
+            vo.setValue(Long.valueOf(i));
+            vo.setLabel(testInitDataEntity.getName());
+            taskSource.add(vo);
+        }
+        return ResultUtil.success(taskSource);
+    }
+
     //    @Transactional(rollbackFor = Exception.class)
-    public Result entrustApprovedMethod(EntrustAddVo entrustDetails,long entrustId){
+    public Result entrustApprovedMethod(EntrustAddVo entrustDetails, long entrustId) {
         // 效验后： 针对预委托单进行审核通过操作 更新委托单
         EntrustEntity basisInfo = new EntrustEntity();
         basisInfo.setId(entrustId);

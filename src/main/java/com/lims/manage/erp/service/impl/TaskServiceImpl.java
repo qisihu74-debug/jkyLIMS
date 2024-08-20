@@ -2590,12 +2590,9 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 // 3、获取当前团队成员
                 List<LabelValueVo> teamVos = taskMapper.selectTeamMemberInformation(teamId);
                 returnSet.setTeamVo(teamVos);
+                // 报告制作人
+                returnSet.setReviewVo(teamVos);
             }
-
-            // 报告制作人
-            List<LabelValueVo> reviewVo = taskMapper.getAllTeamNAMEUser();
-
-            returnSet.setReviewVo(reviewVo);
             return ResultUtil.success(returnSet);
         }
 

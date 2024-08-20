@@ -427,10 +427,18 @@ public interface EntrustService {
 
     /**
      * 根据委托单id查询委托报告的盖章类型
+     *
      * @param ids
      * @return
      */
     List<EntrustEntity> getReportSealTypesByIds(List<Long> ids);
 
     Map<String, String> getOperateResultByEntrustIds(List<String> ids);
+
+    /**
+     * 任务单来源
+     *
+     * @return
+     */
+    Result getTaskSource();
 }
