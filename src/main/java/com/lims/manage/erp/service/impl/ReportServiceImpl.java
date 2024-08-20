@@ -4649,11 +4649,29 @@ public class ReportServiceImpl implements ReportService {
         }
         PageHelper.startPage(pageNum, pageSize);
         List<ReportListVo> list = reportMapper.getReportListOnline1023(search,userId == null?"":userId+"");
+        //重构
+        List<Long> ids = Lists.newArrayList();
         for (ReportListVo reportListVo : list) {
-            List<LabelValueVo> sampleInfos = reportMapper.getSampleInfos(reportListVo.getId());
-            reportListVo.setSampleInfos(sampleInfos);
-            List<String> taskCodes = reportMapper.getTaskCodes(reportListVo.getId());
-            reportListVo.setTaskCodes(taskCodes);
+            ids.add(reportListVo.getId());
+        }
+        List<LabelValueVo> sampleInfos = reportMapper.getSampleInfosByIds(ids);
+        List<LabelValueVo> taskCodes = reportMapper.getTaskCodesByIds(ids);
+
+        for (ReportListVo reportListVo : list) {
+            List<LabelValueVo> valueVos = Lists.newArrayList();
+            List<String> codes = Lists.newArrayList();
+            for (LabelValueVo labelValueVo :sampleInfos){
+                if (reportListVo.getId().equals(labelValueVo.getEntrustId())){
+                    valueVos.add(labelValueVo);
+                }
+            }
+            reportListVo.setSampleInfos(valueVos);
+            for (LabelValueVo valueVo :taskCodes){
+                if (reportListVo.getId().equals(valueVo.getEntrustId())){
+                    codes.add(valueVo.getText());
+                }
+            }
+            reportListVo.setTaskCodes(codes);
         }
         PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;

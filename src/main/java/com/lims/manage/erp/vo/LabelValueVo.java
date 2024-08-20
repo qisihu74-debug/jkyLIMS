@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class LabelValueVo {
+    private Long entrustId;
     private String label;
     private Long value;
     /**
