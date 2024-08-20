@@ -526,4 +526,7 @@ public interface ReportMapper {
             "\tLIMIT 1 ")
     ReportRecordEntity queryReportDetailsByTaskKey(@Param("taskId") Long taskId);
 
+    List<LabelValueVo> getSampleInfosByIds(@Param("items") List<Long> ids);
+
+    List<LabelValueVo> getTaskCodesByIds(@Param("items") List<Long> ids);
 }
