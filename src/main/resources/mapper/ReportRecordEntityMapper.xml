@@ -1387,7 +1387,8 @@
         t1.waybill,
         IFNULL(t1.email,t2.mailbox) email,
         t1.report_manager,
-        t1.operate_time
+        t1.operate_time,
+        t1.seal_time
         FROM
         test_report_record t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
@@ -1435,7 +1436,8 @@
         t1.waybill,
         IFNULL(t1.email,t2.mailbox) email,
         t1.report_manager,
-        t1.operate_time
+        t1.operate_time,
+        t1.seal_time
         FROM
         test_report_record_mid t1
         LEFT JOIN test_entrusted_info t2 ON t1.entrust_id = t2.id
@@ -1462,7 +1464,7 @@
             AND t1.report_time  BETWEEN #{startTime} AND #{endTime}
         </if>
         )
-        order by operate_time desc
+        order by seal_time desc,operate_time desc
     </select>
 
     <select id="getSealTypeByIds" resultType="java.lang.String">
