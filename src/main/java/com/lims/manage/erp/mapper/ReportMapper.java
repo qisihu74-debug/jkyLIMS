@@ -528,5 +528,7 @@ public interface ReportMapper {
 
     List<LabelValueVo> getSampleInfosByIds(@Param("items") List<Long> ids);
 
+    List<LabelValueVo> getSampleNamesByIds(@Param("items") List<Long> ids);
+
     List<LabelValueVo> getTaskCodesByIds(@Param("items") List<Long> ids);
 }

@@ -283,23 +283,39 @@ public class ReportServiceImpl implements ReportService {
             list = reportMapper.reportDownloadList0512(ShiroUtils.getUserInfo().getUserId(), search);
         }
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
+            //重构
+            List<Long> ids = Lists.newArrayList();
+            for (ReportListVo reportListVo : list) {
+                ids.add(reportListVo.getId());
+            }
+            List<LabelValueVo> sampleInfos = reportMapper.getSampleNamesByIds(ids);
+            List<LabelValueVo> taskCodes = reportMapper.getTaskCodesByIds(ids);
+
             for (ReportListVo reportListVo : list) {
                 if (reportListVo.getOperateType() == null){
                     reportListVo.setOperateType(1);
                 }
-                //设置样品信息
-                List<String> sampleNames = reportMapper.getSampleNames(reportListVo.getId());
+                List<LabelValueVo> valueVos = Lists.newArrayList();
+                List<String> codes = Lists.newArrayList();
+                for (LabelValueVo labelValueVo :sampleInfos){
+                    if (reportListVo.getId().equals(labelValueVo.getEntrustId())){
+                        valueVos.add(labelValueVo);
+                    }
+                }
                 StringBuilder sampleName = new StringBuilder();
-                for (int i = 0; i < sampleNames.size(); i++) {
-                    sampleName.append(sampleNames.get(i));
-                    if (i != sampleNames.size() - 1) {
+                for (int i = 0; i < valueVos.size(); i++) {
+                    sampleName.append(valueVos.get(i).getLabel());
+                    if (i != valueVos.size() - 1) {
                         sampleName.append("/");
                     }
                 }
                 reportListVo.setSampleName(sampleName.toString());
-                //设置任务单号
-                List<String> taskCodes = reportMapper.getTaskCodes(reportListVo.getId());
-                reportListVo.setTaskCodes(taskCodes);
+                for (LabelValueVo valueVo :taskCodes){
+                    if (reportListVo.getId().equals(valueVo.getEntrustId())){
+                        codes.add(valueVo.getText());
+                    }
+                }
+                reportListVo.setTaskCodes(codes);
             }
             PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
             return pageInfo;
@@ -364,13 +380,23 @@ public class ReportServiceImpl implements ReportService {
             list = reportMapper.reportDownloadListHistory(reportListVo);
         }
         if (CollectionUtil.isNotEmpty(list)){
-            //设置任务单号
-            for (ReportListVo reportListVo1 : list) {
-                if (reportListVo1.getOperateType() == null){
-                    reportListVo1.setOperateType(1);
+            //重构
+            List<Long> ids = Lists.newArrayList();
+            for (ReportListVo reportListVo : list) {
+                ids.add(reportListVo.getId());
+            }
+            List<LabelValueVo> taskCodes = reportMapper.getTaskCodesByIds(ids);
+            for (ReportListVo reportListVo : list) {
+                if (reportListVo.getOperateType() == null){
+                    reportListVo.setOperateType(1);
                 }
-                List<String> taskCodes = reportMapper.getTaskCodes(reportListVo1.getId());
-                reportListVo1.setTaskCodes(taskCodes);
+                List<String> codes = Lists.newArrayList();
+                for (LabelValueVo valueVo :taskCodes){
+                    if (reportListVo.getId().equals(valueVo.getEntrustId())){
+                        codes.add(valueVo.getText());
+                    }
+                }
+                reportListVo.setTaskCodes(codes);
             }
             PageInfo<ReportListVo> pageInfo = new PageInfo<>(list);
             return pageInfo;
