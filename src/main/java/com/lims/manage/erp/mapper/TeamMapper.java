@@ -163,6 +163,17 @@ public interface TeamMapper extends BaseMapper {
             "\t)")
     List<TestTeam> getIdsByTeamId(@Param("id") Long id);
 
+    @Select("SELECT\n" +
+            "\tsu.user_id As userId,\n" +
+            "\tsu.name As name\n" +
+            "FROM\n" +
+            "\ttest_team te\n" +
+            "INNER JOIN test_technicist tt ON te.id = tt.team_id\n" +
+            "INNER JOIN sys_user su ON tt.user_id = su.user_id\n" +
+            "WHERE\n" +
+            "\tte.id = #{id}")
+    List<TestTeam> getUserInfosByTeamId(@Param("id") Integer id);
+
     /**
      * 查询所有部门id
      */

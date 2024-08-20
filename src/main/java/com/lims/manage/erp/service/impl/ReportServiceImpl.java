@@ -3918,12 +3918,12 @@ public class ReportServiceImpl implements ReportService {
         if (teamId == null){
             return null;
         }
-        Long aLong = this.getTopDepartment((long) teamId);
-        if (aLong == null) {
-            aLong = (long) teamId;
-        }
+        //Long aLong = this.getTopDepartment((long) teamId);
+//        if (aLong == null) {
+//            aLong = (long) teamId;
+//        }
         if (teamId > 0) {
-            List<TestTeam> idsByTeamId = teamMapper.getIdsByTeamId((long) aLong);
+            List<TestTeam> idsByTeamId = teamMapper.getUserInfosByTeamId(teamId);
             idsByTeamId.removeIf(Objects::isNull);
             return idsByTeamId;
         } else {
