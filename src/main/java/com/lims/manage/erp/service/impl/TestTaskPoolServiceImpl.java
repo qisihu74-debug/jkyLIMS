@@ -938,13 +938,26 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 List<SampleItemEntity> updateItemList = new ArrayList<>();
                 for (SampleItemEntity sampleItemEntity1 : itemList) {
                     for (Integer itemId : sampleItemEntity.getItemIds()) {
-                        if (sampleItemEntity1.getTaskId().equals(taskVo.getTaskId()) && itemId.equals(sampleItemEntity1.getId())) {
+                        if (itemId.equals(sampleItemEntity1.getId())) {
                             updateItemList.add(sampleItemEntity1);
                         }
                     }
                 }
                 // 更新数据
                 updateTask1(sampleItemEntity, taskVo, updateItemList, entrustAddVo);
+                //更新检测项分配的部门和任务单号
+                List<CheckItemDeptVo> checkItemDeptVoList1 = Lists.newArrayList();
+                for (SampleItemEntity sampleItemEntity1 : updateItemList) {
+
+                    CheckItemDeptVo checkItemDeptVo = new CheckItemDeptVo();
+                    checkItemDeptVo.setId(sampleItemEntity1.getId());
+                    checkItemDeptVo.setDeptId(taskVo.getDeptId().longValue());
+                    checkItemDeptVo.setTaskId(taskVo.getTaskId());
+                    checkItemDeptVoList1.add(checkItemDeptVo);
+
+                }
+                //更新检测项信息
+                taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
             }
         }
         // 调用方法 进行 更新流水号任务单信息
