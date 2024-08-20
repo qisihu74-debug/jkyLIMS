@@ -342,4 +342,12 @@ public interface TeamMapper extends BaseMapper {
             "\t\t\t\tuser_id = #{userId}\n" +
             "\t\t)")
     List<TestTeam> getTeamsByUserId(@Param("userId") Long userId);
+
+    /**
+     * 通过人员id 获取所属检测部门信息
+     *
+     * @param list
+     * @return
+     */
+    List<Long> getOldTeamIds(@Param("list") List<Long> list);
 }

@@ -163,4 +163,23 @@
             tb1.id != #{id}
             )
     </select>
+
+    <select id="getOldTeamIds" resultType="java.lang.Long">
+        SELECT
+        old_team_id
+        FROM
+        test_team_rel
+        WHERE
+        old_team_id IN ( SELECT team_id FROM test_technicist WHERE user_id IN
+        <foreach collection="list" item="user_id" index="index" open="(" close=")" separator=",">
+            #{user_id}
+        </foreach>
+        )
+        OR
+        new_team_id IN ( SELECT team_id FROM test_technicist WHERE user_id IN
+        <foreach collection="list" item="user_id" index="index" open="(" close=")" separator=",">
+            #{user_id}
+        </foreach>
+        )
+    </select>
 </mapper>
