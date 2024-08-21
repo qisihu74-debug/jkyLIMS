@@ -2146,7 +2146,9 @@ public class EntrustServiceImpl implements EntrustService {
         // 查询团队名称
         if(entrustAddVo.getTeam() != null){
             LabelValueVo team = entityMapper.getIssueDeptById(entrustAddVo.getTeam());
-            entrustAddVo.setTeamName(team.getLabel());
+            if (team != null) {
+                entrustAddVo.setTeamName(team.getLabel());
+            }
         }
         //查询实际缴费
         String total = entityMapper.getRecordCountById(entrustmentId);

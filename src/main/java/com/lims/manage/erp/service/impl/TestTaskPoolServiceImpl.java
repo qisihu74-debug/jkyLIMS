@@ -389,14 +389,41 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 // 遍历检测项数据 存放至 样品中
                 if (CollectionUtil.isNotEmpty(itemList) && taskId != null) {
 
+                    // 当前任务id 不为空 并且检测项 选中：获取 对应的检测管理
+                    SampleItemEntity sampleItemData = new SampleItemEntity();
+                    for (SampleItemEntity sampleItemEntity : itemList) {
+                        if (sampleItemEntity.getPriority() != null && sampleItemEntity.getInspector() != null) {
+                            sampleItemData = sampleItemEntity;
+                        }
+                    }
+
                     Iterator<SampleItemEntity> it = itemList.iterator();
                     while (it.hasNext()) {
 
                         SampleItemEntity sampleItemEntity = it.next();
-                        if (sampleItemEntity.getTaskId() == null || (sampleItemEntity.getTechnicistId() != null && !sampleItemEntity.getTechnicistId().equals(teamId))) {
+//                        if (sampleItemEntity.getTaskId() == null || (sampleItemEntity.getTechnicistId() != null && !sampleItemEntity.getTechnicistId().equals(teamId))) {
+                        if ((sampleItemEntity.getPriority() == null)) {
                             addNewSampleItemEntities.add(sampleItemEntity);
                             it.remove();
                         } else if (sampleItemEntity.getSampleId().equals(sampleEntity.getId())) {
+                            sampleItemEntity.setTaskId(taskId);
+                            // 进行赋值
+                            if (sampleItemEntity.getInspector() == null) {
+                                // 检测人
+                                sampleItemEntity.setInspector(sampleItemData.getInspector());
+                                // 记录人
+                                sampleItemEntity.setRecorder(sampleItemData.getRecorder());
+                                // 复核人
+                                sampleItemEntity.setReviewer(sampleItemData.getReviewer());
+                                // 报告制作人
+                                sampleItemEntity.setReportProducer(sampleItemData.getReportProducer());
+                                // 辅助人员
+                                sampleItemEntity.setAuxiliaryPersonnel(sampleItemData.getAuxiliaryPersonnel() != null ? sampleItemData.getAuxiliaryPersonnel() : null);
+                                //
+                                sampleItemEntity.setProbationer(sampleItemData.getProbationer() != null ? sampleItemData.getProbationer() : null);
+                                //
+                                sampleItemEntity.setInterns(sampleItemData.getInterns() != null ? sampleItemData.getInterns() : null);
+                            }
                             sampleItemEntities.add(sampleItemEntity);
                         }
                     }
@@ -907,10 +934,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         // 通过委托单id 查看检测项列表。
         List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
 
-        // 根据 entrustId 条件删除流转信息
-        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
-        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
-        testCheckItemsTaskRelMapper.delete(queryWrapper12);
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustId);
         // 进行遍历输出
         for (SampleItemEntity sampleItemEntity : list) {
@@ -943,6 +966,13 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                         }
                     }
                 }
+
+                // 根据 taskId 和检测项集合 条件删除流转信息
+                LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+                queryWrapper12.in(TestCheckItemsTaskRel::getItemId, sampleItemEntity.getItemIds());
+                queryWrapper12.or().eq(TestCheckItemsTaskRel::getTaskId, taskVo.getTaskId());
+                testCheckItemsTaskRelMapper.delete(queryWrapper12);
+
                 // 更新数据
                 updateTask1(sampleItemEntity, taskVo, updateItemList, entrustAddVo);
                 //更新检测项分配的部门和任务单号
@@ -1823,6 +1853,12 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             // 调用方法： 针对记录人、复核人、报告制作人信息 方法读取人员信息
             newMethodForPersonnel(sampleItemEntity, inspectorArraysVos, inspectorRels);
             sampleItemEntity.setItemsTaskRels(inspectorRels);
+
+            // 根据 taskId 和检测项集合 条件删除流转信息
+            LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+            queryWrapper12.in(TestCheckItemsTaskRel::getItemId, sampleItemEntity.getItemIds());
+            testCheckItemsTaskRelMapper.delete(queryWrapper12);
+
             // 新增检测项对应的操作人员信息。
             newMethodPublishTaskList(entrustId, sampleItemEntity, itemList, taskId, itemsTaskMap);
             if (StringUtils.isNotEmpty(sampleItemEntity.getSampler())) {
@@ -2226,10 +2262,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     @Transactional(rollbackFor = Exception.class)
     public void newUpdateTask(List<SampleItemEntity> list, Long entrustId, TaskProgressVo taskProgressVo) {
-        // 根据 entrustId 条件删除流转信息
-        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
-        queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
-        testCheckItemsTaskRelMapper.delete(queryWrapper12);
+
         long taskId = taskProgressVo.getTaskId();
         long teamId = taskProgressVo.getDeptId();
         // 通过委托单id 查看检测项列表。
@@ -2246,6 +2279,13 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             // 调用方法： 针对记录人、复核人、报告制作人信息 方法读取人员信息
             newMethodForPersonnel(sampleItemEntity, inspectorArraysVos, inspectorRels);
             sampleItemEntity.setItemsTaskRels(inspectorRels);
+
+            // 根据 taskId 和检测项集合 条件删除流转信息
+            LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+            queryWrapper12.in(TestCheckItemsTaskRel::getItemId, sampleItemEntity.getItemIds());
+            queryWrapper12.or().eq(TestCheckItemsTaskRel::getTaskId, taskId);
+            testCheckItemsTaskRelMapper.delete(queryWrapper12);
+
             // 新增检测项对应的操作人员信息。
             newMethodPublishTaskList(entrustId, sampleItemEntity, itemList, taskId, itemsTaskMap);
             if (StringUtils.isNotEmpty(sampleItemEntity.getSampler())) {
