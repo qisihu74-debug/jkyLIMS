@@ -1120,7 +1120,7 @@
             </if>
         </trim>
         ORDER BY
-        t2.entrustment_no
+        t1.report_complete_time desc
     </select>
     <select id="reportListMid0808" resultMap="reportDetailListResult"
             parameterType="com.lims.manage.erp.vo.ReportDetailListParamVo">
@@ -1178,7 +1178,7 @@
             </if>
         </trim>
         ORDER BY
-        t2.entrustment_no
+        t1.report_complete_time desc
     </select>
     <select id="reportListTask0808" resultMap="reportDetailListResult"
             parameterType="com.lims.manage.erp.vo.ReportDetailListParamVo">
@@ -1241,7 +1241,7 @@
             </if>
         </trim>
         ORDER BY
-        t2.entrustment_no
+        t1.report_complete_time desc
     </select>
     <select id="reportListTaskMid0808" resultMap="reportDetailListResult"
             parameterType="com.lims.manage.erp.vo.ReportDetailListParamVo">
@@ -1305,7 +1305,7 @@
             </if>
         </trim>
         ORDER BY
-        t2.entrustment_no
+        t1.report_complete_time desc
     </select>
 
     <select id="getSendListCount" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
