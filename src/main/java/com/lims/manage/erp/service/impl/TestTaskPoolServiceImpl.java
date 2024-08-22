@@ -379,7 +379,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                         } else {
                             // 所有检测项不可领取：需要配合比试验团队领取后才行
                             sampleItemEntity.setPriority(null);
-                            sampleItemEntity.setTeamName(null);
+                            sampleItemEntity.setTeamName("专属团队领取");
                         }
                     }
                 }
