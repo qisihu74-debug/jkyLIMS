@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.StatisticsMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
+import com.lims.manage.erp.mapper.TeamMapper;
 import com.lims.manage.erp.mapper.TestCheckItemTeamRelDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -37,6 +39,8 @@ public class TestCheckItemTeamRelServiceImpl extends ServiceImpl<TestCheckItemTe
     private LogManagerService logManagerService;
     @Resource
     private StatisticsMapper statisticsMapper;
+    @Resource
+    private TeamMapper teamMapper;
 
     @Override
     public IPage<TestCheckItemTeamRelVo> getPageList(Page<TestCheckItemTeamRelVo> page, QueryWrapper<TestCheckItemTeamRel> queryWrapper) {
@@ -57,6 +61,10 @@ public class TestCheckItemTeamRelServiceImpl extends ServiceImpl<TestCheckItemTe
             if (this.list(queryWrapper).size() > 0) {
                 return ResultUtil.error("同产品检测项重复！");
             }
+            LambdaQueryWrapper<TestTeam> teamWrapper = new LambdaQueryWrapper();
+            teamWrapper.eq(TestTeam::getId, testCheckItemTeamRel.getTeamId());
+            TestTeam testTeam = (TestTeam) teamMapper.selectOne(teamWrapper);
+            testCheckItemTeamRel.setTeamName(testTeam.getName());
             if (this.save(testCheckItemTeamRel)) {
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加科室检测项" + testCheckItemTeamRel.getId() + "成功!", Const.TEAM_MANAGEMENT_LOG, true);
                 return ResultUtil.success("添加成功");
@@ -72,23 +80,27 @@ public class TestCheckItemTeamRelServiceImpl extends ServiceImpl<TestCheckItemTe
     @Override
     public Result updTestCheckItemTeamRel(TestCheckItemTeamRel testCheckItemTeamRel) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        if (testCheckItemTeamRel.getId()!=null&&testCheckItemTeamRel.getCheckItemId()!=null&&testCheckItemTeamRel.getTeamId()!=null&&testCheckItemTeamRel.getProductId()!=null){
-            QueryWrapper<TestCheckItemTeamRel> queryWrapper=new QueryWrapper<>();
-            queryWrapper.eq("product_id",testCheckItemTeamRel.getProductId());
-            queryWrapper.eq("check_item_id",testCheckItemTeamRel.getCheckItemId());
-            queryWrapper.eq("team_id",testCheckItemTeamRel.getTeamId());
-            queryWrapper.ne("id",testCheckItemTeamRel.getId());
-            if (this.list(queryWrapper).size()>0){
+        if (testCheckItemTeamRel.getId() != null && testCheckItemTeamRel.getCheckItemId() != null && testCheckItemTeamRel.getTeamId() != null && testCheckItemTeamRel.getProductId() != null) {
+            QueryWrapper<TestCheckItemTeamRel> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("product_id", testCheckItemTeamRel.getProductId());
+            queryWrapper.eq("check_item_id", testCheckItemTeamRel.getCheckItemId());
+            queryWrapper.eq("team_id", testCheckItemTeamRel.getTeamId());
+            queryWrapper.ne("id", testCheckItemTeamRel.getId());
+            if (this.list(queryWrapper).size() > 0) {
                 return ResultUtil.error("同产品检测项重复！");
             }
-            if (this.updateById(testCheckItemTeamRel)){
-                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改科室检测项"+testCheckItemTeamRel.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
+            LambdaQueryWrapper<TestTeam> teamWrapper = new LambdaQueryWrapper();
+            teamWrapper.eq(TestTeam::getId, testCheckItemTeamRel.getTeamId());
+            TestTeam testTeam = (TestTeam) teamMapper.selectOne(teamWrapper);
+            testCheckItemTeamRel.setTeamName(testTeam.getName());
+            if (this.updateById(testCheckItemTeamRel)) {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "修改科室检测项" + testCheckItemTeamRel.getId() + "成功!", Const.TEAM_MANAGEMENT_LOG, true);
                 return ResultUtil.success("修改成功");
-            }else {
-                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改科室检测项"+testCheckItemTeamRel.getId()+"失败!", Const.TEAM_MANAGEMENT_LOG,false);
+            } else {
+                logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "修改科室检测项" + testCheckItemTeamRel.getId() + "失败!", Const.TEAM_MANAGEMENT_LOG, false);
                 return ResultUtil.error("修改失败");
             }
         }else {

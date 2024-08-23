@@ -49,19 +49,19 @@ public class TestCheckItemsTaskRelController {
             return verifyTeamCollection;
         }
         List<Long> teamCollection = (List<Long>) verifyTeamCollection.getData();
-        Long teamId = teamCollection.get(0);
+        userInfo.setTechnicistId(teamCollection.get(0).intValue());
         // 比较任务单创建时间：区分团队信息是否拆分
         Result taskVerificationInformation = taskService.compareTaskListCreationInformation(entrustId, null);
 
         if (taskVerificationInformation.getData() == null) {
             // 任务单不存在:任务大厅 - 根据登录人、返回所属团队成员的对应检测项。
-            return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId, null);
+            return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId, userInfo);
         } else {
             // 提示信息
             String promptMessage = (String) taskVerificationInformation.getData();
             if (promptMessage.equals("newTask")) {
                 // 我的任务单 返回检测项信息
-                return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId, promptMessage);
+                return testTaskPoolService.getTaskDetectionItemDetails(poolId, entrustId, userInfo);
             }
         }
         // 检测项信息
