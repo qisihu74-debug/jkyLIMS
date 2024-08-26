@@ -170,6 +170,7 @@ public class TaskListToolSortUtils {
             // 检测项已领取，不是当前团队 则标记为空
             if (sampleItemEntity.getTaskId() != null && !sampleItemEntity.getTechnicistId().equals(teamId)) {
                 sampleItemEntity.setPriority(null);
+                sampleItemEntity.setTeamName("其他团队已领取");
             }
             List<TestCheckItemsTaskRel> itemsTaskRels1 = new ArrayList<>();
             // 检测人员信息展示

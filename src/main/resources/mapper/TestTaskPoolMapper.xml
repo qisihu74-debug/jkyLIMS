@@ -4,22 +4,32 @@
 
     <select id="selectItems" resultType="com.lims.manage.erp.entity.SampleItemEntity">
         SELECT
-            t1.id,
-            t1.entrust_id,
-            t1.sample_id,
-            t1.check_item_name AS checkItemName,
-            t1.check_item_id,
-            t1.times,
-            t1.unit_price,
-            t1.task_id + IFNULL(t1.bit_value,0) as taskId,
-            t1.dept_id as technicistId,
-            t2.sample_code,
-            t2.sample_name
+        t1.id,
+        t1.entrust_id,
+        t1.sample_id,
+        t1.check_item_name AS checkItemName,
+        t1.check_item_id,
+        t1.times,
+        t1.unit_price,
+        t1.task_id + IFNULL(t1.bit_value,0) as taskId,
+        t1.dept_id as technicistId,
+        t2.sample_code,
+        t2.sample_name
         FROM
-            test_entrusted_sample_checkitem_rel AS t1
-            LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
-        WHERE
-            entrust_id = #{entrustId}
+        test_entrusted_sample_checkitem_rel AS t1
+        LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id
+        <where>
+            1=1
+            <if test="entrustId!=null">
+                and t1.entrust_id = #{entrustId}
+            </if>
+            <if test="itemIds!=null">
+                and t1.id in
+                <foreach collection="itemIds" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
     </select>
 
 </mapper>

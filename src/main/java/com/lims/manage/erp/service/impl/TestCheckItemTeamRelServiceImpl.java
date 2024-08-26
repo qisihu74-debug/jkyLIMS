@@ -17,6 +17,7 @@ import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TestCheckItemTeamRelService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.TestCheckItemTeamRelVo;
 import com.lims.manage.erp.vo.TestTeamVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,10 +62,10 @@ public class TestCheckItemTeamRelServiceImpl extends ServiceImpl<TestCheckItemTe
             if (this.list(queryWrapper).size() > 0) {
                 return ResultUtil.error("同产品检测项重复！");
             }
-            LambdaQueryWrapper<TestTeam> teamWrapper = new LambdaQueryWrapper();
-            teamWrapper.eq(TestTeam::getId, testCheckItemTeamRel.getTeamId());
-            TestTeam testTeam = (TestTeam) teamMapper.selectOne(teamWrapper);
-            testCheckItemTeamRel.setTeamName(testTeam.getName());
+            String teamName = teamMapper.getTeamIdByName(testCheckItemTeamRel.getTeamId());
+            if (StringUtils.isNotEmpty(teamName)) {
+                testCheckItemTeamRel.setTeamName(teamName);
+            }
             if (this.save(testCheckItemTeamRel)) {
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加科室检测项" + testCheckItemTeamRel.getId() + "成功!", Const.TEAM_MANAGEMENT_LOG, true);
                 return ResultUtil.success("添加成功");
@@ -92,10 +93,10 @@ public class TestCheckItemTeamRelServiceImpl extends ServiceImpl<TestCheckItemTe
             if (this.list(queryWrapper).size() > 0) {
                 return ResultUtil.error("同产品检测项重复！");
             }
-            LambdaQueryWrapper<TestTeam> teamWrapper = new LambdaQueryWrapper();
-            teamWrapper.eq(TestTeam::getId, testCheckItemTeamRel.getTeamId());
-            TestTeam testTeam = (TestTeam) teamMapper.selectOne(teamWrapper);
-            testCheckItemTeamRel.setTeamName(testTeam.getName());
+            String teamName = teamMapper.getTeamIdByName(testCheckItemTeamRel.getTeamId());
+            if (StringUtils.isNotEmpty(teamName)) {
+                testCheckItemTeamRel.setTeamName(teamName);
+            }
             if (this.updateById(testCheckItemTeamRel)) {
                 logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "修改科室检测项" + testCheckItemTeamRel.getId() + "成功!", Const.TEAM_MANAGEMENT_LOG, true);
                 return ResultUtil.success("修改成功");

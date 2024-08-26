@@ -89,7 +89,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         // 3、 查看检测项及所属类型：
         //      （0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生）
         // 3.1：通过委托单id 查看检测项列表。
-        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId, null);
         // 3.2：通过委托单id 查看检测项下指派人员信息。
         LambdaQueryWrapper<TestCheckItemsTaskRel> taskRelLambdaQueryWrapper = new LambdaQueryWrapper<>();
         taskRelLambdaQueryWrapper.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
@@ -317,7 +317,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         Long teamId = userInfo.getTechnicistId().longValue();
 
         // 3： 通过委托单id 查看检测项列表。
-        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId, null);
 
         // 新增样品信息下检测项
         List<SampleEntity> addNewSamples = new ArrayList<>();
@@ -365,6 +365,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 // 检测项已领取，不是当前团队 则标记为空
                 if (sampleItemEntity.getTaskId() != null && !sampleItemEntity.getTechnicistId().equals(teamId)) {
                     sampleItemEntity.setPriority(null);
+                    sampleItemEntity.setTeamName("其他团队已领取");
                 }
             }
         }
@@ -668,7 +669,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         } else {
             // TODO： 执行 旧操作 下列操作 全为旧操作
             // 通过委托单id 查看检测项列表。
-            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId, null);
             // 任务领取-循环验证 数据 msg = null 正常执行、！= null 抛出。
             Result msg = loopValidation(list);
             if (msg != null) {
@@ -725,7 +726,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         } else {
             // TODO： 执行 旧操作 下列操作 全为旧操作
             // 通过委托单id 查看检测项列表。
-            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId, null);
             // 任务领取-循环验证 数据 msg = null 正常执行、！= null 抛出。
             Result msg = loopValidation(list);
             if (msg != null) {
@@ -793,7 +794,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             return ResultUtil.success("更新成功");
         }
         // 通过委托单id 查看检测项列表。
-        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId, null);
 
         EntrustAddVo entrustAddVo = entityMapper.selectByKeyId(entrustId);
         // 进行遍历输出
@@ -1699,7 +1700,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      */
     public void newAddTask(List<SampleItemEntity> list, Long entrustId, Long teamId, TestTaskPool testTaskPool) {
         // 通过委托单id 查看检测项列表。
-        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId, null);
         // 任务单id
         long taskId = GenID.getID();
         // 领样人
@@ -2126,8 +2127,14 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
 
         long taskId = taskProgressVo.getTaskId();
         long teamId = taskProgressVo.getDeptId();
-        // 通过委托单id 查看检测项列表。
-        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+
+        // 检测项id集合
+        List<Integer> itemIdList = new ArrayList<>();
+        for (SampleItemEntity sampleItemEntity : list) {
+            itemIdList.addAll(sampleItemEntity.getItemIds());
+        }
+        // 通过itemIds 查看检测项列表。
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(null, itemIdList);
         // 领样人
         String sampler = "";
         // map信息处理 ： key = （ userType） 、value = （set去重后的人员信息）
@@ -2207,12 +2214,9 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         entity.setDiscount(Double.parseDouble(entrustAddVo.getDiscount()));
         //计算本单价格
         double taskPrice = 0L;
-        // 检测项id集合
-        List<Integer> itemIdList = new ArrayList<>();
         for (SampleItemEntity vo : itemList) {
             taskPrice = taskPrice + ((entity.getDiscount() == null ? 0 : entity.getDiscount()) *
                     (vo.getUnitPrice() == null ? 0 : vo.getUnitPrice()) * vo.getTimes());
-            itemIdList.add(vo.getId());
         }
         addSampleItemEntity.setItemIds(itemIdList);
         // 更新taskId 价格
