@@ -33,7 +33,7 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      * @param entrustId
      * @return
      */
-    Result getTaskDetectionItemDetails(Long poolId, Long entrustId, String promptMessage);
+    Result getTaskDetectionItemDetails(Long poolId, Long entrustId, SysUserEntity userInfo);
 
     /**
      * 任务大厅 领取任务单

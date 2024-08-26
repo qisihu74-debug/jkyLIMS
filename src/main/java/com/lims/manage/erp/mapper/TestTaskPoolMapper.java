@@ -23,11 +23,12 @@ import java.util.List;
 public interface TestTaskPoolMapper extends BaseMapper<TestTaskPool> {
 
     /**
-     * 根据委托单id 查询检测项信息
+     * 根据委托单id、或检测项ids 查询检测项信息
+     *
      * @param entrustId
      * @return
      */
-    List<SampleItemEntity> selectItems(@Param("entrustId") Long entrustId);
+    List<SampleItemEntity> selectItems(@Param("entrustId") Long entrustId, List<Integer> itemIds);
 
     /**
      * 通过检测项主键 获取委托单id

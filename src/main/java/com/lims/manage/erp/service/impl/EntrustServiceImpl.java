@@ -1016,11 +1016,21 @@ public class EntrustServiceImpl implements EntrustService {
 
                 //删除原有检测项——判断是否删除有子检测项的
                 if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)){
-                    //
                     for (int j = 0; j < sampleCheckItemOld.size(); j++) {
                         SampleItemEntity sampleItemEntity = sampleCheckItemOld.get(i);
-                        if(sampleItemEntity == null ){
+                        if (sampleItemEntity == null) {
                             sampleCheckItemOld.remove(sampleItemEntity);
+                        }
+                    }
+                    if (CollectionUtil.isNotEmpty(sampleCheckItemOld)) {
+                        for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
+                            Integer itemId = testCheckItemsTaskRelMapper.selectEntrustedSampleCheckitemId(sampleItemEntity.getEntrustId(), sampleItemEntity.getSampleId(), sampleItemEntity.getCheckItemId());
+                            if (itemId != null) {
+                                // 根据 查询 条件删除检测项流转信息
+                                LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+                                queryWrapper12.eq(TestCheckItemsTaskRel::getItemId, itemId);
+                                testCheckItemsTaskRelMapper.delete(queryWrapper12);
+                            }
                         }
                     }
                     //删除委托检测项表中的检测项
@@ -1030,7 +1040,7 @@ public class EntrustServiceImpl implements EntrustService {
                     Long reportId = entityMapper.getReportId(basisInfo.getId());
                     for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
                         ReportRecordDetailEntity entity = new ReportRecordDetailEntity();
-                        if(sampleItemEntity != null){
+                        if (sampleItemEntity != null) {
                             entity.setCheckItemId(sampleItemEntity.getCheckItemId());
                             entity.setRecordId(reportId);
                             detailEntityList.add(entity);
@@ -1187,14 +1197,23 @@ public class EntrustServiceImpl implements EntrustService {
                     List<SampleItemEntity> temp = Lists.newArrayList();
                     for (int j = 0; j < sampleCheckItemOld.size(); j++) {
                         SampleItemEntity sampleItemEntity = sampleCheckItemOld.get(i);
-                        if(sampleItemEntity != null ){
+                        if (sampleItemEntity != null) {
                             temp.add(sampleItemEntity);
                         }
                     }
                     //把要删除的检测项存放到循环外
                     deleteCheckItems.addAll(temp);
                     //删除委托检测项表中的检测项
-                    if(!CollectionUtils.isEmpty(temp)){
+                    if (!CollectionUtils.isEmpty(temp)) {
+                        for (SampleItemEntity sampleItemEntity : temp) {
+                            Integer itemId = testCheckItemsTaskRelMapper.selectEntrustedSampleCheckitemId(sampleItemEntity.getEntrustId(), sampleItemEntity.getSampleId(), sampleItemEntity.getCheckItemId());
+                            if (itemId != null) {
+                                // 根据 查询 条件删除检测项流转信息
+                                LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+                                queryWrapper12.eq(TestCheckItemsTaskRel::getItemId, itemId);
+                                testCheckItemsTaskRelMapper.delete(queryWrapper12);
+                            }
+                        }
                         entityMapper.batchDeleteEntrustSampleItem(temp);
                     }
                     //根据委托单Id查询报告数据主键
@@ -1202,7 +1221,7 @@ public class EntrustServiceImpl implements EntrustService {
                     Long reportId = entityMapper.getReportId(basisInfo.getId());
                     for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
                         ReportRecordDetailEntity entity = new ReportRecordDetailEntity();
-                        if(sampleItemEntity != null){
+                        if (sampleItemEntity != null) {
                             entity.setCheckItemId(sampleItemEntity.getCheckItemId());
                             entity.setRecordId(reportId);
                             detailEntityList.add(entity);
@@ -1419,7 +1438,7 @@ public class EntrustServiceImpl implements EntrustService {
                     entityMapper.batchUpdateEntrustSampleItem(updateList);
                 }
                 //删除原有检测项——判断是否删除有子检测项的
-                if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)){
+                if (sampleCheckItemOld != null && !CollectionUtils.isEmpty(sampleCheckItemOld)) {
                     List<SampleItemEntity> temp = Lists.newArrayList();
                     for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
                         if (sampleItemEntity != null) {
@@ -1429,7 +1448,16 @@ public class EntrustServiceImpl implements EntrustService {
                     //把要删除的检测项存放到循环外
                     deleteCheckItems.addAll(temp);
                     //删除委托检测项表中的检测项
-                    if(!CollectionUtils.isEmpty(temp)){
+                    if (!CollectionUtils.isEmpty(temp)) {
+                        for (SampleItemEntity sampleItemEntity : temp) {
+                            Integer itemId = testCheckItemsTaskRelMapper.selectEntrustedSampleCheckitemId(sampleItemEntity.getEntrustId(), sampleItemEntity.getSampleId(), sampleItemEntity.getCheckItemId());
+                            if (itemId != null) {
+                                // 根据 查询 条件删除检测项流转信息
+                                LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+                                queryWrapper12.eq(TestCheckItemsTaskRel::getItemId, itemId);
+                                testCheckItemsTaskRelMapper.delete(queryWrapper12);
+                            }
+                        }
                         entityMapper.batchDeleteEntrustSampleItem(temp);
                     }
                     //根据委托单Id查询报告数据主键
@@ -1437,7 +1465,7 @@ public class EntrustServiceImpl implements EntrustService {
                     Long reportId = entityMapper.getReportId(basisInfo.getId());
                     for (SampleItemEntity sampleItemEntity : sampleCheckItemOld) {
                         ReportRecordDetailEntity entity = new ReportRecordDetailEntity();
-                        if(sampleItemEntity != null){
+                        if (sampleItemEntity != null) {
                             entity.setCheckItemId(sampleItemEntity.getCheckItemId());
                             entity.setRecordId(reportId);
                             entity.setSampleId(sampleItemEntity.getSampleId());
@@ -1676,10 +1704,19 @@ public class EntrustServiceImpl implements EntrustService {
                     //把要删除的检测项存放到循环外
                     deleteCheckItems.addAll(temp);
                     //删除委托检测项表中的检测项
-                    if(!CollectionUtils.isEmpty(temp)){
+                    if(!CollectionUtils.isEmpty(temp)) {
+                        for (SampleItemEntity sampleItemEntity : temp) {
+                            Integer itemId = testCheckItemsTaskRelMapper.selectEntrustedSampleCheckitemId(sampleItemEntity.getEntrustId(), sampleItemEntity.getSampleId(), sampleItemEntity.getCheckItemId());
+                            if (itemId != null) {
+                                // 根据 查询 条件删除检测项流转信息
+                                LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+                                queryWrapper12.eq(TestCheckItemsTaskRel::getItemId, itemId);
+                                testCheckItemsTaskRelMapper.delete(queryWrapper12);
+                            }
+                        }
                         entityMapper.batchDeleteEntrustSampleItem(temp);
                         //修改报告的状态，和审批，复核信息
-                        if(!"2".equals(reportState)){
+                        if (!"2".equals(reportState)) {
                             ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
                             reportApprovalVo.setState(2);
                             reportApprovalVo.setEntrustmentId(basisInfo.getId());
@@ -5981,7 +6018,7 @@ public class EntrustServiceImpl implements EntrustService {
         Result msg = entrustApprovedMethod(entrustDetails, entrustId);
         if(msg.getCode() == 200){
             // 通过委托单id 查看检测项列表。
-            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId);
+            List<SampleItemEntity> itemList = taskPoolMapper.selectItems(entrustId, null);
             // 进行 发布数据 更新委托单 = 1
             EntrustEntity basisInfo = new EntrustEntity();
             basisInfo.setId(entrustId);

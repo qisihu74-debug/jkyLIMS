@@ -82,4 +82,15 @@ public interface TestCheckItemsTaskRelMapper extends BaseMapper<TestCheckItemsTa
      * @return
      */
     List<TestCheckItemsTaskRel> selectAllDataBitValue(@Param("taskId") Long taskId);
+
+    @Select("SELECT\n" +
+            "\tid \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel\n" +
+            "WHERE\n" +
+            "\tentrust_id = #{entrustId} \n" +
+            "\tAND check_item_id = #{checkItemId} \n" +
+            "\tAND sample_id = #{sampleId}\n" +
+            "\tlimit 1")
+    Integer selectEntrustedSampleCheckitemId(@Param("entrustId") Long entrustId, @Param("sampleId") Integer sampleId, @Param("checkItemId") Long checkItemId);
 }

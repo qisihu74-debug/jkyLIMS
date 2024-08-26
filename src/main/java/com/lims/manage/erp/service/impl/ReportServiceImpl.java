@@ -1278,7 +1278,11 @@ public class ReportServiceImpl implements ReportService {
         // 查询中间报告或最终报告
         List<ReportRecordEntity> list = new ArrayList<>();
         // 查询中间报告 和 最终报告
-        list = entityMapper.getSendList20230203Report(search, reportType, type, category, reportTypeStatus,startTime,endTime);
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(search)) {
+            // 字符串 去除前后空格
+            search = search.trim();
+        }
+        list = entityMapper.getSendList20230203Report(search, reportType, type, category, reportTypeStatus, startTime, endTime);
         if (!CollectionUtils.isEmpty(list)) {
             for (ReportRecordEntity reportRecordEntity : list) {
                 // 判断收件人为 null 则根据委托单位查询
