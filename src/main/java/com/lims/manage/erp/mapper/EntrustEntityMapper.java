@@ -849,7 +849,7 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     @Select({"<script>",
             " SELECT ",
-            " IFNULL(operate_type,0)",
+            " IFNULL(operate_type,0) as operateType",
             " FROM test_entrusted_info WHERE id in ",
             "<foreach item='item' index='index' collection='items' open='(' separator=',' close=')'>",
             "#{item}",
