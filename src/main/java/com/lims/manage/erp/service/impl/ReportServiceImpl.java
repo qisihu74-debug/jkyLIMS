@@ -1297,9 +1297,6 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         }
-        list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() ->
-                        new TreeSet<>(Comparator.comparing(ReportRecordEntity:: getReportCompleteTime).reversed())),
-                ArrayList::new));
         PageInfo<ReportRecordEntity> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -3884,6 +3881,7 @@ public class ReportServiceImpl implements ReportService {
         Long userId = ShiroUtils.getUserInfo().getUserId();
         List<Integer> ids = Lists.newArrayList();
         //校验用户id是否分配团队
+        PageHelper.clearPage();
         Integer teamId = testTechnicistDao.getSealer(userId);
         if (teamId != null) {
            ids = teamMapper.getTeamIdsByUserId(userId);
@@ -3895,7 +3893,7 @@ public class ReportServiceImpl implements ReportService {
         }
         List<ReportRecordEntity> list;
         PageHelper.startPage(pageNum, pageSize);
-        if (Integer.parseInt(reportType) == 0 || StringUtils.isEmpty(reportType)) {
+        if (StringUtils.isEmpty(reportType) || Integer.parseInt(reportType) == 0) {
             list = reportMapper.historyList(reportCode, reportType, sealType, ids, startDate == null ? null : new Date(startDate), endDate == null ? null : new Date(endDate));
         } else {
             list = reportMapper.historyListZj(reportCode, reportType, sealType, ids, startDate == null ? null : new Date(startDate), endDate == null ? null : new Date(endDate));
