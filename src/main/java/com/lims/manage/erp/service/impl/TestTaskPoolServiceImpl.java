@@ -194,6 +194,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                                                              Long teamId, List<SampleEntity> sampleList, List<SampleEntity> addNewSamples, Long taskId) {
         // 进行检测项 与样品信息 归类:
         if (CollectionUtil.isNotEmpty(itemList) && CollectionUtil.isNotEmpty(sampleList)) {
+            // 新增检测项中 taskId = null的。
+            List<SampleItemEntity> addNewSampleItemEntities = new ArrayList<>();
             for (SampleEntity sampleEntity : sampleList) {
                 // 当前样品属于配合比原材时： 配合比实验交叉参数默认分配给已拥有配合比实验的团队
                 Boolean falg = false;
@@ -212,8 +214,6 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     }
                 }
                 List<SampleItemEntity> sampleItemEntities = new ArrayList<>();
-                // 新增检测项中 taskId = null的。
-                List<SampleItemEntity> addNewSampleItemEntities = new ArrayList<>();
                 // 遍历检测项数据 存放至 样品中
                 if (CollectionUtil.isNotEmpty(itemList) && taskId != null) {
 
@@ -274,7 +274,13 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 sampleData.setSampleOrigin(sampleEntity.getSampleOrigin());
                 sampleData.setOutward(sampleEntity.getOutward());
                 sampleData.setOutwardDescribe(sampleEntity.getOutwardDescribe());
-                sampleData.setSampleCheckItem(addNewSampleItemEntities);
+
+                List<SampleItemEntity> addNewItems = addNewSampleItemEntities.stream().
+                        filter(SampleItemEntity -> SampleItemEntity.getSampleId().equals(sampleData.getId())).collect(Collectors.toList());
+                if (!addNewItems.isEmpty()) {
+                    sampleData.setSampleCheckItem(addNewItems);
+                }
+
                 if (taskId != null) {
                     addNewSamples.add(sampleData);
                 }

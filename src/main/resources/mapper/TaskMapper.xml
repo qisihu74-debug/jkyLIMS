@@ -256,65 +256,72 @@
         where t1.id = #{taskId}
     </select>
     <select id="getTaskDetailInfoTwo" resultMap="taskResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
-        SELECT t1.id,
-               t1.task_code                        code,
-               t1.orderer,
-               DATE_FORMAT(t1.order_time, '%Y-%m-%d')               order_time,
-               DATE_FORMAT(t1.required_completion_time, '%Y-%m-%d') required_completion_time,
-               t1.task_price                                       ,
-               t2.sampling_method,
-               t2.check_purpose,
-               t2.present_information,
-               t2.file_url,
-               t2.seal_type,
-               IFNULL(t2.invalid_reason,null) invalid_reason,
-               t3.sample_id,
-               t4.sample_name,
-               t4.alias_name,
-               t4.product_id,
-               t4.sample_code,
-               t4.specs,
-               t4.batch_number,
-               t4.generation,
-               t4.sample_groups,
-               t4.quantity_per_group,
-               t4.sample_origin,
-               t4.manufacturer,
-               t4.received_date,
-               t4.inspector,
-               t4.sample_requirement,
-               t4.outward,
-               t4.outward_describe,
-               t4.picture,
-               t4.sample_quantity,
-               t4.alias_name,
-               t4.sample_remark,
-               t4.sample_type,
-               t5.check_item_id,
-               t5.check_item_name,
-               t5.method_id,
-               t7.name,
-               t5.standard_id,
-               CONCAT(t6.code, '《', t6.`name`, '》')                 standard_name,
-               t5.times,
-               t5.unit_price,
-               t5.id         AS                                     itemId,
-               t5.state      AS                                     state,
-               t5.origin_url AS                                     originUrl,
-               t5.opinion,
-               t5.start_time,
-               t5.end_time,
-               t5.edit_data
-        FROM test_task t1
-                 LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
-                 LEFT JOIN test_entrusted_sample_details_rel t3 ON t2.id = t3.entrustment_id
-                 LEFT JOIN test_sample t4 ON t3.sample_id = t4.id
-                 LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.entrustment_id = t5.entrust_id
-                 LEFT JOIN test_team as t9 ON t9.id = t5.dept_id
-            AND t4.id = t5.sample_id
-                 LEFT JOIN ( SELECT * FROM test_standard_file UNION ALL SELECT * FROM test_standard_file_record ) t6 ON t5.standard_id = t6.id
-                 LEFT JOIN test_method t7 ON t5.method_id = t7.id
-                 left join test_product_item t8 on t5.check_item_id = t8.check_item_id
+        SELECT
+            t1.id,
+            t1.task_code CODE,
+            t1.orderer,
+            DATE_FORMAT(t1.order_time, '%Y-%m-%d') order_time,
+            DATE_FORMAT(
+                t1.required_completion_time,
+                '%Y-%m-%d'
+            ) required_completion_time,
+            t1.task_price,
+            t2.sampling_method,
+            t2.check_purpose,
+            t2.present_information,
+            t2.file_url,
+            t2.seal_type,
+            IFNULL(t2.invalid_reason, NULL) invalid_reason,
+            t5.sample_id,
+            t5.id AS itemId,
+            t4.sample_name,
+            t4.alias_name,
+            t4.product_id,
+            t4.sample_code,
+            t4.specs,
+            t4.batch_number,
+            t4.generation,
+            t4.sample_groups,
+            t4.quantity_per_group,
+            t4.sample_origin,
+            t4.manufacturer,
+            t4.received_date,
+            t4.inspector,
+            t4.sample_requirement,
+            t4.outward,
+            t4.outward_describe,
+            t4.picture,
+            t4.sample_quantity,
+            t4.alias_name,
+            t4.sample_remark,
+            t4.sample_type,
+            t5.check_item_id,
+            t5.check_item_name,
+            t5.method_id,
+            t6. NAME,
+            t5.standard_id,
+            CONCAT(
+                t6. CODE,
+                '《',
+                t6.`name`,
+                '》'
+            ) standard_name,
+            t5.times,
+            t5.unit_price,
+            t5.state AS state,
+            t5.origin_url AS originUrl,
+            t5.opinion,
+            t5.start_time,
+            t5.end_time,
+            t5.edit_data
+        FROM
+            test_task t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
+        LEFT JOIN test_entrusted_sample_checkitem_rel t5 ON t1.entrustment_id = t5.entrust_id
+        LEFT JOIN test_sample t4 ON t5.sample_id = t4.id
+        LEFT JOIN test_team t9 ON t9.id = t1.dept_id
+        LEFT JOIN test_standard_file t6 ON t5.standard_id = t6.id
+        LEFT JOIN test_product_item t8 ON t5.check_item_id = t8.check_item_id
         where t1.id = #{taskId} and t5.task_id = #{taskId}
     </select>
     <select id="getInstrumentEntityList" resultType="com.lims.manage.erp.entity.TestInstrumentEntity">

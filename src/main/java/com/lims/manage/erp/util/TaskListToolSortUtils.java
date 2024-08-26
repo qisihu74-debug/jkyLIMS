@@ -51,10 +51,10 @@ public class TaskListToolSortUtils {
                     // 条数唯一：部门id与所属部门一致
                     if (teamId.equals(itemTeamRels.get(0).getTeamId().longValue())) {
                         sampleItemEntity.setPriority("1");
-                        sampleItemEntity.setTeamName(itemTeamRels.get(0).getTeamName());
+                        sampleItemEntity.setTeamName(itemTeamRels.get(0).getTeamName() != null ? itemTeamRels.get(0).getTeamName() : "本团队");
                     } else {
                         sampleItemEntity.setPriority(null);
-                        sampleItemEntity.setTeamName(itemTeamRels.get(0).getTeamName());
+                        sampleItemEntity.setTeamName(itemTeamRels.get(0).getTeamName() != null ? itemTeamRels.get(0).getTeamName() : "本团队");
                     }
                 } else if (sampleItemEntity.getPriority() == null && sampleItemEntity.getTechnicistId() != null && sampleItemEntity.getTechnicistId().equals(teamId)) {
                     sampleItemEntity.setPriority("1");
@@ -70,7 +70,7 @@ public class TaskListToolSortUtils {
                         // 设置检测团队优先级 ： 当前团队与检测项团队相等 && 优先级不为空 优先级 = 1
                         if (teamId.equals(teamRel.getTeamId().longValue()) && (teamRel.getPriority() != null && teamRel.getPriority().equals("1"))) {
                             sampleItemEntity.setPriority("1");
-                            sampleItemEntity.setTeamName(teamRel.getTeamName());
+                            sampleItemEntity.setTeamName(teamRel.getTeamName() != null ? teamRel.getTeamName() : "本团队");
                             foundMatchingTeam = true;
                             // 符合条件 跳出本次循环
                             continue;
