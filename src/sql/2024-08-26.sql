@@ -37,24 +37,28 @@ set test_technicist.team_id = test_technicist_new.team_id;
 SET FOREIGN_KEY_CHECKS=0;
 
 DROP TABLE IF EXISTS `test_team_rel`;
-CREATE TABLE `test_team_rel` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `new_team_id` int DEFAULT NULL,
-  `old_team_id` int DEFAULT NULL,
-  `old_team_name` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `test_team_rel`  (
+  `id` int(0) NOT NULL AUTO_INCREMENT,
+  `new_team_id` int(0) DEFAULT NULL,
+  `old_team_id` int(0) DEFAULT NULL,
+  `old_team_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `old_team_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
-INSERT INTO `test_team_rel` VALUES ('1', '3', '231', '土工');
-INSERT INTO `test_team_rel` VALUES ('2', '5', '232', '力学');
-INSERT INTO `test_team_rel` VALUES ('3', '2', '233', '交安');
-INSERT INTO `test_team_rel` VALUES ('4', '6', '234', '水泥');
-INSERT INTO `test_team_rel` VALUES ('5', '3', '235', '沥青');
-INSERT INTO `test_team_rel` VALUES ('6', '4', '236', '化学');
-INSERT INTO `test_team_rel` VALUES ('7', '5', '237', '力学交安');
-INSERT INTO `test_team_rel` VALUES ('8', '6', '238', '水泥化学');
-INSERT INTO `test_team_rel` VALUES ('9', '1', '239', '沥青土工');
-INSERT INTO `test_team_rel` VALUES ('12', '2', '264', '交通工程');
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (1, 3, 231, '土工', 'H');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (2, 5, 232, '力学', 'J');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (3, 2, 233, '交安', 'K');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (4, 6, 234, '水泥', 'L');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (5, 3, 235, '沥青', 'M');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (6, 4, 236, '化学', 'N');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (7, 5, 237, '力学交安', 'A');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (8, 6, 238, '水泥化学', 'B');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (9, 1, 239, '沥青土工', 'C');
+INSERT INTO `test_team_rel`(`id`, `new_team_id`, `old_team_id`, `old_team_name`, `old_team_code`) VALUES (12, 2, 264, '交通工程', 'D');
 
 -- 委托单新增报告盖章类型字段 --
 ALTER TABLE `test_entrusted_info`
