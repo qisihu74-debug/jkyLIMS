@@ -104,19 +104,21 @@ public interface StatisticsMapper {
      * @param deptIds
      * @return
      */
-    List<TeamOutputValueVo> teamParentTaskStatistics(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
+    List<TeamOutputValueVo> teamParentTaskStatistics(@Param("beginDate") String beginDate, @Param("endDate") String endDate, @Param("deptIds") List<Long> deptIds);
 
     /**
-     *
      * @param beginDate
      * @param endDate
      * @param deptIds
      * @return
      */
-    List<TeamOutputValueVo> teamStatistics0715(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
-    List<TeamOutputValueVo> teamStatistics230419(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
-    List<TeamOutputValueVo> teamStatistics231219(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
-    List<TeamOutputValueVo> teamStatisticsNode0715(@Param("beginDate") String beginDate,@Param("endDate") String endDate,@Param("deptIds") List<Long> deptIds);
+    List<TeamOutputValueVo> teamStatistics0715(@Param("beginDate") String beginDate, @Param("endDate") String endDate, @Param("deptIds") List<Long> deptIds);
+
+    List<TeamOutputValueVo> teamStatistics230419(@Param("beginDate") String beginDate, @Param("endDate") String endDate, @Param("deptIds") List<Long> deptIds);
+
+    List<TeamOutputValueVo> teamStatistics231219(@Param("beginDate") String beginDate, @Param("endDate") String endDate, @Param("deptIds") List<Long> deptIds);
+
+    List<TeamOutputValueVo> teamStatisticsNode0715(@Param("beginDate") String beginDate, @Param("endDate") String endDate, @Param("deptIds") List<Long> deptIds);
 
     /**
      * 部门产值统计--子级

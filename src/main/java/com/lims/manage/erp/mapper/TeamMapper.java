@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.TeamTreeStructureEntity;
 import com.lims.manage.erp.entity.TestCheckItemTeamRel;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.vo.LabelValueTeamVo;
+import com.lims.manage.erp.vo.TeamVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -58,8 +59,10 @@ public interface TeamMapper extends BaseMapper {
                    "                SELECT c.* FROM test_team c ,td WHERE c.pid = td.id\n" +
                    "            ) SELECT * FROM td ORDER BY td.id")
     List<TeamTreeStructureEntity> getChirds(Long teamId);
+
     @Select("SELECT * FROM test_team where status = 0 and del_flag = 0")
     List<TeamTreeStructureEntity> getAllTeams();
+
     @Select("WITH RECURSIVE td AS (\n" +
             "                SELECT * FROM test_team WHERE id = #{teamId} \n" +
             "                UNION ALL \n" +
@@ -67,11 +70,38 @@ public interface TeamMapper extends BaseMapper {
             "            ) SELECT id FROM td ORDER BY td.id")
     List<Long> getNodeTeamId(Long teamId);
 
+    @Select("SELECT\n" +
+            "\tt1.id,\n" +
+            "\tt1.name,\n" +
+            "\tt1.code \n" +
+            "FROM\n" +
+            "\t(\n" +
+            "SELECT\n" +
+            "\tid,\n" +
+            "\tNAME,\n" +
+            "\tid AS pid,\n" +
+            "CODE \n" +
+            "FROM\n" +
+            "\ttest_team UNION ALL\n" +
+            "SELECT\n" +
+            "\told_team_id AS id,\n" +
+            "\told_team_name AS NAME,\n" +
+            "\tnew_team_id AS pid,\n" +
+            "\told_team_code \n" +
+            "FROM\n" +
+            "\ttest_team_rel \n" +
+            "\t) AS t1 \n" +
+            "WHERE\n" +
+            "\tt1.pid = 3 ")
+    List<TestTeam> selectNodeTeamPId(Long teamId);
+
     /**
      * 查询2级团队
+     *
      * @return
      */
     List<TeamTreeStructureEntity> getAllSecondTeam();
+
     List<Long> getAllSecondTeamId();
 
     /**

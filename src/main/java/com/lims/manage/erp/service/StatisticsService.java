@@ -63,7 +63,6 @@ public interface StatisticsService {
      * @return
      */
     PageInfo teamStatistics(StatisticsParamVo paramVo);
-    PageInfo teamStatistics0419(StatisticsParamVo paramVo);
     PageInfo teamStatistics1219(StatisticsParamVo paramVo);//快照统计
 
     /**

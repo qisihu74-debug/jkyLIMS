@@ -2,6 +2,7 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.pagehelper.PageHelper;
 import com.lims.manage.erp.entity.SampleItemEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.result.Result;
@@ -76,7 +77,7 @@ public class TestCheckItemsTaskRelController {
      */
     @RequestMapping("/taskCollection")
     public Result taskCollection(@RequestBody SampleItemJsonVo sampleItemJsonVo) {
-
+        PageHelper.clearPage();
         List<SampleItemEntity> list = sampleItemJsonVo.getList();
         if (CollectionUtil.isEmpty(list)) {
             return ResultUtil.error("数据不能为空");

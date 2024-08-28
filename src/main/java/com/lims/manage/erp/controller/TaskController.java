@@ -2,6 +2,7 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.constant.BucketsConst;
@@ -1242,6 +1243,7 @@ public class TaskController {
     @PostMapping("taskHall")
     public Result taskHall(@RequestBody ReqTaskPool bean){
         bean.setUserId(ShiroUtils.getUserInfo().getUserId());
+        PageHelper.clearPage();
         Integer teamId = testTechnicistDao.getSealer(bean.getUserId());
         if (teamId != null){
             //Integer id = testTechnicistDao.getPidById(teamId);

@@ -108,7 +108,7 @@
         t1.sample_quantity, t1.alias_name, t1.sample_type, t1.sample_remark,
         t1.unit_ratio,t1.cubic_meter_consumption,
         <include refid="Blob_Column_List"/>
-        ,t2.company_name
+        ,t2.company_name,pid
         from test_sample t1 left join test_company t2 on t1.company_id = t2.company_id
         where pid = #{id,jdbcType=INTEGER}
     </select>

@@ -40,7 +40,7 @@ public interface TestCheckItemTeamRelDao extends BaseMapper<TestCheckItemTeamRel
      * @param teamId
      * @return
      */
-    @Select("\t\t\t\tSELECT old_team_id FROM test_team_rel WHERE new_team_id = 2\n")
+    @Select("\t\t\t\tSELECT old_team_id FROM test_team_rel WHERE new_team_id = #{teamId}\n")
     List<Integer> selectTeamIdRel(@Param("teamId") Integer teamId);
 
 }
