@@ -1288,4 +1288,9 @@ public class TaskController {
         return ResultUtil.error(502, "token过期！");
     }
 
+    @RequestMapping("plugOperation")
+    public Result getplugOperation(String olCode, String taskCode) {
+
+        return taskService.getplugOperation(olCode, taskCode);
+    }
 }

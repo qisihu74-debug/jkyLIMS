@@ -315,4 +315,13 @@ public interface TaskService {
      * @return
      */
     Result compareTaskListCreationInformation(Long entrustId, Integer teamId);
+
+    /**
+     * 解决插单问题：
+     *
+     * @param olCode：B2407
+     * @param taskCode：DHY2407-005
+     * @return
+     */
+    Result getplugOperation(String olCode, String taskCode);
 }

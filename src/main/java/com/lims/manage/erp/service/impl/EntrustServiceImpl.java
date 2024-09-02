@@ -8,6 +8,8 @@ import com.aspose.cells.Cells;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
@@ -1678,7 +1680,7 @@ public class EntrustServiceImpl implements EntrustService {
                         state = 0;
                         logger.info("委托单编号："+oldEntrustInfo.getEntrustmentNo()+"有新增检测项，状态值已变更为"+state);
                         flag = true;
-                        if(!"2".equals(reportState)){
+                        if (!"2".equals(reportState)) {
                             //修改报告的状态，和审批，复核信息
                             ReportApprovalVo reportApprovalVo = new ReportApprovalVo();
                             reportApprovalVo.setState(2);
@@ -1687,6 +1689,13 @@ public class EntrustServiceImpl implements EntrustService {
                             //修改任务的报告完成状态
                             taskMapper.updateTestTaskReportComplete(basisInfo.getId());
                         }
+
+                        // 检测项新增时：流转任务单号 设置为待领取
+                        LambdaUpdateWrapper<TestTaskPool> updateWrapper = new LambdaUpdateWrapper<>();
+                        updateWrapper.set(TestTaskPool::getReceiveDate, null);
+                        updateWrapper.eq(TestTaskPool::getEntrustmentId, basisInfo.getId());
+                        taskPoolMapper.update(null, updateWrapper);
+
                     }
                 }
                 //修改原有检测项

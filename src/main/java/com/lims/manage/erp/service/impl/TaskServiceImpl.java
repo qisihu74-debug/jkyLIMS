@@ -2,6 +2,7 @@ package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -91,6 +92,8 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     private SysRoleDao sysRoleDao;
     @Autowired
     private TestCompanyDao testCompanyDao;
+    @Autowired
+    private TestTaskPoolMapper taskPoolMapper;
 
     @Override
     public TaskDetailInfoVo getTaskDetailInfo(Long taskId) {
@@ -2620,5 +2623,74 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             }
         }
         return ResultUtil.success(null);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result getplugOperation(String olCode, String taskCode) {
+        // 查询历史单号信息
+        PageHelper.clearPage();
+        TaskVo taskEntity = taskMapper.selectTaskDetails(olCode);
+        if (taskEntity == null) {
+            return ResultUtil.error("查询失败 " + " 无信息 " + olCode);
+        }
+
+        TaskVo taskDetailInfo = taskMapper.selectTaskOneDetails(taskCode);
+        if (taskDetailInfo == null) {
+            return ResultUtil.error("查询失败 " + " 不存在 " + taskCode);
+        }
+        String[] arrays = taskEntity.getTaskCode().split("-");
+
+        Integer code = Integer.parseInt(taskEntity.getCode()) + 1;
+        String codeStr = code + "";
+        taskEntity.setTaskCode(arrays[0] + "-" + codeStr.substring(4, 7));
+        taskEntity.setCode(code.toString());
+        taskEntity.setId(taskDetailInfo.getId());
+        taskMapper.updateoldTaskEntity(taskEntity);
+
+        LambdaQueryWrapper<TestTaskPool> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(TestTaskPool::getEntrustmentId, taskEntity.getEntrustmentId());
+        TestTaskPool testTaskPool = taskPoolMapper.selectOne(lambdaQueryWrapper);
+        String[] taskCodeS = testTaskPool.getTaskCode().split(",");
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < taskCodeS.length; i++) {
+            // DHY2409-003&4773697051929315,YB2409-004&4773697322463226
+            String[] codes = taskCodeS[i].split("&");
+            if (codes[1].equals(taskDetailInfo.getId().toString())) {
+                stringBuffer.append(taskEntity.getTaskCode() + "&" + taskDetailInfo.getId().toString() + ",");
+            } else {
+                stringBuffer.append(taskCodeS[i] + ",");
+            }
+        }
+        // 检测项新增时：流转任务单号 设置为待领取
+        LambdaUpdateWrapper<TestTaskPool> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(TestTaskPool::getTaskCode, stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+        updateWrapper.eq(TestTaskPool::getEntrustmentId, taskEntity.getEntrustmentId());
+        taskPoolMapper.update(null, updateWrapper);
+
+        // 更新检测项 所属部门ID
+        // 通过委托单id 查看检测项列表。
+        List<SampleItemEntity> itemList = taskPoolMapper.selectItems(taskEntity.getEntrustmentId(), null);
+        if (CollectionUtil.isEmpty(itemList)) {
+            //更新检测项分配的部门和任务单号
+            List<CheckItemDeptVo> checkItemDeptVoList1 = com.google.api.client.util.Lists.newArrayList();
+
+            for (SampleItemEntity sampleItemEntity : itemList) {
+                if (sampleItemEntity.getTaskId() != null && sampleItemEntity.getTechnicistId().equals(taskDetailInfo.getDeptId())) {
+                    // 更新 deptid
+                    CheckItemDeptVo checkItemDeptVo = new CheckItemDeptVo();
+                    checkItemDeptVo.setId(sampleItemEntity.getId());
+                    checkItemDeptVo.setDeptId(taskEntity.getDeptId().longValue());
+                    checkItemDeptVo.setTaskId(taskDetailInfo.getId());
+                    checkItemDeptVoList1.add(checkItemDeptVo);
+                }
+            }
+            if (CollectionUtil.isNotEmpty(checkItemDeptVoList1)) {
+                //更新检测项信息
+                taskMapper.batchUpdateCheckItem(checkItemDeptVoList1);
+            }
+        }
+
+        return ResultUtil.success("操作成功 " + " 任务单单号信息为 " + taskEntity.getTaskCode());
     }
 }

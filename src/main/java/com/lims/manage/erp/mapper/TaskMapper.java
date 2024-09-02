@@ -740,4 +740,30 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<TaskVo> selectTaskCreateTimeList(@Param("entrustId") Long entrustId, @Param("teamId") Integer teamId);
+
+    /**
+     * 查询任务单号信息
+     *
+     * @param taskCode
+     * @return
+     */
+    @Select("SELECT id,entrustment_id as entrustmentId,code,team_id as deptId,order_time as orderTime , task_code as taskCode FROM test_task WHERE  task_code like CONCAT( '%',#{taskCode}, '%') ORDER BY code desc limit 1")
+    TaskVo selectTaskDetails(@Param("taskCode") String taskCode);
+
+    /**
+     * 查询任务单号信息
+     *
+     * @param taskCode
+     * @return
+     */
+    @Select("SELECT id,entrustment_id as entrustmentId,code,team_id as deptId,order_time as orderTime , task_code as taskCode FROM test_task WHERE  task_code like #{taskCode}  limit 1")
+    TaskVo selectTaskOneDetails(@Param("taskCode") String taskCode);
+
+    /**
+     * 更新旧单号信息
+     *
+     * @param taskVo
+     * @return
+     */
+    int updateoldTaskEntity(TaskVo taskVo);
 }

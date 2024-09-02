@@ -1761,4 +1761,12 @@
         </if>
 
     </select>
+
+    <update id="updateoldTaskEntity" parameterType="com.lims.manage.erp.vo.TaskVo">
+        UPDATE test_task tab1
+            LEFT JOIN test_task tab2 ON tab1.id = tab2.id
+            SET tab1.team_id = #{deptId},tab1.dept_id = #{deptId},tab1.code = #{code},tab1.task_code = #{taskCode},
+            tab1.create_time =tab2.order_time
+            WHERE tab1.id = #{id}
+    </update>
 </mapper>
