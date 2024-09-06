@@ -100,4 +100,11 @@ public interface TestTaskPoolService extends IService<TestTaskPool> {
      */
     Result verifyClaimBaseConditions(Long userId);
 
+    /**
+     * 替换任务单信息
+     *
+     * @return
+     */
+    Result informationSubstitution(String taskCode);
+
 }

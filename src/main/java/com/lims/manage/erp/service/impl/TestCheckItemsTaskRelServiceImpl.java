@@ -438,20 +438,21 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         if (reportDetails == null) {
             return ResultUtil.error("分配失败，报告单不存在");
         }
-        // 当前签发-月底时间。
+        // 当前签发时间（24小时之内）。
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Date nowDate = new Date();
         // 去除当前时间 时分秒
         Date currentLatestTime = format.parse(format.format(nowDate));
-        // 报告签发时间 06-05 - 月底为 06-30
+
+        // 报告签发时间 09-05
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(reportDetails.getIssuerTime());
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        calendar.add(Calendar.DAY_OF_MONTH, +1);
         Date lastDayOfMonth = calendar.getTime();
-        //  报告签发（2024-06-05）月底 2024-06-30 < 当前时间 2024-07-05
-//        if (lastDayOfMonth.before(currentLatestTime)) {
-//            return ResultUtil.error("分配失败,最晚分配时间为 " + format.format(lastDayOfMonth));
-//        }
+        //  报告签发（2024-09-05 ) < 当前时间 2024-09-05 + 1
+        if (lastDayOfMonth.before(currentLatestTime)) {
+            return ResultUtil.error("分配失败,最晚分配时间为 " + format.format(lastDayOfMonth));
+        }
         // 删除旧数据
         LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, list.get(0).getTaskId());
@@ -1927,7 +1928,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     public void updateTaskSimplexHourRatio() {
 
         LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, 4664675243335519L);
         // 获取任务单工时信息：
         List<TestTaskOrderWorkingHours> latestWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
         // 有序 map
@@ -1946,7 +1946,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
 
         LambdaQueryWrapper<TestItemOrderWorkingHours> itemQueryWrapper = new LambdaQueryWrapper<>();
-//        itemQueryWrapper.eq(TestItemOrderWorkingHours::getTaskId, 4664675243335519L);
         // 获取检测项下 对下 工时
         List<TestItemOrderWorkingHours> itemWorkingHoursList = testItemOrderWorkingHoursMapper.selectList(itemQueryWrapper);
         Map<Long, List<TestItemOrderWorkingHours>> itemWorkingHoursMap = new HashMap<>();
@@ -1963,6 +1962,26 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             }
         }
 
+        //  获取全部 阶梯检测项工时信息
+        List<TestItemWorkHourLadderVo> itemWorkHourLadderVos = testItemOrderWorkingHoursMapper.selectAllTestItemWorkHourLadderVos();
+
+        // 检测项id 对应工时阶梯集合
+        Map<Integer, List<TestItemWorkHourLadderVo>> checlItemIdWorkHourMap = new HashMap<>();
+        for (TestItemWorkHourLadderVo testItemWorkHourLadderVo : itemWorkHourLadderVos) {
+
+            if (checlItemIdWorkHourMap.get(testItemWorkHourLadderVo.getCheckItemId()) == null) {
+
+                // 待计算 check_item_id 工时信息集合
+                List<TestItemWorkHourLadderVo> testItemWorkHourLadderVos = new ArrayList<>();
+                testItemWorkHourLadderVos.add(testItemWorkHourLadderVo);
+                checlItemIdWorkHourMap.put(testItemWorkHourLadderVo.getCheckItemId(), testItemWorkHourLadderVos);
+            } else {
+                List<TestItemWorkHourLadderVo> testItemWorkHourLadderVos = checlItemIdWorkHourMap.get(testItemWorkHourLadderVo.getCheckItemId());
+                testItemWorkHourLadderVos.add(testItemWorkHourLadderVo);
+                checlItemIdWorkHourMap.put(testItemWorkHourLadderVo.getCheckItemId(), testItemWorkHourLadderVos);
+            }
+        }
+
 
         int i = 0;
         // 比较任务单工时 与 现有检测项 工时 是否一致：
@@ -1974,23 +1993,10 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             // 任务单工时集合
             List<TestTaskOrderWorkingHours> taskDataWorkingHoursList = taskWorkingHoursMap.get(key);
 
-//            Date date = null;
-//            //实现将字符串转成⽇期类型
-//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//            try {
-//                date = dateFormat.parse("2024-07-03 00:00:00");
-//            } catch (ParseException e) {
-//                e.printStackTrace();
-//            }
-//            if (taskDataWorkingHoursList.get(0).getCreateTime().getTime() >= date.getTime()) {
-//                // for循环跳出
-//                continue;
-//            }
-
             // 比较当前任务单下检测项工时信息
             List<TestItemOrderWorkingHours> itemDataWorkingHoursList = itemWorkingHoursMap.get(key);
             try {
-                comintWorks(taskDataWorkingHoursList, itemDataWorkingHoursList);
+                comintWorks(taskDataWorkingHoursList, itemDataWorkingHoursList, checlItemIdWorkHourMap);
             } catch (Exception e) {
                 e.printStackTrace();
                 stringBuffer.append("任务单key 抛出异常 key =" + key);
@@ -1998,12 +2004,37 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             }
 
             System.out.println(stringBuffer.toString());
-//            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuffer.toString(), Const.DEVICE_LOG, true);
         }
     }
 
+    /**
+     * 检测项工时 与 次数 处理阶梯管理
+     *
+     * @param workingHours
+     * @param times
+     * @param testItemWorkHourLadderVos
+     */
+    String returnTimeLadderWorkingHours(String workingHours, Integer times, List<TestItemWorkHourLadderVo> testItemWorkHourLadderVos) {
+        // 找出最匹配区间数值。
+        for (TestItemWorkHourLadderVo itemWorkHourLadderVo : testItemWorkHourLadderVos) {
+            // 当前检测项次数 >= 最小值 && 当前检测项次数 <= 最小值
+            if (times >= itemWorkHourLadderVo.getStartTimes() && times <= itemWorkHourLadderVo.getEndTimes()) {
+                // 工时信息 填报: 检测项工时 = 工时 * 阶梯工时比例 保留小数点后四位。
+                // 工时
+                BigDecimal zhi1 = BigDecimal.valueOf(Double.parseDouble(workingHours)).setScale(4, BigDecimal.ROUND_HALF_UP);
+                // 阶梯工时比例
+                BigDecimal zhi2 = BigDecimal.valueOf(Double.parseDouble(itemWorkHourLadderVo.getDecimalPoint())).setScale(4, BigDecimal.ROUND_HALF_UP);
+                // 检测项工时 = 工时 * 阶梯工时比例 保留小数点后四位。
+                BigDecimal itemWorkingHours = zhi1.multiply(zhi2).setScale(4, BigDecimal.ROUND_HALF_UP);
+                return String.valueOf(itemWorkingHours);
+            }
+        }
+        return workingHours;
+    }
+
     @Transactional(rollbackFor = Exception.class)
-    public void comintWorks(List<TestTaskOrderWorkingHours> taskDataWorkingHoursList, List<TestItemOrderWorkingHours> itemDataWorkingHoursList) {
+    public void comintWorks(List<TestTaskOrderWorkingHours> taskDataWorkingHoursList, List<TestItemOrderWorkingHours> itemDataWorkingHoursList,
+                            Map<Integer, List<TestItemWorkHourLadderVo>> checlItemIdWorkHourMap) {
 
         // 获取check_item_id
         List<Integer> checkItemIds = new ArrayList<>();
@@ -2023,7 +2054,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                     // 总工时 =  检测项工时 * 次数 (保留两位小数)
                     String workHours = "0";
                     if (StringUtils.isNotEmpty(checkItemInfoVo.getWorkingHours())) {
-                        workHours = checkItemInfoVo.getWorkingHours();
+                        // 包含阶梯次数
+                        if (CollectionUtil.isNotEmpty(checlItemIdWorkHourMap.get(testItemOrderWorkingHours.getCheckItemId()))) {
+                            List<TestItemWorkHourLadderVo> testItemWorkHourLadderVos = checlItemIdWorkHourMap.get(testItemOrderWorkingHours.getCheckItemId());
+                            // 调用方法 返回阶梯业务数据
+                            String returnWorkingHours = returnTimeLadderWorkingHours(checkItemInfoVo.getWorkingHours(), testItemOrderWorkingHours.getTimes(), testItemWorkHourLadderVos);
+                            workHours = returnWorkingHours;
+                        } else {
+                            workHours = checkItemInfoVo.getWorkingHours();
+                        }
                     }
                     totalWorkingHours = totalWorkingHours.add(new BigDecimal(workHours).multiply(new BigDecimal(testItemOrderWorkingHours.getTimes()))).setScale(2, BigDecimal.ROUND_FLOOR);
                     // 工时不一致 取检测工时即可

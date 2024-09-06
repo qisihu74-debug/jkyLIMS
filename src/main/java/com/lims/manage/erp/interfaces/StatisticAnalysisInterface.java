@@ -151,7 +151,7 @@ public class StatisticAnalysisInterface {
         if (CollectionUtils.isEmpty(taskOrderWorkingHoursVo.getList())) {
             return ResultUtil.error("数据不能为空");
         }
-        System.out.println("workingHoursId == " + taskOrderWorkingHoursVo.getWorkingHoursId());
+//        System.out.println("workingHoursId == " + taskOrderWorkingHoursVo.getWorkingHoursId());
 
         return testCheckItemsTaskRelService.postAdjustingQuotas(taskOrderWorkingHoursVo.getList(), taskOrderWorkingHoursVo.getWorkingHoursId());
     }

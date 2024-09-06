@@ -2409,4 +2409,113 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         return ResultUtil.error("当前用户不能操作");
 
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result informationSubstitution(String taskCode) {
+        // 获取 任务单信息：
+        TaskVo taskDetailInfo = taskMapper.selectTaskOneDetails(taskCode);
+        if (taskDetailInfo == null) {
+            System.out.println("查询失败 " + " 不存在 " + taskCode);
+            return ResultUtil.error("查询失败 " + " 不存在 " + null);
+        }
+        // 获取 任务单详情：
+        TaskTestEntity taskTestData = taskMapper.selectTaskEntity(taskDetailInfo.getId());
+        // 任务单替换：检测人：孙朋骄&1654681160256116,孙含玉&1654680782486113,李小华&1654680716455112,马瑞玲&1652404746060112,林海娟&4575892253571035
+
+        //记录：林海娟&4575892253571035
+
+        //复核：申永伟&1654682129126105
+
+        //制作：马瑞玲&1652404746060112
+
+        //辅助人员：焦凯&1654682057588104
+
+        // 根据 taskId
+        // 更新taskId 价格
+        TaskTestEntity taskTestEntity = new TaskTestEntity();
+        taskTestEntity.setId(taskTestData.getId());
+        taskTestEntity.setTaskPrice(taskTestData.getTaskPrice());
+        taskTestEntity.setSampler(taskTestData.getSampler());
+        // 补充人员信息 检测人
+        taskTestEntity.setInspector("孙朋骄&1654681160256116,孙含玉&1654680782486113,李小华&1654680716455112,马瑞玲&1652404746060112,林海娟&4575892253571035");
+        // 记录人
+        taskTestEntity.setRecorder("林海娟&4575892253571035");
+        // 复核人
+        taskTestEntity.setReviewer("申永伟&1654682129126105");
+        // 报告制作人
+        taskTestEntity.setReportProducer("马瑞玲&1652404746060112");
+        // 辅助人员
+        taskTestEntity.setAuxiliaryPersonnel("焦凯&1654682057588104");
+        taskMapper.updateTestTask(taskTestEntity);
+
+
+        LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
+        queryWrapper12.or().eq(TestCheckItemsTaskRel::getTaskId, taskDetailInfo.getId());
+        queryWrapper12.last("GROUP BY item_id");
+        // 获取检测项信息
+        List<TestCheckItemsTaskRel> itemList = testCheckItemsTaskRelMapper.selectList(queryWrapper12);
+
+        // 进行删除
+        LambdaQueryWrapper<TestCheckItemsTaskRel> deleteWrapper = new LambdaQueryWrapper<>();
+        deleteWrapper.eq(TestCheckItemsTaskRel::getTaskId, taskDetailInfo.getId());
+        testCheckItemsTaskRelMapper.delete(deleteWrapper);
+
+        if (CollectionUtil.isNotEmpty(itemList)) {
+
+
+            // 0：检测人、1：记录人、2、复核人、3、报告制作人、4、辅助人员、5、见习生：实习的新手、6、实习生
+
+            for (TestCheckItemsTaskRel taskRel : itemList) {
+                // 进行新增
+                String[] inspectorArrays = taskTestEntity.getInspector().split(",");
+                for (int i = 0; i < inspectorArrays.length; i++) {
+                    String[] inspectorSet = inspectorArrays[i].split("&");
+                    taskRel.setUserType(0);
+                    taskRel.setUserName(inspectorSet[0]);
+                    taskRel.setUserId(inspectorSet[1]);
+                    taskRel.setId(null);
+                    // 调用方法： 对每组检测项的人员信息进行新增。
+                    testCheckItemsTaskRelMapper.insert(taskRel);
+                }
+                // 进行新增 记录人
+                String[] recorderArrays = taskTestEntity.getRecorder().split("&");
+                taskRel.setUserType(1);
+                taskRel.setUserName(recorderArrays[0]);
+                taskRel.setUserId(recorderArrays[1]);
+                taskRel.setId(null);
+                // 调用方法： 对每组检测项的人员信息进行新增。
+                testCheckItemsTaskRelMapper.insert(taskRel);
+
+                // 进行新增 复核人
+                String[] receiverArrays = taskTestEntity.getReviewer().split("&");
+                taskRel.setUserType(2);
+                taskRel.setUserName(receiverArrays[0]);
+                taskRel.setUserId(receiverArrays[1]);
+                taskRel.setId(null);
+                // 调用方法： 对每组检测项的人员信息进行新增。
+                testCheckItemsTaskRelMapper.insert(taskRel);
+
+                // 进行新增 报告制作人
+                String[] reportProducerArrays = taskTestEntity.getReportProducer().split("&");
+                taskRel.setUserType(3);
+                taskRel.setUserName(reportProducerArrays[0]);
+                taskRel.setUserId(reportProducerArrays[1]);
+                taskRel.setId(null);
+                // 调用方法： 对每组检测项的人员信息进行新增。
+                testCheckItemsTaskRelMapper.insert(taskRel);
+
+                // 进行新增 辅助人
+                String[] auxiliaryPersonnelArrays = taskTestEntity.getAuxiliaryPersonnel().split("&");
+                taskRel.setUserType(4);
+                taskRel.setUserName(auxiliaryPersonnelArrays[0]);
+                taskRel.setUserId(auxiliaryPersonnelArrays[1]);
+                taskRel.setId(null);
+                // 调用方法： 对每组检测项的人员信息进行新增。
+                testCheckItemsTaskRelMapper.insert(taskRel);
+
+            }
+        }
+        return null;
+    }
 }

@@ -756,7 +756,7 @@ public interface TaskMapper extends BaseMapper {
      * @param taskCode
      * @return
      */
-    @Select("SELECT id,entrustment_id as entrustmentId,code,team_id as deptId,order_time as orderTime , task_code as taskCode FROM test_task WHERE  task_code like #{taskCode}  limit 1")
+    @Select("SELECT id,entrustment_id as entrustmentId,code,team_id as deptId,order_time as orderTime , task_code as taskCode FROM test_task WHERE  task_code = #{taskCode}  limit 1")
     TaskVo selectTaskOneDetails(@Param("taskCode") String taskCode);
 
     /**

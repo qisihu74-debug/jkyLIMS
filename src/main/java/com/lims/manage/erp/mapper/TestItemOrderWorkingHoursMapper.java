@@ -46,4 +46,11 @@ public interface TestItemOrderWorkingHoursMapper extends BaseMapper<TestItemOrde
      * @return
      */
     List<TestItemWorkHourLadderVo> selectTestItemWorkHourLadderVos(@Param("checkItemIdSet") Set<Integer> checkItemIdSet);
+
+    /**
+     * 获取全部 阶梯检测项工时信息
+     *
+     * @return
+     */
+    List<TestItemWorkHourLadderVo> selectAllTestItemWorkHourLadderVos();
 }

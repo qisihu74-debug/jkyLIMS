@@ -124,5 +124,18 @@ public class TestCheckItemsTaskRelController {
         return testTaskPoolService.updateNewTicket(list, entrustId, userInfo, teamId);
     }
 
+    /**
+     * 替换任务单信息
+     *
+     * @return
+     */
+    @RequestMapping("/informationSubstitution")
+    public Result informationSubstitution(String str) {
+        String[] strings = str.split(",");
+        for (int i = 0; i < strings.length; i++) {
+            testTaskPoolService.informationSubstitution(strings[i]);
+        }
+        return null;
+    }
 }
 

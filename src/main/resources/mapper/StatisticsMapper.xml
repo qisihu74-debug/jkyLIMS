@@ -1495,7 +1495,27 @@
         WHERE
         DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT( #{beginDate}, '%Y-%m-%d' )
         AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
-        AND t1.dept_id IN ( SELECT id FROM test_team WHERE pid = #{teamId} OR id = #{teamId} )
+        AND t1.dept_id IN ( SELECT
+	tt.id
+FROM
+	(
+SELECT
+	id,
+	NAME,
+	id AS pid,
+CODE
+FROM
+	test_team UNION ALL
+SELECT
+	old_team_id AS id,
+	old_team_name AS NAME,
+	new_team_id AS pid,
+	old_team_code AS CODE
+FROM
+	test_team_rel
+	) AS tt
+WHERE
+ tt.pid = #{teamId} OR tt.id = #{teamId} )
         )
         GROUP BY
         entrust_id
@@ -1503,7 +1523,27 @@
         WHERE
         DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT(  #{beginDate}, '%Y-%m-%d' )
         AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
-        AND t1.dept_id IN ( SELECT id FROM test_team WHERE pid = #{teamId} OR id = #{teamId} )
+        AND t1.dept_id IN ( SELECT
+            tt.id
+        FROM
+            (
+        SELECT
+            id,
+            NAME,
+            id AS pid,
+        CODE
+        FROM
+            test_team UNION ALL
+        SELECT
+            old_team_id AS id,
+            old_team_name AS NAME,
+            new_team_id AS pid,
+            old_team_code AS CODE
+        FROM
+            test_team_rel
+            ) AS tt
+        WHERE
+         tt.pid = #{teamId} OR tt.id = #{teamId} )
         UNION
         SELECT
         t3.id,
@@ -1521,7 +1561,27 @@
         WHERE
         DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT( #{beginDate}, '%Y-%m-%d' )
         AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
-        AND t1.dept_id IN ( SELECT id FROM test_team WHERE pid = #{teamId} OR id = #{teamId} )
+        AND t1.dept_id IN ( SELECT
+            tt.id
+        FROM
+            (
+        SELECT
+            id,
+            NAME,
+            id AS pid,
+        CODE
+        FROM
+            test_team UNION ALL
+        SELECT
+            old_team_id AS id,
+            old_team_name AS NAME,
+            new_team_id AS pid,
+            old_team_code AS CODE
+        FROM
+            test_team_rel
+            ) AS tt
+        WHERE
+         tt.pid = #{teamId} OR tt.id = #{teamId}  )
         ORDER BY entrustment_no desc
     </select>
 </mapper>
