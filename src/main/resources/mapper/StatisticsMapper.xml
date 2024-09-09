@@ -1465,123 +1465,42 @@
 
     <select id="getTeamStatisticsNode" resultType="com.lims.manage.erp.vo.StatisticsNodeDetailVo">
         SELECT
-        t3.id,
-        t3.entrustment_id ,
-        t3.report_code ,
-        t3.sample_name ,
+        t3.id teamId,
+        t3.NAME teamName,
+        t1.task_code as taskCode,
         t2.discount,
-        t2.actual_price,
-        t4.actualReportPrice AS system_price,
-        t2.entrustment_no
+        t2.entrustment_no,
+        SUM( IFNULL( t5.unit_price, 0 ) ) * 1.00 actualPrice,
+        SUM(
+        IFNULL( t2.discount, 1 ) * IFNULL( t5.unit_price, 0 ) * IFNULL( t5.times, 0 )
+        ) systemPrice
         FROM
-        test_task AS t1
-        LEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id
-        LEFT JOIN test_report_record AS t3 ON t3.entrustment_id = t2.id
+        test_task_statistics t1
+        LEFT JOIN test_entrusted_info t2 ON t1.entrustment_id = t2.id
         LEFT JOIN (
         SELECT
-        reportValue_talbe.entrust_id,
-        SUM( IFNULL( entrust_table.discount, 1 ) * IFNULL( unit_price, 0 ) * IFNULL( times, 0 ) ) actualReportPrice
+        id,
+        NAME,
+        id AS pid,
+        CODE
         FROM
-        test_entrusted_sample_checkitem_statistics AS reportValue_talbe
-        LEFT JOIN test_entrusted_info AS entrust_table ON reportValue_talbe.entrust_id = entrust_table.id
-        WHERE
-        entrust_id IN (
+        test_team UNION ALL
         SELECT
-        t3.entrustment_id
+        old_team_id AS id,
+        old_team_name AS NAME,
+        new_team_id AS pid,
+        old_team_code AS CODE
         FROM
-        test_task AS t1
-        LEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id
-        LEFT JOIN test_report_record AS t3 ON t3.entrustment_id = t2.id
+        test_team_rel
+        ) t3 ON t1.dept_id = t3.id
+        LEFT JOIN test_entrusted_sample_checkitem_statistics t5 ON t1.id = t5.task_id
+        AND DATE_FORMAT( t1.issuer_time, '%Y-%m-%d' ) = DATE_FORMAT( t5.issuer_time, '%Y-%m-%d' )
         WHERE
-        DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT( #{beginDate}, '%Y-%m-%d' )
-        AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
-        AND t1.dept_id IN ( SELECT
-	tt.id
-FROM
-	(
-SELECT
-	id,
-	NAME,
-	id AS pid,
-CODE
-FROM
-	test_team UNION ALL
-SELECT
-	old_team_id AS id,
-	old_team_name AS NAME,
-	new_team_id AS pid,
-	old_team_code AS CODE
-FROM
-	test_team_rel
-	) AS tt
-WHERE
- tt.pid = #{teamId} OR tt.id = #{teamId} )
-        )
+        t3.pid = #{teamId}
+        AND DATE_FORMAT( t1.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT( #{beginDate}, '%Y-%m-%d' )
+        AND DATE_FORMAT( t1.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
         GROUP BY
-        entrust_id
-        ) AS t4 ON t2.id = t4.entrust_id
-        WHERE
-        DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT(  #{beginDate}, '%Y-%m-%d' )
-        AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
-        AND t1.dept_id IN ( SELECT
-            tt.id
-        FROM
-            (
-        SELECT
-            id,
-            NAME,
-            id AS pid,
-        CODE
-        FROM
-            test_team UNION ALL
-        SELECT
-            old_team_id AS id,
-            old_team_name AS NAME,
-            new_team_id AS pid,
-            old_team_code AS CODE
-        FROM
-            test_team_rel
-            ) AS tt
-        WHERE
-         tt.pid = #{teamId} OR tt.id = #{teamId} )
-        UNION
-        SELECT
-        t3.id,
-        null ,
-        t3.report_code ,
-        t3.sample_name ,
-        t2.discount,
-        null,
-        null,
-        t2.entrustment_no
-        FROM
-        test_task AS t1
-        LEFT JOIN test_entrusted_info AS t2 ON t1.entrustment_id = t2.id
-        LEFT JOIN test_report_record_mid AS t3 ON t3.entrust_id = t2.id
-        WHERE
-        DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &gt;= DATE_FORMAT( #{beginDate}, '%Y-%m-%d' )
-        AND DATE_FORMAT( t3.issuer_time, '%Y-%m-%d' ) &lt;= DATE_FORMAT( #{endDate}, '%Y-%m-%d' )
-        AND t1.dept_id IN ( SELECT
-            tt.id
-        FROM
-            (
-        SELECT
-            id,
-            NAME,
-            id AS pid,
-        CODE
-        FROM
-            test_team UNION ALL
-        SELECT
-            old_team_id AS id,
-            old_team_name AS NAME,
-            new_team_id AS pid,
-            old_team_code AS CODE
-        FROM
-            test_team_rel
-            ) AS tt
-        WHERE
-         tt.pid = #{teamId} OR tt.id = #{teamId}  )
-        ORDER BY entrustment_no desc
+        t1.id
+        ORDER BY t2.entrustment_no desc
     </select>
 </mapper>

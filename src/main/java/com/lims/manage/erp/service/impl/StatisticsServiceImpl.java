@@ -712,35 +712,29 @@ public class StatisticsServiceImpl implements StatisticsService {
         //在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
         HSSFRow row1 = sheet.createRow(0);
         //创建单元格并设置单元格内容
-        row1.createCell(0).setCellValue("报告类型");
-        row1.createCell(1).setCellValue("报告编号");
-        row1.createCell(2).setCellValue("样品名称");
+        row1.createCell(0).setCellValue("团队信息");
+        row1.createCell(1).setCellValue("任务单号");
+        row1.createCell(2).setCellValue("委托单号");
         row1.createCell(3).setCellValue("折扣率");
         row1.createCell(4).setCellValue("应收价格");
         row1.createCell(5).setCellValue("实际收费");
-        row1.createCell(6).setCellValue("委托单号");
+
         for (int i = 0; i < list.size(); i++) {
             StatisticsNodeDetailVo teamOutputValueVo = list.get(i);
             //在sheet里创建第二行
             HSSFRow row3 = sheet.createRow(i + 1);
-            // 报告类型
-            if (StringUtils.isEmpty(teamOutputValueVo.getEntrustmentId())) {
-                row3.createCell(0).setCellValue("中间报告");
-            } else {
-                row3.createCell(0).setCellValue("最终报告");
-            }
-            // 报告编号
-            row3.createCell(1).setCellValue(teamOutputValueVo.getReportCode());
-            // 样品名称
-            row3.createCell(2).setCellValue(teamOutputValueVo.getSampleName());
+            // 团队信息
+            row3.createCell(0).setCellValue(teamOutputValueVo.getTeamName());
+            // 任务单号
+            row3.createCell(1).setCellValue(teamOutputValueVo.getTaskCode());
+            // 委托单号
+            row3.createCell(2).setCellValue(teamOutputValueVo.getEntrustmentNo());
             // 折扣率
             row3.createCell(3).setCellValue(teamOutputValueVo.getDiscount());
             // 应收价格
             row3.createCell(4).setCellValue(teamOutputValueVo.getActualPrice() != null ? teamOutputValueVo.getActualPrice().toString() : null);
             // 实际收费
             row3.createCell(5).setCellValue(teamOutputValueVo.getSystemPrice() != null ? teamOutputValueVo.getSystemPrice().toString() : null);
-            // 委托单号
-            row3.createCell(6).setCellValue(teamOutputValueVo.getEntrustmentNo());
         }
         //输出Excel文件 字节输出流
         ByteArrayOutputStream os = new ByteArrayOutputStream();

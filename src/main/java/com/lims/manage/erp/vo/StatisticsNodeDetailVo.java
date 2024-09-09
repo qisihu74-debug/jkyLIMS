@@ -41,4 +41,12 @@ public class StatisticsNodeDetailVo {
      * 委托单号
      */
     private String entrustmentNo;
+    /**
+     * 团队信息
+     */
+    private String teamName;
+    /**
+     * 任务单号
+     */
+    private String taskCode;
 }
