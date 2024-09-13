@@ -1262,8 +1262,8 @@ public class ReportController {
      */
     @GetMapping("inspectorList")
     public Result inspectorList(String search){
-        List<String> list = reportService.inspectorList(search);
-        return ResultUtil.success(list);
+
+        return reportService.inspectorList(search);
     }
 
     /**

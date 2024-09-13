@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,6 +13,7 @@ import java.util.Date;
  * 流转单实体类 test_entrusted_task_rel
  */
 @Data
+@TableName("test_entrusted_task_rel")
 public class TestEntrustedTaskRelEntity {
 
     /**

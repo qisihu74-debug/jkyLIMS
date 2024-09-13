@@ -130,7 +130,6 @@ public class StatisticAnalysisInterface {
      */
     @GetMapping(value = "getMyHoursStatisticsDetails")
     public Result<?> getMyHoursStatisticsDetails(Long taskId, String workingHoursId) {
-        System.out.println("workingHoursId == " + workingHoursId);
         if (StringUtils.isEmpty(workingHoursId)) {
             workingHoursId = null;
         }

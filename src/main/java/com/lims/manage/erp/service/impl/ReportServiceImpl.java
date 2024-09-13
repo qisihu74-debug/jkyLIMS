@@ -71,6 +71,7 @@ import com.lims.manage.erp.mapper.TestReportTemplateDao;
 import com.lims.manage.erp.mapper.TestSampleEntityMapper;
 import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
 import com.lims.manage.erp.mapper.TestTechnicistDao;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.AsposeUtil;
@@ -1560,11 +1561,26 @@ public class ReportServiceImpl implements ReportService {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
+        // 检测人 拆分
+        StringBuffer inspectorBuffer = new StringBuffer();
+        StringBuffer inspectorAndIdsBuffer = new StringBuffer();
+        String[] inspectorArrays = inspector.split(",");
+        for (int i = 0; i < inspectorArrays.length; i++) {
+            String[] inspectors = inspectorArrays[i].split("&");
+            inspectorBuffer.append(inspectors[0] + ",");
+            inspectorAndIdsBuffer.append(inspectors[1] + ",");
+        }
         //TODO (报告) 兼容中间报告
         if (along == null) {
-            reportMapper.updateUrlZj(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrlZj(reportCode,
+                    inspectorBuffer.deleteCharAt(inspectorBuffer.length() - 1).toString(),
+                    inspectorAndIdsBuffer.deleteCharAt(inspectorAndIdsBuffer.length() - 1).toString(),
+                    url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         } else {
-            reportMapper.updateUrl(reportCode, inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrl(reportCode,
+                    inspectorBuffer.deleteCharAt(inspectorBuffer.length() - 1).toString(),
+                    inspectorAndIdsBuffer.deleteCharAt(inspectorAndIdsBuffer.length() - 1).toString(),
+                    url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         }
         logger.info("签名信息更新成功！:{}", reportCode + ":" + url);
         //更新配合比信息
@@ -1820,32 +1836,32 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ApproveInfo approveInfo(String reportCode) {
         List<ApproveInfo> approveInfoList = recordEntityMapper.approveInfo(reportCode);
-        List<KeyValue> jcMap = Lists.newArrayList();
+        List<LabelValueVo> jcMap = Lists.newArrayList();
         List<KeyValue> shMap = Lists.newArrayList();
         List<KeyValue> qfMap = Lists.newArrayList();
         for (ApproveInfo approveInfo :approveInfoList){
             String inspector = approveInfo.getInspector();
             String recorder = approveInfo.getRecorder();
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(inspector)){
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(inspector)) {
                 String[] split = inspector.split(",");
-                if (split != null){
-                    for (String jcr:split){
-                        KeyValue keyValue = new KeyValue();
-                        keyValue.setKey(jcr.split("&")[1]);
-                        keyValue.setValue(jcr.split("&")[0]);
+                if (split != null) {
+                    for (String jcr : split) {
+                        LabelValueVo keyValue = new LabelValueVo();
+                        keyValue.setValue(Long.valueOf(jcr.split("&")[1]));
+                        keyValue.setLabel(jcr.split("&")[0]);
                         jcMap.add(keyValue);
                     }
                 }
             }
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(recorder)){
-                KeyValue keyValue = new KeyValue();
-                keyValue.setKey(recorder.split("&")[1]);
-                keyValue.setValue(recorder.split("&")[0]);
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(recorder)) {
+                LabelValueVo keyValue = new LabelValueVo();
+                keyValue.setValue(Long.valueOf(recorder.split("&")[1]));
+                keyValue.setLabel(recorder.split("&")[0]);
                 jcMap.add(keyValue);
             }
 
             String receiver = approveInfo.getReviewer();
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(receiver)){
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(receiver)) {
                 KeyValue keyValue = new KeyValue();
                 keyValue.setKey(receiver.split("&")[1]);
                 keyValue.setValue(receiver.split("&")[0]);
@@ -4146,10 +4162,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<String> inspectorList(String search) {
+    public Result inspectorList(String search) {
         //获取检测人员
-
-        return testTechnicistDao.inspectorList(search);
+        return ResultUtil.success(testTechnicistDao.inspectorList(search));
     }
 
     @Override
@@ -4279,11 +4294,26 @@ public class ReportServiceImpl implements ReportService {
         if (url.contains("?")) {
             url = url.substring(0, url.indexOf("?"));
         }
+        // 检测人 拆分
+        StringBuffer inspectorBuffer = new StringBuffer();
+        StringBuffer inspectorAndIdsBuffer = new StringBuffer();
+        String[] inspectorArrays = inspector.split(",");
+        for (int i = 0; i < inspectorArrays.length; i++) {
+            String[] inspectors = inspectorArrays[i].split("&");
+            inspectorBuffer.append(inspectors[0] + ",");
+            inspectorAndIdsBuffer.append(inspectors[1] + ",");
+        }
         //TODO (报告) 兼容中间报告
         if ("1".equals(type)) {
-            reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrlZj(entity.getEntrustmentId() == null ? entity.getEntrustId() + "" : entity.getEntrustmentId() + "",
+                    inspectorBuffer.deleteCharAt(inspectorBuffer.length() - 1).toString(),
+                    inspectorAndIdsBuffer.deleteCharAt(inspectorAndIdsBuffer.length() - 1).toString(),
+                    url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         } else {
-            reportMapper.updateUrl(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrl(entity.getEntrustmentId() == null ? entity.getEntrustId() + "" : entity.getEntrustmentId() + "",
+                    inspectorBuffer.deleteCharAt(inspectorBuffer.length() - 1).toString(),
+                    inspectorAndIdsBuffer.deleteCharAt(inspectorAndIdsBuffer.length() - 1).toString(),
+                    url, verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         }
         logger.info("签名信息更新成功！:{}", reportCode + ":" + url);
         return true;
@@ -4429,10 +4459,26 @@ public class ReportServiceImpl implements ReportService {
         ReportRecordEntity urlByCode = recordEntityMapper.getUrlByCode(reportCode);
         //更新
         String type = recordEntityMapper.getTypeByCode(reportCode);
+        // 检测人 拆分
+        StringBuffer inspectorBuffer = new StringBuffer();
+        StringBuffer inspectorAndIdsBuffer = new StringBuffer();
+        String[] inspectorArrays = inspector.split(",");
+        for (int i = 0; i < inspectorArrays.length; i++) {
+            String[] inspectors = inspectorArrays[i].split("&");
+            inspectorBuffer.append(inspectors[0] + ",");
+            inspectorAndIdsBuffer.append(inspectors[1] + ",");
+        }
+
         if ("1".equals(type)) {
-            reportMapper.updateUrlZj(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, urlByCode.getReportUrl(), verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrlZj(entity.getEntrustmentId() == null ? entity.getEntrustId() + "" : entity.getEntrustmentId() + "",
+                    inspectorBuffer.deleteCharAt(inspectorBuffer.length() - 1).toString(),
+                    inspectorAndIdsBuffer.deleteCharAt(inspectorAndIdsBuffer.length() - 1).toString(),
+                    urlByCode.getReportUrl(), verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         } else {
-            reportMapper.updateUrl(entity.getEntrustmentId()==null?entity.getEntrustId()+"":entity.getEntrustmentId()+"", inspector, urlByCode.getReportUrl(), verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
+            reportMapper.updateUrl(entity.getEntrustmentId() == null ? entity.getEntrustId() + "" : entity.getEntrustmentId() + "",
+                    inspectorBuffer.deleteCharAt(inspectorBuffer.length() - 1).toString(),
+                    inspectorAndIdsBuffer.deleteCharAt(inspectorAndIdsBuffer.length() - 1).toString(),
+                    urlByCode.getReportUrl(), verifyer, issuer, verifyerId, issuerId, new Date(), ShiroUtils.getUserInfo().getName());
         }
         return true;
     }

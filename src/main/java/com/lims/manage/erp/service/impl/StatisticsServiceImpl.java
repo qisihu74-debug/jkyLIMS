@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
@@ -8,6 +9,7 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.StatisticsMapper;
 import com.lims.manage.erp.mapper.TaskMapper;
 import com.lims.manage.erp.mapper.TeamMapper;
+import com.lims.manage.erp.mapper.TestCheckItemTeamRelDao;
 import com.lims.manage.erp.service.StatisticsService;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
@@ -36,7 +38,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Autowired
     private TeamMapper teamMapper;
-
+    @Autowired
+    private TestCheckItemTeamRelDao testCheckItemTeamRelDao;
 
 
     @Override
@@ -72,41 +75,57 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public InputStream exportPersonDetails( PagingToolVo list) throws IOException {
+    public InputStream exportPersonDetails(TaskStatsVo taskStatsVo) throws IOException {
+
         //创建HSSFWorkbook对象(excel的文档对象)
         HSSFWorkbook wb = new HSSFWorkbook();
-//建立新的sheet对象（excel的表单）
-        HSSFSheet sheet = wb.createSheet("sheet0");
-//在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
-        HSSFRow row1 = sheet.createRow(0);
-        //创建单元格并设置单元格内容
-        row1.createCell(0).setCellValue("任务单编号");
-        row1.createCell(1).setCellValue("要求完成日期");
-        row1.createCell(2).setCellValue("实际完成日期");
-        row1.createCell(3).setCellValue("费用");
-        row1.createCell(4).setCellValue("报告编号");
-        row1.createCell(5).setCellValue("报告类型");
-        row1.createCell(6).setCellValue("样品名称");
-        row1.createCell(7).setCellValue("状态");
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        for (int i = 0; i < list.getList().size(); i++) {
-            TaskStatsVo personVo = (TaskStatsVo) list.getList().get(i);
-            //在sheet里创建第二行
-            HSSFRow row3 = sheet.createRow(i + 1);
-            row3.createCell(0).setCellValue(personVo.getTaskCode());
-            if (personVo.getRequestDate() != null) {
-                String dateString = formatter.format(personVo.getRequestDate());
-                row3.createCell(1).setCellValue(dateString);
+
+        // 获取统计条数
+        PageInfo pageInfo = taskQuery1111(taskStatsVo);
+        if (CollectionUtil.isNotEmpty(pageInfo.getList())) {
+
+            Integer x = Integer.valueOf((int) (pageInfo.getTotal() / 1000));
+
+            for (int i = 0; i <= x; i++) {
+
+                taskStatsVo.setPageNum(i + 1);
+                taskStatsVo.setPageSize(1000);
+                PageInfo pageInfos = taskQuery1111(taskStatsVo);
+
+                //建立新的sheet对象（excel的表单）
+                HSSFSheet sheet = wb.createSheet("sheet" + i);
+                //在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+                HSSFRow row1 = sheet.createRow(0);
+                //创建单元格并设置单元格内容
+                row1.createCell(0).setCellValue("任务单编号");
+                row1.createCell(1).setCellValue("要求完成日期");
+                row1.createCell(2).setCellValue("实际完成日期");
+                row1.createCell(3).setCellValue("费用");
+                row1.createCell(4).setCellValue("报告编号");
+                row1.createCell(5).setCellValue("报告类型");
+                row1.createCell(6).setCellValue("样品名称");
+                row1.createCell(7).setCellValue("状态");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                for (int j = 0; j < pageInfos.getList().size(); j++) {
+                    TaskStatsVo personVo = (TaskStatsVo) pageInfos.getList().get(j);
+                    //在sheet里创建第二行
+                    HSSFRow row3 = sheet.createRow(j + 1);
+                    row3.createCell(0).setCellValue(personVo.getTaskCode());
+                    if (personVo.getRequestDate() != null) {
+                        String dateString = formatter.format(personVo.getRequestDate());
+                        row3.createCell(1).setCellValue(dateString);
+                    }
+                    if (personVo.getFinishDate() != null) {
+                        String dateString = formatter.format(personVo.getFinishDate());
+                        row3.createCell(2).setCellValue(dateString);
+                    }
+                    row3.createCell(3).setCellValue(personVo.getCost());
+                    row3.createCell(4).setCellValue(personVo.getReportCode());
+                    row3.createCell(5).setCellValue(personVo.getReportType());
+                    row3.createCell(6).setCellValue(personVo.getSampleName());
+                    row3.createCell(7).setCellValue(personVo.getTaskStatus());
+                }
             }
-            if (personVo.getFinishDate() != null) {
-                String dateString = formatter.format(personVo.getFinishDate());
-                row3.createCell(2).setCellValue(dateString);
-            }
-            row3.createCell(3).setCellValue(personVo.getCost());
-            row3.createCell(4).setCellValue(personVo.getReportCode());
-            row3.createCell(5).setCellValue(personVo.getReportType());
-            row3.createCell(6).setCellValue(personVo.getSampleName());
-            row3.createCell(7).setCellValue(personVo.getTaskStatus());
         }
         //输出Excel文件 字节输出流
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -591,8 +610,10 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<TaskStatsVo> personList = new ArrayList<>();
         if (!org.springframework.util.StringUtils.isEmpty(taskStatsVo.getTeamId())) {
             PageHelper.clearPage();
-            List<Long> nodeTeam = teamMapper.getNodeTeamId(Long.parseLong(taskStatsVo.getTeamId()));
-            taskStatsVo.setNodeTeam(nodeTeam);
+            List<Integer> nodeTeam = testCheckItemTeamRelDao.selectTeamIdRel(Integer.parseInt(taskStatsVo.getTeamId()));
+            List<Long> longs = JSONArray.parseArray(nodeTeam.toString(), Long.class);
+            longs.add(Long.parseLong(taskStatsVo.getTeamId()));
+            taskStatsVo.setNodeTeam(longs);
         }
         PageHelper.clearPage();
         PageHelper.startPage(taskStatsVo.getPageNum(), taskStatsVo.getPageSize());

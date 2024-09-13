@@ -8,6 +8,7 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TechnicistCapacity;
 import com.lims.manage.erp.entity.TestProductType;
 import com.lims.manage.erp.entity.TestTechnicist;
+import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.TestTechnicistVo;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
@@ -46,7 +47,7 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
     @Select("select team_id from test_technicist where user_id=#{userId} and del_flag = 0 limit 1")
     Integer getSealer(@Param("userId") Long userId);
 
-    List<String> inspectorList(@Param("search") String search);
+    List<LabelValueVo> inspectorList(@Param("search") String search);
 
     List<TechnicistCapacity> getTypeAndProductList(@Param("id") Serializable id);
 

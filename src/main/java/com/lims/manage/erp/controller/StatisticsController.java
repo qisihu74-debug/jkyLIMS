@@ -48,11 +48,12 @@ public class StatisticsController {
 
     /**
      * 任务查询详情。
+     *
      * @param
      * @return
      */
     @RequestMapping("/taskDetails")
-    public Result taskDetails(@Param("taskId")Long taskId) {
+    public Result taskDetails(@Param("taskId") Long taskId) {
         if (taskId == null) {
             return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
         }
@@ -61,31 +62,32 @@ public class StatisticsController {
 
     /**
      * 任务查询_（Excel表导出）
+     *
      * @return
      */
     @PostMapping("/taskQuery_export")
-    public void taskQueryExport(@RequestBody TaskStatsVo taskStatsVo,HttpServletResponse response) throws IOException {
+    public void taskQueryExport(@RequestBody TaskStatsVo taskStatsVo, HttpServletResponse response) throws IOException {
         BufferedOutputStream bos = null;
-        taskStatsVo.setPageNum(1);
-        taskStatsVo.setPageSize(1000000);
+        BufferedInputStream bis = null;
+
         String fileName = "任务统计结果";
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "attachment; filename="
                 + new String(fileName.getBytes("gbk"), "iso_8859_1") + ".xls");
-        PageInfo pageInfo = statisticsService.taskQuery1111(taskStatsVo);
-        if (CollectionUtil.isNotEmpty(pageInfo.getList())) {
-            InputStream inputStream = statisticsService.exportPersonDetails((PagingToolVo) pageInfo.getList());
-            ServletOutputStream outputStream = response.getOutputStream();
-            BufferedInputStream bis = new BufferedInputStream(inputStream);
-            bos = new BufferedOutputStream(outputStream);
-            byte[] buff = new byte[2048];
-            int bytesRead;
-            while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
-                bos.write(buff, 0, bytesRead);
-                bos.flush();
-            }
+        taskStatsVo.setPageNum(1);
+        taskStatsVo.setPageSize(10);
 
+        InputStream inputStream = statisticsService.exportPersonDetails(taskStatsVo);
+
+        ServletOutputStream outputStream = response.getOutputStream();
+        bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
         }
         bos.close();
     }

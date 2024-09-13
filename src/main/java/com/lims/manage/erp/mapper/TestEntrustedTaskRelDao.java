@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.TestEntrustedTaskRelEntity;
 import com.lims.manage.erp.vo.TestEntrustedTaskRelVo;
 import org.apache.ibatis.annotations.Delete;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 @Component
 @Mapper
-public interface TestEntrustedTaskRelDao {
+public interface TestEntrustedTaskRelDao extends BaseMapper<TestEntrustedTaskRelEntity> {
 
 
     /**

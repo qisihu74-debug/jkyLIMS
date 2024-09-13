@@ -18,6 +18,7 @@ import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
+import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
 import org.springframework.web.multipart.MultipartFile;
@@ -403,7 +404,7 @@ public interface ReportService {
 
     byte[] exportRecords(String reportCode, String reportType, String sealType, Long startDate, Long endDate);
 
-    List<String> inspectorList(String search);
+    Result inspectorList(String search);
 
     void updateInspector(String reportCode, String inspector);
 
