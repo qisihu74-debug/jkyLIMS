@@ -16,6 +16,7 @@ import com.aspose.words.Row;
 import com.aspose.words.Run;
 import com.aspose.words.SaveFormat;
 import com.aspose.words.Table;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -52,25 +53,7 @@ import com.lims.manage.erp.entity.TreeEntity;
 import com.lims.manage.erp.http.QiYueSuoDocment;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.job.QiYueSuoHnadler;
-import com.lims.manage.erp.mapper.EntrustEntityMapper;
-import com.lims.manage.erp.mapper.ReportApprovalMapper;
-import com.lims.manage.erp.mapper.ReportMapper;
-import com.lims.manage.erp.mapper.ReportRecordDetailEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
-import com.lims.manage.erp.mapper.ReportRecordMidEntityMapper;
-import com.lims.manage.erp.mapper.ReportTemplateEntityMapper;
-import com.lims.manage.erp.mapper.SampleEntityMapper;
-import com.lims.manage.erp.mapper.SysUserDao;
-import com.lims.manage.erp.mapper.TaskMapper;
-import com.lims.manage.erp.mapper.TeamMapper;
-import com.lims.manage.erp.mapper.TestEntrustedTaskRelDao;
-import com.lims.manage.erp.mapper.TestProductDao;
-import com.lims.manage.erp.mapper.TestProductItemDao;
-import com.lims.manage.erp.mapper.TestReportQualifcationDao;
-import com.lims.manage.erp.mapper.TestReportTemplateDao;
-import com.lims.manage.erp.mapper.TestSampleEntityMapper;
-import com.lims.manage.erp.mapper.TestSampleMixInfoEntityMapper;
-import com.lims.manage.erp.mapper.TestTechnicistDao;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ReportService;
@@ -201,6 +184,8 @@ public class ReportServiceImpl implements ReportService {
     private DownloadUtils downLoad;
     @Autowired
     private DingNotifyUtils dingNotifyUtils;
+    @Autowired
+    private TestTaskOrderWorkingHoursScoreEntityMapper testTaskOrderWorkingHoursScoreEntityMapper;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -4432,12 +4417,12 @@ public class ReportServiceImpl implements ReportService {
         }
         String url = MinIoUtil.upload("report-download", reportCode + ".pdf", inputStream, "application/octet-stream");
         String substring = "";
-        if (url.contains("?")){
+        if (url.contains("?")) {
             substring = url.substring(0, url.indexOf("?"));
-        }else {
+        } else {
             substring = url;
         }
-        recordEntityMapper.updateUrlByCode(reportCode,substring);
+        recordEntityMapper.updateUrlByCode(reportCode, substring);
         //删除临时文件
         FileAndFolderUtil.delete(pdfPath);
         FileAndFolderUtil.delete(qzPdfPath);
