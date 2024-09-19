@@ -4,12 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.lims.manage.erp.config.HkConfig;
-import com.lims.manage.erp.entity.HkDoor;
-import com.lims.manage.erp.entity.HkDoorReq;
-import com.lims.manage.erp.entity.HkGrantDoorReq;
-import com.lims.manage.erp.entity.HkPerson;
-import com.lims.manage.erp.entity.PersonDoorReq;
-import com.lims.manage.erp.entity.ResourceInfo;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkDoorService;
@@ -18,11 +13,7 @@ import com.lims.manage.erp.util.HkUtils;
 import com.lims.manage.erp.util.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -128,16 +119,44 @@ public class HkController {
             return ResultUtil.error("请选择下发权限的门禁");
         }
         Map<String, Object> map = HkUtils.personGrant(hkConfig.getGrant(),hkGrantDoorReq);
-        if (map != null){
+        if (map != null) {
             String msg = map.get("msg").toString();
-            if ("success".equals(msg)){
-                return ResultUtil.success("人员下发门禁权限成功",JSON.toJSONString(map));
-            }else {
+            if ("success".equals(msg)) {
+                return ResultUtil.success("人员下发门禁权限成功", JSON.toJSONString(map));
+            } else {
                 return ResultUtil.error("人员下发门禁权限失败");
             }
-        }else {
+        } else {
             return ResultUtil.error("人员下发门禁权限失败");
         }
     }
+
+    //
+
+    /**
+     * 编辑门禁与实验室id 进行关联
+     *
+     * @param hkDoorLaboratoryRelEntity
+     * @return
+     */
+    @PostMapping("editDoorLaboratoryRel")
+    public Result editDoorLaboratoryRel(@RequestBody HKDoorLaboratoryRelEntity hkDoorLaboratoryRelEntity) {
+
+        return hkDoorService.editDoorLaboratoryRel(hkDoorLaboratoryRelEntity);
+    }
+
+
+    /**
+     * 编辑人员与userid 进行关联
+     *
+     * @param hkPersonUserRelEntity
+     * @return
+     */
+    @PostMapping("editPersonUserRel")
+    public Result editPersonUserRel(@RequestBody HKPersonUserRelEntity hkPersonUserRelEntity) {
+
+        return hkDoorService.editPersonUserRel(hkPersonUserRelEntity);
+    }
+
 
 }
