@@ -130,4 +130,8 @@ public class TaskStatisticsVo {
     private String sTime;
     @TableField(exist = false)
     private String eTime;
+    /**
+     * 折扣率
+     */
+    private String discount;
 }

@@ -5608,7 +5608,10 @@ public class EntrustServiceImpl implements EntrustService {
         LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
         queryWrapper12.eq(TestCheckItemsTaskRel::getEntrustId, entrustId);
         testCheckItemsTaskRelMapper.delete(queryWrapper12);
-        // 删除任务流转信息 根据任务单id
+        // 删除任务流转信息 根据委托单id
+        LambdaQueryWrapper<TestEntrustedTaskRelEntity> deleteWapper = new LambdaQueryWrapper<>();
+        deleteWapper.eq(TestEntrustedTaskRelEntity::getEntrustId, entrustId);
+        testEntrustedTaskRelDao.delete(deleteWapper);
         entityMapper.updateEntrustInfos(basisInfo);
         // 根据委托单id 进行批量处理检测项状态
         taskMapper.batchUpdateItemState(entrustId);

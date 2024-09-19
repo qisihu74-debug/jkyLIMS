@@ -55,7 +55,8 @@
         "任务大厅" AS source,
         0 AS state,
         t3.working_hours as workingHours,
-        t3.working_hours_id as workingHoursId
+        t3.working_hours_id as workingHoursId,
+        t3.discount
         FROM
         test_task AS t1
         LEFT JOIN sys_user AS t2 ON t1.receiver = t2.user_id

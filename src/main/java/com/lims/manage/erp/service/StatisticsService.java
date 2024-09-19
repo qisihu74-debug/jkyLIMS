@@ -16,10 +16,12 @@ public interface StatisticsService {
     /**
      * 导出Excel 表
      */
-    InputStream exportPersonDetails(PagingToolVo list) throws IOException;
+    InputStream exportPersonDetails(TaskStatsVo taskStatsVo) throws IOException;
+
 
     /**
      * 个人工作量统计
+     *
      * @param
      * @return
      */

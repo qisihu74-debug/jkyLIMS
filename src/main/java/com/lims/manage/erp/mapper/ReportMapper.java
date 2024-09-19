@@ -150,16 +150,17 @@ public interface ReportMapper {
 
     /**
      * 更新报告上传的url存储地址
+     *
      * @param reportCode
      * @param url
      */
-    @Update("update test_report_record set inspector=#{inspector},report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
+    @Update("update test_report_record set inspector=#{inspector},inspector_and_ids=#{inspectorAndIds},report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
             "verifyer_id=#{verifyerId},issuer_id=#{issuerId},report_complete_time=#{now},state='3'," +
             "applicant=#{applicant} where entrustment_id=#{entrustId} ")
-    void updateUrl(@Param("entrustId") String reportCode,@Param("inspector") String inspector, @Param("url") String url,
+    void updateUrl(@Param("entrustId") String reportCode, @Param("inspector") String inspector, @Param("inspectorAndIds") String inspectorAndIds, @Param("url") String url,
                    @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                    @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
-                   @Param("now")Date now,@Param("applicant") String applicant);
+                   @Param("now") Date now, @Param("applicant") String applicant);
 
     @Update("update test_report_record set inspector=#{inspector},verifyer=#{verifyer},issuer=#{issuer}," +
             "verifyer_id=#{verifyerId},issuer_id=#{issuerId},combine_time=#{combineTime} where entrustment_id=#{entrustId}")
@@ -236,13 +237,13 @@ public interface ReportMapper {
     void updateVerAndIssZj(@Param("entrustId") String reportCode,@Param("inspector") String inspector, @Param("verifyer") String verifyer, @Param("issuer") String issuer,
                          @Param("verifyerId") Long verifyerId,@Param("combineTime") Date combineTime, @Param("issuerId") Long issuerId);
 
-    @Update("update test_report_record set inspector=#{inspector},report_url=#{url},verifyer=#{verifyer},issuer=#{issuer}," +
+    @Update("update test_report_record set inspector=#{inspector},report_url=#{url},verifyer=#{verifyer},issuer=#{issuer},inspector_and_ids=#{inspectorAndIds}," +
             "verifyer_id=#{verifyerId},issuer_id=#{issuerId},report_complete_time=#{now},state='3'," +
             "applicant=#{applicant} where entrust_id=#{entrustId} ")
-    void updateUrlZj(@Param("entrustId") String reportCode,@Param("inspector") String inspector, @Param("url") String url,
-                   @Param("verifyer") String verifyer, @Param("issuer") String issuer,
-                   @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
-                   @Param("now")Date now,@Param("applicant") String applicant);
+    void updateUrlZj(@Param("entrustId") String reportCode, @Param("inspector") String inspector, @Param("inspectorAndIds") String inspectorAndIds, @Param("url") String url,
+                     @Param("verifyer") String verifyer, @Param("issuer") String issuer,
+                     @Param("verifyerId") Long verifyerId, @Param("issuerId") Long issuerId,
+                     @Param("now") Date now, @Param("applicant") String applicant);
 
     ReportDetailVo getReportDetailZj(Long taskId,List<Long> deptIds);
 

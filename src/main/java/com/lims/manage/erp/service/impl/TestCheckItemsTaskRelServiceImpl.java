@@ -13,15 +13,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.entity.HourCount;
-import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.entity.SysUserEntity;
-import com.lims.manage.erp.entity.TaskTestEntity;
-import com.lims.manage.erp.entity.TestCheckItemsTaskRel;
-import com.lims.manage.erp.entity.TestInitDataEntity;
-import com.lims.manage.erp.entity.TestItemOrderWorkingHours;
-import com.lims.manage.erp.entity.TestTaskOrderWorkingHours;
-import com.lims.manage.erp.entity.TestTeam;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
@@ -33,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.bytedeco.opencv.presets.opencv_core;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,6 +84,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     private LogManagerService logManagerService;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
 
     @Override
     public IPage<WorkHourStatisticVo> getWorkHoursList(Page<WorkHourStatisticVo> page, Map<String, Object> paramMap) {
@@ -329,14 +324,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             map.put("sumCount", workingHours);
         } else {
             map.put("list", list);
-            // 通过任务单id 获取任务单下对应的检测项总工时
-            String workingHours = null;
-            if (workingHoursId != null) {
-                workingHours = testItemOrderWorkingHoursMapper.getTotalWorkingHours(taskId, Long.valueOf(workingHoursId));
-            } else {
-                workingHours = baseMapper.getWorkingHours(taskId);
-            }
-            map.put("sumCount", workingHours);
+            // 获取总工时：
+            map.put("sumCount", list.get(0).getTotalWorkingHours());
         }
         return ResultUtil.success(map);
     }
@@ -1194,6 +1183,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         } else {
             // 中间报告
             entrustId = detailById.getEntrustId();
+
+            return false;
         }
         List<Long> taskIds = testTaskOrderWorkingHoursMapper.getTaskList(entrustId);
         if (CollectionUtil.isEmpty(taskIds)) {
@@ -1514,9 +1505,6 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         if (taskDetails == null) {
             return false;
         }
-//        if (taskDetails.getTaskListStatus() == null) {
-//            return false;
-//        }
         //TODO:11月10 查询基础表信息 - 检测类型包含工时
         List<TestInitDataEntity> sqlBasisList = taskMapper.selectEntrustBasis(30);
         String[] strings = new String[sqlBasisList.size()];
@@ -1536,7 +1524,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             updateSqlBasisList.set(i, dataEntity);
         }
         // 处理工时信息
-        addTestTaskOrderWorkingHoursMapper(taskId, bitTaskRelList, updateSqlBasisList);
+        addTestTaskOrderWorkingHoursMapper(taskId, taskDetails.getEntrustmentId(), bitTaskRelList, updateSqlBasisList);
         return true;
     }
 
@@ -1641,20 +1629,68 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     }
 
     /**
+     * 任务流转单-折扣率
+     *
+     * @param testEntrustedTaskRelList
+     * @return
+     */
+    public String hourDiscount(List<TestEntrustedTaskRelEntity> testEntrustedTaskRelList) {
+
+        // 进行比较 流转日期 >= 与当前签发时间
+        Date taskFlowDate = null;
+        for (TestEntrustedTaskRelEntity testEntrustedTaskRelEntity : testEntrustedTaskRelList) {
+            if (testEntrustedTaskRelEntity.getType() == 0) {
+                taskFlowDate = testEntrustedTaskRelEntity.getTaskFlowDate();
+            }
+        }
+
+        try {
+            // 当前签发时间
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date nowDate = new Date();
+            // 去除当前时间 时分秒
+            Date currentLatestTime = format.parse(format.format(nowDate));
+            // 任务单 流转时间
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(taskFlowDate);
+            Date lastDayOfMonth = calendar.getTime();
+            // 任务单流转时间（2024-09-09 ) < 当前时间 2024-09-09
+            if (lastDayOfMonth.before(currentLatestTime)) {
+                return "0.9";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "1";
+    }
+
+    /**
      * 分配工时信息
      *
      * @param taskId
+     * @param entrustId
      * @param bitTaskRelList 分组设置任务大厅 获取工时信息
      * @param sqlBasisList   查询基础表信息 - 检测类型包含工时
      */
-    public void addTestTaskOrderWorkingHoursMapper(Long taskId, HashMap<Integer, List<TestTaskOrderWorkingHours>> bitTaskRelList, List<TestInitDataEntity> sqlBasisList) {
+    public void addTestTaskOrderWorkingHoursMapper(Long taskId, Long entrustId, HashMap<Integer, List<TestTaskOrderWorkingHours>> bitTaskRelList, List<TestInitDataEntity> sqlBasisList) {
         //  人员对应的检测工时及比例信息。
         // 使用map 进行用户数据合并
         Map<Long, TestTaskOrderWorkingHours> taskRelMap = new HashMap<>();
         // 总工时
         // 私有方法：人员多组工时合并工时
         String totalWorkingHours = methodUserMerge(bitTaskRelList, taskRelMap);
-        System.out.println("totalWorkingHours == " + totalWorkingHours.toString());
+
+        // TODO: 9月11 暂时停止   通过任务单id 获取 流转日期  与报告签发时间 是否一致
+//        LambdaQueryWrapper<TestEntrustedTaskRelEntity> entityLambdaQueryWrapper = new LambdaQueryWrapper<>();
+//        entityLambdaQueryWrapper.eq(TestEntrustedTaskRelEntity::getEntrustId, entrustId);
+//        List<TestEntrustedTaskRelEntity> testEntrustedTaskRelList = testEntrustedTaskRelDao.selectList(entityLambdaQueryWrapper);
+//        String discount = "1";
+//        if (CollectionUtil.isNotEmpty(testEntrustedTaskRelList)) {
+//            discount = hourDiscount(testEntrustedTaskRelList);
+//            totalWorkingHours = BigDecimal.valueOf(Double.valueOf(totalWorkingHours)).multiply(BigDecimal.valueOf(Double.valueOf(discount))).toString();
+//        }
+
         // 展示数据
         TaskTestEntity taskDetails = taskMapper.selectTaskEntity(taskId);
         // 签发人： 获取
@@ -1690,10 +1726,10 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             // 总工时
             data.setTotalWorkingHours(totalWorkingHours);
             BigDecimal totalWorkingHoursBig = BigDecimal.valueOf(Double.valueOf(totalWorkingHours)).setScale(4, BigDecimal.ROUND_HALF_UP);
-            System.out.println("totalWorkingHoursBig == " + totalWorkingHoursBig.toString());
+
             //所占工时 保留四位小数。
             BigDecimal workingHours = BigDecimal.valueOf(Double.valueOf(data.getWorkingHours())).setScale(4, BigDecimal.ROUND_HALF_UP);
-            System.out.println("workingHours == " + workingHours.toString());
+
             // 百分比 = 所占工时 / 总工时 * 100 保留两位小数
             //当前人的工时 = 比例 * zhi 保留四位小数。
             BigDecimal he = workingHours.divide(totalWorkingHoursBig, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100)).setScale(4, BigDecimal.ROUND_HALF_UP);
@@ -1730,7 +1766,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             taskRelMap.put(data.getUserId(), data);
         }
         // 把调整后的任务单中人员、工时、比例信息、总工时 动态处理、或新增、或更新操作。
-        updateOrAddTaskRelMap(taskId, taskRelMap, taskDetails);
+        updateOrAddTaskRelMap(taskId, taskRelMap, taskDetails, null);
     }
 
     /**
@@ -1796,7 +1832,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      * @param taskDetails
      */
     @Transactional(rollbackFor = Exception.class)
-    public void updateOrAddTaskRelMap(Long taskId, Map<Long, TestTaskOrderWorkingHours> taskRelMap, TaskTestEntity taskDetails) {
+    public void updateOrAddTaskRelMap(Long taskId, Map<Long, TestTaskOrderWorkingHours> taskRelMap, TaskTestEntity taskDetails, String discount) {
         // 工时id
         Long workingHoursId = GenID.getID();
         // 任务单号
@@ -1873,6 +1909,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 queryWrapper1.eq(TestTaskOrderWorkingHours::getUserId, workingHoursData.getUserId());
                 queryWrapper1.eq(TestTaskOrderWorkingHours::getWorkingHoursId, workingHoursId);
                 workingHoursData.setCreateTime(null);
+                workingHoursData.setDiscount(discount);
                 testTaskOrderWorkingHoursMapper.update(workingHoursData, queryWrapper1);
             } else {
                 testTaskOrderWorkingHoursMapper.insert(workingHoursData);

@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.lims.manage.erp.vo.LabelValueVo;
 import lombok.Data;
 
 import java.util.List;
@@ -64,7 +65,7 @@ public class ApproveInfo {
     /**
      * 报告检测人
      */
-    private List<KeyValue> jcrMap;
+    private List<LabelValueVo> jcrMap;
     /**
      * 报告审核人
      */
