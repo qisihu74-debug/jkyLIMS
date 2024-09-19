@@ -12,4 +12,5 @@ import com.lims.manage.erp.entity.HkDoor;
  * @Copyright © 河南交科院
  */
 public interface HkDoorService extends IService<HkDoor> {
+
 }
