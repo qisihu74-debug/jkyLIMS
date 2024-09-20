@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
@@ -15,6 +16,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.util.RedisUtils;
+import com.lims.manage.erp.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +80,75 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         // 新增
         hkPersonUserRelEntityMapper.insert(hkPersonUserRelEntity);
 
+        return ResultUtil.success("操作成功");
+    }
+
+    @Override
+    public Result getDoorLaboratoryInstruments(HKDoorLaboratoryInstrumentRelEntity hkDoorLaboratoryInstrumentRelEntity) {
+
+        LambdaQueryWrapper<HKDoorLaboratoryInstrumentRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotEmpty(hkDoorLaboratoryInstrumentRelEntity.getIndexCode())) {
+            queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getIndexCode, hkDoorLaboratoryInstrumentRelEntity.getIndexCode());
+        }
+        if (hkDoorLaboratoryInstrumentRelEntity.getTestLaboratoryId() != null) {
+            queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getTestLaboratoryId, hkDoorLaboratoryInstrumentRelEntity.getTestLaboratoryId());
+        }
+        if (hkDoorLaboratoryInstrumentRelEntity.getTestInstrumentId() != null) {
+            queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getTestInstrumentId, hkDoorLaboratoryInstrumentRelEntity.getTestInstrumentId());
+        }
+        List<HKDoorLaboratoryInstrumentRelEntity> list = hkDoorLaboratoryInstrumentRelEntityMapper.selectList(queryWrapper);
+
+        return ResultUtil.success(list);
+    }
+
+    /**
+     * 进行监控与试验室和仪器关系授权
+     *
+     * @param indexCode
+     * @param testLaboratoryId
+     * @param ids
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result impowerDoorLaboratoryInstruments(String indexCode, Integer testLaboratoryId, Integer[] ids) {
+        if (StringUtils.isEmpty(indexCode)) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        if (testLaboratoryId == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        // 效验重复项
+        LambdaQueryWrapper<HKDoorLaboratoryInstrumentRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getIndexCode, indexCode);
+        queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getTestLaboratoryId, testLaboratoryId);
+        queryWrapper.in(HKDoorLaboratoryInstrumentRelEntity::getTestInstrumentId, ids);
+        List<HKDoorLaboratoryInstrumentRelEntity> list = hkDoorLaboratoryInstrumentRelEntityMapper.selectList(queryWrapper);
+        if (CollectionUtil.isNotEmpty(list)) {
+            return ResultUtil.error("操作失败，有重复项，请重新选择");
+        }
+        for (int i = 0; i < ids.length; i++) {
+            HKDoorLaboratoryInstrumentRelEntity data = new HKDoorLaboratoryInstrumentRelEntity();
+            data.setIndexCode(indexCode);
+            data.setTestLaboratoryId(testLaboratoryId);
+            data.setTestInstrumentId(ids[i]);
+            hkDoorLaboratoryInstrumentRelEntityMapper.insert(data);
+        }
+        return ResultUtil.success("操作成功");
+    }
+
+    /**
+     * 进行监控与试验室和仪器关系移除
+     *
+     * @param ids
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result removeDoorLaboratoryInstruments(Integer[] ids) {
+        for (int i = 0; i < ids.length; i++) {
+            hkDoorLaboratoryInstrumentRelEntityMapper.deleteById(ids[i]);
+        }
         return ResultUtil.success("操作成功");
     }
 

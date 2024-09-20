@@ -306,11 +306,37 @@ public class TestInstrumentController extends ApiController {
             return ResultUtil.error("缺少分页参数！");
         }
         PageInfo<DeviceEntity> allDevice = testInstrumentService.getAllDevice(deviceEntity);
-        return ResultUtil.success("查询设备仪器列表成功！",allDevice);
+        return ResultUtil.success("查询设备仪器列表成功！", allDevice);
+    }
+
+    /**
+     * 进行仪器与实验室授权
+     *
+     * @param laboratoryId
+     * @param ids
+     * @return
+     */
+    @GetMapping("/impowerInstrumentsAndLaboratories")
+    public Result impowerInstrumentsAndLaboratories(Integer laboratoryId, Integer ids[]) {
+
+        return testInstrumentService.impowerInstrumentsAndLaboratories(laboratoryId, ids);
+    }
+
+    /**
+     * 进行实验室与仪器移除
+     *
+     * @param ids
+     * @return
+     */
+    @GetMapping("/removeInstrumentsAndLaboratories")
+    public Result removeInstrumentsAndLaboratories(Integer ids[]) {
+
+        return testInstrumentService.removeInstrumentsAndLaboratories(ids);
     }
 
     /**
      * 新增设备
+     *
      * @param record
      * @return
      */

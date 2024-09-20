@@ -77,13 +77,32 @@ public interface TestInstrumentService extends IService<TestInstrument> {
     /**********************************设备仪器202303****************************************/
     /**
      * 查询设备仪器列表
+     *
      * @param deviceEntity
      * @return
      */
     PageInfo<DeviceEntity> getAllDevice(DeviceEntity deviceEntity);
 
     /**
+     * 进行仪器与实验室授权
+     *
+     * @param laboratoryId
+     * @param ids
+     * @return
+     */
+    Result impowerInstrumentsAndLaboratories(Integer laboratoryId, Integer ids[]);
+
+    /**
+     * 进行仪器与实验室移除
+     *
+     * @param ids
+     * @return
+     */
+    Result removeInstrumentsAndLaboratories(Integer ids[]);
+
+    /**
      * 新增设备
+     *
      * @param record
      * @param picture
      * @param contract

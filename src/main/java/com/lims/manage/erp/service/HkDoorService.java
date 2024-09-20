@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
 import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
 import com.lims.manage.erp.entity.HKPersonUserRelEntity;
 import com.lims.manage.erp.entity.HkDoor;
@@ -33,4 +34,30 @@ public interface HkDoorService extends IService<HkDoor> {
      * @return
      */
     Result editPersonUserRel(HKPersonUserRelEntity hkPersonUserRelEntity);
+
+    /**
+     * 获取监控与试验室和仪器关系
+     *
+     * @param hkDoorLaboratoryInstrumentRelEntity
+     * @return
+     */
+    Result getDoorLaboratoryInstruments(HKDoorLaboratoryInstrumentRelEntity hkDoorLaboratoryInstrumentRelEntity);
+
+    /**
+     * 进行监控与试验室和仪器关系授权
+     *
+     * @param indexCode
+     * @param testLaboratoryId
+     * @param ids
+     * @return
+     */
+    Result impowerDoorLaboratoryInstruments(String indexCode, Integer testLaboratoryId, Integer ids[]);
+
+    /**
+     * 进行监控与试验室和仪器关系移除
+     *
+     * @param ids
+     * @return
+     */
+    Result removeDoorLaboratoryInstruments(Integer ids[]);
 }

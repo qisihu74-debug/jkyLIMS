@@ -131,8 +131,6 @@ public class HkController {
         }
     }
 
-    //
-
     /**
      * 编辑门禁与实验室id 进行关联
      *
@@ -156,6 +154,46 @@ public class HkController {
     public Result editPersonUserRel(@RequestBody HKPersonUserRelEntity hkPersonUserRelEntity) {
 
         return hkDoorService.editPersonUserRel(hkPersonUserRelEntity);
+    }
+
+    /**
+     * 获取监控与试验室和仪器关系
+     *
+     * @param hkDoorLaboratoryInstrumentRelEntity
+     * @return
+     */
+    @GetMapping("getDoorLaboratoryInstruments")
+    public Result getDoorLaboratoryInstruments(HKDoorLaboratoryInstrumentRelEntity hkDoorLaboratoryInstrumentRelEntity) {
+
+        return hkDoorService.getDoorLaboratoryInstruments(hkDoorLaboratoryInstrumentRelEntity);
+    }
+
+
+    /**
+     * 进行监控与试验室和仪器关系授权
+     *
+     * @param indexCode
+     * @param testLaboratoryId
+     * @param ids
+     * @return
+     */
+    @GetMapping("/impowerDoorLaboratoryInstruments")
+    public Result impowerDoorLaboratoryInstruments(String indexCode, Integer testLaboratoryId, Integer ids[]) {
+
+        return hkDoorService.impowerDoorLaboratoryInstruments(indexCode, testLaboratoryId, ids);
+    }
+
+
+    /**
+     * 进行监控与试验室和仪器关系移除
+     *
+     * @param ids
+     * @return
+     */
+    @GetMapping("/removeDoorLaboratoryInstruments")
+    public Result removeDoorLaboratoryInstruments(Integer ids[]) {
+
+        return hkDoorService.removeDoorLaboratoryInstruments(ids);
     }
 
 

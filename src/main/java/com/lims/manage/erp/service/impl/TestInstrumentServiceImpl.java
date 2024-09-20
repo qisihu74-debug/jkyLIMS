@@ -3,7 +3,9 @@ package com.lims.manage.erp.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.Worksheet;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -19,12 +21,7 @@ import com.lims.manage.erp.mapper.TestInstrumentDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.PDFHelper3;
-import com.lims.manage.erp.util.QRCodeUtil;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.InstrumentRecordListVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -336,9 +333,60 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     @Override
     public PageInfo<DeviceEntity> getAllDevice(DeviceEntity deviceEntity) {
         PageHelper.startPage(deviceEntity.getPageNum(), deviceEntity.getPageSize());
-        List<DeviceEntity> allDevice = deviceEntityMapper.getAllDevice(deviceEntity);
+        LambdaQueryWrapper<DeviceEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotEmpty(deviceEntity.getCode())) {
+            lambdaQueryWrapper.like(DeviceEntity::getCode, deviceEntity.getCode());
+        }
+        if (StringUtils.isNotEmpty(deviceEntity.getName())) {
+            lambdaQueryWrapper.like(DeviceEntity::getName, deviceEntity.getName());
+        }
+        if (deviceEntity.getLaboratoryId() != null) {
+            lambdaQueryWrapper.eq(DeviceEntity::getLaboratoryId, deviceEntity.getLaboratoryId());
+        }
+        List<DeviceEntity> allDevice = deviceEntityMapper.selectList(lambdaQueryWrapper);
         PageInfo<DeviceEntity> pageInfo = new PageInfo<>(allDevice);
         return pageInfo;
+    }
+
+    /**
+     * 进行仪器与实验室授权
+     *
+     * @param laboratoryId
+     * @param ids
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result impowerInstrumentsAndLaboratories(Integer laboratoryId, Integer[] ids) {
+        for (int i = 0; i < ids.length; i++) {
+            DeviceEntity deviceEntity = new DeviceEntity();
+
+            UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.lambda().eq(DeviceEntity::getId, ids[i]).
+                    set(DeviceEntity::getLaboratoryId, laboratoryId);
+            deviceEntityMapper.update(null, updateWrapper);
+        }
+        return ResultUtil.success("操作成功");
+    }
+
+    /**
+     * 进行仪器与实验室移除
+     *
+     * @param ids
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result removeInstrumentsAndLaboratories(Integer[] ids) {
+        for (int i = 0; i < ids.length; i++) {
+            DeviceEntity deviceEntity = new DeviceEntity();
+
+            UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.lambda().eq(DeviceEntity::getId, ids[i]).
+                    set(DeviceEntity::getLaboratoryId, null);
+            deviceEntityMapper.update(null, updateWrapper);
+        }
+        return ResultUtil.success("操作成功");
     }
 
     @Override
