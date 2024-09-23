@@ -268,5 +268,25 @@ public class HkController {
         return hkDoorService.removeDoorLaboratoryInstruments(ids);
     }
 
+    /**
+     * 临时授权
+     * @param personId
+     * @return
+     */
+    @GetMapping("temporaryVisit")
+    public Result temporaryVisit(String personId){
+        
+        return null;
+    }
 
+    /**
+     *取消临时授权
+     * @param personId
+     * @return
+     */
+    @GetMapping("cancelVisit")
+    public Result cancelVisit(String personId){
+
+        return null;
+    }
 }

@@ -19,4 +19,8 @@ public class HkDoorReq {
     private List<ResourceInfo> resourceInfos;
     private String startTime;
     private String endTime;
+    /**
+     * 实验室id集合
+     */
+    private List<Integer> laboratoryIds;
 }
