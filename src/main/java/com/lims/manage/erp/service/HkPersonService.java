@@ -1,6 +1,7 @@
 package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.HkPerson;
 
 /**
@@ -12,4 +13,5 @@ import com.lims.manage.erp.entity.HkPerson;
  * @Copyright © 河南交科院
  */
 public interface HkPersonService extends IService<HkPerson> {
+    PageInfo<HkPerson> personList(Integer pageNum, Integer pageSize, String name, String mobile, String state);
 }

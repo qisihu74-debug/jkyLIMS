@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -47,4 +48,6 @@ public class HkPerson {
     private String orgPath; // 组织路径
 
     private String orgPathName; // 组织路径名称
+    @TableField(exist = false)
+    private String leftUser; //关联用户
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lims.manage.erp.mapper.HkDoorDao">
+
+    <select id="doorList" resultType="java.util.List">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        hd.*, tl.`name` AS laboratoryName
+        FROM
+        hk_door hd
+        LEFT JOIN hk_door_laboratory_rel hr ON hd.index_code = hr.index_code
+        LEFT JOIN test_laboratory tl ON hr.test_laboratory_id = tl.id
+        ) tba
+<if test="name!=null and name!=''">
+    AND tba.name LIKE CONCAT('%',#{name},'%')
+</if>
+<if test="mobile!=null and mobile!=''">
+    AND tba.region_name LIKE CONCAT('%',#{position},'%')
+</if>
+<if test="state == '已关联'">
+    AND tba.laboratoryName is not null
+</if>
+<if test="state == '未关联'">
+    AND tba.laboratoryName is null
+</if>
+   </select>
+
+
+</mapper>
