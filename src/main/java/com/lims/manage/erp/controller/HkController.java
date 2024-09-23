@@ -188,6 +188,21 @@ public class HkController {
         Map<String, Object> map = hkDoorService.doorDetails(doorDetailReq);
         return ResultUtil.success(map);
     }
+
+    /**
+     * 获取门禁事件的图片
+     * @param svrIndexCode
+     * @param picUri
+     * @return
+     */
+    @GetMapping("pictures")
+    public Result pictures(String svrIndexCode,String picUri){
+        if (StringUtils.isEmpty(svrIndexCode) || StringUtils.isEmpty(picUri)){
+            return ResultUtil.error("未抓拍图片");
+        }
+        return ResultUtil.success(hkDoorService.pictures(svrIndexCode,picUri));
+    }
+
     /**
      * 编辑门禁与实验室id 进行关联
      *
