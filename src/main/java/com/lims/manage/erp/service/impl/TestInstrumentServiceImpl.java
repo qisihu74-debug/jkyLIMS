@@ -18,6 +18,7 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.DeviceEntityMapper;
 import com.lims.manage.erp.mapper.InstrumentRecordEntityMapper;
 import com.lims.manage.erp.mapper.TestInstrumentDao;
+import com.lims.manage.erp.mapper.TestLaboratoryDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.*;
@@ -65,38 +66,41 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     private InstrumentRecordEntityMapper instrumentRecordEntityMapper;
     @Autowired
     private DeviceEntityMapper deviceEntityMapper;
+    @Autowired
+    private TestLaboratoryDao testLaboratoryDao;
 
     @Resource
     private SysOssService sysOssService;
+
     @Override
     public Result addInstrument_old(TestInstrument testInstrument) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        if (testInstrument.getLaboratoryId()!=null){
-            TestLaboratory testLaboratory=testLaboratoryService.getById(testInstrument.getLaboratoryId());
-            if (StrUtil.isEmptyIfStr(testLaboratory)){
+        if (testInstrument.getLaboratoryId() != null) {
+            TestLaboratory testLaboratory = testLaboratoryService.getById(testInstrument.getLaboratoryId());
+            if (StrUtil.isEmptyIfStr(testLaboratory)) {
                 return ResultUtil.error("没有这个实验室！");
             }
-        }else {
+        } else {
             return ResultUtil.error("所在实验室参数为空！");
         }
-        QueryWrapper<TestInstrument> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("laboratory_id",testInstrument.getLaboratoryId());
-        queryWrapper.eq("name",testInstrument.getName());
-        if (this.list(queryWrapper).size()>0){
+        QueryWrapper<TestInstrument> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("laboratory_id", testInstrument.getLaboratoryId());
+        queryWrapper.eq("name", testInstrument.getName());
+        if (this.list(queryWrapper).size() > 0) {
             return ResultUtil.error("该实验室已有该设备！");
         }
         testInstrument.setStatus("0");
         testInstrument.setDelFlag(0);
         testInstrument.setCreateTime(new Date());
         testInstrument.setUpdateTime(null);
-        if (this.save(testInstrument)){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加设备仪器"+testInstrument.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG,true);
+        if (this.save(testInstrument)) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加设备仪器" + testInstrument.getId() + "成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
             return ResultUtil.success("设备添加成功");
-        }else {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加设备仪器失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加设备仪器失败!", Const.INSTRUMENT_MANAGEMENT_LOG, false);
             return ResultUtil.error("添加失败");
         }
     }
@@ -150,43 +154,82 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         }
         List<TestInstrument> testInstrumentList=new ArrayList<>();
         for (Long aLong : idList) {
-            TestInstrument testInstrument=new TestInstrument();
+            TestInstrument testInstrument = new TestInstrument();
             testInstrument.setUpdateTime(new Date());
             testInstrument.setDelFlag(1);
             testInstrument.setId(aLong.intValue());
-            String url1=this.getById(aLong).getPicture();
-            if (url1!=null){
+            String url1 = this.getById(aLong).getPicture();
+            if (url1 != null) {
                 sysOssService.delAnnounce(url1);
             }
-            String url2=this.getById(aLong).getContractUrl();
-            if (url2!=null){
+            String url2 = this.getById(aLong).getContractUrl();
+            if (url2 != null) {
                 sysOssService.delAnnounce(url2);
             }
-            String url3=this.getById(aLong).getInvoiceUrl();
-            if (url3!=null){
+            String url3 = this.getById(aLong).getInvoiceUrl();
+            if (url3 != null) {
                 sysOssService.delAnnounce(url3);
             }
             testInstrumentList.add(testInstrument);
         }
-        String idStr=idList.toString();
-        if (this.updateBatchById(testInstrumentList)){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除设备仪器"+idStr+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG,true);
+        String idStr = idList.toString();
+        if (this.updateBatchById(testInstrumentList)) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除设备仪器" + idStr + "成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
             return ResultUtil.success("删除成功");
-        }else {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"删除设备仪器"+idStr+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "删除设备仪器" + idStr + "失败!", Const.INSTRUMENT_MANAGEMENT_LOG, false);
             return ResultUtil.error("删除失败");
         }
     }
 
+    /**
+     * 单个图片文件上传
+     *
+     * @param id
+     * @param multipartFile
+     * @return
+     */
+    @Override
+    public Boolean uploading(Integer id, MultipartFile multipartFile) {
+
+        LambdaQueryWrapper<TestInstrument> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestInstrument::getId, id);
+        TestInstrument testInstrument = testInstrumentDao.selectOne(queryWrapper);
+        if (testInstrument == null) {
+            return false;
+        }
+        if (StringUtils.isNotEmpty(testInstrument.getPicture())) {
+            String[] arrays = testInstrument.getPicture().split("\\.");
+            String fileName = arrays[arrays.length - 1];
+            MinIoUtil.deleteFile(BucketsConst.instrument_picture, fileName);
+        }
+        //附件存在上传附件到服务器
+        Long fileCode = GenID.getID();
+        String name = multipartFile.getOriginalFilename();
+        String[] strings = name.split("\\.");
+
+        String upload = MinIoUtil.upload(BucketsConst.instrument_picture, multipartFile, fileCode + "." + strings[strings.length - 1]);
+        if (!org.springframework.util.StringUtils.isEmpty(upload)) {
+            String[] fileUrls = upload.split("\\?");
+            testInstrument.setPicture(fileUrls[0]);
+            // 更新
+            UpdateWrapper<TestInstrument> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.lambda().set(TestInstrument::getPicture, testInstrument.getPicture())
+                    .eq(TestInstrument::getId, testInstrument.getId());
+            testInstrumentDao.update(null, updateWrapper);
+        }
+        return true;
+    }
+
     @Override
     public IPage<TestInstrumentVo> getPageList(Page<TestInstrumentVo> page, QueryWrapper<TestInstrument> queryWrapper) {
-        return testInstrumentDao.getPageList(page,queryWrapper);
+        return testInstrumentDao.getPageList(page, queryWrapper);
     }
 
     @Override
     public PageInfo getInstrumentRecord(InstrumentRecordParamVo paramVo) {
         PageHelper.clearPage();
-        PageHelper.startPage(paramVo.getPageNum(),paramVo.getPageSize());
+        PageHelper.startPage(paramVo.getPageNum(), paramVo.getPageSize());
         List<InstrumentRecordListVo> instrumentRecord = instrumentRecordEntityMapper.getInstrumentRecord(paramVo);
         PageInfo<InstrumentRecordListVo> pageInfo = new com.github.pagehelper.PageInfo<>(instrumentRecord);
         return pageInfo;
@@ -358,12 +401,19 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Result impowerInstrumentsAndLaboratories(Integer laboratoryId, Integer[] ids) {
+        // 获取实验室名称
+        LambdaQueryWrapper<TestLaboratory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestLaboratory::getId, laboratoryId);
+        TestLaboratory testLaboratory = testLaboratoryDao.selectOne(queryWrapper);
+        if (testLaboratory == null) {
+            return ResultUtil.error("实验室不存在");
+        }
         for (int i = 0; i < ids.length; i++) {
             DeviceEntity deviceEntity = new DeviceEntity();
 
             UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
             updateWrapper.lambda().eq(DeviceEntity::getId, ids[i]).
-                    set(DeviceEntity::getLaboratoryId, laboratoryId);
+                    set(DeviceEntity::getLaboratoryId, laboratoryId).set(DeviceEntity::getLaboratoryName, testLaboratory.getName());
             deviceEntityMapper.update(null, updateWrapper);
         }
         return ResultUtil.success("操作成功");

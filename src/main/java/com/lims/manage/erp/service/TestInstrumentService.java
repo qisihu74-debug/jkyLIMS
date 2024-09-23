@@ -30,6 +30,11 @@ public interface TestInstrumentService extends IService<TestInstrument> {
 
     Result updInstrument(TestInstrument testInstrument);
 
+    /**
+     * 单个图片文件上传
+     */
+    Boolean uploading(Integer id, MultipartFile multipartFile);
+
     Result delInstruments(List<Long> idList);
 
     IPage<TestInstrumentVo> getPageList(Page<TestInstrumentVo> page, QueryWrapper<TestInstrument> queryWrapper);
