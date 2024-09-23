@@ -1,5 +1,6 @@
 package com.lims.manage.erp.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.DeviceEntity;
 import com.lims.manage.erp.entity.ReportRecordDetailEntity;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @Component
 @Mapper
-public interface DeviceEntityMapper {
+public interface DeviceEntityMapper extends BaseMapper<DeviceEntity> {
     int deleteByPrimaryKey(Integer id);
 
     int insert(DeviceEntity record);

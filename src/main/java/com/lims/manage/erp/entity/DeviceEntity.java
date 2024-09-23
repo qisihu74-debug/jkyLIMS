@@ -1,5 +1,7 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -7,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
+@TableName("test_instrument")
 public class DeviceEntity {
     private Integer id;
 
@@ -26,9 +29,9 @@ public class DeviceEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date appraisalDate;
-
+    @TableField(value = "`range`")
     private String range;
-
+    @TableField(value = "`level`")
     private String level;
 
     private String used;
@@ -98,9 +101,9 @@ public class DeviceEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateTime;
-
+    @TableField(exist = false)
     private Integer pageSize;
-
+    @TableField(exist = false)
     private Integer pageNum;
 
 }
