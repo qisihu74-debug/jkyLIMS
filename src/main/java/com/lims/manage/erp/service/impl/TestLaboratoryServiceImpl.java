@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lims.manage.erp.entity.HKPersonDoorProvisionalAuthorityRelEntity;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrument;
+import com.lims.manage.erp.mapper.HKPersonDoorProvisionalAuthorityRelEntityMapper;
 import com.lims.manage.erp.mapper.TestInstrumentDao;
 import com.lims.manage.erp.mapper.TestLaboratoryDao;
 import com.lims.manage.erp.entity.TestLaboratory;
@@ -43,6 +45,8 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
     private SysOssService sysOssService;
     @Resource
     private TestInstrumentDao testInstrumentDao;
+    @Resource
+    private HKPersonDoorProvisionalAuthorityRelEntityMapper hkPersonDoorProvisionalAuthorityRelEntityMapper;
 
     @Override
     public Result addLaboratory(TestLaboratory testLaboratory) {
@@ -158,6 +162,12 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
         }
         // 排序
         queryWrapper.orderByDesc(TestLaboratory::getId);
+
+        List<HKPersonDoorProvisionalAuthorityRelEntity> list = hkPersonDoorProvisionalAuthorityRelEntityMapper.selectList(null);
+        for (HKPersonDoorProvisionalAuthorityRelEntity data : list) {
+            System.out.println("data == " + data);
+
+        }
 
         List<TestLaboratory> testLaboratorylist = testLaboratoryDao.selectList(queryWrapper);
         PageInfo<TestLaboratory> pageInfo = new PageInfo<>(testLaboratorylist);
