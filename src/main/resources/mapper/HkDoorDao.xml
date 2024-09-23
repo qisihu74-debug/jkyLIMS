@@ -3,7 +3,7 @@
 
 <mapper namespace="com.lims.manage.erp.mapper.HkDoorDao">
 
-    <select id="doorList" resultType="java.util.List">
+    <select id="doorList" resultType="com.lims.manage.erp.entity.HkDoor">
         SELECT
         *
         FROM
@@ -18,7 +18,7 @@
 <if test="name!=null and name!=''">
     AND tba.name LIKE CONCAT('%',#{name},'%')
 </if>
-<if test="mobile!=null and mobile!=''">
+<if test="position!=null and position!=''">
     AND tba.region_name LIKE CONCAT('%',#{position},'%')
 </if>
 <if test="state == '已关联'">

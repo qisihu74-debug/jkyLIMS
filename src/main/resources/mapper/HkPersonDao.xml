@@ -3,7 +3,7 @@
 
 <mapper namespace="com.lims.manage.erp.mapper.HkPersonDao">
 
-    <select id="personList" resultType="java.util.List">
+    <select id="personList" resultType="com.lims.manage.erp.entity.HkPerson">
         SELECT
         *
         FROM
