@@ -1,11 +1,14 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.SysUserEntity;
 import com.lims.manage.erp.entity.TestInstrument;
+import com.lims.manage.erp.mapper.TestInstrumentDao;
 import com.lims.manage.erp.mapper.TestLaboratoryDao;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.result.Result;
@@ -15,6 +18,7 @@ import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestLaboratoryService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.TestLaboratoryVo;
 import org.springframework.stereotype.Service;
 
@@ -37,16 +41,19 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
     private LogManagerService logManagerService;
     @Resource
     private SysOssService sysOssService;
+    @Resource
+    private TestInstrumentDao testInstrumentDao;
+
     @Override
     public Result addLaboratory(TestLaboratory testLaboratory) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        if (testLaboratory.getName()==null){
+        if (testLaboratory.getName() == null) {
             return ResultUtil.error("实验室名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name",testLaboratory.getName()).eq("del_flag",0))!=null){
+        if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name", testLaboratory.getName()).eq("del_flag", 0)) != null) {
             return ResultUtil.error("实验室名称重复");
         }
         testLaboratory.setStatus("0");
@@ -90,17 +97,26 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
     @Override
     public Result delLaboratory(List<Long> idList) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        List<TestLaboratory> testLaboratoryList=new ArrayList<>();
+        for (Long id : idList) {
+            // 查询实验室与仪器存在关联信息
+            LambdaQueryWrapper<TestInstrument> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(TestInstrument::getLaboratoryId, id);
+            List<TestInstrument> instrumentList = testInstrumentDao.selectList(queryWrapper);
+            if (CollectionUtil.isNotEmpty(instrumentList)) {
+                return ResultUtil.error("删除失败，当前实验室 下存在关联设备");
+            }
+        }
+        List<TestLaboratory> testLaboratoryList = new ArrayList<>();
         for (Long aLong : idList) {
-            TestLaboratory testLaboratory=new TestLaboratory();
+            TestLaboratory testLaboratory = new TestLaboratory();
             testLaboratory.setUpdateTime(new Date());
             testLaboratory.setDelFlag(1);
             testLaboratory.setId(aLong.intValue());
-            String url=this.getById(aLong).getPicture();
-            if (url!=null){
+            String url = this.getById(aLong).getPicture();
+            if (url != null) {
                 sysOssService.delAnnounce(url);
             }
             testLaboratoryList.add(testLaboratory);
@@ -116,8 +132,37 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
     }
 
     @Override
-    public IPage<TestLaboratoryVo> getPageList(Page<TestLaboratoryVo> page, QueryWrapper<TestLaboratory> queryWrapper) {
-        return testLaboratoryDao.getListPage(page,queryWrapper);
+    public Result getPageList(TestLaboratoryVo testLaboratory) {
+
+        if (testLaboratory.getPageNum() == null || testLaboratory.getPageSize() == null) {
+            testLaboratory.setPageNum(1);
+            testLaboratory.setPageSize(10);
+        }
+
+        // 设置分页
+        PageHelper.startPage(testLaboratory.getPageNum(), testLaboratory.getPageSize());
+
+        LambdaQueryWrapper<TestLaboratory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestLaboratory::getDelFlag, 0);
+        if (StringUtils.isNotEmpty(testLaboratory.getName())) {
+            queryWrapper.like(TestLaboratory::getName, testLaboratory.getName());
+        }
+        if (StringUtils.isNotEmpty(testLaboratory.getCode())) {
+            queryWrapper.like(TestLaboratory::getCode, testLaboratory.getCode());
+        }
+        if (StringUtils.isNotEmpty(testLaboratory.getPosition())) {
+            queryWrapper.like(TestLaboratory::getPicture, testLaboratory.getPhone());
+        }
+        if (testLaboratory.getPageNum() == null || testLaboratory.getPageSize() == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        // 排序
+        queryWrapper.orderByDesc(TestLaboratory::getId);
+
+        List<TestLaboratory> testLaboratorylist = testLaboratoryDao.selectList(queryWrapper);
+        PageInfo<TestLaboratory> pageInfo = new PageInfo<>(testLaboratorylist);
+
+        return ResultUtil.success(pageInfo);
     }
 }
 

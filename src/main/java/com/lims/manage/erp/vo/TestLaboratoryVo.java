@@ -36,4 +36,8 @@ public class TestLaboratoryVo {
     private String remark;
     //数量
     private Integer quantity;
+    @TableField(exist = false)
+    private Integer pageSize;
+    @TableField(exist = false)
+    private Integer pageNum;
 }

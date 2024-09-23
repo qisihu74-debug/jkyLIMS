@@ -5,10 +5,7 @@ package com.lims.manage.erp.controller;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.annotation.Log;
-import com.lims.manage.erp.entity.TestInstrumentType;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
@@ -46,22 +43,18 @@ public class TestLaboratoryController extends ApiController {
         queryWrapper.eq("del_flag",0);
         return ResultUtil.success(this.testLaboratoryService.list(queryWrapper));
     }
+
     /**
      * 分页查询所有数据
      *
-     * @param page 分页对象
      * @param testLaboratory 查询实体
      * @return 所有数据
      */
     @GetMapping("/list")
     @ApiOperation("分页查询实验室信息")
-    public Result selectAll(Page<TestLaboratoryVo> page, TestLaboratoryVo testLaboratory) {
-        QueryWrapper<TestLaboratory> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("del_flag",0);
-        if (testLaboratory.getName()!=null){
-            queryWrapper.like("name",testLaboratory.getName());
-        }
-        return ResultUtil.success(this.testLaboratoryService.getPageList(page, queryWrapper));
+    public Result selectAll(TestLaboratoryVo testLaboratory) {
+
+        return this.testLaboratoryService.getPageList(testLaboratory);
     }
 
     /**
