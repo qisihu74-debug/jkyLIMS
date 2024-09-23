@@ -21,6 +21,7 @@ public interface TestLaboratoryService extends IService<TestLaboratory> {
     Result addLaboratory(TestLaboratory testLaboratory);
     Result updLaboratory(TestLaboratory testLaboratory);
     Result delLaboratory(List<Long> idList);
-    IPage<TestLaboratoryVo> getPageList(Page<TestLaboratoryVo> page, QueryWrapper<TestLaboratory> queryWrapper);
+
+    Result getPageList(TestLaboratoryVo testLaboratory);
 }
 
