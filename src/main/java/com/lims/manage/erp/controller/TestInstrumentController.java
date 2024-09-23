@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -374,17 +375,51 @@ public class TestInstrumentController extends ApiController {
         boolean save = testInstrumentService.update(record);
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (!save) {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
-                    +"修改设备仪器"+record.getId()+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                    + "修改设备仪器" + record.getId() + "失败!", Const.INSTRUMENT_MANAGEMENT_LOG, false);
             return ResultUtil.success("设备修改失败!");
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
-                +"修改设备仪器"+record.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                + "修改设备仪器" + record.getId() + "成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
         return ResultUtil.success("设备修改成功！", record);
     }
 
     /**
+     * 仪器图片上传
+     */
+    @RequestMapping("/uploading/{id}")
+    public Result uploading(@PathVariable("id") Integer id, MultipartFile file) {
+
+        if (id == null && "".equals(id)) {
+            return ResultUtil.error("缺少必填参数！");
+        }
+        // 处理file文件后缀
+        // 常规图片后缀名。
+        String[] nameSuffixS = Const.nameSuffixS;
+        // true 正常运行。 flase 返回数组中不存在格式。
+        Boolean flag = false;
+
+        String name = file.getOriginalFilename();
+        String[] strings = name.split("\\.");
+        String nameSuffix = strings[strings.length - 1];
+        for (int i = 0; i < nameSuffixS.length; i++) {
+            if (nameSuffixS[i].equalsIgnoreCase(nameSuffix)) {
+                // 变动
+                flag = true;
+            }
+        }
+
+        if (flag == false) {
+            return ResultUtil.error("样品文件上传失败 图片后缀不在通用规则中！");
+        }
+
+        testInstrumentService.uploading(id, file);
+        return ResultUtil.error("仪器图片上传成功");
+    }
+
+    /**
      * 删除设备
+     *
      * @param idList
      * @return
      */

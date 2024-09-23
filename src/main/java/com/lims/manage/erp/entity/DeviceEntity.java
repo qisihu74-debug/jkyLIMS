@@ -37,6 +37,10 @@ public class DeviceEntity {
     private String used;
 
     private Integer laboratoryId;
+    /**
+     * 实验室名称
+     */
+    private String laboratoryName;
 
     private String oldCode;
 
