@@ -179,5 +179,10 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         return ResultUtil.success("操作成功");
     }
 
+    @Override
+    public Map<String, Object> pictures(String svrIndexCode, String picUri) {
+        return HkUtils.doorPictures(hkConfig.getDoorPictures(),svrIndexCode,picUri);
+    }
+
 
 }

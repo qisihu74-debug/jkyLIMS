@@ -107,25 +107,16 @@ public class HkUtils {
     }
 
     /**
-     * 获取门禁设备在线状态
-     * @return
-     */
-    public static Map<String,Object> doorGetState(String path){
-        JSONObject jsonBody = new JSONObject();
-        jsonBody.put("pageNo", 1);
-        jsonBody.put("pageSize", 1000);
-        Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
-        return returnMap;
-    }
-
-    /**
      * 获取门禁事件的图片（每个门禁事件的图片）
+     * @param path 请求路径
+     * @param svrIndexCode 提供picUri处会提供此字段
+     * @param picUri 图片相对地址
      * @return
      */
-    public static Map<String,Object> doorPictures(String path){
+    public static Map<String,Object> doorPictures(String path,String svrIndexCode,String picUri){
         JSONObject jsonBody = new JSONObject();
-        jsonBody.put("pageNo", 1);
-        jsonBody.put("pageSize", 1000);
+        jsonBody.put("svrIndexCode", svrIndexCode);
+        jsonBody.put("picUri", picUri);
         Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
         return returnMap;
     }
