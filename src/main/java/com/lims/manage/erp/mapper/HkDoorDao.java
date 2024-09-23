@@ -2,6 +2,9 @@ package com.lims.manage.erp.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lims.manage.erp.entity.HkDoor;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @author gjl
@@ -12,4 +15,5 @@ import com.lims.manage.erp.entity.HkDoor;
  * @Copyright © 河南交科院
  */
 public interface HkDoorDao extends BaseMapper<HkDoor> {
+    List<HkDoor> doorList(@Param("name") String name, @Param("position") String position, @Param("state") String state);
 }

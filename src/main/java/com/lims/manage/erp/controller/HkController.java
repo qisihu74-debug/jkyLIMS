@@ -3,7 +3,9 @@ package com.lims.manage.erp.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.config.HkConfig;
+import com.lims.manage.erp.entity.DoorDetailReq;
 import com.lims.manage.erp.entity.HkDoor;
 import com.lims.manage.erp.entity.HkDoorReq;
 import com.lims.manage.erp.entity.HkGrantDoorReq;
@@ -140,4 +142,53 @@ public class HkController {
         }
     }
 
+    /**
+     * 海康人员列表查询
+     * @param pageNum
+     * @param pageSize
+     * @param name
+     * @param mobile
+     * @param state
+     * @return
+     */
+    @GetMapping("personList")
+    public Result personList(Integer pageNum,Integer pageSize,String name,String mobile,String state){
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数");
+        }
+        PageInfo<HkPerson> pageInfo = hkPersonService.personList(pageNum,pageSize,name,mobile,state);
+        return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 海康人员列表查询
+     * @param pageNum
+     * @param pageSize
+     * @param name
+     * @param position
+     * @param state
+     * @return
+     */
+    @GetMapping("doorList")
+    public Result doorList(Integer pageNum,Integer pageSize,String name,String position,String state){
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数");
+        }
+        PageInfo<HkDoor> pageInfo = hkDoorService.doorList(pageNum,pageSize,name,position,state);
+        return ResultUtil.success(pageInfo);
+    }
+
+    /**
+     * 查询门禁点出入事件详情记录
+     * @param doorDetailReq
+     * @return
+     */
+    @PostMapping("doorDetails")
+    public Result doorDetails(@RequestBody DoorDetailReq doorDetailReq){
+        if (doorDetailReq.getPageNo() == null || doorDetailReq.getPageSize() == null){
+            return ResultUtil.error("缺少分页参数");
+        }
+        Map<String, Object> map = hkDoorService.doorDetails(doorDetailReq);
+        return ResultUtil.success(map);
+    }
 }
