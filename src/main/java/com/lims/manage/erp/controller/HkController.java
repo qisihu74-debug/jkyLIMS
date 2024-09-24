@@ -275,7 +275,7 @@ public class HkController {
      */
     @GetMapping("temporaryVisit")
     public Result temporaryVisit(String personId){
-        
+
         return null;
     }
 
