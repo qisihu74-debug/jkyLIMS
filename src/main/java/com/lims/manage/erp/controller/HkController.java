@@ -6,13 +6,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.config.HkConfig;
 import com.lims.manage.erp.entity.DoorDetailReq;
+import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
+import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
+import com.lims.manage.erp.entity.HKPersonUserRelEntity;
 import com.lims.manage.erp.entity.HkDoor;
 import com.lims.manage.erp.entity.HkDoorReq;
 import com.lims.manage.erp.entity.HkGrantDoorReq;
 import com.lims.manage.erp.entity.HkPerson;
-import com.lims.manage.erp.entity.PersonDoorReq;
-import com.lims.manage.erp.entity.ResourceInfo;
-import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkDoorService;
@@ -21,7 +21,11 @@ import com.lims.manage.erp.util.HkUtils;
 import com.lims.manage.erp.util.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -270,23 +274,30 @@ public class HkController {
 
     /**
      * 临时授权
-     * @param personId
+     * @param id
      * @return
      */
     @GetMapping("temporaryVisit")
-    public Result temporaryVisit(String personId){
+    public Result temporaryVisit(Integer id){
+        if (id == null){
+            return ResultUtil.error("缺少参数");
+        }
 
+        hkDoorService.temporaryVisit(id);
         return null;
     }
 
     /**
      *取消临时授权
-     * @param personId
+     * @param id
      * @return
      */
     @GetMapping("cancelVisit")
-    public Result cancelVisit(String personId){
-
+    public Result cancelVisit(String id){
+        if (id == null){
+            return ResultUtil.error("缺少参数");
+        }
+        hkDoorService.cancelVisit(id);
         return null;
     }
 }

@@ -1,34 +1,38 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.config.HkConfig;
 import com.lims.manage.erp.entity.DoorDetailReq;
 import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
 import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
+import com.lims.manage.erp.entity.HKPersonDoorProvisionalAuthorityRelEntity;
 import com.lims.manage.erp.entity.HKPersonUserRelEntity;
 import com.lims.manage.erp.entity.HkDoor;
-import com.lims.manage.erp.http.RestUtil;
+import com.lims.manage.erp.entity.HkDoorReq;
+import com.lims.manage.erp.entity.HkGrantDoorReq;
+import com.lims.manage.erp.entity.PersonDoorReq;
+import com.lims.manage.erp.entity.ResourceInfo;
 import com.lims.manage.erp.mapper.HKDoorLaboratoryInstrumentRelEntityMapper;
 import com.lims.manage.erp.mapper.HKDoorLaboratoryRelEntityMapper;
+import com.lims.manage.erp.mapper.HKPersonDoorProvisionalAuthorityRelEntityMapper;
 import com.lims.manage.erp.mapper.HKPersonUserRelEntityMapper;
 import com.lims.manage.erp.mapper.HkDoorDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.util.HkUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.lims.manage.erp.util.RedisUtils;
 import com.lims.manage.erp.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +50,8 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private HkDoorDao hkDoorDao;
     @Autowired
     private HkConfig hkConfig;
+    @Autowired
+    private HKPersonDoorProvisionalAuthorityRelEntityMapper authorityRelEntityMapper;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
@@ -182,6 +188,65 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Override
     public Map<String, Object> pictures(String svrIndexCode, String picUri) {
         return HkUtils.doorPictures(hkConfig.getDoorPictures(),svrIndexCode,picUri);
+    }
+
+    @Override
+    public Boolean temporaryVisit(Integer id) {
+        HKPersonDoorProvisionalAuthorityRelEntity byId = authorityRelEntityMapper.selectById(id);
+        //组装数据
+        HkDoorReq hkDoorReq = new HkDoorReq();
+        hkDoorReq.setStartTime(byId.getStartTime());
+        hkDoorReq.setEndTime(byId.getEndTime());
+        List<PersonDoorReq> personDatas = Lists.newArrayList();
+        PersonDoorReq personDoorReq = new PersonDoorReq();
+        List<String> personId = Lists.newArrayList();
+        personId.add(byId.getPersonId());
+        personDoorReq.setIndexCodes(personId);
+        personDatas.add(personDoorReq);
+        hkDoorReq.setPersonDatas(personDatas);
+        List<ResourceInfo> resourceInfos = Lists.newArrayList();
+        String indexCode = byId.getIndexCode();
+        if (StringUtils.isEmpty(indexCode)){
+            return false;
+        }
+        String[] split = indexCode.split(",");
+        for (String s:split){
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setResourceIndexCode(s);
+            resourceInfos.add(resourceInfo);
+        }
+        hkDoorReq.setResourceInfos(resourceInfos);
+        //授权对象
+        HkGrantDoorReq hkGrantDoorReq = new HkGrantDoorReq();
+        hkGrantDoorReq.setResourceInfos(resourceInfos);
+        //人员门禁设备绑定
+        Map<String, Object> map = HkUtils.personBandDoor(hkConfig.getPersonBandDoor(), hkDoorReq);
+        if (map != null){
+            String msg = map.get("msg").toString();
+            if ("success".equals(msg)){
+                //权限下发
+                Map<String, Object> grant = HkUtils.personGrant(hkConfig.getGrant(), hkGrantDoorReq);
+                if (grant != null) {
+                    String msg1 = map.get("msg").toString();
+                    if ("success".equals(msg1)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }else {
+                return false;
+            }
+        }else {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean cancelVisit(String id) {
+
     }
 
 

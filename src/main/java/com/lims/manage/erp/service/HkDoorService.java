@@ -69,4 +69,8 @@ public interface HkDoorService extends IService<HkDoor> {
     Result removeDoorLaboratoryInstruments(Integer ids[]);
 
     Map<String, Object> pictures(String svrIndexCode, String picUri);
+
+    Boolean temporaryVisit(Integer id);
+
+    Boolean cancelVisit(String id);
 }
