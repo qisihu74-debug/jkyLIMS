@@ -247,6 +247,7 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Override
     public Boolean cancelVisit(String id) {
 
+        return false;
     }
 
 
