@@ -246,8 +246,38 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
     @Override
     public Boolean cancelVisit(String id) {
-
-        return false;
+        HKPersonDoorProvisionalAuthorityRelEntity byId = authorityRelEntityMapper.selectById(id);
+        HkDoorReq hkDoorReq = new HkDoorReq();
+        List<PersonDoorReq> personDatas = Lists.newArrayList();
+        PersonDoorReq personDoorReq = new PersonDoorReq();
+        List<String> personId = Lists.newArrayList();
+        personId.add(byId.getPersonId());
+        personDoorReq.setIndexCodes(personId);
+        personDatas.add(personDoorReq);
+        hkDoorReq.setPersonDatas(personDatas);
+        List<ResourceInfo> resourceInfos = Lists.newArrayList();
+        String indexCode = byId.getIndexCode();
+        if (StringUtils.isEmpty(indexCode)){
+            return false;
+        }
+        String[] split = indexCode.split(",");
+        for (String s:split){
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setResourceIndexCode(s);
+            resourceInfos.add(resourceInfo);
+        }
+        hkDoorReq.setResourceInfos(resourceInfos);
+        Map<String, Object> map = HkUtils.cancleBandDoor(hkConfig.getCancelBandDoor(), hkDoorReq);
+        if (map != null){
+            String msg = map.get("msg").toString();
+            if ("success".equals(msg)){
+                return true;
+            }else {
+                return false;
+            }
+        }else {
+            return false;
+        }
     }
 
 

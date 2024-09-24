@@ -300,7 +300,11 @@ public class HkController {
         if (id == null){
             return ResultUtil.error("缺少参数");
         }
-        hkDoorService.cancelVisit(id);
-        return null;
+        Boolean aBoolean = hkDoorService.cancelVisit(id);
+        if (aBoolean){
+            return ResultUtil.success("取消临时授权成功",null);
+        }else {
+            return ResultUtil.error("取消临时授权失败");
+        }
     }
 }

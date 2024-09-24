@@ -153,6 +153,25 @@ public class HkUtils {
     }
 
     /**
+     * 取消权限配置
+     * @return
+     */
+    public static Map<String,Object> cancleBandDoor(String path, HkDoorReq hkDoorReq){
+        //设置固定参数
+        List<PersonDoorReq> personDatas = hkDoorReq.getPersonDatas();
+        for (PersonDoorReq personDoorReq :personDatas){
+            personDoorReq.setPersonDataType("person");
+        }
+        List<ResourceInfo> resourceInfos = hkDoorReq.getResourceInfos();
+        for (ResourceInfo resourceInfo: resourceInfos){
+            resourceInfo.setResourceType("door");
+        }
+        JSONObject jsonBody = JSONObject.parseObject(JSON.toJSONString(hkDoorReq));
+        Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
+        return returnMap;
+    }
+
+    /**
      * 根据出入权限快速配置（人员授权门禁）
      * @return
      */
