@@ -5,14 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.config.HkConfig;
-import com.lims.manage.erp.entity.DoorDetailReq;
-import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
-import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
-import com.lims.manage.erp.entity.HKPersonUserRelEntity;
-import com.lims.manage.erp.entity.HkDoor;
-import com.lims.manage.erp.entity.HkDoorReq;
-import com.lims.manage.erp.entity.HkGrantDoorReq;
-import com.lims.manage.erp.entity.HkPerson;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkDoorService;
@@ -322,4 +315,30 @@ public class HkController {
         Map<String,Object> map = hkDoorService.doorState(indexCodes);
         return ResultUtil.success(map);
     }
+
+    /**
+     * 临时访问列表
+     *
+     * @param personId
+     * @return
+     */
+    @GetMapping("getTemporaryAccessList")
+    public Result getTemporaryAccessList(String personId) {
+
+        return null;
+    }
+
+    /**
+     * 新增：临时访问
+     *
+     * @param data
+     * @return
+     */
+    @PostMapping("addtemporaryVisit")
+    public Result addtemporaryVisit(@RequestBody HKPersonDoorProvisionalAuthorityRelEntity data) {
+
+        return null;
+    }
+
+
 }

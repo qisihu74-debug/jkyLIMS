@@ -24,14 +24,18 @@ import com.lims.manage.erp.mapper.HKDoorLaboratoryRelEntityMapper;
 import com.lims.manage.erp.mapper.HKPersonDoorProvisionalAuthorityRelEntityMapper;
 import com.lims.manage.erp.mapper.HKPersonUserRelEntityMapper;
 import com.lims.manage.erp.mapper.HkDoorDao;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.util.HkUtils;
-import com.lims.manage.erp.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.lims.manage.erp.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,11 +57,19 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private HkConfig hkConfig;
     @Autowired
     private HKPersonDoorProvisionalAuthorityRelEntityMapper authorityRelEntityMapper;
+    @Autowired
+    private HKDoorLaboratoryInstrumentRelEntityMapper hkDoorLaboratoryInstrumentRelEntityMapper;
+    @Autowired
+    private HKDoorLaboratoryRelEntityMapper hkDoorLaboratoryRelEntityMapper;
+    @Autowired
+    private HKPersonUserRelEntityMapper hkPersonUserRelEntityMapper;
+    @Autowired
+    private HKPersonDoorProvisionalAuthorityRelEntityMapper hkPersonDoorProvisionalAuthorityRelEntityMapper;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
-        PageHelper.startPage(pageNum,pageSize);
-        List<HkDoor> list = hkDoorDao.doorList(name,position,state);
+        PageHelper.startPage(pageNum, pageSize);
+        List<HkDoor> list = hkDoorDao.doorList(name, position, state);
         PageInfo<HkDoor> pageInfo = new PageInfo(list);
         return pageInfo;
     }
@@ -67,15 +79,6 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         Map<String, Object> map = HkUtils.doorEvents(hkConfig.getDoorEvents(), doorDetailReq);
         return map;
     }
-    @Autowired
-    private HKDoorLaboratoryInstrumentRelEntityMapper hkDoorLaboratoryInstrumentRelEntityMapper;
-
-    @Autowired
-    private HKDoorLaboratoryRelEntityMapper hkDoorLaboratoryRelEntityMapper;
-
-    @Autowired
-    private HKPersonUserRelEntityMapper hkPersonUserRelEntityMapper;
-
 
     /**
      * 编辑门禁与实验室id 进行关联
@@ -292,6 +295,35 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         DoorStateReq doorStateReq = new DoorStateReq();
         doorStateReq.setDoorIndexCodes(indexCodes);
         return HkUtils.doorState(hkConfig.getDoorState(),doorStateReq);
+    }
+
+    /**
+     * 临时访问列表
+     *
+     * @param personId
+     * @return
+     */
+    @Override
+    public Result getTemporaryAccessList(String personId) {
+
+        LambdaQueryWrapper<HKPersonDoorProvisionalAuthorityRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(HKPersonDoorProvisionalAuthorityRelEntity::getPersonId, personId);
+        queryWrapper.orderByDesc(HKPersonDoorProvisionalAuthorityRelEntity::getCreateTime);
+        List<HKPersonDoorProvisionalAuthorityRelEntity> list = hkPersonDoorProvisionalAuthorityRelEntityMapper.selectList(queryWrapper);
+
+        return ResultUtil.success(list);
+    }
+
+    /**
+     * 新增：临时访问
+     *
+     * @param data
+     * @return
+     */
+    @Override
+    public Result addtemporaryVisit(HKPersonDoorProvisionalAuthorityRelEntity data) {
+
+        return null;
     }
 
 
