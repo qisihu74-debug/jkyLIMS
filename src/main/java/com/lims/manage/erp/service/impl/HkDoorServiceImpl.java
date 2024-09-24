@@ -193,6 +193,9 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Override
     public Boolean temporaryVisit(Integer id) {
         HKPersonDoorProvisionalAuthorityRelEntity byId = authorityRelEntityMapper.selectById(id);
+        if (byId == null){
+            return false;
+        }
         //组装数据
         HkDoorReq hkDoorReq = new HkDoorReq();
         hkDoorReq.setStartTime(byId.getStartTime());
@@ -247,6 +250,9 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Override
     public Boolean cancelVisit(String id) {
         HKPersonDoorProvisionalAuthorityRelEntity byId = authorityRelEntityMapper.selectById(id);
+        if (byId == null){
+            return false;
+        }
         HkDoorReq hkDoorReq = new HkDoorReq();
         List<PersonDoorReq> personDatas = Lists.newArrayList();
         PersonDoorReq personDoorReq = new PersonDoorReq();
