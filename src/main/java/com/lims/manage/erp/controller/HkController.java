@@ -282,9 +282,12 @@ public class HkController {
         if (id == null){
             return ResultUtil.error("缺少参数");
         }
-
-        hkDoorService.temporaryVisit(id);
-        return null;
+        Boolean aBoolean = hkDoorService.temporaryVisit(id);
+        if (aBoolean){
+            return ResultUtil.success("临时授权成功",null);
+        }else {
+            return ResultUtil.error("临时授权失败");
+        }
     }
 
     /**
