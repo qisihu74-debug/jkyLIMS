@@ -25,8 +25,6 @@ public class HKPersonDoorProvisionalAuthorityRelEntity implements Serializable {
 
     private String laboratoryMessage;
 
-    private String doorMessage;
-
     private Date createTime;
 
     private Integer state;
