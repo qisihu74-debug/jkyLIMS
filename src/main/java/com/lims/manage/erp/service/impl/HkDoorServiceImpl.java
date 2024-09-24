@@ -27,6 +27,7 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.HKDoorLaboratoryInstrumentRelService;
 import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.util.HkUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +35,9 @@ import com.lims.manage.erp.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author gjl
@@ -64,6 +63,8 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private HKPersonUserRelEntityMapper hkPersonUserRelEntityMapper;
     @Autowired
     private HKPersonDoorProvisionalAuthorityRelEntityMapper hkPersonDoorProvisionalAuthorityRelEntityMapper;
+    @Autowired
+    private HKDoorLaboratoryInstrumentRelService hkDoorLaboratoryInstrumentRelService;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
@@ -163,13 +164,15 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         if (CollectionUtil.isNotEmpty(list)) {
             return ResultUtil.error("操作失败，有重复项，请重新选择");
         }
+        List<HKDoorLaboratoryInstrumentRelEntity> dataSet = new ArrayList<>();
         for (int i = 0; i < ids.length; i++) {
             HKDoorLaboratoryInstrumentRelEntity data = new HKDoorLaboratoryInstrumentRelEntity();
             data.setIndexCode(indexCode);
             data.setTestLaboratoryId(testLaboratoryId);
             data.setTestInstrumentId(ids[i]);
-            hkDoorLaboratoryInstrumentRelEntityMapper.insert(data);
+            dataSet.add(data);
         }
+        hkDoorLaboratoryInstrumentRelService.saveBatch(dataSet);
         return ResultUtil.success("操作成功");
     }
 
@@ -182,9 +185,7 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Result removeDoorLaboratoryInstruments(Integer[] ids) {
-        for (int i = 0; i < ids.length; i++) {
-            hkDoorLaboratoryInstrumentRelEntityMapper.deleteById(ids[i]);
-        }
+        hkDoorLaboratoryInstrumentRelEntityMapper.deleteBatchIds(Arrays.asList(ids));
         return ResultUtil.success("操作成功");
     }
 
@@ -312,10 +313,17 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
      * @param data
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Result addtemporaryVisit(HKPersonDoorProvisionalAuthorityRelEntity data) {
 
-        return null;
+        String startTime = "";
+//        DateU
+        String str = "2024-09-10T11:30:08.000+08:00";
+
+
+//        hkPersonDoorProvisionalAuthorityRelEntityMapper.insert(data);
+        return ResultUtil.success("操作成功");
     }
 
 
