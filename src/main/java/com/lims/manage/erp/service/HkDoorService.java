@@ -6,6 +6,7 @@ import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -69,6 +70,8 @@ public interface HkDoorService extends IService<HkDoor> {
     Boolean temporaryVisit(Integer id);
 
     Boolean cancelVisit(String id);
+
+    Map<String, Object> doorState(List<String> indexCodes);
 
     /**
      * 临时访问列表

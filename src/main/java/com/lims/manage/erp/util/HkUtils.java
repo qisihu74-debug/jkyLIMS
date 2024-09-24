@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.hikvision.artemis.sdk.ArtemisHttpUtil;
 import com.hikvision.artemis.sdk.config.ArtemisConfig;
 import com.lims.manage.erp.entity.DoorDetailReq;
+import com.lims.manage.erp.entity.DoorStateReq;
 import com.lims.manage.erp.entity.HkDoorReq;
 import com.lims.manage.erp.entity.HkGrantDoorReq;
 import com.lims.manage.erp.entity.PersonDoorReq;
@@ -92,6 +93,16 @@ public class HkUtils {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("pageNo", 1);
         jsonBody.put("pageSize", 1000);
+        Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
+        return returnMap;
+    }
+
+    /**
+     * 查询门禁点状态
+     * @return
+     */
+    public static Map<String,Object> doorState(String path, DoorStateReq doorStateReq){
+        JSONObject jsonBody = JSONObject.parseObject(JSON.toJSONString(doorStateReq));
         Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
         return returnMap;
     }

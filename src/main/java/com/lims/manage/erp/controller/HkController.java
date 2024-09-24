@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -299,6 +300,20 @@ public class HkController {
         }else {
             return ResultUtil.error("取消临时授权失败");
         }
+    }
+
+    /**
+     * 查询门禁点状态
+     * @param indexCodes
+     * @return
+     */
+    @GetMapping("doorState")
+    public Result doorState(@RequestParam("indexCodes") List<String> indexCodes){
+        if (CollectionUtils.isEmpty(indexCodes)){
+            return ResultUtil.error("缺少参数");
+        }
+        Map<String,Object> map = hkDoorService.doorState(indexCodes);
+        return ResultUtil.success(map);
     }
 
     /**
