@@ -21,6 +21,8 @@ public class HkConfig {
     private String person;
     @Value("${hikvision.api.personBandDoor}")
     private String personBandDoor;
+    @Value("${hikvision.api.cancelBandDoor}")
+    private String cancelBandDoor;
     @Value("${hikvision.api.grant}")
     private String grant;
 

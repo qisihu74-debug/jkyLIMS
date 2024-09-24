@@ -66,6 +66,10 @@ public interface HkDoorService extends IService<HkDoor> {
 
     Map<String, Object> pictures(String svrIndexCode, String picUri);
 
+    Boolean temporaryVisit(Integer id);
+
+    Boolean cancelVisit(String id);
+
     /**
      * 临时访问列表
      *
