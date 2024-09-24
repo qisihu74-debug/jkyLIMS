@@ -74,5 +74,5 @@ public class BucketsConst {
     /**
      * 仪器照片
      */
-    public static final String instrument_picture = "instrument_picture";
+    public static final String instrument_picture = "instrument-picture";
 }
