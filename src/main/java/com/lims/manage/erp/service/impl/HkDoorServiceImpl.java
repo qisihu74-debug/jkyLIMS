@@ -6,30 +6,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.config.HkConfig;
-import com.lims.manage.erp.entity.DoorDetailReq;
-import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
-import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
-import com.lims.manage.erp.entity.HKPersonUserRelEntity;
-import com.lims.manage.erp.entity.HkDoor;
-import com.lims.manage.erp.http.RestUtil;
-import com.lims.manage.erp.mapper.HKDoorLaboratoryInstrumentRelEntityMapper;
-import com.lims.manage.erp.mapper.HKDoorLaboratoryRelEntityMapper;
-import com.lims.manage.erp.mapper.HKPersonUserRelEntityMapper;
-import com.lims.manage.erp.mapper.HkDoorDao;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.util.HkUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.lims.manage.erp.util.RedisUtils;
 import com.lims.manage.erp.util.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,11 +35,19 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private HkDoorDao hkDoorDao;
     @Autowired
     private HkConfig hkConfig;
+    @Autowired
+    private HKDoorLaboratoryInstrumentRelEntityMapper hkDoorLaboratoryInstrumentRelEntityMapper;
+    @Autowired
+    private HKDoorLaboratoryRelEntityMapper hkDoorLaboratoryRelEntityMapper;
+    @Autowired
+    private HKPersonUserRelEntityMapper hkPersonUserRelEntityMapper;
+    @Autowired
+    private HKPersonDoorProvisionalAuthorityRelEntityMapper hkPersonDoorProvisionalAuthorityRelEntityMapper;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
-        PageHelper.startPage(pageNum,pageSize);
-        List<HkDoor> list = hkDoorDao.doorList(name,position,state);
+        PageHelper.startPage(pageNum, pageSize);
+        List<HkDoor> list = hkDoorDao.doorList(name, position, state);
         PageInfo<HkDoor> pageInfo = new PageInfo(list);
         return pageInfo;
     }
@@ -60,15 +57,6 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         Map<String, Object> map = HkUtils.doorEvents(hkConfig.getDoorEvents(), doorDetailReq);
         return map;
     }
-    @Autowired
-    private HKDoorLaboratoryInstrumentRelEntityMapper hkDoorLaboratoryInstrumentRelEntityMapper;
-
-    @Autowired
-    private HKDoorLaboratoryRelEntityMapper hkDoorLaboratoryRelEntityMapper;
-
-    @Autowired
-    private HKPersonUserRelEntityMapper hkPersonUserRelEntityMapper;
-
 
     /**
      * 编辑门禁与实验室id 进行关联
@@ -181,7 +169,36 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
     @Override
     public Map<String, Object> pictures(String svrIndexCode, String picUri) {
-        return HkUtils.doorPictures(hkConfig.getDoorPictures(),svrIndexCode,picUri);
+        return HkUtils.doorPictures(hkConfig.getDoorPictures(), svrIndexCode, picUri);
+    }
+
+    /**
+     * 临时访问列表
+     *
+     * @param personId
+     * @return
+     */
+    @Override
+    public Result getTemporaryAccessList(String personId) {
+
+        LambdaQueryWrapper<HKPersonDoorProvisionalAuthorityRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(HKPersonDoorProvisionalAuthorityRelEntity::getPersonId, personId);
+        queryWrapper.orderByDesc(HKPersonDoorProvisionalAuthorityRelEntity::getCreateTime);
+        List<HKPersonDoorProvisionalAuthorityRelEntity> list = hkPersonDoorProvisionalAuthorityRelEntityMapper.selectList(queryWrapper);
+
+        return ResultUtil.success(list);
+    }
+
+    /**
+     * 新增：临时访问
+     *
+     * @param data
+     * @return
+     */
+    @Override
+    public Result addtemporaryVisit(HKPersonDoorProvisionalAuthorityRelEntity data) {
+
+        return null;
     }
 
 

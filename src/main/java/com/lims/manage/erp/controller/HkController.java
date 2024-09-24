@@ -280,13 +280,40 @@ public class HkController {
     }
 
     /**
-     *取消临时授权
+     * 取消临时授权
+     *
      * @param personId
      * @return
      */
     @GetMapping("cancelVisit")
-    public Result cancelVisit(String personId){
+    public Result cancelVisit(String personId) {
 
         return null;
     }
+
+    /**
+     * 临时访问列表
+     *
+     * @param personId
+     * @return
+     */
+    @GetMapping("getTemporaryAccessList")
+    public Result getTemporaryAccessList(String personId) {
+
+        return null;
+    }
+
+    /**
+     * 新增：临时访问
+     *
+     * @param data
+     * @return
+     */
+    @PostMapping("addtemporaryVisit")
+    public Result addtemporaryVisit(@RequestBody HKPersonDoorProvisionalAuthorityRelEntity data) {
+
+        return null;
+    }
+
+
 }

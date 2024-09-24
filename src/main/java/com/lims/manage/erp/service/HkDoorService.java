@@ -2,11 +2,7 @@ package com.lims.manage.erp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.pagehelper.PageInfo;
-import com.lims.manage.erp.entity.DoorDetailReq;
-import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
-import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
-import com.lims.manage.erp.entity.HKPersonUserRelEntity;
-import com.lims.manage.erp.entity.HkDoor;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -69,4 +65,20 @@ public interface HkDoorService extends IService<HkDoor> {
     Result removeDoorLaboratoryInstruments(Integer ids[]);
 
     Map<String, Object> pictures(String svrIndexCode, String picUri);
+
+    /**
+     * 临时访问列表
+     *
+     * @param personId
+     * @return
+     */
+    Result getTemporaryAccessList(String personId);
+
+    /**
+     * 新增：临时访问
+     *
+     * @param data
+     * @return
+     */
+    Result addtemporaryVisit(HKPersonDoorProvisionalAuthorityRelEntity data);
 }
