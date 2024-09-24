@@ -9,6 +9,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.config.HkConfig;
 import com.lims.manage.erp.entity.DoorDetailReq;
+import com.lims.manage.erp.entity.DoorStateReq;
 import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
 import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
 import com.lims.manage.erp.entity.HKPersonDoorProvisionalAuthorityRelEntity;
@@ -284,6 +285,13 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         }else {
             return false;
         }
+    }
+
+    @Override
+    public Map<String, Object> doorState(List<String> indexCodes) {
+        DoorStateReq doorStateReq = new DoorStateReq();
+        doorStateReq.setDoorIndexCodes(indexCodes);
+        return HkUtils.doorState(hkConfig.getDoorState(),doorStateReq);
     }
 
 
