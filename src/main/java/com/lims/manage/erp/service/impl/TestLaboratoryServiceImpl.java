@@ -155,7 +155,7 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
             queryWrapper.like(TestLaboratory::getCode, testLaboratory.getCode());
         }
         if (StringUtils.isNotEmpty(testLaboratory.getPosition())) {
-            queryWrapper.like(TestLaboratory::getPicture, testLaboratory.getPhone());
+            queryWrapper.like(TestLaboratory::getPosition, testLaboratory.getPosition());
         }
         if (testLaboratory.getPageNum() == null || testLaboratory.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数！");
