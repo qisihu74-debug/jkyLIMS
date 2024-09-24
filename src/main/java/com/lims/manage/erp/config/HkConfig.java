@@ -42,9 +42,6 @@ public class HkConfig {
     private String doorSearch;
     @Value("${hikvision.api.door.state}")
     private String doorState;
-
-    @Value("${hikvision.api.door.get}")
-    private String doorGet;
     @Value("${hikvision.api.camera.encodeSearch}")
     private String cameraEncodeSearch;
     @Value("${hikvision.api.camera.subResources}")
