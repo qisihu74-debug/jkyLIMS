@@ -19,9 +19,9 @@ public class HKPersonDoorProvisionalAuthorityRelEntity implements Serializable {
 
     private String indexCode;
 
-    private Date startTime;
+    private String startTime;
 
-    private Date endTime;
+    private String endTime;
 
     private String laboratoryMessage;
 
