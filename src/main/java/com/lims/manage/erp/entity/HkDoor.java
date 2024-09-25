@@ -34,7 +34,13 @@ public class HkDoor {
      */
     private String doorNo;
     /**
-     *门序号
+     * 门禁状态，0初始状态，1开门状态，2关门状态，3离线状态
+     */
+    @TableField(exist = false)
+    private Integer doorState;
+
+    /**
+     * 门序号
      */
     private Integer doorSerial;
 

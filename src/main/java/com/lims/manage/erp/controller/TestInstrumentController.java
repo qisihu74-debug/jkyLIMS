@@ -2,6 +2,7 @@ package com.lims.manage.erp.controller;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.aspose.cells.Cells;
 import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -21,12 +22,9 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestInstrumentService;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
-import com.lims.manage.erp.util.SnowflakeIdGenerator;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.ExportParamVo;
 import com.lims.manage.erp.vo.InstrumentRecordParamVo;
 import com.lims.manage.erp.vo.LabelValueVo;
@@ -39,7 +37,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,6 +58,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 仪器设备(TestInstrument)表控制层
@@ -83,6 +81,8 @@ public class TestInstrumentController extends ApiController {
     private DeviceEntityMapper deviceEntityMapper;
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
+    @Resource
+    private SysOssService sysOssService;
 
     @GetMapping("/getAllOld")
     public Result getAllOld(TestInstrument testInstrument) {
@@ -330,15 +330,15 @@ public class TestInstrumentController extends ApiController {
      * @return
      */
     @GetMapping("/removeInstrumentsAndLaboratories")
-    public Result removeInstrumentsAndLaboratories(Integer ids[]) {
+    public Result removeInstrumentsAndLaboratories(Integer laboratoryId, Integer ids[]) {
 
-        return testInstrumentService.removeInstrumentsAndLaboratories(ids);
+        return testInstrumentService.removeInstrumentsAndLaboratories(laboratoryId, ids);
     }
 
     /**
      * 新增设备
      *
-     * @param record
+     * @param record TODO: 已过时 前后端废弃
      * @return
      */
     @Log(title = "新增设备", businessType = BusinessType.INSERT)
@@ -352,18 +352,19 @@ public class TestInstrumentController extends ApiController {
         boolean save = testInstrumentService.addDevice(record, null, null, null);
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (!save) {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()
-                    +"添加设备仪器"+record.getId()+"失败!", Const.INSTRUMENT_MANAGEMENT_LOG,false);
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                    + "添加设备仪器" + record.getId() + "失败!", Const.INSTRUMENT_MANAGEMENT_LOG, false);
             return ResultUtil.success("设备添加失败!");
         }
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户："+userInfo.getUsername()
-                +"添加设备仪器"+record.getId()+"成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                + "添加设备仪器" + record.getId() + "成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
         return ResultUtil.success("设备添加成功！", record);
     }
 
     /**
      * 修改设备
-     * @param record
+     *
+     * @param record TODO: 已过时 前后端废弃
      * @return
      */
     @Log(title = "修改设备", businessType = BusinessType.UPDATE)
@@ -385,14 +386,85 @@ public class TestInstrumentController extends ApiController {
     }
 
     /**
+     * 新增设备
+     *
+     * @return
+     */
+    @Log(title = "新增设备", businessType = BusinessType.INSERT)
+    @PostMapping("addDeviceFile")
+    public Result addDeviceFile(@RequestParam("json") String json, MultipartFile file) {
+        if (StrUtil.isEmptyIfStr(json)) {
+            return ResultUtil.error("数据为空");
+        }
+        DeviceEntity record = JSON.parseObject(json, DeviceEntity.class);
+        if (record.getName() == null || record.getCode() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        if (file != null && StringUtils.isNotEmpty(file.getOriginalFilename())) {
+            Map<String, Object> mapObject = sysOssService.postAnnounce(file);
+            String fileUrl = (String) mapObject.get("fileUrl");
+            record.setPicture(fileUrl);
+        }
+        boolean save = testInstrumentService.addDevice(record, null, null, null);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                    + "添加设备仪器" + record.getId() + "失败!", Const.INSTRUMENT_MANAGEMENT_LOG, false);
+            return ResultUtil.success("设备添加失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                + "添加设备仪器" + record.getId() + "成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("设备添加成功！", record);
+    }
+
+    /**
+     * 修改设备
+     *
+     * @param json
+     * @param file
+     * @return
+     */
+    @Log(title = "修改设备", businessType = BusinessType.UPDATE)
+    @PostMapping("updateDeviceFile")
+    public Result updateDevice(@RequestParam("json") String json, MultipartFile file) {
+
+        if (StrUtil.isEmptyIfStr(json)) {
+            return ResultUtil.error("数据为空");
+        }
+        DeviceEntity record = JSON.parseObject(json, DeviceEntity.class);
+
+        if (record.getId() == null || record.getName() == null || record.getCode() == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        if (file != null && StringUtils.isNotEmpty(file.getOriginalFilename())) {
+            Map<String, Object> mapObject = sysOssService.postAnnounce(file);
+            String fileUrl = (String) mapObject.get("fileUrl");
+            record.setPicture(fileUrl);
+            // 获取信息
+            TestInstrument data = testInstrumentService.getById(record.getId());
+            if (StringUtils.isNotEmpty(data.getPicture())) {
+                // 进行移除附件
+                sysOssService.delAnnounce(data.getPicture());
+            }
+        }
+        boolean save = testInstrumentService.update(record);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (!save) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                    + "修改设备仪器" + record.getId() + "失败!", Const.INSTRUMENT_MANAGEMENT_LOG, false);
+            return ResultUtil.success("设备修改失败!");
+        }
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername()
+                + "修改设备仪器" + record.getId() + "成功!", Const.INSTRUMENT_MANAGEMENT_LOG, true);
+        return ResultUtil.success("设备修改成功！", record);
+    }
+
+    /**
      * 仪器图片上传
      */
     @RequestMapping("/uploading/{id}")
-    public Result uploading(@PathVariable("id") Integer id, MultipartFile file) {
+    public Result uploading(MultipartFile file) {
 
-        if (id == null && "".equals(id)) {
-            return ResultUtil.error("缺少必填参数！");
-        }
         // 处理file文件后缀
         // 常规图片后缀名。
         String[] nameSuffixS = Const.nameSuffixS;
@@ -410,11 +482,9 @@ public class TestInstrumentController extends ApiController {
         }
 
         if (flag == false) {
-            return ResultUtil.error("样品文件上传失败 图片后缀不在通用规则中！");
+            return ResultUtil.error("文件上传失败 图片后缀不在通用规则中！");
         }
-
-        testInstrumentService.uploading(id, file);
-        return ResultUtil.error("仪器图片上传成功");
+        return ResultUtil.success("图片上传成功");
     }
 
     /**

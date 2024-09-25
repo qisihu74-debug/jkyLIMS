@@ -325,7 +325,7 @@ public class HkController {
     @GetMapping("getTemporaryAccessList")
     public Result getTemporaryAccessList(String personId) {
 
-        return null;
+        return hkDoorService.getTemporaryAccessList(personId);
     }
 
     /**
@@ -337,7 +337,19 @@ public class HkController {
     @PostMapping("addtemporaryVisit")
     public Result addtemporaryVisit(@RequestBody HKPersonDoorProvisionalAuthorityRelEntity data) {
 
-        return null;
+        return hkDoorService.addtemporaryVisit(data);
+    }
+
+    /**
+     * 通过实验室id 获取门禁列表
+     *
+     * @param testLaboratoryId
+     * @return
+     */
+    @GetMapping("getAccessControlStatusList")
+    public Result getAccessControlStatusList(String testLaboratoryId) {
+
+        return hkDoorService.getAccessControlStatusList(testLaboratoryId);
     }
 
 

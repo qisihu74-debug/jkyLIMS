@@ -1,8 +1,14 @@
 package com.lims.manage.erp.util;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -443,8 +449,48 @@ public class DateUtil {
         return time;
     }
 
+
+    /**
+     * 传入String类型日期(ISO8601标准时间:yyyy-MM-dd'T'HH:mm:ss.SSS'Z')，返回字符串类型时间(yyyy-MM-dd HH:mm:ss)
+     *
+     * @param ISOdate
+     * @return
+     */
+    public static String getDateStrFromISO8601Timestamp(String ISOdate) {
+        org.joda.time.format.DateTimeFormatter dtf1 = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        DateTime dt = dtf1.parseDateTime(ISOdate);
+        org.joda.time.format.DateTimeFormatter dtf2 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+        return dt.toString(dtf2);
+    }
+
+    /**
+     * 和上面的jar包不一样
+     * 传入String类型日期(yyyy-MM-dd HH:mm:ss)，返回字符串类型时间（ISO8601标准时间）
+     *
+     * @param timestamp
+     * @return
+     */
+    public static String getISO8601TimestampFromDateStr(String timestamp) {
+        java.time.format.DateTimeFormatter dtf1 = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime ldt = LocalDateTime.parse(timestamp, dtf1);
+        ZoneOffset offset = ZoneOffset.of("+08:00");
+        OffsetDateTime date = OffsetDateTime.of(ldt, offset);
+        java.time.format.DateTimeFormatter dtf2 = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
+        return date.format(dtf2);
+    }
+
     public static void main(String[] args) {
         String s = formatDate(new Date());
         System.out.println("");
+
+        String ISODateTime = "2024-09-10T11:30:08.000+08:00";
+        String dateStr = getDateStrFromISO8601Timestamp(ISODateTime);
+        System.out.println("dateStr = " + dateStr);
+
+        String dateTime = "2024-09-10 11:30:08";
+        String ISOStr = getISO8601TimestampFromDateStr(dateTime);
+        System.out.println("ISOStr = " + ISOStr);
     }
 }

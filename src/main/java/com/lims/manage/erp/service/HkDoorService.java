@@ -88,4 +88,12 @@ public interface HkDoorService extends IService<HkDoor> {
      * @return
      */
     Result addtemporaryVisit(HKPersonDoorProvisionalAuthorityRelEntity data);
+
+    /**
+     * 通过实验室id 获取门禁列表
+     *
+     * @param testLaboratoryId
+     * @return
+     */
+    Result getAccessControlStatusList(String testLaboratoryId);
 }

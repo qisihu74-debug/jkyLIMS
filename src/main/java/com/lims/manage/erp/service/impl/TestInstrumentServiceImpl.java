@@ -182,45 +182,6 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         }
     }
 
-    /**
-     * 单个图片文件上传
-     *
-     * @param id
-     * @param multipartFile
-     * @return
-     */
-    @Override
-    public Boolean uploading(Integer id, MultipartFile multipartFile) {
-
-        LambdaQueryWrapper<TestInstrument> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(TestInstrument::getId, id);
-        TestInstrument testInstrument = testInstrumentDao.selectOne(queryWrapper);
-        if (testInstrument == null) {
-            return false;
-        }
-        if (StringUtils.isNotEmpty(testInstrument.getPicture())) {
-            String[] arrays = testInstrument.getPicture().split("\\.");
-            String fileName = arrays[arrays.length - 1];
-            MinIoUtil.deleteFile(BucketsConst.instrument_picture, fileName);
-        }
-        //附件存在上传附件到服务器
-        Long fileCode = GenID.getID();
-        String name = multipartFile.getOriginalFilename();
-        String[] strings = name.split("\\.");
-
-        String upload = MinIoUtil.upload(BucketsConst.instrument_picture, multipartFile, fileCode + "." + strings[strings.length - 1]);
-        if (!org.springframework.util.StringUtils.isEmpty(upload)) {
-            String[] fileUrls = upload.split("\\?");
-            testInstrument.setPicture(fileUrls[0]);
-            // 更新
-            UpdateWrapper<TestInstrument> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.lambda().set(TestInstrument::getPicture, testInstrument.getPicture())
-                    .eq(TestInstrument::getId, testInstrument.getId());
-            testInstrumentDao.update(null, updateWrapper);
-        }
-        return true;
-    }
-
     @Override
     public IPage<TestInstrumentVo> getPageList(Page<TestInstrumentVo> page, QueryWrapper<TestInstrument> queryWrapper) {
         return testInstrumentDao.getPageList(page, queryWrapper);
@@ -375,17 +336,30 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
 
     @Override
     public PageInfo<DeviceEntity> getAllDevice(DeviceEntity deviceEntity) {
+
         PageHelper.startPage(deviceEntity.getPageNum(), deviceEntity.getPageSize());
+
         LambdaQueryWrapper<DeviceEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+
         if (StringUtils.isNotEmpty(deviceEntity.getCode())) {
             lambdaQueryWrapper.like(DeviceEntity::getCode, deviceEntity.getCode());
         }
+
         if (StringUtils.isNotEmpty(deviceEntity.getName())) {
             lambdaQueryWrapper.like(DeviceEntity::getName, deviceEntity.getName());
         }
-        if (deviceEntity.getLaboratoryId() != null) {
-            lambdaQueryWrapper.eq(DeviceEntity::getLaboratoryId, deviceEntity.getLaboratoryId());
+
+        if (StringUtils.isNotEmpty(deviceEntity.getStatus()) && deviceEntity.getLaboratoryId() != null) {
+            // 未绑定
+            if (deviceEntity.getStatus().equals("0")) {
+                // 实验室id 为空
+                lambdaQueryWrapper.isNull(DeviceEntity::getLaboratoryId);
+            } else {
+                // 已绑定的话
+                lambdaQueryWrapper.eq(DeviceEntity::getLaboratoryId, deviceEntity.getLaboratoryId());
+            }
         }
+
         List<DeviceEntity> allDevice = deviceEntityMapper.selectList(lambdaQueryWrapper);
         PageInfo<DeviceEntity> pageInfo = new PageInfo<>(allDevice);
         return pageInfo;
@@ -408,14 +382,18 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         if (testLaboratory == null) {
             return ResultUtil.error("实验室不存在");
         }
-        for (int i = 0; i < ids.length; i++) {
-            DeviceEntity deviceEntity = new DeviceEntity();
-
-            UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.lambda().eq(DeviceEntity::getId, ids[i]).
-                    set(DeviceEntity::getLaboratoryId, laboratoryId).set(DeviceEntity::getLaboratoryName, testLaboratory.getName());
-            deviceEntityMapper.update(null, updateWrapper);
-        }
+//        for (int i = 0; i < ids.length; i++) {
+//            DeviceEntity deviceEntity = new DeviceEntity();
+//
+//            UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
+//            updateWrapper.lambda().eq(DeviceEntity::getId, ids[i]).
+//                    set(DeviceEntity::getLaboratoryId, laboratoryId).set(DeviceEntity::getLaboratoryName, testLaboratory.getName());
+//            deviceEntityMapper.update(null, updateWrapper);
+//        }
+        // 批量更新仪器信息
+        UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.lambda().in(DeviceEntity::getId, ids).set(DeviceEntity::getLaboratoryId, laboratoryId).set(DeviceEntity::getLaboratoryName, testLaboratory.getName());
+        deviceEntityMapper.update(null, updateWrapper);
         return ResultUtil.success("操作成功");
     }
 
@@ -427,15 +405,19 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Result removeInstrumentsAndLaboratories(Integer[] ids) {
-        for (int i = 0; i < ids.length; i++) {
-            DeviceEntity deviceEntity = new DeviceEntity();
-
-            UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.lambda().eq(DeviceEntity::getId, ids[i]).
-                    set(DeviceEntity::getLaboratoryId, null);
-            deviceEntityMapper.update(null, updateWrapper);
-        }
+    public Result removeInstrumentsAndLaboratories(Integer laboratoryId, Integer[] ids) {
+//        for (int i = 0; i < ids.length; i++) {
+//            DeviceEntity deviceEntity = new DeviceEntity();
+//
+//            UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
+//            updateWrapper.lambda().eq(DeviceEntity::getId, ids[i]).
+//                    set(DeviceEntity::getLaboratoryId, null);
+//            deviceEntityMapper.update(null, updateWrapper);
+//        }
+        UpdateWrapper<DeviceEntity> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.lambda().in(DeviceEntity::getId, ids).eq(DeviceEntity::getLaboratoryId, laboratoryId).
+                set(DeviceEntity::getLaboratoryId, null).set(DeviceEntity::getLaboratoryName, null);
+        deviceEntityMapper.update(null, updateWrapper);
         return ResultUtil.success("操作成功");
     }
 

@@ -1,7 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
@@ -24,12 +23,11 @@ import com.lims.manage.erp.mapper.HKDoorLaboratoryRelEntityMapper;
 import com.lims.manage.erp.mapper.HKPersonDoorProvisionalAuthorityRelEntityMapper;
 import com.lims.manage.erp.mapper.HKPersonUserRelEntityMapper;
 import com.lims.manage.erp.mapper.HkDoorDao;
-import com.lims.manage.erp.entity.*;
-import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HKDoorLaboratoryInstrumentRelService;
 import com.lims.manage.erp.service.HkDoorService;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.HkUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.lims.manage.erp.util.StringUtils;
@@ -39,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author gjl
@@ -311,7 +310,18 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         queryWrapper.eq(HKPersonDoorProvisionalAuthorityRelEntity::getPersonId, personId);
         queryWrapper.orderByDesc(HKPersonDoorProvisionalAuthorityRelEntity::getCreateTime);
         List<HKPersonDoorProvisionalAuthorityRelEntity> list = hkPersonDoorProvisionalAuthorityRelEntityMapper.selectList(queryWrapper);
-
+        // 进行startTime 与 endTime 进行转换
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (HKPersonDoorProvisionalAuthorityRelEntity data : list) {
+                // 进行转换 2024-09-10T11:30:08.000+08:00 转成 年月日 时分秒
+                if (StringUtils.isNotEmpty(data.getStartTime())) {
+                    data.setStartTime(DateUtil.getDateStrFromISO8601Timestamp(data.getStartTime()));
+                }
+                if (StringUtils.isNotEmpty(data.getEndTime())) {
+                    data.setEndTime(DateUtil.getDateStrFromISO8601Timestamp(data.getEndTime()));
+                }
+            }
+        }
         return ResultUtil.success(list);
     }
 
@@ -325,13 +335,66 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Override
     public Result addtemporaryVisit(HKPersonDoorProvisionalAuthorityRelEntity data) {
 
-        String startTime = "";
-//        DateU
-        String str = "2024-09-10T11:30:08.000+08:00";
-
-
-//        hkPersonDoorProvisionalAuthorityRelEntityMapper.insert(data);
+        // 进行转换： 年月日 时分秒 转成 UTC：东八区存放
+        if (StringUtils.isNotEmpty(data.getStartTime())) {
+            data.setStartTime(DateUtil.getISO8601TimestampFromDateStr(data.getStartTime()));
+        }
+        if (StringUtils.isNotEmpty(data.getEndTime())) {
+            data.setEndTime(DateUtil.getISO8601TimestampFromDateStr(data.getEndTime()));
+        }
+        hkPersonDoorProvisionalAuthorityRelEntityMapper.insert(data);
         return ResultUtil.success("操作成功");
+    }
+
+    /**
+     * 通过实验室id 获取门禁列表
+     *
+     * @param testLaboratoryId
+     * @return
+     */
+    @Override
+    public Result getAccessControlStatusList(String testLaboratoryId) {
+
+        if (StringUtils.isEmpty(testLaboratoryId)) {
+            return ResultUtil.error("缺少必填参数");
+        }
+
+        LambdaQueryWrapper<HKDoorLaboratoryRelEntity> doorLaboratoryRelWrapper = new LambdaQueryWrapper<>();
+        doorLaboratoryRelWrapper.eq(HKDoorLaboratoryRelEntity::getTestLaboratoryId, testLaboratoryId);
+
+        List<HKDoorLaboratoryRelEntity> list = hkDoorLaboratoryRelEntityMapper.selectList(doorLaboratoryRelWrapper);
+        if (CollectionUtil.isEmpty(list)) {
+            return ResultUtil.success(null);
+        }
+
+        List<String> indexCodes = list.stream().map(HKDoorLaboratoryRelEntity -> HKDoorLaboratoryRelEntity.getIndexCode()).collect(Collectors.toList());
+
+        // 获取 门禁信息
+        LambdaQueryWrapper<HkDoor> doorWrapper = new LambdaQueryWrapper<>();
+        doorWrapper.select(HkDoor::getName, HkDoor::getIndexCode);
+        doorWrapper.in(HkDoor::getIndexCode, indexCodes);
+        List<HkDoor> doorList = this.baseMapper.selectList(doorWrapper);
+
+        // 通过门禁集合 获取对应状态
+        Map<String, Object> objectMap = doorState(indexCodes);
+        Map<String, Object> authDoorMap = (Map<String, Object>) objectMap.get("data");
+        List<Map<String, Object>> hkDoorList = (List<Map<String, Object>>) authDoorMap.get("authDoorList");
+
+        // 处理业务数据
+        if (CollectionUtil.isNotEmpty(hkDoorList)) {
+            for (Map<String, Object> map : hkDoorList) {
+                String doorIndexCode = map.get("doorIndexCode").toString();
+                Integer doorState = Integer.parseInt(map.get("doorState").toString());
+                for (HkDoor hkDoor : doorList) {
+                    if (doorIndexCode.equals(hkDoor.getIndexCode())) {
+                        hkDoor.setDoorState(doorState);
+                    }
+                }
+            }
+        }
+
+        return ResultUtil.success(doorList);
+
     }
 
 

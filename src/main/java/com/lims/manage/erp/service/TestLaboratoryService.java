@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.TestLaboratoryVo;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.management.Query;
 import java.util.List;
@@ -18,8 +19,10 @@ import java.util.List;
  * @since 2022-02-25 10:08:36
  */
 public interface TestLaboratoryService extends IService<TestLaboratory> {
-    Result addLaboratory(TestLaboratory testLaboratory);
-    Result updLaboratory(TestLaboratory testLaboratory);
+    Result addLaboratory(TestLaboratory testLaboratory, MultipartFile file);
+
+    Result updLaboratory(TestLaboratory testLaboratory, MultipartFile file);
+
     Result delLaboratory(List<Long> idList);
 
     Result getPageList(TestLaboratoryVo testLaboratory);

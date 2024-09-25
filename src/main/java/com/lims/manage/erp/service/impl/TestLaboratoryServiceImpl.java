@@ -23,11 +23,13 @@ import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.TestLaboratoryVo;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 实验室管理(TestLaboratory)表服务实现类
@@ -49,7 +51,7 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
     private HKPersonDoorProvisionalAuthorityRelEntityMapper hkPersonDoorProvisionalAuthorityRelEntityMapper;
 
     @Override
-    public Result addLaboratory(TestLaboratory testLaboratory) {
+    public Result addLaboratory(TestLaboratory testLaboratory, MultipartFile file) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
@@ -60,40 +62,58 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
         if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name", testLaboratory.getName()).eq("del_flag", 0)) != null) {
             return ResultUtil.error("实验室名称重复");
         }
+        if (file != null) {
+            Map<String, Object> mapObject = sysOssService.postAnnounce(file);
+            String fileUrl = (String) mapObject.get("fileUrl");
+            testLaboratory.setPicture(fileUrl);
+        }
         testLaboratory.setStatus("0");
         testLaboratory.setDelFlag(0);
         testLaboratory.setCreateTime(new Date());
         testLaboratory.setUpdateTime(null);
-        if (this.save(testLaboratory)){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加实验室"+testLaboratory.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
+        if (this.save(testLaboratory)) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加实验室" + testLaboratory.getId() + "成功!", Const.TEAM_MANAGEMENT_LOG, true);
             return ResultUtil.success("添加成功!");
-        }else {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加实验室失败!", Const.TEAM_MANAGEMENT_LOG,false);
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "添加实验室失败!", Const.TEAM_MANAGEMENT_LOG, false);
             return ResultUtil.error("添加失败，未知异常!");
         }
     }
 
     @Override
-    public Result updLaboratory(TestLaboratory testLaboratory) {
+    public Result updLaboratory(TestLaboratory testLaboratory, MultipartFile file) {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
-        if(userInfo==null){
+        if (userInfo == null) {
             return ResultUtil.error("token 已过期！");
         }
-        if (testLaboratory.getId()==null){
+        if (testLaboratory.getId() == null) {
             return ResultUtil.error("修改对象ID为空");
         }
-        if (testLaboratory.getName()==null){
+        if (testLaboratory.getName() == null) {
             return ResultUtil.error("实验室名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name",testLaboratory.getName()).eq("del_flag",0).ne("id",testLaboratory.getId()))!=null){
+        if (this.getOne(new QueryWrapper<TestLaboratory>().eq("name", testLaboratory.getName()).eq("del_flag", 0).ne("id", testLaboratory.getId())) != null) {
             return ResultUtil.error("实验室名称重复");
         }
+
+        if (file != null) {
+            Map<String, Object> mapObject = sysOssService.postAnnounce(file);
+            String fileUrl = (String) mapObject.get("fileUrl");
+            testLaboratory.setPicture(fileUrl);
+            // 获取详情
+            TestLaboratory data = this.getById(testLaboratory.getId());
+            if (StringUtils.isNotEmpty(data.getPicture())) {
+                // 进行移除附件
+                sysOssService.delAnnounce(data.getPicture());
+            }
+        }
+
         testLaboratory.setUpdateTime(new Date());
-        if (this.updateById(testLaboratory)){
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改实验室"+testLaboratory.getId()+"成功!", Const.TEAM_MANAGEMENT_LOG,true);
+        if (this.updateById(testLaboratory)) {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "修改实验室" + testLaboratory.getId() + "成功!", Const.TEAM_MANAGEMENT_LOG, true);
             return ResultUtil.success("修改成功!");
-        }else {
-            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改实验室"+testLaboratory.getId()+"失败!", Const.TEAM_MANAGEMENT_LOG,false);
+        } else {
+            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "用户：" + userInfo.getUsername() + "修改实验室" + testLaboratory.getId() + "失败!", Const.TEAM_MANAGEMENT_LOG, false);
             return ResultUtil.error("修改失败，未知异常!");
         }
     }
@@ -139,10 +159,10 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
     public Result getPageList(TestLaboratoryVo testLaboratory) {
 
         if (testLaboratory.getPageNum() == null || testLaboratory.getPageSize() == null) {
-            testLaboratory.setPageNum(1);
-            testLaboratory.setPageSize(10);
+            return ResultUtil.error("缺少分页参数");
         }
 
+        PageHelper.clearPage();
         // 设置分页
         PageHelper.startPage(testLaboratory.getPageNum(), testLaboratory.getPageSize());
 
@@ -162,12 +182,6 @@ public class TestLaboratoryServiceImpl extends ServiceImpl<TestLaboratoryDao, Te
         }
         // 排序
         queryWrapper.orderByDesc(TestLaboratory::getId);
-
-        List<HKPersonDoorProvisionalAuthorityRelEntity> list = hkPersonDoorProvisionalAuthorityRelEntityMapper.selectList(null);
-        for (HKPersonDoorProvisionalAuthorityRelEntity data : list) {
-            System.out.println("data == " + data);
-
-        }
 
         List<TestLaboratory> testLaboratorylist = testLaboratoryDao.selectList(queryWrapper);
         PageInfo<TestLaboratory> pageInfo = new PageInfo<>(testLaboratorylist);
