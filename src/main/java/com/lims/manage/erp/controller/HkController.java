@@ -196,7 +196,7 @@ public class HkController {
     @GetMapping("pictures")
     public Result pictures(String svrIndexCode,String picUri){
         if (StringUtils.isEmpty(svrIndexCode) || StringUtils.isEmpty(picUri)){
-            return ResultUtil.error("未抓拍图片");
+            return ResultUtil.error("门禁设备上没有打开上传功能");
         }
         return ResultUtil.success(hkDoorService.pictures(svrIndexCode,picUri));
     }
