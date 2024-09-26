@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Map;
@@ -42,10 +41,10 @@ public interface HkDoorService extends IService<HkDoor> {
     /**
      * 获取监控与试验室和仪器关系
      *
-     * @param hkDoorLaboratoryInstrumentRelEntity
+     * @param hkCameraLaboratoryInstrumentRelEntity
      * @return
      */
-    Result getDoorLaboratoryInstruments(HKDoorLaboratoryInstrumentRelEntity hkDoorLaboratoryInstrumentRelEntity);
+    Result getDoorLaboratoryInstruments(HKCameraLaboratoryInstrumentRelEntity hkCameraLaboratoryInstrumentRelEntity);
 
     /**
      * 进行监控与试验室和仪器关系授权

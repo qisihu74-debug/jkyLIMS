@@ -5,16 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.config.HkConfig;
-import com.lims.manage.erp.entity.CameraInfo;
-import com.lims.manage.erp.entity.DoorDetailReq;
-import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
-import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
-import com.lims.manage.erp.entity.HKPersonDoorProvisionalAuthorityRelEntity;
-import com.lims.manage.erp.entity.HKPersonUserRelEntity;
-import com.lims.manage.erp.entity.HkDoor;
-import com.lims.manage.erp.entity.HkDoorReq;
-import com.lims.manage.erp.entity.HkGrantDoorReq;
-import com.lims.manage.erp.entity.HkPerson;
+import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkCameraService;
@@ -282,28 +273,28 @@ public class HkController {
     /**
      * 获取监控与试验室和仪器关系
      *
-     * @param hkDoorLaboratoryInstrumentRelEntity
+     * @param hkCameraLaboratoryInstrumentRelEntity
      * @return
      */
     @GetMapping("getDoorLaboratoryInstruments")
-    public Result getDoorLaboratoryInstruments(HKDoorLaboratoryInstrumentRelEntity hkDoorLaboratoryInstrumentRelEntity) {
+    public Result getDoorLaboratoryInstruments(HKCameraLaboratoryInstrumentRelEntity hkCameraLaboratoryInstrumentRelEntity) {
 
-        return hkDoorService.getDoorLaboratoryInstruments(hkDoorLaboratoryInstrumentRelEntity);
+        return hkDoorService.getDoorLaboratoryInstruments(hkCameraLaboratoryInstrumentRelEntity);
     }
 
 
     /**
      * 进行监控与试验室和仪器关系授权
      *
-     * @param indexCode
+     * @param camera
      * @param testLaboratoryId
      * @param ids
      * @return
      */
     @GetMapping("/impowerDoorLaboratoryInstruments")
-    public Result impowerDoorLaboratoryInstruments(String indexCode, Integer testLaboratoryId, Integer ids[]) {
+    public Result impowerDoorLaboratoryInstruments(String camera, Integer testLaboratoryId, Integer ids[]) {
 
-        return hkDoorService.impowerDoorLaboratoryInstruments(indexCode, testLaboratoryId, ids);
+        return hkDoorService.impowerDoorLaboratoryInstruments(camera, testLaboratoryId, ids);
     }
 
 

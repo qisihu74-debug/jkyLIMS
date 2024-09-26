@@ -361,6 +361,17 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         }
 
         List<DeviceEntity> allDevice = deviceEntityMapper.selectList(lambdaQueryWrapper);
+        // 处理业务数据
+        if (CollectionUtils.isNotEmpty(allDevice)) {
+            for (DeviceEntity data : allDevice) {
+                // 判断 绑定关系
+                if (data.getLaboratoryId() == null) {
+                    data.setStatus("0");
+                } else {
+                    data.setStatus("1");
+                }
+            }
+        }
         PageInfo<DeviceEntity> pageInfo = new PageInfo<>(allDevice);
         return pageInfo;
     }

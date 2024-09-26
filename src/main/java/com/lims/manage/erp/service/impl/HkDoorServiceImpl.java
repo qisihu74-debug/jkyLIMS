@@ -9,7 +9,7 @@ import com.google.api.client.util.Lists;
 import com.lims.manage.erp.config.HkConfig;
 import com.lims.manage.erp.entity.DoorDetailReq;
 import com.lims.manage.erp.entity.DoorStateReq;
-import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
+import com.lims.manage.erp.entity.HKCameraLaboratoryInstrumentRelEntity;
 import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
 import com.lims.manage.erp.entity.HKPersonDoorProvisionalAuthorityRelEntity;
 import com.lims.manage.erp.entity.HKPersonUserRelEntity;
@@ -121,19 +121,19 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     }
 
     @Override
-    public Result getDoorLaboratoryInstruments(HKDoorLaboratoryInstrumentRelEntity hkDoorLaboratoryInstrumentRelEntity) {
+    public Result getDoorLaboratoryInstruments(HKCameraLaboratoryInstrumentRelEntity hkCameraLaboratoryInstrumentRelEntity) {
 
-        LambdaQueryWrapper<HKDoorLaboratoryInstrumentRelEntity> queryWrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotEmpty(hkDoorLaboratoryInstrumentRelEntity.getIndexCode())) {
-            queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getIndexCode, hkDoorLaboratoryInstrumentRelEntity.getIndexCode());
+        LambdaQueryWrapper<HKCameraLaboratoryInstrumentRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotEmpty(hkCameraLaboratoryInstrumentRelEntity.getCamera())) {
+            queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getCamera, hkCameraLaboratoryInstrumentRelEntity.getCamera());
         }
-        if (hkDoorLaboratoryInstrumentRelEntity.getTestLaboratoryId() != null) {
-            queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getTestLaboratoryId, hkDoorLaboratoryInstrumentRelEntity.getTestLaboratoryId());
+        if (hkCameraLaboratoryInstrumentRelEntity.getTestLaboratoryId() != null) {
+            queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getTestLaboratoryId, hkCameraLaboratoryInstrumentRelEntity.getTestLaboratoryId());
         }
-        if (hkDoorLaboratoryInstrumentRelEntity.getTestInstrumentId() != null) {
-            queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getTestInstrumentId, hkDoorLaboratoryInstrumentRelEntity.getTestInstrumentId());
+        if (hkCameraLaboratoryInstrumentRelEntity.getTestInstrumentId() != null) {
+            queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getTestInstrumentId, hkCameraLaboratoryInstrumentRelEntity.getTestInstrumentId());
         }
-        List<HKDoorLaboratoryInstrumentRelEntity> list = hkDoorLaboratoryInstrumentRelEntityMapper.selectList(queryWrapper);
+        List<HKCameraLaboratoryInstrumentRelEntity> list = hkDoorLaboratoryInstrumentRelEntityMapper.selectList(queryWrapper);
 
         return ResultUtil.success(list);
     }
@@ -156,18 +156,18 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
             return ResultUtil.error("缺少必填参数");
         }
         // 效验重复项
-        LambdaQueryWrapper<HKDoorLaboratoryInstrumentRelEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getIndexCode, indexCode);
-        queryWrapper.eq(HKDoorLaboratoryInstrumentRelEntity::getTestLaboratoryId, testLaboratoryId);
-        queryWrapper.in(HKDoorLaboratoryInstrumentRelEntity::getTestInstrumentId, ids);
-        List<HKDoorLaboratoryInstrumentRelEntity> list = hkDoorLaboratoryInstrumentRelEntityMapper.selectList(queryWrapper);
+        LambdaQueryWrapper<HKCameraLaboratoryInstrumentRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getCamera, indexCode);
+        queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getTestLaboratoryId, testLaboratoryId);
+        queryWrapper.in(HKCameraLaboratoryInstrumentRelEntity::getTestInstrumentId, ids);
+        List<HKCameraLaboratoryInstrumentRelEntity> list = hkDoorLaboratoryInstrumentRelEntityMapper.selectList(queryWrapper);
         if (CollectionUtil.isNotEmpty(list)) {
             return ResultUtil.error("操作失败，有重复项，请重新选择");
         }
-        List<HKDoorLaboratoryInstrumentRelEntity> dataSet = new ArrayList<>();
+        List<HKCameraLaboratoryInstrumentRelEntity> dataSet = new ArrayList<>();
         for (int i = 0; i < ids.length; i++) {
-            HKDoorLaboratoryInstrumentRelEntity data = new HKDoorLaboratoryInstrumentRelEntity();
-            data.setIndexCode(indexCode);
+            HKCameraLaboratoryInstrumentRelEntity data = new HKCameraLaboratoryInstrumentRelEntity();
+            data.setCamera(indexCode);
             data.setTestLaboratoryId(testLaboratoryId);
             data.setTestInstrumentId(ids[i]);
             dataSet.add(data);
