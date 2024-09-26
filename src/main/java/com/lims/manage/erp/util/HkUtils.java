@@ -80,11 +80,11 @@ public class HkUtils {
      * 描述：根据条件查询目录下有权限的监控点列表
      * @return
      */
-    public static Map<String,Object> cameraSearch(){
+    public static Map<String,Object> cameraSearch(String path){
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("pageNo", 1);
         jsonBody.put("pageSize", 1000);
-        Map<String,Object> returnMap=publicHkInterface(jsonBody,"/api/resource/v2/acsDevice/search");
+        Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
         return returnMap;
     }
 
@@ -280,7 +280,7 @@ public class HkUtils {
 
 
     public static void main(String[] args) {
-        Map<String, Object> events = doorSearch("/api/resource/v2/door/search");
+        Map<String, Object> events = cameraSearch("/api/resource/v2/camera/search");
         System.out.println("============"+JSON.toJSONString(events));
 
     }
