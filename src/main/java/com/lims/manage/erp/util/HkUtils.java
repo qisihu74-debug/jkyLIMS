@@ -2,6 +2,8 @@ package com.lims.manage.erp.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.api.client.util.Data;
+import com.google.api.client.util.Lists;
 import com.hikvision.artemis.sdk.ArtemisHttpUtil;
 import com.hikvision.artemis.sdk.config.ArtemisConfig;
 import com.lims.manage.erp.entity.DoorDetailReq;
@@ -10,6 +12,7 @@ import com.lims.manage.erp.entity.HkDoorReq;
 import com.lims.manage.erp.entity.HkGrantDoorReq;
 import com.lims.manage.erp.entity.PersonDoorReq;
 import com.lims.manage.erp.entity.ResourceInfo;
+import com.lims.manage.erp.result.ResultUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -142,6 +145,78 @@ public class HkUtils {
         jsonBody.put("pageSize", 1000);
         Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
         return returnMap;
+    }
+
+    /**
+     * 任务单授权门禁权限(门禁和人员绑定-下发权限)
+     * @param bandPath
+     * @param grantPath
+     * @param indexCodes
+     * @return
+     */
+    public static Boolean taskGrantDoor(String bandPath,String grantPath, List<String> personIds,List<String> indexCodes){
+        HkDoorReq hkDoorReq = new HkDoorReq();
+        List<PersonDoorReq> personDatas = Lists.newArrayList();
+        PersonDoorReq personDoorReq = new PersonDoorReq();
+        personDoorReq.setIndexCodes(personIds);
+        personDatas.add(personDoorReq);
+        hkDoorReq.setPersonDatas(personDatas);
+
+        List<ResourceInfo> resourceInfos = Lists.newArrayList();
+        for (String string :indexCodes){
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setResourceIndexCode(string);
+            resourceInfos.add(resourceInfo);
+        }
+        hkDoorReq.setResourceInfos(resourceInfos);
+        //设置日期默认当天
+        Map<String, String> stringMap = DateUtil.getTodaySTAndET();
+        hkDoorReq.setStartTime(stringMap.get("startTime"));
+        hkDoorReq.setEndTime(stringMap.get("endTime"));
+
+        //设置固定参数
+        List<PersonDoorReq> personDatas1 = hkDoorReq.getPersonDatas();
+        for (PersonDoorReq personDoorReq1 :personDatas1){
+            personDoorReq1.setPersonDataType("person");
+        }
+        List<ResourceInfo> resourceInfos1 = hkDoorReq.getResourceInfos();
+        for (ResourceInfo resourceInfo: resourceInfos1){
+            resourceInfo.setResourceType("door");
+        }
+        JSONObject jsonBody = JSONObject.parseObject(JSON.toJSONString(hkDoorReq));
+        Map<String,Object> returnMap=publicHkInterface(jsonBody,bandPath);
+        if (returnMap != null){
+            String msg = returnMap.get("msg").toString();
+            if ("success".equals(msg)){
+                //权限下发
+                //构造参数
+                HkGrantDoorReq hkGrantDoorReq = new HkGrantDoorReq();
+                List<ResourceInfo> resourceInfoList = Lists.newArrayList();
+                for (String string :indexCodes){
+                    ResourceInfo resourceInfo = new ResourceInfo();
+                    resourceInfo.setResourceIndexCode(string);
+                    resourceInfoList.add(resourceInfo);
+                }
+                hkGrantDoorReq.setResourceInfos(resourceInfoList);
+
+                if (hkGrantDoorReq.getTaskType() == 0){
+                    hkGrantDoorReq.setTaskType(4);
+                }
+                List<ResourceInfo> reqResourceInfos = hkGrantDoorReq.getResourceInfos();
+                for (ResourceInfo resourceInfo: reqResourceInfos){
+                    resourceInfo.setResourceType("door");
+                }
+                JSONObject parseObject = JSONObject.parseObject(JSON.toJSONString(hkGrantDoorReq));
+                Map<String,Object> map=publicHkInterface(parseObject,grantPath);
+                if (map != null) {
+                    String msg1 = map.get("msg").toString();
+                    if ("success".equals(msg1)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**

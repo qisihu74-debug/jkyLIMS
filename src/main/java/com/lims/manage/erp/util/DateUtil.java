@@ -1,14 +1,19 @@
 package com.lims.manage.erp.util;
 
+import com.alibaba.fastjson.JSON;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -31,6 +36,34 @@ public class DateUtil {
     private static String ymdhms = "yyyy-MM-dd HH:mm:ss";
     private static String ymd = "yyyy-MM-dd";
     public static long DATEMM = 86400L;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+
+    /**
+     * 获取指定格式的当前开始和结束时间
+     * @return
+     */
+    public static Map<String,String> getTodaySTAndET(){
+        Map<String,String> map = new HashMap<>();
+        // 获取当前日期
+        LocalDate today = LocalDate.now();
+        // 设置当天的开始时间
+        LocalDateTime startOfDay = today.atStartOfDay();
+        // 设置当天的结束时间
+        LocalDateTime endOfDay = today.atTime(23, 59, 59);
+        // 设置时区
+        ZoneId zoneId = ZoneId.systemDefault();
+        // 转换为带时区的日期时间
+        ZonedDateTime startOfDayWithZone = startOfDay.atZone(zoneId);
+        ZonedDateTime endOfDayWithZone = endOfDay.atZone(zoneId);
+        // 定义日期时间格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        // 输出格式化的开始时间和结束时间
+        String formattedStartOfDay = startOfDayWithZone.format(formatter);
+        map.put("startTime",formattedStartOfDay);
+        String formattedEndOfDay = endOfDayWithZone.format(formatter);
+        map.put("endTime",formattedEndOfDay);
+        return map;
+    }
 
     /**
      * 时间戳转化 yyyy.MM.dd 格式
@@ -482,6 +515,9 @@ public class DateUtil {
     }
 
     public static void main(String[] args) {
+        Map<String, String> todaySTAndET = getTodaySTAndET();
+        System.out.println("============"+ JSON.toJSONString(todaySTAndET));
+
         String s = formatDate(new Date());
         System.out.println("");
 
