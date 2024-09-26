@@ -271,19 +271,6 @@ public class HkController {
     }
 
     /**
-     * 获取监控与试验室和仪器关系
-     *
-     * @param hkCameraLaboratoryInstrumentRelEntity
-     * @return
-     */
-    @GetMapping("getDoorLaboratoryInstruments")
-    public Result getDoorLaboratoryInstruments(HKCameraLaboratoryInstrumentRelEntity hkCameraLaboratoryInstrumentRelEntity) {
-
-        return hkDoorService.getDoorLaboratoryInstruments(hkCameraLaboratoryInstrumentRelEntity);
-    }
-
-
-    /**
      * 进行监控与试验室和仪器关系授权
      *
      * @param camera
@@ -291,23 +278,10 @@ public class HkController {
      * @param ids
      * @return
      */
-    @GetMapping("/impowerDoorLaboratoryInstruments")
-    public Result impowerDoorLaboratoryInstruments(String camera, Integer testLaboratoryId, Integer ids[]) {
+    @GetMapping("/impowerCameraaboratoryInstruments")
+    public Result impowerCameraLaboratoryInstruments(String camera, Integer testLaboratoryId, Integer ids[]) {
 
         return hkDoorService.impowerDoorLaboratoryInstruments(camera, testLaboratoryId, ids);
-    }
-
-
-    /**
-     * 进行监控与试验室和仪器关系移除
-     *
-     * @param ids
-     * @return
-     */
-    @GetMapping("/removeDoorLaboratoryInstruments")
-    public Result removeDoorLaboratoryInstruments(Integer ids[]) {
-
-        return hkDoorService.removeDoorLaboratoryInstruments(ids);
     }
 
     /**
@@ -396,6 +370,17 @@ public class HkController {
         return hkDoorService.getAccessControlStatusList(testLaboratoryId);
     }
 
+    /**
+     * 任务单与人员授权
+     *
+     * @param taskId
+     * @return
+     */
+    @GetMapping("taskListAuthorization")
+    public Result taskListAuthorization(String taskId) {
+
+        return null;
+    }
 
 
 }

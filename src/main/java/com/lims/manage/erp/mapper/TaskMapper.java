@@ -766,4 +766,13 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     int updateoldTaskEntity(TaskVo taskVo);
+
+    /**
+     * 通过任务单Id 获取关联仪器
+     *
+     * @param taskId
+     * @return
+     */
+    @Select("SELECT DISTINCT instrument_id FROM test_instrument_use_record WHERE task_id = #{taskId}")
+    List<Integer> getDistinctInstrumentIds(Long taskId);
 }

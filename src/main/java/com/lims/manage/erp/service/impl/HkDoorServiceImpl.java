@@ -7,28 +7,15 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.config.HkConfig;
-import com.lims.manage.erp.entity.DoorDetailReq;
-import com.lims.manage.erp.entity.DoorStateReq;
-import com.lims.manage.erp.entity.HKCameraLaboratoryInstrumentRelEntity;
-import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
-import com.lims.manage.erp.entity.HKPersonDoorProvisionalAuthorityRelEntity;
-import com.lims.manage.erp.entity.HKPersonUserRelEntity;
-import com.lims.manage.erp.entity.HkDoor;
-import com.lims.manage.erp.entity.HkDoorReq;
-import com.lims.manage.erp.entity.HkGrantDoorReq;
-import com.lims.manage.erp.entity.PersonDoorReq;
-import com.lims.manage.erp.entity.ResourceInfo;
-import com.lims.manage.erp.mapper.HKDoorLaboratoryInstrumentRelEntityMapper;
-import com.lims.manage.erp.mapper.HKDoorLaboratoryRelEntityMapper;
-import com.lims.manage.erp.mapper.HKPersonDoorProvisionalAuthorityRelEntityMapper;
-import com.lims.manage.erp.mapper.HKPersonUserRelEntityMapper;
-import com.lims.manage.erp.mapper.HkDoorDao;
+import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HKDoorLaboratoryInstrumentRelService;
 import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.HkUtils;
+import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.lims.manage.erp.util.StringUtils;
 import org.springframework.stereotype.Service;
@@ -65,6 +52,10 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private HKPersonDoorProvisionalAuthorityRelEntityMapper hkPersonDoorProvisionalAuthorityRelEntityMapper;
     @Autowired
     private HKDoorLaboratoryInstrumentRelService hkDoorLaboratoryInstrumentRelService;
+    @Autowired
+    private HkCameraDao hkCameraDao;
+    @Autowired
+    private TaskMapper taskMapper;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
@@ -109,6 +100,33 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Result editPersonUserRel(HKPersonUserRelEntity hkPersonUserRelEntity) {
+
+        if (hkPersonUserRelEntity == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+
+        if (StringUtils.isEmpty(hkPersonUserRelEntity.getPersonId())) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        if (hkPersonUserRelEntity.getUserId() == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+
+        LambdaQueryWrapper<HKPersonUserRelEntity> perrsonWrapper = new LambdaQueryWrapper<>();
+        perrsonWrapper.eq(HKPersonUserRelEntity::getUserId, hkPersonUserRelEntity.getUserId());
+        perrsonWrapper.notIn(HKPersonUserRelEntity::getPersonId, hkPersonUserRelEntity.getPersonId());
+        List<HKPersonUserRelEntity> userlist = hkPersonUserRelEntityMapper.selectList(perrsonWrapper);
+        if (CollectionUtil.isNotEmpty(userlist)) {
+            // 遍历数据 进行比较
+            for (HKPersonUserRelEntity data : userlist) {
+                if (!data.getPersonId().equals(hkPersonUserRelEntity.getPersonId())) {
+                    // 抛出
+                    return ResultUtil.error("用户已绑定");
+                }
+            }
+        }
+
+
         // 先删除 再新增关系
         LambdaQueryWrapper<HKPersonUserRelEntity> deteWapper = new LambdaQueryWrapper<>();
         deteWapper.eq(HKPersonUserRelEntity::getPersonId, hkPersonUserRelEntity.getPersonId());
@@ -118,24 +136,6 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         hkPersonUserRelEntityMapper.insert(hkPersonUserRelEntity);
 
         return ResultUtil.success("操作成功");
-    }
-
-    @Override
-    public Result getDoorLaboratoryInstruments(HKCameraLaboratoryInstrumentRelEntity hkCameraLaboratoryInstrumentRelEntity) {
-
-        LambdaQueryWrapper<HKCameraLaboratoryInstrumentRelEntity> queryWrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotEmpty(hkCameraLaboratoryInstrumentRelEntity.getCamera())) {
-            queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getCamera, hkCameraLaboratoryInstrumentRelEntity.getCamera());
-        }
-        if (hkCameraLaboratoryInstrumentRelEntity.getTestLaboratoryId() != null) {
-            queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getTestLaboratoryId, hkCameraLaboratoryInstrumentRelEntity.getTestLaboratoryId());
-        }
-        if (hkCameraLaboratoryInstrumentRelEntity.getTestInstrumentId() != null) {
-            queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getTestInstrumentId, hkCameraLaboratoryInstrumentRelEntity.getTestInstrumentId());
-        }
-        List<HKCameraLaboratoryInstrumentRelEntity> list = hkDoorLaboratoryInstrumentRelEntityMapper.selectList(queryWrapper);
-
-        return ResultUtil.success(list);
     }
 
     /**
@@ -149,21 +149,30 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Result impowerDoorLaboratoryInstruments(String indexCode, Integer testLaboratoryId, Integer[] ids) {
+
         if (StringUtils.isEmpty(indexCode)) {
             return ResultUtil.error("缺少必填参数");
         }
         if (testLaboratoryId == null) {
             return ResultUtil.error("缺少必填参数");
         }
-        // 效验重复项
-        LambdaQueryWrapper<HKCameraLaboratoryInstrumentRelEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getCamera, indexCode);
-        queryWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getTestLaboratoryId, testLaboratoryId);
-        queryWrapper.in(HKCameraLaboratoryInstrumentRelEntity::getTestInstrumentId, ids);
-        List<HKCameraLaboratoryInstrumentRelEntity> list = hkDoorLaboratoryInstrumentRelEntityMapper.selectList(queryWrapper);
-        if (CollectionUtil.isNotEmpty(list)) {
-            return ResultUtil.error("操作失败，有重复项，请重新选择");
+        if (ids == null) {
+            return ResultUtil.error("缺少必填参数");
         }
+
+        // 查询监控是否存在
+        LambdaQueryWrapper<CameraInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CameraInfo::getIndexCode, indexCode);
+        List<CameraInfo> cameraInfoList = hkCameraDao.selectList(queryWrapper);
+        if (CollectionUtil.isNotEmpty(cameraInfoList)) {
+            return ResultUtil.error("监控标识不存在");
+        }
+
+        // 删除绑定关系
+        LambdaQueryWrapper<HKCameraLaboratoryInstrumentRelEntity> deleteWrapper = new LambdaQueryWrapper<>();
+        deleteWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getCamera, indexCode);
+        hkDoorLaboratoryInstrumentRelService.remove(deleteWrapper);
+
         List<HKCameraLaboratoryInstrumentRelEntity> dataSet = new ArrayList<>();
         for (int i = 0; i < ids.length; i++) {
             HKCameraLaboratoryInstrumentRelEntity data = new HKCameraLaboratoryInstrumentRelEntity();
@@ -176,18 +185,6 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         return ResultUtil.success("操作成功");
     }
 
-    /**
-     * 进行监控与试验室和仪器关系移除
-     *
-     * @param ids
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public Result removeDoorLaboratoryInstruments(Integer[] ids) {
-        hkDoorLaboratoryInstrumentRelEntityMapper.deleteBatchIds(Arrays.asList(ids));
-        return ResultUtil.success("操作成功");
-    }
 
     @Override
     public Map<String, Object> pictures(String svrIndexCode, String picUri) {
@@ -305,7 +302,9 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
      */
     @Override
     public Result getTemporaryAccessList(String personId) {
-
+        if (StringUtils.isEmpty(personId)) {
+            return ResultUtil.error("缺少必填参数");
+        }
         LambdaQueryWrapper<HKPersonDoorProvisionalAuthorityRelEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(HKPersonDoorProvisionalAuthorityRelEntity::getPersonId, personId);
         queryWrapper.orderByDesc(HKPersonDoorProvisionalAuthorityRelEntity::getCreateTime);
@@ -342,6 +341,8 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         if (StringUtils.isNotEmpty(data.getEndTime())) {
             data.setEndTime(DateUtil.getISO8601TimestampFromDateStr(data.getEndTime()));
         }
+        data.setCreateTime(new Date());
+        data.setState(0);
         hkPersonDoorProvisionalAuthorityRelEntityMapper.insert(data);
         return ResultUtil.success("操作成功");
     }
@@ -395,6 +396,60 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
         return ResultUtil.success(doorList);
 
+    }
+
+    @Override
+    public Result taskListAuthorization(String taskId) {
+
+        // 获取任务单信息：
+        TaskTestEntity taskTestEntity = taskMapper.getTaskOrders(Long.parseLong(taskId));
+        if (taskTestEntity == null) {
+            return ResultUtil.error("任务单为空");
+        }
+        // 获取 检测人、记录人
+        List<Long> userIDs = new ArrayList<>();
+
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getInspector())) {
+            String[] split = taskTestEntity.getInspector().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    LabelValueVo keyValue = new LabelValueVo();
+                    keyValue.setValue(Long.valueOf(jcr.split("&")[1]));
+                    keyValue.setLabel(jcr.split("&")[0]);
+                    userIDs.add(keyValue.getValue());
+                }
+            }
+        }
+
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getRecorder())) {
+            String[] split = taskTestEntity.getRecorder().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    LabelValueVo keyValue = new LabelValueVo();
+                    keyValue.setValue(Long.valueOf(jcr.split("&")[1]));
+                    keyValue.setLabel(jcr.split("&")[0]);
+                    userIDs.add(keyValue.getValue());
+                }
+            }
+        }
+        // 获取 对应的 personIds
+        LambdaQueryWrapper<HKPersonUserRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(HKPersonUserRelEntity::getUserId, userIDs);
+        List<HKPersonUserRelEntity> personEntities = hkPersonUserRelEntityMapper.selectList(queryWrapper);
+
+        // 获取 门禁集合
+
+        // 通过任务单id 获取 检测项绑定的仪器
+        List<Integer> instrumentIds = taskMapper.getDistinctInstrumentIds(Long.parseLong(taskId));
+        if (CollectionUtil.isNotEmpty(instrumentIds)) {
+            return ResultUtil.error("任务单下 无仪器绑定");
+        }
+
+        // 2、获取 仪器的 实验室id信息
+
+        // 3、通过实验室 获取 对应的门禁
+
+        return null;
     }
 
 
