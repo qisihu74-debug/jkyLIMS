@@ -8,12 +8,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.lims.manage.erp.annotation.Log;
+import com.lims.manage.erp.config.HkConfig;
 import com.lims.manage.erp.entity.TestLaboratory;
 import com.lims.manage.erp.enums.BusinessType;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestLaboratoryService;
+import com.lims.manage.erp.util.HkUtils;
 import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.TestLaboratoryVo;
 import io.swagger.annotations.Api;
@@ -42,15 +44,18 @@ public class TestLaboratoryController extends ApiController {
     private TestLaboratoryService testLaboratoryService;
 
 
+
     @GetMapping("/getList")
     public Result getAll(TestLaboratory testLaboratory) {
 
         LambdaQueryWrapper<TestLaboratory> queryWrapper = new LambdaQueryWrapper<>(testLaboratory);
         if (testLaboratory != null && StringUtils.isNotEmpty(testLaboratory.getSerch())) {
-//            queryWrapper.like()
+            queryWrapper.like(TestLaboratory::getName, testLaboratory.getSerch())
+                    .or().like(TestLaboratory::getCode, testLaboratory.getSerch())
+                    .or().like(TestLaboratory::getPosition, testLaboratory.getSerch());
         }
-//        queryWrapper.orderByDesc("create_time");
-//        queryWrapper.eq(, 0);
+        queryWrapper.eq(TestLaboratory::getDelFlag, 0);
+        queryWrapper.orderByDesc(TestLaboratory::getCreateTime);
         return ResultUtil.success(this.testLaboratoryService.list(queryWrapper));
     }
 

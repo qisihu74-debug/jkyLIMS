@@ -8,12 +8,12 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-@TableName("hk_door_laboratory_instrument_rel")
-public class HKDoorLaboratoryInstrumentRelEntity implements Serializable {
+@TableName("hk_camera_laboratory_instrument_rel")
+public class HKCameraLaboratoryInstrumentRelEntity implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    private String indexCode;
+    private String camera;
 
     private Integer testLaboratoryId;
 

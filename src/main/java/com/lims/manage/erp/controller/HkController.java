@@ -229,28 +229,28 @@ public class HkController {
     /**
      * 获取监控与试验室和仪器关系
      *
-     * @param hkDoorLaboratoryInstrumentRelEntity
+     * @param hkCameraLaboratoryInstrumentRelEntity
      * @return
      */
     @GetMapping("getDoorLaboratoryInstruments")
-    public Result getDoorLaboratoryInstruments(HKDoorLaboratoryInstrumentRelEntity hkDoorLaboratoryInstrumentRelEntity) {
+    public Result getDoorLaboratoryInstruments(HKCameraLaboratoryInstrumentRelEntity hkCameraLaboratoryInstrumentRelEntity) {
 
-        return hkDoorService.getDoorLaboratoryInstruments(hkDoorLaboratoryInstrumentRelEntity);
+        return hkDoorService.getDoorLaboratoryInstruments(hkCameraLaboratoryInstrumentRelEntity);
     }
 
 
     /**
      * 进行监控与试验室和仪器关系授权
      *
-     * @param indexCode
+     * @param camera
      * @param testLaboratoryId
      * @param ids
      * @return
      */
     @GetMapping("/impowerDoorLaboratoryInstruments")
-    public Result impowerDoorLaboratoryInstruments(String indexCode, Integer testLaboratoryId, Integer ids[]) {
+    public Result impowerDoorLaboratoryInstruments(String camera, Integer testLaboratoryId, Integer ids[]) {
 
-        return hkDoorService.impowerDoorLaboratoryInstruments(indexCode, testLaboratoryId, ids);
+        return hkDoorService.impowerDoorLaboratoryInstruments(camera, testLaboratoryId, ids);
     }
 
 
