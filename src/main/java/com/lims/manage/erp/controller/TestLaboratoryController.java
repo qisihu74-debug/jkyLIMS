@@ -4,6 +4,7 @@ package com.lims.manage.erp.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.lims.manage.erp.annotation.Log;
@@ -13,6 +14,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.SysOssService;
 import com.lims.manage.erp.service.TestLaboratoryService;
+import com.lims.manage.erp.util.StringUtils;
 import com.lims.manage.erp.vo.TestLaboratoryVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,9 +44,13 @@ public class TestLaboratoryController extends ApiController {
 
     @GetMapping("/getList")
     public Result getAll(TestLaboratory testLaboratory) {
-        QueryWrapper<TestLaboratory> queryWrapper = new QueryWrapper<>(testLaboratory);
-        queryWrapper.orderByDesc("create_time");
-        queryWrapper.eq("del_flag", 0);
+
+        LambdaQueryWrapper<TestLaboratory> queryWrapper = new LambdaQueryWrapper<>(testLaboratory);
+        if (testLaboratory != null && StringUtils.isNotEmpty(testLaboratory.getSerch())) {
+//            queryWrapper.like()
+        }
+//        queryWrapper.orderByDesc("create_time");
+//        queryWrapper.eq(, 0);
         return ResultUtil.success(this.testLaboratoryService.list(queryWrapper));
     }
 

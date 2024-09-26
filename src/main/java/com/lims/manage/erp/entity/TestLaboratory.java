@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.Date;
  * @since 2022-02-25 10:08:36
  */
 @SuppressWarnings("serial")
+@Data
 public class TestLaboratory extends Model<TestLaboratory> {
     @TableId(type = IdType.AUTO)
     private Integer id;
@@ -45,6 +47,11 @@ public class TestLaboratory extends Model<TestLaboratory> {
     private Date updateTime;
     //备注
     private String remark;
+    /**
+     * 搜索内容
+     */
+    @TableField(exist = false)
+    private String serch;
 
 
     public Integer getId() {
