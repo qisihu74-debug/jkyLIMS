@@ -5,9 +5,19 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.config.HkConfig;
-import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.entity.CameraInfo;
+import com.lims.manage.erp.entity.DoorDetailReq;
+import com.lims.manage.erp.entity.HKDoorLaboratoryInstrumentRelEntity;
+import com.lims.manage.erp.entity.HKDoorLaboratoryRelEntity;
+import com.lims.manage.erp.entity.HKPersonDoorProvisionalAuthorityRelEntity;
+import com.lims.manage.erp.entity.HKPersonUserRelEntity;
+import com.lims.manage.erp.entity.HkDoor;
+import com.lims.manage.erp.entity.HkDoorReq;
+import com.lims.manage.erp.entity.HkGrantDoorReq;
+import com.lims.manage.erp.entity.HkPerson;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.service.HkCameraService;
 import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.service.HkPersonService;
 import com.lims.manage.erp.util.HkUtils;
@@ -41,6 +51,8 @@ public class HkController {
     private HkPersonService hkPersonService;
     @Autowired
     private HkDoorService hkDoorService;
+    @Autowired
+    private HkCameraService hkCameraService;
 
     /**
      * 同步海康人员信息
@@ -82,6 +94,29 @@ public class HkController {
                 if (CollectionUtil.isNotEmpty(list)){
                     hkDoorService.saveOrUpdateBatch(list);
                     return ResultUtil.success("同步海康门禁成功",null);
+                }
+            }
+        }
+        return ResultUtil.error("同步失败",null);
+    }
+
+    /**
+     * 同步海康摄像头设备信息
+     * @return
+     */
+    @GetMapping("pullCamera")
+    public Result pullCamera(){
+        Map<String, Object> map = HkUtils.cameraSearch(hkConfig.getCameraSearch());
+        JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(map));
+        String data = jsonObject.get("data").toString();
+        if (StringUtils.isNotEmpty(data)){
+            JSONObject jsonObject1 = JSONObject.parseObject(data);
+            if (jsonObject1 != null){
+                String toString = jsonObject1.get("list").toString();
+                List<CameraInfo> list = JSON.parseArray(toString, CameraInfo.class);
+                if (CollectionUtil.isNotEmpty(list)){
+                    hkCameraService.saveOrUpdateBatch(list);
+                    return ResultUtil.success("同步海康摄像头成功",null);
                 }
             }
         }
@@ -351,6 +386,7 @@ public class HkController {
 
         return hkDoorService.getAccessControlStatusList(testLaboratoryId);
     }
+
 
 
 }
