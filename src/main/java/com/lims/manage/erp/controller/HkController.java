@@ -209,6 +209,24 @@ public class HkController {
     }
 
     /**
+     * 海康摄像头监控列表查询
+     * @param pageNum
+     * @param pageSize
+     * @param name
+     * @param position
+     * @param state
+     * @return
+     */
+    @GetMapping("cameraList")
+    public Result cameraList(Integer pageNum,Integer pageSize,String name,String position,String state){
+        if (pageNum == null || pageSize == null){
+            return ResultUtil.error("缺少分页参数");
+        }
+        PageInfo<HkDoor> pageInfo = hkCameraService.cameraList(pageNum,pageSize,name,position,state);
+        return ResultUtil.success(pageInfo);
+    }
+
+    /**
      * 查询门禁点出入事件详情记录
      * @param doorDetailReq
      * @return

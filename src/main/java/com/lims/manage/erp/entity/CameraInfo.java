@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -61,4 +62,6 @@ public class CameraInfo {
     private String regionPath;
 
     private String regionPathName;
+    @TableField(exist = false)
+    private String laboratoryName;
 }
