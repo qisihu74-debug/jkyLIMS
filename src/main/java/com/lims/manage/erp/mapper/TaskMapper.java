@@ -773,6 +773,17 @@ public interface TaskMapper extends BaseMapper {
      * @param taskId
      * @return
      */
-    @Select("SELECT DISTINCT instrument_id FROM test_instrument_use_record WHERE task_id = #{taskId}")
+    @Select("SELECT DISTINCT\n" +
+            "\tintrusment_id \n" +
+            "FROM\n" +
+            "\ttest_product_item_instrument_middle_rel \n" +
+            "WHERE\n" +
+            "\tid_item IN ( SELECT id FROM test_entrusted_sample_checkitem_rel WHERE task_id = #{taskId} ) UNION\n" +
+            "SELECT DISTINCT\n" +
+            "\tinstrument_id \n" +
+            "FROM\n" +
+            "\ttest_instrument_use_record \n" +
+            "WHERE\n" +
+            "\ttask_id = #{taskId}")
     List<Integer> getDistinctInstrumentIds(Long taskId);
 }

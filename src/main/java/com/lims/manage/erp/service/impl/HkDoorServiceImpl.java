@@ -56,6 +56,8 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private HkCameraDao hkCameraDao;
     @Autowired
     private TaskMapper taskMapper;
+    @Autowired
+    private DeviceEntityMapper deviceEntityMapper;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
@@ -428,25 +430,29 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
     }
 
+    /**
+     * 任务单与人员授权
+     *
+     * @param taskId
+     * @return
+     */
     @Override
     public Result taskListAuthorization(String taskId) {
 
         // 获取任务单信息：
         TaskTestEntity taskTestEntity = taskMapper.getTaskOrders(Long.parseLong(taskId));
+
         if (taskTestEntity == null) {
             return ResultUtil.error("任务单为空");
         }
+
         // 获取 检测人、记录人
         List<Long> userIDs = new ArrayList<>();
-
         if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getInspector())) {
             String[] split = taskTestEntity.getInspector().split(",");
             if (split != null) {
                 for (String jcr : split) {
-                    LabelValueVo keyValue = new LabelValueVo();
-                    keyValue.setValue(Long.valueOf(jcr.split("&")[1]));
-                    keyValue.setLabel(jcr.split("&")[0]);
-                    userIDs.add(keyValue.getValue());
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
                 }
             }
         }
@@ -455,31 +461,58 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
             String[] split = taskTestEntity.getRecorder().split(",");
             if (split != null) {
                 for (String jcr : split) {
-                    LabelValueVo keyValue = new LabelValueVo();
-                    keyValue.setValue(Long.valueOf(jcr.split("&")[1]));
-                    keyValue.setLabel(jcr.split("&")[0]);
-                    userIDs.add(keyValue.getValue());
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
                 }
             }
         }
+
         // 获取 对应的 personIds
         LambdaQueryWrapper<HKPersonUserRelEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(HKPersonUserRelEntity::getUserId, userIDs);
         List<HKPersonUserRelEntity> personEntities = hkPersonUserRelEntityMapper.selectList(queryWrapper);
 
+        if (CollectionUtil.isEmpty(personEntities)) {
+            return ResultUtil.error("检测人记录人 无人员绑定");
+        }
+
+        // 人员集合
+        List<String> personIds = personEntities.stream().map(HKPersonUserRelEntity::getPersonId).collect(Collectors.toList());
+
+
         // 获取 门禁集合
 
         // 通过任务单id 获取 检测项绑定的仪器
         List<Integer> instrumentIds = taskMapper.getDistinctInstrumentIds(Long.parseLong(taskId));
-        if (CollectionUtil.isNotEmpty(instrumentIds)) {
+        if (CollectionUtil.isEmpty(instrumentIds)) {
             return ResultUtil.error("任务单下 无仪器绑定");
         }
 
         // 2、获取 仪器的 实验室id信息
+        LambdaQueryWrapper<DeviceEntity> deviceWrapper = new LambdaQueryWrapper<>();
+        deviceWrapper.in(DeviceEntity::getId, instrumentIds);
+        deviceWrapper.isNotNull(DeviceEntity::getLaboratoryId);
+        List<DeviceEntity> deviceEntities = deviceEntityMapper.selectList(deviceWrapper);
+        if (CollectionUtil.isEmpty(deviceEntities)) {
+            return ResultUtil.error("仪器下 无实验室绑定");
+        }
+        List<Integer> laboratoryIds = deviceEntities.stream().map(DeviceEntity::getLaboratoryId).collect(Collectors.toList());
 
         // 3、通过实验室 获取 对应的门禁
+        LambdaQueryWrapper<HKDoorLaboratoryRelEntity> doorLaboratoryWrapper = new LambdaQueryWrapper<>();
+        doorLaboratoryWrapper.in(HKDoorLaboratoryRelEntity::getTestLaboratoryId, laboratoryIds);
+        List<HKDoorLaboratoryRelEntity> hkDoorLaboratoryRelEntities = hkDoorLaboratoryRelEntityMapper.selectList(doorLaboratoryWrapper);
 
-        return null;
+        if (CollectionUtil.isEmpty(hkDoorLaboratoryRelEntities)) {
+            return ResultUtil.error("实验室下 无门禁绑定");
+        }
+
+        // 门禁集合
+        List<String> indexCodes = hkDoorLaboratoryRelEntities.stream().map(HKDoorLaboratoryRelEntity::getIndexCode).collect(Collectors.toList());
+        // 执行： 任务单授权门禁权限(门禁和人员绑定-下发权限)
+        HkUtils.taskGrantDoor(hkConfig.getPersonBandDoor(), hkConfig.getGrant(), personIds, indexCodes);
+
+        return ResultUtil.success("操作成功");
+
     }
 
 

@@ -379,7 +379,7 @@ public class HkController {
     @GetMapping("taskListAuthorization")
     public Result taskListAuthorization(String taskId) {
 
-        return null;
+        return hkDoorService.taskListAuthorization(taskId);
     }
 
 

@@ -80,5 +80,11 @@ public interface HkDoorService extends IService<HkDoor> {
      */
     Result getAccessControlStatusList(String testLaboratoryId);
 
+    /**
+     * 任务单与人员授权
+     *
+     * @param taskId
+     * @return
+     */
     Result taskListAuthorization(String taskId);
 }
