@@ -39,14 +39,6 @@ public interface HkDoorService extends IService<HkDoor> {
     Result editPersonUserRel(HKPersonUserRelEntity hkPersonUserRelEntity);
 
     /**
-     * 获取监控与试验室和仪器关系
-     *
-     * @param hkCameraLaboratoryInstrumentRelEntity
-     * @return
-     */
-    Result getDoorLaboratoryInstruments(HKCameraLaboratoryInstrumentRelEntity hkCameraLaboratoryInstrumentRelEntity);
-
-    /**
      * 进行监控与试验室和仪器关系授权
      *
      * @param indexCode
@@ -55,14 +47,6 @@ public interface HkDoorService extends IService<HkDoor> {
      * @return
      */
     Result impowerDoorLaboratoryInstruments(String indexCode, Integer testLaboratoryId, Integer ids[]);
-
-    /**
-     * 进行监控与试验室和仪器关系移除
-     *
-     * @param ids
-     * @return
-     */
-    Result removeDoorLaboratoryInstruments(Integer ids[]);
 
     Map<String, Object> pictures(String svrIndexCode, String picUri);
 
@@ -95,4 +79,12 @@ public interface HkDoorService extends IService<HkDoor> {
      * @return
      */
     Result getAccessControlStatusList(String testLaboratoryId);
+
+    /**
+     * 任务单与人员授权
+     *
+     * @param taskId
+     * @return
+     */
+    Result taskListAuthorization(String taskId);
 }

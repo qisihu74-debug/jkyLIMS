@@ -311,6 +311,24 @@ public class TestInstrumentController extends ApiController {
     }
 
     /**
+     * 通过实验室id 查询设备下拉列表
+     *
+     * @param laboratoryId
+     * @return
+     */
+    @GetMapping("/getDropDownDeviceList")
+    public Result getDropDownDeviceList(Integer laboratoryId) {
+        if (laboratoryId == null) {
+            return ResultUtil.error("缺少必要参数！");
+        }
+        LambdaQueryWrapper<TestInstrument> deviceWrapper = new LambdaQueryWrapper<>();
+        deviceWrapper.select(TestInstrument::getId, TestInstrument::getCode, TestInstrument::getName);
+        deviceWrapper.eq(TestInstrument::getLaboratoryId, laboratoryId);
+        List<TestInstrument> list = testInstrumentService.list(deviceWrapper);
+        return ResultUtil.success(list);
+    }
+
+    /**
      * 进行仪器与实验室授权
      *
      * @param laboratoryId

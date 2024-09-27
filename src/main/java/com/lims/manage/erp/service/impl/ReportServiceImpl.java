@@ -1839,10 +1839,15 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             if (org.apache.commons.lang.StringUtils.isNotEmpty(recorder)) {
-                LabelValueVo keyValue = new LabelValueVo();
-                keyValue.setValue(Long.valueOf(recorder.split("&")[1]));
-                keyValue.setLabel(recorder.split("&")[0]);
-                jcMap.add(keyValue);
+                String[] split = recorder.split(",");
+                if (split.length > 0) {
+                    for (String jcr : split) {
+                        LabelValueVo keyValue = new LabelValueVo();
+                        keyValue.setValue(Long.valueOf(jcr.split("&")[1]));
+                        keyValue.setLabel(jcr.split("&")[0]);
+                        jcMap.add(keyValue);
+                    }
+                }
             }
 
             String receiver = approveInfo.getReviewer();
