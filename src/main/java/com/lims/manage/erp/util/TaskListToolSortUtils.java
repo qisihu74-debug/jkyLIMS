@@ -60,8 +60,6 @@ public class TaskListToolSortUtils {
                     sampleItemEntity.setPriority("1");
                     sampleItemEntity.setTeamName("本团队");
                 } else {
-                    // 设置排序优先级
-                    Collections.sort(itemTeamRels, Comparator.comparing(TestCheckItemTeamRel::getPriority));
 
                     boolean foundMatchingTeam = false;
                     // 多个情况下 进行排序优先操作

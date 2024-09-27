@@ -17,5 +17,5 @@ public class HKCameraLaboratoryInstrumentRelEntity implements Serializable {
 
     private Integer testLaboratoryId;
 
-    private Integer testInstrumentId;
+    private String testInstrumentId;
 }

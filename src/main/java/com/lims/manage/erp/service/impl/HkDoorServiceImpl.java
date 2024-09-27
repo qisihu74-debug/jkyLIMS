@@ -169,7 +169,7 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         LambdaQueryWrapper<CameraInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(CameraInfo::getIndexCode, indexCode);
         List<CameraInfo> cameraInfoList = hkCameraDao.selectList(queryWrapper);
-        if (CollectionUtil.isNotEmpty(cameraInfoList)) {
+        if (CollectionUtil.isEmpty(cameraInfoList)) {
             return ResultUtil.error("监控标识不存在");
         }
 
@@ -178,15 +178,16 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         deleteWrapper.eq(HKCameraLaboratoryInstrumentRelEntity::getCamera, indexCode);
         hkDoorLaboratoryInstrumentRelService.remove(deleteWrapper);
 
-        List<HKCameraLaboratoryInstrumentRelEntity> dataSet = new ArrayList<>();
+        HKCameraLaboratoryInstrumentRelEntity data = new HKCameraLaboratoryInstrumentRelEntity();
+        StringBuffer stringBuffer = new StringBuffer();
         for (int i = 0; i < ids.length; i++) {
-            HKCameraLaboratoryInstrumentRelEntity data = new HKCameraLaboratoryInstrumentRelEntity();
-            data.setCamera(indexCode);
-            data.setTestLaboratoryId(testLaboratoryId);
-            data.setTestInstrumentId(ids[i]);
-            dataSet.add(data);
+            stringBuffer.append(ids[i]);
+            stringBuffer.append(",");
         }
-        hkDoorLaboratoryInstrumentRelService.saveBatch(dataSet);
+        data.setCamera(indexCode);
+        data.setTestLaboratoryId(testLaboratoryId);
+        data.setTestInstrumentId(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+        hkDoorLaboratoryInstrumentRelService.save(data);
         return ResultUtil.success("操作成功");
     }
 
