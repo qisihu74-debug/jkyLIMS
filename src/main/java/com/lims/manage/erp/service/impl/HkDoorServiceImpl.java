@@ -59,6 +59,7 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
+        PageHelper.clearPage();
         PageHelper.startPage(pageNum, pageSize);
         List<HkDoor> list = hkDoorDao.doorList(name, position, state);
         PageInfo<HkDoor> pageInfo = new PageInfo(list);
@@ -334,6 +335,13 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Override
     public Result addtemporaryVisit(HKPersonDoorProvisionalAuthorityRelEntity data) {
 
+        if (data == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        if (StringUtils.isEmpty(data.getLaboratoryMessage())) {
+            return ResultUtil.error("缺少必填参数");
+        }
+
         // 进行转换： 年月日 时分秒 转成 UTC：东八区存放
         if (StringUtils.isNotEmpty(data.getStartTime())) {
             data.setStartTime(DateUtil.getISO8601TimestampFromDateStr(data.getStartTime()));
@@ -343,7 +351,29 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         }
         data.setCreateTime(new Date());
         data.setState(0);
+
+        // 通过实验室id 获取门禁信息
+        LambdaQueryWrapper<HKDoorLaboratoryRelEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(HKDoorLaboratoryRelEntity::getTestLaboratoryId, data.getLaboratoryMessage());
+
+        List<HKDoorLaboratoryRelEntity> list = hkDoorLaboratoryRelEntityMapper.selectList(queryWrapper);
+
+        if (CollectionUtil.isNotEmpty(list)) {
+            StringBuffer stringBuffer = new StringBuffer();
+            for (HKDoorLaboratoryRelEntity doorLaboratoryRelEntity : list) {
+                stringBuffer.append(doorLaboratoryRelEntity.getIndexCode() + ",");
+            }
+            data.setIndexCode(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+        }
+
         hkPersonDoorProvisionalAuthorityRelEntityMapper.insert(data);
+        // 授权
+        Boolean msg = temporaryVisit(data.getId());
+
+        if (!msg) {
+            int i = 1 / 0;
+        }
+
         return ResultUtil.success("操作成功");
     }
 
