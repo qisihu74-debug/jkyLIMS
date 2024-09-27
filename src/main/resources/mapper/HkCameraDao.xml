@@ -15,19 +15,22 @@
         LEFT JOIN hk_camera_laboratory_instrument_rel hr ON hd.index_code = hr.camera
         LEFT JOIN test_laboratory tl ON hr.test_laboratory_id = tl.id
         ) tba
-<if test="name!=null and name!=''">
-    AND tba.name LIKE CONCAT('%',#{name},'%')
-</if>
-<if test="position!=null and position!=''">
-    AND tba.region_name LIKE CONCAT('%',#{position},'%')
-</if>
-<if test="state == '已关联'">
-    AND tba.laboratoryName is not null
-</if>
-<if test="state == '未关联'">
-    AND tba.laboratoryName is null
-</if>
-   </select>
+        <where>
+            1=1
+            <if test="name!=null and name!=''">
+                AND tba.name LIKE CONCAT('%',#{name},'%')
+            </if>
+            <if test="position!=null and position!=''">
+                AND tba.region_name LIKE CONCAT('%',#{position},'%')
+            </if>
+            <if test="state == '已关联'">
+                AND tba.laboratoryName is not null
+            </if>
+            <if test="state == '未关联'">
+                AND tba.laboratoryName is null
+            </if>
+        </where>
+    </select>
 
 
 </mapper>

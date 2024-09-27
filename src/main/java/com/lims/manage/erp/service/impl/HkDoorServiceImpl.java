@@ -58,6 +58,8 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private TaskMapper taskMapper;
     @Autowired
     private DeviceEntityMapper deviceEntityMapper;
+    @Autowired
+    private ReportMapper reportMapper;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
@@ -444,6 +446,14 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
         if (taskTestEntity == null) {
             return ResultUtil.error("任务单为空");
+        }
+
+        // 获取最终报告 签发完成 则抛出信息
+        ReportRecordEntity recordEntity = reportMapper.getDetailByEntrustId(taskTestEntity.getEntrustmentId());
+        if (recordEntity != null) {
+            if (recordEntity.getState() != null && Integer.parseInt(recordEntity.getState()) >= 6) {
+                return ResultUtil.error("操作失败 报告单已签发完成");
+            }
         }
 
         // 获取 检测人、记录人

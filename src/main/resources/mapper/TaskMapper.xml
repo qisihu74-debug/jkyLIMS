@@ -778,6 +778,7 @@
 
     <select id="getTaskOrders" resultType="com.lims.manage.erp.entity.TaskTestEntity">
         SELECT id,
+                entrustment_id as entrustmentId,
                code,
                start_detection_time,
                end_detection_time,
