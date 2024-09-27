@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.lims.manage.erp.config.HkConfig;
 import com.lims.manage.erp.entity.*;
+import com.lims.manage.erp.mapper.HKPersonDoorProvisionalAuthorityRelEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.HkCameraService;
@@ -44,6 +45,8 @@ public class HkController {
     private HkDoorService hkDoorService;
     @Autowired
     private HkCameraService hkCameraService;
+    @Autowired
+    private HKPersonDoorProvisionalAuthorityRelEntityMapper hkPersonDoorProvisionalAuthorityRelEntityMapper;
 
     /**
      * 同步海康人员信息
@@ -340,6 +343,8 @@ public class HkController {
         }
         Boolean aBoolean = hkDoorService.cancelVisit(id);
         if (aBoolean){
+            //移除数据
+            hkPersonDoorProvisionalAuthorityRelEntityMapper.deleteById(id);
             return ResultUtil.success("取消临时授权成功",null);
         }else {
             return ResultUtil.error("取消临时授权失败");
