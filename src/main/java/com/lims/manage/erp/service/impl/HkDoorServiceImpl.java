@@ -60,6 +60,8 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private DeviceEntityMapper deviceEntityMapper;
     @Autowired
     private ReportMapper reportMapper;
+    @Autowired
+    private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
@@ -433,6 +435,88 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
     }
 
+    // 根据任务单详情 进行获取 对应检测人、记录人、复核人、报告制作人、辅助人员
+    public static Map<String, Object> getUserIds(TaskTestEntity taskTestEntity) {
+
+        Map<String, Object> map = new HashMap<>();
+
+        // 获取 人员集合
+        List<Long> userIDs = new ArrayList<>();
+
+        // 检测人
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getInspector())) {
+            String[] split = taskTestEntity.getInspector().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
+                }
+            }
+        }
+
+        // 记录人
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getRecorder())) {
+            String[] split = taskTestEntity.getRecorder().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
+                }
+            }
+        }
+
+        // 复核人
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getReviewer())) {
+            String[] split = taskTestEntity.getReviewer().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
+                }
+            }
+        }
+
+        // 报告制作人
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getReportProducer())) {
+            String[] split = taskTestEntity.getReportProducer().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
+                }
+            }
+        }
+
+        // 辅助人员
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getAuxiliaryPersonnel())) {
+            String[] split = taskTestEntity.getAuxiliaryPersonnel().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
+                }
+            }
+        }
+
+        // 见习生：实习的新手
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getProbationer())) {
+            String[] split = taskTestEntity.getProbationer().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
+                }
+            }
+        }
+
+        // 实习生
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getInterns())) {
+            String[] split = taskTestEntity.getInterns().split(",");
+            if (split != null) {
+                for (String jcr : split) {
+                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
+                }
+            }
+        }
+
+        map.put("userIDs", userIDs);
+        return map;
+    }
+
     /**
      * 任务单与人员授权
      *
@@ -443,7 +527,7 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     public Result taskListAuthorization(String taskId) {
 
         // 获取任务单信息：
-        TaskTestEntity taskTestEntity = taskMapper.getTaskOrders(Long.parseLong(taskId));
+        TaskTestEntity taskTestEntity = taskMapper.selectTaskEntity(Long.parseLong(taskId));
 
         if (taskTestEntity == null) {
             return ResultUtil.error("任务单为空");
@@ -456,26 +540,11 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
                 return ResultUtil.error("操作失败 报告单已签发完成");
             }
         }
-
         // 获取 检测人、记录人
         List<Long> userIDs = new ArrayList<>();
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getInspector())) {
-            String[] split = taskTestEntity.getInspector().split(",");
-            if (split != null) {
-                for (String jcr : split) {
-                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
-                }
-            }
-        }
+        Map<String, Object> map = getUserIds(taskTestEntity);
+        userIDs = (List<Long>) map.get("userIDs");
 
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getRecorder())) {
-            String[] split = taskTestEntity.getRecorder().split(",");
-            if (split != null) {
-                for (String jcr : split) {
-                    userIDs.add(Long.valueOf(jcr.split("&")[1]));
-                }
-            }
-        }
 
         // 获取 对应的 personIds
         LambdaQueryWrapper<HKPersonUserRelEntity> queryWrapper = new LambdaQueryWrapper<>();
@@ -519,8 +588,21 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
         // 门禁集合
         List<String> indexCodes = hkDoorLaboratoryRelEntities.stream().map(HKDoorLaboratoryRelEntity::getIndexCode).collect(Collectors.toList());
+        // 获取任务单 最终报告流转日期 进行 下发即可
+        LambdaQueryWrapper<TestEntrustedTaskRelEntity> entityWrapper = new LambdaQueryWrapper<>();
+        entityWrapper.eq(TestEntrustedTaskRelEntity::getEntrustId, taskTestEntity.getEntrustmentId());
+        // 获取 最终报告流转信息
+        entityWrapper.eq(TestEntrustedTaskRelEntity::getType, 0);
+        entityWrapper.orderByAsc(TestEntrustedTaskRelEntity::getId);
+        List<TestEntrustedTaskRelEntity> entrustedTaskRelEntities = testEntrustedTaskRelDao.selectList(entityWrapper);
+        if (CollectionUtil.isEmpty(entrustedTaskRelEntities)) {
+            return ResultUtil.error("任务单下 无最终报告流转时间");
+        }
+        TestEntrustedTaskRelEntity taskRelEntity = entrustedTaskRelEntities.get(0);
+        Map<String, String> timeCyclemap = DateUtil.returnTimeCycle(taskRelEntity.getTaskFlowDate());
+
         // 执行： 任务单授权门禁权限(门禁和人员绑定-下发权限)
-        HkUtils.taskGrantDoor(hkConfig.getPersonBandDoor(), hkConfig.getGrant(), personIds, indexCodes);
+        HkUtils.taskGrantDoor(hkConfig.getPersonBandDoor(), hkConfig.getGrant(), personIds, indexCodes, timeCyclemap);
 
         return ResultUtil.success("操作成功");
 

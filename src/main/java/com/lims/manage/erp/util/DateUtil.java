@@ -514,19 +514,40 @@ public class DateUtil {
         return date.format(dtf2);
     }
 
+    /***
+     * 返回时间周期
+     * @param taskFlowDate
+     * @return
+     */
+    public static Map<String, String> returnTimeCycle(Date taskFlowDate) {
+        String startTime = formatDate(new Date());
+        startTime = startTime + " 00:00:00";
+        String startTimeStr = getISO8601TimestampFromDateStr(startTime);
+        // 获取结束时间
+        String endTime = formatDate(taskFlowDate);
+        endTime = endTime + " 23:59:59";
+        String endTimeStr = getISO8601TimestampFromDateStr(endTime);
+        Map<String, String> map = new HashMap<>();
+        map.put("startTime", startTimeStr);
+        map.put("endTime", endTimeStr);
+        return map;
+    }
+
+
     public static void main(String[] args) {
         Map<String, String> todaySTAndET = getTodaySTAndET();
-        System.out.println("============"+ JSON.toJSONString(todaySTAndET));
+        System.out.println("============" + JSON.toJSONString(todaySTAndET));
 
         String s = formatDate(new Date());
-        System.out.println("");
+        s = s + " 23:59:59";
+        System.out.println("s 当前时间为 " + s);
 
         String ISODateTime = "2024-09-10T11:30:08.000+08:00";
         String dateStr = getDateStrFromISO8601Timestamp(ISODateTime);
         System.out.println("dateStr = " + dateStr);
 
-        String dateTime = "2024-09-10 11:30:08";
-        String ISOStr = getISO8601TimestampFromDateStr(dateTime);
+//        String dateTime = "2024-09-10 11:30:08";
+        String ISOStr = getISO8601TimestampFromDateStr(s);
         System.out.println("ISOStr = " + ISOStr);
     }
 }

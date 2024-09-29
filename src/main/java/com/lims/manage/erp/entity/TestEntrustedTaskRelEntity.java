@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -24,11 +25,13 @@ public class TestEntrustedTaskRelEntity {
     /**
      * 部门id
      */
+    @TableField(exist = false)
     private Integer deptId;
 
     /**
      * 部门名称
      */
+    @TableField(exist = false)
     private String deptName;
 
     /**
@@ -71,6 +74,7 @@ public class TestEntrustedTaskRelEntity {
     /**
      * 任务单编号
      */
+    @TableField(exist = false)
     private String taskCode;
 
     /**

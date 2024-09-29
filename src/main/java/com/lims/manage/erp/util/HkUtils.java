@@ -149,12 +149,14 @@ public class HkUtils {
 
     /**
      * 任务单授权门禁权限(门禁和人员绑定-下发权限)
+     *
      * @param bandPath
      * @param grantPath
      * @param indexCodes
+     * @param stringMap  设置日期 开始日期 截止日期
      * @return
      */
-    public static Boolean taskGrantDoor(String bandPath,String grantPath, List<String> personIds,List<String> indexCodes){
+    public static Boolean taskGrantDoor(String bandPath, String grantPath, List<String> personIds, List<String> indexCodes, Map<String, String> stringMap) {
         HkDoorReq hkDoorReq = new HkDoorReq();
         List<PersonDoorReq> personDatas = Lists.newArrayList();
         PersonDoorReq personDoorReq = new PersonDoorReq();
@@ -163,24 +165,23 @@ public class HkUtils {
         hkDoorReq.setPersonDatas(personDatas);
 
         List<ResourceInfo> resourceInfos = Lists.newArrayList();
-        for (String string :indexCodes){
+        for (String string : indexCodes) {
             ResourceInfo resourceInfo = new ResourceInfo();
             resourceInfo.setResourceIndexCode(string);
             resourceInfos.add(resourceInfo);
         }
         hkDoorReq.setResourceInfos(resourceInfos);
-        //设置日期默认当天
-        Map<String, String> stringMap = DateUtil.getTodaySTAndET();
+        //设置日期 根据传参即可
         hkDoorReq.setStartTime(stringMap.get("startTime"));
         hkDoorReq.setEndTime(stringMap.get("endTime"));
 
         //设置固定参数
         List<PersonDoorReq> personDatas1 = hkDoorReq.getPersonDatas();
-        for (PersonDoorReq personDoorReq1 :personDatas1){
+        for (PersonDoorReq personDoorReq1 : personDatas1) {
             personDoorReq1.setPersonDataType("person");
         }
         List<ResourceInfo> resourceInfos1 = hkDoorReq.getResourceInfos();
-        for (ResourceInfo resourceInfo: resourceInfos1){
+        for (ResourceInfo resourceInfo : resourceInfos1) {
             resourceInfo.setResourceType("door");
         }
         JSONObject jsonBody = JSONObject.parseObject(JSON.toJSONString(hkDoorReq));
