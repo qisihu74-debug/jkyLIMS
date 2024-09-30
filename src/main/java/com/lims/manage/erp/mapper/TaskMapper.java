@@ -98,7 +98,16 @@ public interface TaskMapper extends BaseMapper {
     int updateTestTask(TaskTestEntity taskTestEntity);
 
     /**
+     * 修改任务单 - 参数可以 set=null
+     *
+     * @param taskTestEntity
+     * @return
+     */
+    int updateTaskEntity(TaskTestEntity taskTestEntity);
+
+    /**
      * 批量修改任务信息
+     *
      * @param list
      * @return
      */

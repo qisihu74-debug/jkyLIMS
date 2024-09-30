@@ -985,7 +985,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskTestEntity.setInterns(methodRetrunStrSplit(addSampleItemEntity.getInterns(), ","));
         // 样品描述信息
         taskTestEntity.setSampleStateDescription(sampleItemEntity.getSampleStateDescription());
-        taskMapper.updateTestTask(taskTestEntity);
+        taskMapper.updateTaskEntity(taskTestEntity);
 
     }
 
@@ -1064,7 +1064,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     taskTestEntity.setInterns(itemEntity.getInterns());
                     // 领样人
                     taskTestEntity.setSampler(itemEntity.getSampler());
-                    taskMapper.updateTestTask(taskTestEntity);
+                    taskMapper.updateTaskEntity(taskTestEntity);
                 }
             }
         }
@@ -2275,7 +2275,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskTestEntity.setInterns(methodRetrunStrSplit(addSampleItemEntity.getInterns(), ","));
         // 样品描述信息
         taskTestEntity.setSampleStateDescription(list.get(0).getSampleStateDescription());
-        taskMapper.updateTestTask(taskTestEntity);
+        taskMapper.updateTaskEntity(taskTestEntity);
         // 更新检测项及样品流转状态
         updateItemStatus(addSampleItemEntity, list);
     }
@@ -2447,7 +2447,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskTestEntity.setReportProducer("马瑞玲&1652404746060112");
         // 辅助人员
         taskTestEntity.setAuxiliaryPersonnel("焦凯&1654682057588104");
-        taskMapper.updateTestTask(taskTestEntity);
+        taskMapper.updateTaskEntity(taskTestEntity);
 
 
         LambdaQueryWrapper<TestCheckItemsTaskRel> queryWrapper12 = new LambdaQueryWrapper<>();
