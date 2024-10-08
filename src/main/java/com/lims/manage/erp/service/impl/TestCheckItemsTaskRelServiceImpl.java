@@ -427,21 +427,28 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         if (reportDetails == null) {
             return ResultUtil.error("分配失败，报告单不存在");
         }
-        // 当前签发时间（24小时之内）。
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date nowDate = new Date();
-        // 去除当前时间 时分秒
-        Date currentLatestTime = format.parse(format.format(nowDate));
+        List<TestInitDataEntity> entrustBasis = taskMapper.selectEntrustBasis(26);
+        Integer type = Integer.parseInt(entrustBasis.get(0).getName());
 
-        // 报告签发时间 09-05
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(reportDetails.getIssuerTime());
-        calendar.add(Calendar.DAY_OF_MONTH, +1);
-        Date lastDayOfMonth = calendar.getTime();
-        //  报告签发（2024-09-05 ) < 当前时间 2024-09-05 + 1
-        if (lastDayOfMonth.before(currentLatestTime)) {
-            return ResultUtil.error("分配失败,最晚分配时间为 " + format.format(lastDayOfMonth));
+        // 获取 系统基础效验信息：
+        if (type == 0) {
+            // 当前签发时间（24小时之内）。
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date nowDate = new Date();
+            // 去除当前时间 时分秒
+            Date currentLatestTime = format.parse(format.format(nowDate));
+
+            // 报告签发时间 09-05
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(reportDetails.getIssuerTime());
+            calendar.add(Calendar.DAY_OF_MONTH, +1);
+            Date lastDayOfMonth = calendar.getTime();
+            //  报告签发（2024-09-05 ) < 当前时间 2024-09-05 + 1
+            if (lastDayOfMonth.before(currentLatestTime)) {
+                return ResultUtil.error("分配失败,最晚分配时间为 " + format.format(lastDayOfMonth));
+            }
         }
+
         // 删除旧数据
         LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, list.get(0).getTaskId());
