@@ -377,6 +377,13 @@ public class StatisticsController {
     @GetMapping("/teamStatisticsNodeDetailExport")
     public void teamStatisticsNodeDetailExport(String teamId, String beginDate, String endDate, HttpServletResponse response) throws IOException {
 
+        if (teamId == null) {
+            return;
+        }
+        if (beginDate == null || endDate == null) {
+            return;
+        }
+
         BufferedOutputStream bos = null;
         List<StatisticsNodeDetailVo> list = statisticsService.teamStatisticsNodeDetailExport(teamId, beginDate, endDate);
 //        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
