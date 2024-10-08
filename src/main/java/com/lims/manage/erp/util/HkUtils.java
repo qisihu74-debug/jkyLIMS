@@ -63,6 +63,23 @@ public class HkUtils {
     }
 
     /**
+     * 获取监控点回放取流URLv2
+     * @param path
+     * @param cameraIndexCode
+     * @param starTime
+     * @param endTime
+     * @return
+     */
+    public static Map<String,Object> playbackURLs(String path,String cameraIndexCode,String starTime,String endTime){
+        JSONObject jsonBody = new JSONObject();
+        jsonBody.put("cameraIndexCode", cameraIndexCode);
+        jsonBody.put("beginTime", starTime);
+        jsonBody.put("endTime", endTime);
+        Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
+        return returnMap;
+    }
+
+    /**
      * API名称：
      * 查询监控点列表v2
      * 分组：
