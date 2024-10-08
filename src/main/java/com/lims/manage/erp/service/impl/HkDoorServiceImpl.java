@@ -441,7 +441,7 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         Map<String, Object> map = new HashMap<>();
 
         // 获取 人员集合
-        List<Long> userIDs = new ArrayList<>();
+        Set<Long> userIDs = new HashSet<>();
 
         // 检测人
         if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getInspector())) {
@@ -541,9 +541,9 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
             }
         }
         // 获取 检测人、记录人
-        List<Long> userIDs = new ArrayList<>();
+        Set<Long> userIDs = new HashSet<>();
         Map<String, Object> map = getUserIds(taskTestEntity);
-        userIDs = (List<Long>) map.get("userIDs");
+        userIDs = (Set<Long>) map.get("userIDs");
 
 
         // 获取 对应的 personIds
@@ -600,6 +600,17 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         }
         TestEntrustedTaskRelEntity taskRelEntity = entrustedTaskRelEntities.get(0);
         Map<String, String> timeCyclemap = DateUtil.returnTimeCycle(taskRelEntity.getTaskFlowDate());
+
+        String startISO8601Time = timeCyclemap.get("startTime");
+        String endISO8601Time = timeCyclemap.get("endTime");
+
+        String startTime = DateUtil.getDateStrFromISO8601Timestamp(startISO8601Time);
+        String endTime = DateUtil.getDateStrFromISO8601Timestamp(endISO8601Time);
+
+        // 进行比较: endTime < startTime
+        if (DateUtil.timeMinuteFormat(endTime).before(DateUtil.timeMinuteFormat(startTime))) {
+            return ResultUtil.error("授权失败-流转时间异常 " + endTime);
+        }
 
         // 执行： 任务单授权门禁权限(门禁和人员绑定-下发权限)
         HkUtils.taskGrantDoor(hkConfig.getPersonBandDoor(), hkConfig.getGrant(), personIds, indexCodes, timeCyclemap);

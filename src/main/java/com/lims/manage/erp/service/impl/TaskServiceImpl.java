@@ -594,8 +594,8 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         stringBuilder1.append(" 见习生：实习的新手:"+taskTestEntity.getProbationer());
         stringBuilder1.append(" 实习生:"+taskTestEntity.getInterns());
         stringBuilder1.append(" 辅助人员:"+taskTestEntity.getAuxiliaryPersonnel());
-        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单领取\n\t"+stringBuilder1.toString(), Const.TASK_GET, true);
-        taskMapper.updateTestTask(taskTestEntity);
+        logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), "任务单领取\n\t" + stringBuilder1.toString(), Const.TASK_GET, true);
+        taskMapper.updateTaskEntity(taskTestEntity);
         // 获取任务单id集合 进行更新样品领样状态
         List<Long> taskIds = new ArrayList<>();
         taskIds.add(taskTestEntity.getId());

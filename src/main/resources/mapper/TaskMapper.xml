@@ -729,9 +729,6 @@
             <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
             <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
             <if test="reviewTime!=null">review_time=#{reviewTime},</if>
-<!--            <if test="inspectorId!=null and inspectorId!=''">inspector_id=#{inspectorId},</if>-->
-<!--            <if test="recorderId!=null and recorderId!=''">recorder_id=#{recorderId},</if>-->
-<!--            <if test="reviewerId!=null and reviewerId!=''">reviewer_id=#{reviewerId},</if>-->
             <if test="reportProducer!=null and reportProducer!=''">report_producer=#{reportProducer},</if>
             <if test="receiver!=null and receiver!=''">receiver=#{receiver},</if>
             <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
@@ -740,16 +737,49 @@
             <if test="verifyer!=null and verifyer!=''">verifyer=#{verifyer},</if>
             <if test="signer!=null and signer!=''">signer=#{signer},</if>
             <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
-            <if test="sampleStateDescription!=null and sampleStateDescription!='null'">sample_state_description=#{sampleStateDescription},</if>
+            <if test="sampleStateDescription!=null and sampleStateDescription!='null'">
+                sample_state_description=#{sampleStateDescription},
+            </if>
             <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
             <if test="requiredCompletionTime!=null">required_completion_time=#{requiredCompletionTime},</if>
             <if test="orderTime!=null">order_time=#{orderTime},</if>
             <if test="taskPrice!=null">task_price=#{taskPrice},</if>
+            <if test="auxiliaryPersonnel!=null and auxiliaryPersonnel!=''">auxiliary_personnel=#{auxiliaryPersonnel},
+            </if>
             <if test="probationer!=null and probationer!=''">probationer=#{probationer},</if>
             <if test="interns!=null and interns!=''">interns=#{interns},</if>
-            <if test="auxiliaryPersonnel!=null and auxiliaryPersonnel!=''">auxiliary_personnel=#{auxiliaryPersonnel},</if>
-            probationer = null,
-            interns = null,
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateTaskEntity" parameterType="com.lims.manage.erp.entity.TaskTestEntity">
+        UPDATE test_task
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="state!=null">state=#{state},</if>
+            <if test="taskCode!=null and taskCode!=''">task_code=#{taskCode},</if>
+            <if test="teamId!=null">team_id=#{teamId},</if>
+            <if test="inspector!=null and inspector!=''">inspector=#{inspector},</if>
+            <if test="recorder!=null and recorder!=''">recorder=#{recorder},</if>
+            <if test="reviewer!=null and reviewer!=''">reviewer=#{reviewer},</if>
+            <if test="reviewTime!=null">review_time=#{reviewTime},</if>
+            <if test="reportProducer!=null and reportProducer!=''">report_producer=#{reportProducer},</if>
+            <if test="receiver!=null and receiver!=''">receiver=#{receiver},</if>
+            <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
+            <if test="startDetectionTime!=null">start_detection_time=#{startDetectionTime},</if>
+            <if test="endDetectionTime!=null">end_detection_time=#{endDetectionTime},</if>
+            <if test="verifyer!=null and verifyer!=''">verifyer=#{verifyer},</if>
+            <if test="signer!=null and signer!=''">signer=#{signer},</if>
+            <if test="sampleReceivingTime!=null">sample_receiving_time=#{sampleReceivingTime},</if>
+            <if test="sampleStateDescription!=null and sampleStateDescription!='null'">
+                sample_state_description=#{sampleStateDescription},
+            </if>
+            <if test="sampler!=null and sampler!=''">sampler=#{sampler},</if>
+            <if test="requiredCompletionTime!=null">required_completion_time=#{requiredCompletionTime},</if>
+            <if test="orderTime!=null">order_time=#{orderTime},</if>
+            <if test="taskPrice!=null">task_price=#{taskPrice},</if>
+            auxiliary_personnel=#{auxiliaryPersonnel},
+            probationer=#{probationer},
+            interns=#{interns},
         </trim>
         where id = #{id}
     </update>
