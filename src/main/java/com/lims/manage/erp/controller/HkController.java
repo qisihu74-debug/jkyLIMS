@@ -77,7 +77,7 @@ public class HkController {
      */
     @GetMapping("pullDoor")
     public Result pullDoor(){
-        Map<String, Object> map = HkUtils.personList(hkConfig.getDoorSearch());
+        Map<String, Object> map = HkUtils.doorSearch(hkConfig.getDoorSearch());
         JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(map));
         String data = jsonObject.get("data").toString();
         if (StringUtils.isNotEmpty(data)){
@@ -115,6 +115,20 @@ public class HkController {
             }
         }
         return ResultUtil.error("同步失败",null);
+    }
+
+    /**
+     * 获取监控点预览取流URLv2
+     * @param cameraIndexCode
+     * @return
+     */
+    @GetMapping("camerasPreviewURLs")
+    public Result camerasPreviewURLs(String cameraIndexCode){
+        if (StringUtils.isEmpty(cameraIndexCode)){
+            return ResultUtil.error("缺少参数");
+        }
+        Map<String, Object> map = HkUtils.camerasPreviewURLs(hkConfig.getVideoPreviewURLs(), cameraIndexCode);
+        return ResultUtil.success(map);
     }
 
     /**

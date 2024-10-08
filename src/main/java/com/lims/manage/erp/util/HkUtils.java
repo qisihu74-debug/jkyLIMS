@@ -27,14 +27,6 @@ import java.util.Map;
  * @Copyright © 河南交科院
  */
 public class HkUtils {
-    static {
-        // 代理API网关nginx服务器ip端口
-        ArtemisConfig.host = "192.168.150.10";
-        // 秘钥appkey
-        ArtemisConfig.appKey = "28884631";
-        // 秘钥appSecret
-        ArtemisConfig.appSecret = "uFYpLT7a5Ssyz2aInxkf";
-    }
     /**
      * 能力开放平台的网站路径
      */
@@ -51,6 +43,8 @@ public class HkUtils {
         // post请求application/json类型参数
         Map<String,String> head = new HashMap<>();
         head.put("tagId","frs");
+        head.put("domainId","auto");
+        head.put("userId","admin");
         String result =ArtemisHttpUtil.doPostStringArtemis(path,jsonBody.toJSONString(),null,null,"application/json",head);
         return DataTypeConversionUtil.getStringToMap(result);
     }
@@ -58,14 +52,13 @@ public class HkUtils {
 
     /**
      * 获取监控点预览取流URL
-     * @param id 设备编号
+     * @param path 设备编号
      * @return
      */
-    public static Map<String,Object> camerasPreviewURLs(String id){
+    public static Map<String,Object> camerasPreviewURLs(String path,String cameraIndexCode){
         JSONObject jsonBody = new JSONObject();
-        jsonBody.put("cameraIndexCode", id);
-        jsonBody.put("protocol", "hls");
-        Map<String,Object> returnMap=publicHkInterface(jsonBody,"/api/video/v1/cameras/previewURLs");
+        jsonBody.put("cameraIndexCode", cameraIndexCode);
+        Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
         return returnMap;
     }
 
@@ -281,7 +274,8 @@ public class HkUtils {
 
 
     public static void main(String[] args) {
-        Map<String, Object> events = cameraSearch("/api/resource/v2/camera/search");
+        Map<String, Object> events = camerasPreviewURLs(null,"02b2785f6a954b2cae25528e2db83a22");
+        Map<String, Object> events1 = cameraSearch("/api/resource/v2/camera/search");
         System.out.println("============"+JSON.toJSONString(events));
 
     }

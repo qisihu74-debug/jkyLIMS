@@ -44,10 +44,6 @@ public class HkConfig {
     private String doorState;
     @Value("${hikvision.api.camera.search}")
     private String cameraSearch;
-    @Value("${hikvision.api.camera.cameras}")
-    private String cameraCameras;
-    @Value("${hikvision.api.camera.indexCode}")
-    private String cameraIndexCode;
     @Value("${hikvision.api.video.previewURLs}")
     private String videoPreviewURLs;
     @Value("${hikvision.api.video.playbackURLs}")
