@@ -45,6 +45,9 @@ public class HkUtils {
         head.put("tagId","frs");
         head.put("domainId","auto");
         head.put("userId","admin");
+        System.out.println("请求路径："+path);
+        System.out.println("请求参数："+jsonBody.toJSONString());
+        System.out.println("请求头信息："+JSON.toJSONString(head));
         String result =ArtemisHttpUtil.doPostStringArtemis(path,jsonBody.toJSONString(),null,null,"application/json",head);
         return DataTypeConversionUtil.getStringToMap(result);
     }
@@ -58,6 +61,7 @@ public class HkUtils {
     public static Map<String,Object> camerasPreviewURLs(String path,String cameraIndexCode){
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("cameraIndexCode", cameraIndexCode);
+        jsonBody.put("protocol", "rtsp");
         Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
         return returnMap;
     }
@@ -75,6 +79,7 @@ public class HkUtils {
         jsonBody.put("cameraIndexCode", cameraIndexCode);
         jsonBody.put("beginTime", starTime);
         jsonBody.put("endTime", endTime);
+        jsonBody.put("protocol", "rtsp");
         Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
         return returnMap;
     }
