@@ -510,4 +510,38 @@
             and task_id = #{item.taskId}
         </foreach>
     </update>
+
+    <select id="selectInstrumentVos" resultType="com.lims.manage.erp.vo.InstrumentRecordVo">
+        SELECT
+        task_code,
+        check_item_name,
+        t1.start_time,
+        t1.end_time,
+        t1.USER
+        FROM
+        test_instrument_use_record AS t1
+        LEFT JOIN test_entrusted_sample_checkitem_rel AS t2 ON t1.esc_rel_id = t2.id
+        WHERE
+        1=1
+        <if test="ids !=null">
+            and t1.instrument_id IN
+            <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="startTime!=null and endTime !=null">
+            and
+            <![CDATA[ DATE_FORMAT(t1.start_time, '%Y-%m-%d %H:%i:%S') >=  DATE_FORMAT(#{startTime}, '%Y-%m-%d %H:%i:%S') ]]>
+            and
+            <![CDATA[ DATE_FORMAT(t1.end_time, '%Y-%m-%d %H:%i:%S') <=  DATE_FORMAT(#{endTime}, '%Y-%m-%d %H:%i:%S') ]]>
+        </if>
+        <if test="taskCode !=null and taskCode !='' ">
+            and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
+        </if>
+        <if test="user !=null and user !='' ">
+            and t1.user LIKE CONCAT('%',#{user},'%')
+        </if>
+        ORDER BY
+        time DESC
+    </select>
 </mapper>

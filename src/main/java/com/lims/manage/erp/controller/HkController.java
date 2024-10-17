@@ -237,6 +237,7 @@ public class HkController {
 
     /**
      * 海康摄像头监控列表查询
+     *
      * @param pageNum
      * @param pageSize
      * @param name
@@ -245,22 +246,45 @@ public class HkController {
      * @return
      */
     @GetMapping("cameraList")
-    public Result cameraList(Integer pageNum,Integer pageSize,String name,String position,String state){
-        if (pageNum == null || pageSize == null){
+    public Result cameraList(Integer pageNum, Integer pageSize, String name, String position, String state) {
+        if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少分页参数");
         }
-        PageInfo<HkDoor> pageInfo = hkCameraService.cameraList(pageNum,pageSize,name,position,state);
+        PageInfo<HkDoor> pageInfo = hkCameraService.cameraList(pageNum, pageSize, name, position, state);
         return ResultUtil.success(pageInfo);
     }
 
+
+    /**
+     * 监控详情列表
+     *
+     * @param pageNum
+     * @param pageSize
+     * @param indexCode
+     * @param taskCode
+     * @param timeCycle
+     * @param user
+     * @return
+     */
+    @GetMapping("cameraDetailsList")
+    public Result cameraDetailsList(Integer pageNum, Integer pageSize, String indexCode, String taskCode, String timeCycle, String user) {
+
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数");
+        }
+        return hkCameraService.cameraDetailsList(pageNum, pageSize, indexCode, taskCode, timeCycle, user);
+    }
+
+
     /**
      * 查询门禁点出入事件详情记录
+     *
      * @param doorDetailReq
      * @return
      */
     @PostMapping("doorDetails")
-    public Result doorDetails(@RequestBody DoorDetailReq doorDetailReq){
-        if (doorDetailReq.getPageNo() == null || doorDetailReq.getPageSize() == null){
+    public Result doorDetails(@RequestBody DoorDetailReq doorDetailReq) {
+        if (doorDetailReq.getPageNo() == null || doorDetailReq.getPageSize() == null) {
             return ResultUtil.error("缺少分页参数");
         }
         Map<String, Object> map = hkDoorService.doorDetails(doorDetailReq);
@@ -406,6 +430,18 @@ public class HkController {
     public Result getAccessControlStatusList(String testLaboratoryId) {
 
         return hkDoorService.getAccessControlStatusList(testLaboratoryId);
+    }
+
+    /**
+     * 通过实验室id 获取监控列表
+     *
+     * @param testLaboratoryId
+     * @return
+     */
+    @GetMapping("getCameraList")
+    public Result getCameraList(String testLaboratoryId) {
+
+        return hkCameraService.getCameraList(testLaboratoryId);
     }
 
     /**

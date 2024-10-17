@@ -163,9 +163,10 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         if (testLaboratoryId == null) {
             return ResultUtil.error("缺少必填参数");
         }
-        if (ids == null) {
-            return ResultUtil.error("缺少必填参数");
+        if (ids == null || ids.length == 0) {
+            return ResultUtil.error("仪器不能为空");
         }
+
 
         // 查询监控是否存在
         LambdaQueryWrapper<CameraInfo> queryWrapper = new LambdaQueryWrapper<>();
@@ -188,7 +189,9 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         }
         data.setCamera(indexCode);
         data.setTestLaboratoryId(testLaboratoryId);
-        data.setTestInstrumentId(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+        if (StringUtils.isNotEmpty(stringBuffer.toString())) {
+            data.setTestInstrumentId(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+        }
         hkDoorLaboratoryInstrumentRelService.save(data);
         return ResultUtil.success("操作成功");
     }

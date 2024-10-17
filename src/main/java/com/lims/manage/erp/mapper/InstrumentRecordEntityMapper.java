@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Mapper
 @Component
@@ -207,8 +208,11 @@ public interface InstrumentRecordEntityMapper {
 
     /**
      * 批量更新组队
+     *
      * @param list
      * @return
      */
     int batchUpdateGroup(@Param("list") List<InstrumentUseGroup> list);
+
+    List<InstrumentRecordVo> selectInstrumentVos(Set<Long> ids, String taskCode, String user, Date startTime, Date endTime);
 }

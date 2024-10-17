@@ -64,4 +64,6 @@ public class CameraInfo {
     private String regionPathName;
     @TableField(exist = false)
     private String laboratoryName;
+    @TableField(exist = false)
+    private Integer doorState;
 }
