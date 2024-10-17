@@ -150,8 +150,7 @@ public class HkCameraServiceImpl extends ServiceImpl<HkCameraDao, CameraInfo> im
         // 获取监控列表
         List<String> cameras = cameraLaboratoryList.stream().map(HKCameraLaboratoryInstrumentRelEntity::getCamera).collect(Collectors.toList());
         LambdaQueryWrapper<CameraInfo> cameraInfoWrapper = new LambdaQueryWrapper<>();
-        cameraInfoWrapper.select(CameraInfo::getName);
-        cameraInfoWrapper.select(CameraInfo::getIndexCode);
+        cameraInfoWrapper.select(CameraInfo::getName, CameraInfo::getIndexCode);
         cameraInfoWrapper.in(CameraInfo::getIndexCode, cameras);
         List<CameraInfo> list = this.baseMapper.selectList(cameraInfoWrapper);
 
