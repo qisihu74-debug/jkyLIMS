@@ -134,19 +134,19 @@ public class HkController {
     /**
      * 视频回放
      * @param cameraIndexCode
-     * @param starTime
+     * @param startTime
      * @param endTime
      * @return
      */
     @GetMapping("playbackURLs")
-    public Result playbackURLs(String cameraIndexCode,String starTime,String endTime){
+    public Result playbackURLs(String cameraIndexCode,String startTime,String endTime){
         if (StringUtils.isEmpty(cameraIndexCode)){
             return ResultUtil.error("缺少参数");
         }
-        if (StringUtils.isEmpty(starTime) || StringUtils.isEmpty(endTime)){
+        if (StringUtils.isEmpty(startTime) || StringUtils.isEmpty(endTime)){
             return ResultUtil.error("请选择查看监控视频的时间范围");
         }
-        Map<String, Object> map = HkUtils.playbackURLs(hkConfig.getVideoPreviewURLs(), cameraIndexCode,starTime,endTime);
+        Map<String, Object> map = HkUtils.playbackURLs(hkConfig.getVideoPreviewURLs(), cameraIndexCode,startTime,endTime);
         return ResultUtil.success(map);
     }
 
