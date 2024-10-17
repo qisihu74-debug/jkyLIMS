@@ -70,11 +70,11 @@ public interface ReserveCodeEntityMapper {
     int batchInsert(@Param("records") List<ReserveCodeEntity> records);
 
     // 查询最终报告：
-    @Select("SELECT id,report_code,entrustment_id as entrustmentId FROM test_report_record WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")  LIMIT 1")
+    @Select("SELECT id,report_code,entrustment_id as entrustmentId FROM test_report_record WHERE report_code = #{reportCode}  LIMIT 1")
     ReportRecordEntity selectReportRecord(String reportCode);
 
     // 查询中间报告：
-    @Select("SELECT id,report_code,entrust_id as entrustId FROM test_report_record_mid WHERE report_code like CONCAT(\"%\",#{reportCode},\"%\")  LIMIT 1")
+    @Select("SELECT id,report_code,entrust_id as entrustId FROM test_report_record_mid WHERE report_code = #{reportCode} LIMIT 1")
     ReportRecordEntity selectReportRecordMid(String reportCode);
 
     // 查询留号报告：

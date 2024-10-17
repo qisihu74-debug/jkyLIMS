@@ -132,6 +132,25 @@ public class HkController {
     }
 
     /**
+     * 视频回放
+     * @param cameraIndexCode
+     * @param starTime
+     * @param endTime
+     * @return
+     */
+    @GetMapping("playbackURLs")
+    public Result playbackURLs(String cameraIndexCode,String starTime,String endTime){
+        if (StringUtils.isEmpty(cameraIndexCode)){
+            return ResultUtil.error("缺少参数");
+        }
+        if (StringUtils.isEmpty(starTime) || StringUtils.isEmpty(endTime)){
+            return ResultUtil.error("请选择查看监控视频的时间范围");
+        }
+        Map<String, Object> map = HkUtils.playbackURLs(hkConfig.getVideoPreviewURLs(), cameraIndexCode,starTime,endTime);
+        return ResultUtil.success(map);
+    }
+
+    /**
      * 海康人员门禁绑定发送
      * @param hkDoorReq
      * @return
