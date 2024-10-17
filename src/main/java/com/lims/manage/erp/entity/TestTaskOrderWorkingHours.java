@@ -199,4 +199,29 @@ public class TestTaskOrderWorkingHours implements Serializable {
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         return result;
     }
+
+    public TestTaskOrderWorkingHours() {
+    }
+
+    public TestTaskOrderWorkingHours(TestTaskOrderWorkingHours taskOrderWorkingHours) {
+        this.id = taskOrderWorkingHours.getId();
+        this.taskId = taskOrderWorkingHours.getTaskId();
+        this.taskCode = taskOrderWorkingHours.getTaskCode();
+        this.sampleName = taskOrderWorkingHours.getSampleName();
+        this.totalWorkingHours = taskOrderWorkingHours.getTotalWorkingHours();
+        this.detectionType = taskOrderWorkingHours.getDetectionType();
+        this.userId = taskOrderWorkingHours.getUserId();
+        this.userName = taskOrderWorkingHours.getUserName();
+        this.workingHours = taskOrderWorkingHours.getWorkingHours();
+        this.proportion = taskOrderWorkingHours.getProportion();
+        this.createTime = taskOrderWorkingHours.getCreateTime();
+        this.updateTime = taskOrderWorkingHours.getUpdateTime();
+        this.addOperator = taskOrderWorkingHours.getAddOperator();
+        this.state = taskOrderWorkingHours.getState();
+        this.source = taskOrderWorkingHours.getSource();
+        this.workingHoursId = taskOrderWorkingHours.getWorkingHoursId();
+        this.discount = taskOrderWorkingHours.getDiscount();
+    }
+
+
 }

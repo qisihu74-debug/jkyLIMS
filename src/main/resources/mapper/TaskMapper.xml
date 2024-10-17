@@ -777,6 +777,7 @@
             <if test="requiredCompletionTime!=null">required_completion_time=#{requiredCompletionTime},</if>
             <if test="orderTime!=null">order_time=#{orderTime},</if>
             <if test="taskPrice!=null">task_price=#{taskPrice},</if>
+            <if test="workingHoursId!=null">working_hours_id=#{workingHoursId},</if>
             auxiliary_personnel=#{auxiliaryPersonnel},
             probationer=#{probationer},
             interns=#{interns},

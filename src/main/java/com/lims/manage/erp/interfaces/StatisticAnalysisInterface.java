@@ -156,6 +156,20 @@ public class StatisticAnalysisInterface {
     }
 
     /**
+     * 调整工时比例
+     *
+     * @return
+     */
+    @RequestMapping("/informationSubstitution")
+    public Result informationSubstitution(String str) {
+        String[] strings = str.split(",");
+        for (int i = 0; i < strings.length; i++) {
+            testCheckItemsTaskRelService.adjustTheTimeAllocationRatio(strings[i]);
+        }
+        return null;
+    }
+
+    /**
      * 工时统计-按照人员统计
      *
      * @return

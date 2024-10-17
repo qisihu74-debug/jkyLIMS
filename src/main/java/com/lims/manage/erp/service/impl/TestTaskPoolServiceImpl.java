@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,6 +62,8 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
     private TestDetectionDao testDetectionDao;
     @Autowired
     private TaskService taskService;
+    @Resource
+    private TestTaskOrderWorkingHoursMapper testTaskOrderWorkingHoursMapper;
 
     /**
      * 任务大厅 展示详情数据
@@ -2410,18 +2414,249 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
 
     }
 
+    /**
+     * 替换化学室单子
+     *
+     * @param taskOrderWorkingHoursList
+     */
+//    @Transactional(rollbackFor = Exception.class)
+//    public void replaceTaskOrderWorkingHours(List<TestTaskOrderWorkingHours> taskOrderWorkingHoursList) {
+//
+//        BigDecimal workingHours = new BigDecimal("0");
+//        BigDecimal proportion = new BigDecimal("0");
+//        for (TestTaskOrderWorkingHours data : taskOrderWorkingHoursList) {
+//
+//            data.setAddOperator("杨波&1654681210551117");
+//            data.setSource("杨波");
+//            // 当前数据为 签发人 && 当前人 不是 杨波 则新增数据
+//            if (data.getDetectionType().equals("签发人") && data.getUserId() != 1654681210551117L) {
+//                // 新增数据
+//                TestTaskOrderWorkingHours taskOrderWorkingHours = new TestTaskOrderWorkingHours(data);
+//
+//                // 0、
+//                taskOrderWorkingHours.setUserName("杨波");
+//                taskOrderWorkingHours.setUserId(1654681210551117L);
+//                taskOrderWorkingHours.setDetectionType("签发人");
+//                taskOrderWorkingHours.setId(null);
+//                // 调用方法： 对每组检测项的人员信息进行新增。
+//                testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+//                workingHours = new BigDecimal(data.getWorkingHours());
+//                proportion = new BigDecimal(data.getProportion());
+//                // 更新
+//                data.setProportion("0");
+//                data.setWorkingHours("0");
+//            }
+//            // 更新
+//            testTaskOrderWorkingHoursMapper.updateByPrimaryKeySelective(data);
+//        }
+//        // 判断杨波在 则新增 不在 则更细
+//    }
+    @Transactional(rollbackFor = Exception.class)
+    public void addTaskOrderWorkingHours(TestTaskOrderWorkingHours taskOrderWorkingHours) {
+
+        taskOrderWorkingHours.setSource("代海燕");
+        taskOrderWorkingHours.setAddOperator("代海燕&1650006443416157");
+
+
+        // 0、
+        taskOrderWorkingHours.setUserName("代海燕");
+        taskOrderWorkingHours.setUserId(1650006443416157L);
+        taskOrderWorkingHours.setDetectionType("签发人");
+        taskOrderWorkingHours.setProportion("15");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 1、
+        taskOrderWorkingHours.setUserName("检测人员");
+        taskOrderWorkingHours.setUserId(1654681160256116L);
+        taskOrderWorkingHours.setDetectionType("孙朋骄");
+        taskOrderWorkingHours.setProportion("12.2");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 2、
+        taskOrderWorkingHours.setUserName("林海娟");
+        taskOrderWorkingHours.setUserId(4575892253571035L);
+        taskOrderWorkingHours.setDetectionType("检测人员、记录人员");
+        taskOrderWorkingHours.setProportion("12.2");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+
+        // 3、
+        taskOrderWorkingHours.setUserName("孙含玉");
+        taskOrderWorkingHours.setUserId(1654680782486113L);
+        taskOrderWorkingHours.setDetectionType("检测人员");
+        taskOrderWorkingHours.setProportion("12.2");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 4、
+        taskOrderWorkingHours.setUserName("申永伟");
+        taskOrderWorkingHours.setUserId(1654682129126105L);
+        taskOrderWorkingHours.setDetectionType("复核人");
+        taskOrderWorkingHours.setProportion("14");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 5、
+        taskOrderWorkingHours.setUserName("马瑞玲");
+        taskOrderWorkingHours.setUserId(1652404746060112L);
+        taskOrderWorkingHours.setDetectionType("检测人员、报告制作人");
+        taskOrderWorkingHours.setProportion("12.2");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 6、
+        taskOrderWorkingHours.setUserName("焦凯");
+        taskOrderWorkingHours.setUserId(1654682057588104L);
+        taskOrderWorkingHours.setDetectionType("辅助人员");
+        taskOrderWorkingHours.setProportion("10.0");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+
+        // 6、
+        taskOrderWorkingHours.setUserName("焦凯");
+        taskOrderWorkingHours.setUserId(1654680716455112L);
+        taskOrderWorkingHours.setDetectionType("检测人员");
+        taskOrderWorkingHours.setProportion("12.2");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void addTaskOrderWorkingHours1(TestTaskOrderWorkingHours taskOrderWorkingHours) {
+
+
+        // 0、
+        taskOrderWorkingHours.setUserName("杨波");
+        taskOrderWorkingHours.setUserId(1654681210551117L);
+        taskOrderWorkingHours.setDetectionType("签发人");
+        taskOrderWorkingHours.setProportion("16.84");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 1、
+        taskOrderWorkingHours.setUserName("刘秋芳");
+        taskOrderWorkingHours.setUserId(1654681099998115L);
+        taskOrderWorkingHours.setDetectionType("检测人员、记录人员");
+        taskOrderWorkingHours.setProportion("16.34");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 2、
+        taskOrderWorkingHours.setUserName("于胜楠");
+        taskOrderWorkingHours.setUserId(4739625864645518L);
+        taskOrderWorkingHours.setDetectionType("报告制作人");
+        taskOrderWorkingHours.setProportion("15.84");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+
+        // 3、
+        taskOrderWorkingHours.setUserName("王巧利");
+        taskOrderWorkingHours.setUserId(4573649232290487L);
+        taskOrderWorkingHours.setDetectionType("检测人员");
+        taskOrderWorkingHours.setProportion("15.34");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 4、
+        taskOrderWorkingHours.setUserName("高贯奇");
+        taskOrderWorkingHours.setUserId(1652365586151107L);
+        taskOrderWorkingHours.setDetectionType("检测人员");
+        taskOrderWorkingHours.setProportion("14.84");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 5、
+        taskOrderWorkingHours.setUserName("崔路伟");
+        taskOrderWorkingHours.setUserId(1654682006912103L);
+        taskOrderWorkingHours.setDetectionType("辅助人员");
+        taskOrderWorkingHours.setProportion("14.9");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        // 6、
+        taskOrderWorkingHours.setUserName("邢洁");
+        taskOrderWorkingHours.setUserId(1654682170405106L);
+        taskOrderWorkingHours.setDetectionType("复核人");
+        taskOrderWorkingHours.setProportion("5.9");
+        taskOrderWorkingHours.setId(null);
+        // 调用方法： 对每组检测项的人员信息进行新增。
+        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+
+//        // 0、
+//        taskOrderWorkingHours.setUserName("孙含玉");
+//        taskOrderWorkingHours.setUserId(1654680782486113L);
+//        taskOrderWorkingHours.setDetectionType("检测人员");
+//        taskOrderWorkingHours.setProportion("14");
+//        taskOrderWorkingHours.setId(null);
+//        // 调用方法： 对每组检测项的人员信息进行新增。
+//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+//        // 1、
+//        taskOrderWorkingHours.setUserName("李小华");
+//        taskOrderWorkingHours.setUserId(1654680716455112L);
+//        taskOrderWorkingHours.setDetectionType("复核人");
+//        taskOrderWorkingHours.setProportion("11");
+//        taskOrderWorkingHours.setId(null);
+//        // 调用方法： 对每组检测项的人员信息进行新增。
+//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+//        // 2、
+//        taskOrderWorkingHours.setUserName("严建行");
+//        taskOrderWorkingHours.setUserId(1655455410514153L);
+//        taskOrderWorkingHours.setDetectionType("检测人员");
+//        taskOrderWorkingHours.setProportion("8.5");
+//        taskOrderWorkingHours.setId(null);
+//        // 调用方法： 对每组检测项的人员信息进行新增。
+//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+//        // 3、
+//        taskOrderWorkingHours.setUserName("杨永祥");
+//        taskOrderWorkingHours.setUserId(1655455951944156L);
+//        taskOrderWorkingHours.setDetectionType("检测人员");
+//        taskOrderWorkingHours.setProportion("8.5");
+//        taskOrderWorkingHours.setId(null);
+//        // 调用方法： 对每组检测项的人员信息进行新增。
+//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+//        // 4、
+//        taskOrderWorkingHours.setUserName("刘昊天");
+//        taskOrderWorkingHours.setUserId(4689457230074278L);
+//        taskOrderWorkingHours.setDetectionType("辅助人员");
+//        taskOrderWorkingHours.setProportion("8");
+//        taskOrderWorkingHours.setId(null);
+//        // 调用方法： 对每组检测项的人员信息进行新增。
+//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Result informationSubstitution(String taskCode) {
+
         // 获取 任务单信息：
         TaskVo taskDetailInfo = taskMapper.selectTaskOneDetails(taskCode);
         if (taskDetailInfo == null) {
             System.out.println("查询失败 " + " 不存在 " + taskCode);
             return ResultUtil.error("查询失败 " + " 不存在 " + null);
         }
+
         // 获取 任务单详情：
         TaskTestEntity taskTestData = taskMapper.selectTaskEntity(taskDetailInfo.getId());
-        // 任务单替换：检测人：孙朋骄&1654681160256116,孙含玉&1654680782486113,李小华&1654680716455112,马瑞玲&1652404746060112,林海娟&4575892253571035
+
+        // 根据 taskId
+        // 更新taskId 价格
+        TaskTestEntity taskTestEntity = new TaskTestEntity();
+
+
+        if (StringUtils.isNotEmpty(taskTestData.getWorkingHoursId())) {
+            taskTestEntity.setWorkingHoursId(taskTestData.getWorkingHoursId());
+        }
+
+
+        // 任务单替换：检测人：孙朋骄&1654681160256116,孙含玉&1654680782486113,
+        // 李小华&1654680716455112,马瑞玲&1652404746060112,林海娟&4575892253571035
 
         //记录：林海娟&4575892253571035
 
@@ -2431,14 +2666,14 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
 
         //辅助人员：焦凯&1654682057588104
 
-        // 根据 taskId
-        // 更新taskId 价格
-        TaskTestEntity taskTestEntity = new TaskTestEntity();
+
         taskTestEntity.setId(taskTestData.getId());
         taskTestEntity.setTaskPrice(taskTestData.getTaskPrice());
         taskTestEntity.setSampler(taskTestData.getSampler());
+
         // 补充人员信息 检测人
         taskTestEntity.setInspector("孙朋骄&1654681160256116,孙含玉&1654680782486113,李小华&1654680716455112,马瑞玲&1652404746060112,林海娟&4575892253571035");
+//        taskTestEntity.setInspector("刘秋芳&1654681160256116,王巧利&1654680782486113,高贯奇&1654680716455112");
         // 记录人
         taskTestEntity.setRecorder("林海娟&4575892253571035");
         // 复核人
@@ -2447,6 +2682,25 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskTestEntity.setReportProducer("马瑞玲&1652404746060112");
         // 辅助人员
         taskTestEntity.setAuxiliaryPersonnel("焦凯&1654682057588104");
+//        if (!taskDetailInfo.getReceiver().equals("1654681210551117")) {
+//            return null;
+//        }
+//        // 签发人
+//        taskDetailInfo.setReceiver("1654681210551117");
+        /**
+         * 试验刘秋芳，王巧利，高贯奇，记录刘秋芳，王巧利，复核，邢洁，制作于胜楠，辅助崔路伟，签发杨波&1654681210551117
+         */
+        // 补充人员信息 检测人
+//        taskTestEntity.setInspector("刘秋芳&1654681099998115,王巧利&4573649232290487,高贯奇&1652365586151107");
+//        // 记录人
+//        taskTestEntity.setRecorder("刘秋芳&1654681099998115,王巧利&4573649232290487");
+//        // 复核人
+//        taskTestEntity.setReviewer("邢洁&1654682170405106");
+//        // 报告制作人
+//        taskTestEntity.setReportProducer("于胜楠&4739625864645518");
+//        // 辅助人员
+//        taskTestEntity.setAuxiliaryPersonnel("崔路伟&1654682006912103");
+
         taskMapper.updateTaskEntity(taskTestEntity);
 
 
@@ -2479,13 +2733,16 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     testCheckItemsTaskRelMapper.insert(taskRel);
                 }
                 // 进行新增 记录人
-                String[] recorderArrays = taskTestEntity.getRecorder().split("&");
-                taskRel.setUserType(1);
-                taskRel.setUserName(recorderArrays[0]);
-                taskRel.setUserId(recorderArrays[1]);
-                taskRel.setId(null);
-                // 调用方法： 对每组检测项的人员信息进行新增。
-                testCheckItemsTaskRelMapper.insert(taskRel);
+                String[] recorderArrays = taskTestEntity.getRecorder().split(",");
+                for (int i = 0; i < recorderArrays.length; i++) {
+                    String[] inspectorSet = recorderArrays[i].split("&");
+                    taskRel.setUserType(1);
+                    taskRel.setUserName(inspectorSet[0]);
+                    taskRel.setUserId(inspectorSet[1]);
+                    taskRel.setId(null);
+                    // 调用方法： 对每组检测项的人员信息进行新增。
+                    testCheckItemsTaskRelMapper.insert(taskRel);
+                }
 
                 // 进行新增 复核人
                 String[] receiverArrays = taskTestEntity.getReviewer().split("&");
@@ -2516,6 +2773,25 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
 
             }
         }
+
+        // 获取 任务单工时信息：
+        LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, taskDetailInfo.getId());
+        List<TestTaskOrderWorkingHours> latestWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
+
+
+        if (CollectionUtil.isEmpty(latestWorkingHoursList)) {
+            return null;
+        }
+        // 执行 替换任务单授权签字人
+//        replaceTaskOrderWorkingHours(latestWorkingHoursList);
+//        // 获取一条数据
+        TestTaskOrderWorkingHours taskOrderWorkingHours = latestWorkingHoursList.get(0);
+//        // 其余执行删除
+        testTaskOrderWorkingHoursMapper.delete(queryWrapper);
+////        // 执行新增
+        addTaskOrderWorkingHours(taskOrderWorkingHours);
+
         return null;
     }
 }

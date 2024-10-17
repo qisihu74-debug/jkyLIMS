@@ -2051,6 +2051,94 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void updateOrAddTaskRelMap02(Long taskId, List<TestTaskOrderWorkingHours> list) {
+
+
+        // list排序 进行保留小数点后两位
+        for (int i = 0; i < list.size(); i++) {
+            TestTaskOrderWorkingHours workingHoursData = list.get(i);
+            BigDecimal proportion = BigDecimal.valueOf(Double.valueOf(workingHoursData.getProportion())).setScale(2, RoundingMode.FLOOR);
+            workingHoursData.setProportion(proportion.toString());
+            BigDecimal workHours = proportion.multiply(new BigDecimal(Double.valueOf(workingHoursData.getTotalWorkingHours())).setScale(4, BigDecimal.ROUND_FLOOR));
+            BigDecimal workHours1 = workHours.divide(new BigDecimal(100), 4, BigDecimal.ROUND_FLOOR);
+            workingHoursData.setWorkingHours(workHours1.toString());
+            // 通过taskId 判断 工时是否存在 存在则更新操作、不存在则新增。
+            workingHoursData.setUpdateTime(new Date());
+            LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper1 = new LambdaQueryWrapper<>();
+            queryWrapper1.eq(TestTaskOrderWorkingHours::getTaskId, taskId);
+            queryWrapper1.eq(TestTaskOrderWorkingHours::getUserId, workingHoursData.getUserId());
+
+            workingHoursData.setCreateTime(null);
+
+            testTaskOrderWorkingHoursMapper.update(workingHoursData, queryWrapper1);
+        }
+        // 统计数据 是否被整除
+        String count = testTaskOrderWorkingHoursMapper.selectTaskOrderWorkingCount(taskId);
+        if (StringUtils.isNotEmpty(count)) {
+            // 计算剩余工时信息、及百分比
+            surplusWorkingHours(taskId);
+        }
+    }
+
+    @Override
+    public void adjustTheTimeAllocationRatio(String taskCode) {
+
+        // 获取 任务单信息：
+        TaskVo taskDetailInfo = taskMapper.selectTaskOneDetails(taskCode);
+        if (taskDetailInfo == null) {
+            System.out.println("查询失败 " + " 不存在 " + taskCode);
+            return;
+        }
+
+        LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
+        // 获取任务单工时信息：
+        queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, taskDetailInfo.getId());
+        List<TestTaskOrderWorkingHours> latestWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
+        if (CollectionUtil.isEmpty(latestWorkingHoursList)) {
+            return;
+        }
+
+//        for (TestTaskOrderWorkingHours data : latestWorkingHoursList) {
+//            if (data.getUserName().equals("代海燕")) {
+//                data.setProportion("15.00");
+//            }
+//            if (data.getUserName().equals("申永伟")) {
+//                data.setProportion("14.00");
+//            }
+//            if (data.getUserName().equals("马瑞玲")) {
+//                data.setProportion("12.20");
+//            }
+//            if (data.getUserName().equals("孙朋骄")) {
+//                data.setProportion("12.20");
+//            }
+//            if (data.getUserName().equals("李小华")) {
+//                data.setProportion("12.20");
+//            }
+//            if (data.getUserName().equals("林海娟")) {
+//                data.setProportion("12.20");
+//            }
+//            if (data.getUserName().equals("孙含玉")) {
+//                data.setProportion("12.20");
+//            }
+//            if (data.getUserName().equals("焦凯")) {
+//                data.setProportion("10");
+//            }
+//        }
+
+        BigDecimal bigDecimal = new BigDecimal("0");
+        for (TestTaskOrderWorkingHours data : latestWorkingHoursList) {
+            BigDecimal sum = bigDecimal.add(new BigDecimal(data.getProportion())).setScale(2, RoundingMode.FLOOR);
+            System.out.println("sum = " + sum.toString());
+            bigDecimal = sum;
+        }
+        System.out.println("bigDecimal = " + bigDecimal.toString());
+        if (bigDecimal.compareTo(new BigDecimal("100")) == 0) {
+            updateOrAddTaskRelMap02(taskDetailInfo.getId(), latestWorkingHoursList);
+        }
+
+    }
+
     /**
      * 检测项工时 与 次数 处理阶梯管理
      *
