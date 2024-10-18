@@ -15,7 +15,6 @@ import com.lims.manage.erp.service.HKDoorLaboratoryInstrumentRelService;
 import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.HkUtils;
-import com.lims.manage.erp.vo.LabelValueVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.lims.manage.erp.util.StringUtils;
 import org.springframework.stereotype.Service;
@@ -62,6 +61,8 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     private ReportMapper reportMapper;
     @Autowired
     private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
+    @Autowired
+    private TestLaboratoryDao testLaboratoryDao;
 
     @Override
     public PageInfo<HkDoor> doorList(Integer pageNum, Integer pageSize, String name, String position, String state) {
@@ -362,11 +363,28 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         data.setCreateTime(new Date());
         data.setState(0);
 
-        // 通过实验室id 获取门禁信息
+        String[] arrays = data.getLaboratoryMessage().split(",");
+        List<Integer> laboratoryIds = new ArrayList<>();
+        for (int i = 0; i < arrays.length; i++) {
+            laboratoryIds.add(Integer.valueOf(arrays[i]));
+        }
+        // 通过实验室id集合 获取门禁信息
         LambdaQueryWrapper<HKDoorLaboratoryRelEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(HKDoorLaboratoryRelEntity::getTestLaboratoryId, data.getLaboratoryMessage());
+        queryWrapper.in(HKDoorLaboratoryRelEntity::getTestLaboratoryId, laboratoryIds);
 
         List<HKDoorLaboratoryRelEntity> list = hkDoorLaboratoryRelEntityMapper.selectList(queryWrapper);
+
+        // 获取对应的 实验室信息
+        LambdaQueryWrapper<TestLaboratory> laboratoryWrapper = new LambdaQueryWrapper<>();
+        laboratoryWrapper.in(TestLaboratory::getId, laboratoryIds);
+        List<TestLaboratory> laboratories = testLaboratoryDao.selectList(laboratoryWrapper);
+        if (CollectionUtil.isNotEmpty(laboratories)) {
+            StringBuffer stringBuffer = new StringBuffer();
+            for (TestLaboratory testLaboratory : laboratories) {
+                stringBuffer.append(testLaboratory.getName() + ",");
+            }
+            data.setLaboratoryName(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
+        }
 
         if (CollectionUtil.isNotEmpty(list)) {
             StringBuffer stringBuffer = new StringBuffer();
