@@ -80,8 +80,8 @@ public class HkUtils {
         jsonBody.put("cameraIndexCode", cameraIndexCode);
         jsonBody.put("beginTime", starTime);
         jsonBody.put("endTime", endTime);
-//        jsonBody.put("protocol", "rtsp");
-        jsonBody.put("protocol", "hls");
+        jsonBody.put("protocol", "rtsp");
+        //jsonBody.put("protocol", "hls");
         Map<String,Object> returnMap=publicHkInterface(jsonBody,path);
         return returnMap;
     }
