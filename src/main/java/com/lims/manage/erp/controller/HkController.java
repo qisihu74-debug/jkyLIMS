@@ -146,7 +146,7 @@ public class HkController {
         if (StringUtils.isEmpty(startTime) || StringUtils.isEmpty(endTime)){
             return ResultUtil.error("请选择查看监控视频的时间范围");
         }
-        Map<String, Object> map = HkUtils.playbackURLs(hkConfig.getVideoPreviewURLs(), cameraIndexCode,startTime,endTime);
+        Map<String, Object> map = HkUtils.playbackURLs(hkConfig.getVideoPlaybackURLs(), cameraIndexCode,startTime,endTime);
         return ResultUtil.success(map);
     }
 
