@@ -403,7 +403,7 @@ public interface SampleEntityMapper {
     List<SampleEntity> selectAllState(@Param("list")List<Long> list);
 
     @Select("select id from test_sample where sample_code = #{code} limit 1")
-    int getIdByCode(@Param("code") String code);
+    Integer getIdByCode(@Param("code") String code);
 
     @Update("update test_sample set sample_retention_period=#{parseInt} where sample_code = #{code}")
     void updateDayByCode(@Param("code") String code, @Param("parseInt") int parseInt);
