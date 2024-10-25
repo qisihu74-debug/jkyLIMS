@@ -1944,14 +1944,26 @@ public class ReportServiceImpl implements ReportService {
             sealDefData.setType("签发人");
             sealDefData.setName(receiverName);
             SysUserEntity mobileByName = sysUserDao.getMobileByName(receiverName);
-            if (mobileByName != null){
+            if (mobileByName != null) {
                 sealDefData.setMobile(mobileByName.getMobile());
             }
             list.add(sealDefData);
         }
         //获取印章
         SysUserEntity rolName = sysUserDao.getNameByRolName();
-        String seals = recordEntityMapper.getsealsById(id)+","+"2937191218674492340";
+        String seals = recordEntityMapper.getsealsById(id) + "," + "2937191218674492340";
+        if (com.lims.manage.erp.util.StringUtils.isNotEmpty(seals)) {
+            String[] arrays = seals.split("\\,");
+            Boolean flag = false;
+            for (int i = 0; i < arrays.length; i++) {
+                if (arrays[i].equals("2024新CMA")) {
+                    flag = true;
+                }
+            }
+            if (!flag) {
+                seals = seals + "," + "2024新CMA";
+            }
+        }
         String replace = seals.replace("综合甲级", "2934033400316387595").
                 replace("CMA", "2937188764910183324").
                 replace("2024新2937188764910183324", "3212968793413837357").
