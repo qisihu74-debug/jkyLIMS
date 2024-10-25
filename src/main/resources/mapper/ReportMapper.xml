@@ -653,8 +653,8 @@ FROM
 		AND t6.state = 1
         <if test="reportCode!=null and reportCode!=''">
  AND (
-			t6.report_code LIKE CONCAT('%', #{reportCode}, '%')
-		 	OR t2.task_code LIKE CONCAT('%', #{reportCode}, '%')
+            t6.report_code = #{reportCode}
+            OR t2.task_code = #{reportCode}
 		 )
         </if>
 	) tb1

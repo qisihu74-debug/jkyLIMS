@@ -21,6 +21,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.DynamicImgService;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.RtspToHlsService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.*;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +73,22 @@ public class UserLoginController {
     private DynamicImgService dynamicImgService;
     @Autowired
     RedisUtil redisUtil;
+    @Autowired
+    private RtspToHlsService rtspToHlsService;
+
+    @GetMapping("convert")
+    public Result convert(String rtspUrl, String hlsOutputPath){
+        String url = null;
+        try {
+            url = rtspToHlsService.startTranscoding(rtspUrl,hlsOutputPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ResultUtil.success(url);
+    }
+
 
     /**
      * 登录
