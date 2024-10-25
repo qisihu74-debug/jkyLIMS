@@ -73,6 +73,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/sample/downloadNewSampleTab", "anon");
         filterChainDefinitionMap.put("/sample/downloadRetentionTab", "anon");
         filterChainDefinitionMap.put("/userLogin/**", "anon");
+        filterChainDefinitionMap.put("/client/receiveFile", "anon");
         filterChainDefinitionMap.put("/qiyuesuo/**", "anon");
         filterChainDefinitionMap.put("/report/previewDownLoad", "anon");
         filterChainDefinitionMap.put("/report/preReportUrl", "anon");
