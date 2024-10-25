@@ -65,11 +65,14 @@
         <where>
             1=1
             and t3.task_id is not null
+            <if test="taskCode!=null and taskCode!=''">
+                and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
+            </if>
             <if test="receiverUserId!=null">
                 and ( t3.user_id = #{receiverUserId})
             </if>
             <if test="startDate!=null">
-                AND t4.issuer_time  >= #{startDate}
+                AND t4.issuer_time >= #{startDate}
             </if>
             <if test="stopDate!=null">
                 AND #{stopDate} >= t4.issuer_time
@@ -104,6 +107,9 @@
         <where>
             1=1
             and t3.task_id is not null
+            <if test="taskCode!=null and taskCode!=''">
+                and t1.task_code LIKE CONCAT('%',#{taskCode},'%')
+            </if>
             <if test="receiverUserId!=null">
                 and (t3.user_id = #{receiverUserId} )
             </if>

@@ -2690,7 +2690,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                 updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
                 testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
             }
-            if (data.getUserName().equals("刘秋芳 ")) {
+            if (data.getUserName().equals("刘秋芳")) {
                 LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
                 updateWrapper.set(TestTaskOrderWorkingHours::getProportion, "8.5");
                 updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
