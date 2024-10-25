@@ -154,7 +154,7 @@ public interface SampleService {
      */
     PageInfo sampleReservedSamplePageInfoList(SampleOutPutVo sampleOutPutVo);
 
-    int getIdByCode(String code);
+    Integer getIdByCode(String code);
 
     void updateDayByCode(String code, String value);
 

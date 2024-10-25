@@ -501,19 +501,19 @@ public class SampleServiceImpl implements SampleService {
                     worksheet.getCells().get("B4").setValue(sampleDetailVoList.get(i).getSpecs());
                     worksheet.getCells().get("B5").setValue(sampleDetailVoList.get(i).getOutwardDescribe());
                     //设置二维码
-                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl()+sampleDetailVoList.get(i).getId() + "&type="+type);
+                    BufferedImage bufferedImage = QRCodeUtil.getBufferedImage(qiYueSuoEntity.getQRcodeUrl() + sampleDetailVoList.get(i).getId() + "&type=" + type);
                     InputStream stream = bufferedImageToInputStream(bufferedImage);
-                    worksheet.getPictures().add(5,3,stream,30,30);
+                    worksheet.getPictures().add(5, 3, stream, 30, 30);
                     //合并sheet
                     Worksheet worksheetS = newBook.getWorksheets().add(sampleDetailVoList.get(i).getSampleCode());
                     worksheetS.copy(worksheet);
                 }
             }
-            if ("王雪青".equals(sampleTagInfo.getInspector())) {
-                newBook.save("D:\\Users\\Administrator\\Desktop\\人员档案\\王雪青样品标签\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
+            if ("泥文举".equals(sampleTagInfo.getInspector())) {
+                newBook.save("D:\\Users\\Administrator\\Desktop\\人员档案\\泥文举样品标签\\" + sampleTagInfo.getSampleCode() + ".xlsx", SaveFormat.XLSX);
             }
             if ("石小玉".equals(sampleTagInfo.getInspector())) {
-                newBook.save("D:\\Users\\Administrator\\Desktop\\人员档案\\石小玉样品标签\\"+sampleTagInfo.getSampleCode()+".xlsx", SaveFormat.XLSX);
+                newBook.save("D:\\Users\\Administrator\\Desktop\\人员档案\\石小玉样品标签\\" + sampleTagInfo.getSampleCode() + ".xlsx", SaveFormat.XLSX);
             }
         }catch (Exception e){
             log.error("下载样品标签异常:{}",e);
@@ -713,10 +713,10 @@ public class SampleServiceImpl implements SampleService {
         if (date11 != null){
             record.setTime(date11);
         }
-        if (record.getOperatorId() == null){
+        if (record.getOperatorId() == null) {
             record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
         }
-        if (StringUtils.isEmpty(record.getOperatorName())){
+        if (StringUtils.isEmpty(record.getOperatorName())) {
             record.setOperatorName(userDao.getSysUserName(ShiroUtils.getUserInfo().getUserId()));
         }
         sampleEntityMapper.insertRecord(record);
@@ -724,18 +724,137 @@ public class SampleServiceImpl implements SampleService {
     }
 
     /**
+     * 支持 手动批量处理业务留样数据-动态修改
+     *
+     * @param sampleId
+     * @param state
+     * @param time
+     * @param saveTime
+     * @param sampleRetentionPeriod
+     * @param sampleProcessMode
+     * @param approver
+     * @param sampleRetentionArea
+     * @param disposalDate
+     * @param disposalPeople
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Integer updateState1(Integer sampleId, Integer state, Date time, Integer saveTime, Integer sampleRetentionPeriod, String sampleProcessMode,
+                                String approver, String sampleRetentionArea, String disposalDate, String disposalPeople) {
+        //2领样，3留样，4处置
+        List<Integer> ids = sampleEntityMapper.getExist(sampleId, state);
+        if (ids != null && ids.size() >= 1) {
+            return 1;
+        }
+        //插入流转记录
+        SampleCirculationRecord record = new SampleCirculationRecord();
+        //更新样品表状态
+        if (state == 1) {
+            List<Integer> list = sampleEntityMapper.getExist(sampleId, 0);
+            if (org.apache.commons.collections.CollectionUtils.isEmpty(list)) {
+                return 4;
+            }
+            sampleEntityMapper.updateSampleState(sampleId, state);
+        }
+        Date date11 = null;
+        if (state >= 3) {
+            Integer status = null;
+            if (state == 3) {
+                status = 1;
+                //留样时查询样品接收人和时间
+                SampleDetailVo sampleTagInfo = sampleEntityMapper.getSampleTagInfo(sampleId);
+                SysUserEntity one = userDao.getUserIdByName(sampleTagInfo.getInspector());
+                if (one != null) {
+                    record.setOperatorId(one.getUserId());
+                }
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Date date = null;
+                try {
+                    date = simpleDateFormat.parse(sampleTagInfo.getReceivedDate());
+                } catch (Exception e) {
+                    log.error("时间转换异常:{}", e);
+                }
+                record.setTime(date);
+                record.setOperatorName(sampleTagInfo.getInspector());
+                // 更新 留样天数  (state =3 留样)
+                if (!org.springframework.util.StringUtils.isEmpty(sampleRetentionPeriod)) {
+                    SampleEntity sampleEntity1 = new SampleEntity();
+                    sampleEntity1.setId(sampleId);
+                    sampleEntity1.setSampleRetentionPeriod(sampleRetentionPeriod);
+                    sampleEntity1.setSampleRetentionArea(sampleRetentionArea);
+                    // 动态更新
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity1);
+                }
+            }
+            if (state == 4) {
+                //已检测、在判断已检时间和留样天数，当前时间
+                List<Integer> list = sampleEntityMapper.getExist(sampleId, 2);
+                if (org.apache.commons.collections.CollectionUtils.isEmpty(list)) {
+                    return 5;
+                }
+                Date date = sampleEntityMapper.getDate(sampleId, 3);
+                int saveDay = sampleEntityMapper.getDaysById(sampleId);
+                //检测完成时间+留样天数》= 当前日期
+                String beforeDayString = DateUtil.getBeforeDayString(saveDay);//获取N天前的日期
+                //date>=beforeDayString
+                String dayString = DateUtil.getDayString(date.getTime());
+                if (Integer.parseInt(dayString) < Integer.parseInt(beforeDayString)) {
+                    return 6;
+                }
+                status = 2;
+                // 样品处置方式（state=4处置）
+                if (!org.springframework.util.StringUtils.isEmpty(sampleProcessMode)) {
+                    SampleEntity sampleEntity2 = new SampleEntity();
+                    sampleEntity2.setId(sampleId);
+                    sampleEntity2.setSampleProcessMode(sampleProcessMode);
+                    sampleEntity2.setApprover(approver);
+                    // 动态更新
+                    sampleEntityMapper.updateByPrimaryKeySelective(sampleEntity2);
+                }
+            }
+//            sampleEntityMapper.updateIsSave(sampleId,status,saveTime);
+            if (StringUtils.isNotEmpty(disposalDate)) {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    date11 = simpleDateFormat.parse(disposalDate);
+                } catch (Exception e) {
+                    log.error("时间转换异常:{}", e);
+                }
+            }
+        }
+
+        record.setSampleId(sampleId);
+        record.setStatus(state + "");
+      /*   if (record.getTime() == null){
+            record.setTime(time);
+        }
+        if (date11 != null){
+            record.setTime(date11);
+        }
+       if (record.getOperatorId() == null){
+            record.setOperatorId(ShiroUtils.getUserInfo().getUserId());
+        }
+        if (StringUtils.isEmpty(record.getOperatorName())){
+            record.setOperatorName(userDao.getSysUserName(ShiroUtils.getUserInfo().getUserId()));
+        }*/
+        sampleEntityMapper.insertRecord(record);
+        return 0;
+    }
+
+    /**
      * 将BufferedImage转换为InputStream
+     *
      * @param image
      * @return
      */
-    public InputStream bufferedImageToInputStream(BufferedImage image){
+    public InputStream bufferedImageToInputStream(BufferedImage image) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, "jpg", os);
             InputStream input = new ByteArrayInputStream(os.toByteArray());
             return input;
         } catch (IOException e) {
-            log.error("提示:",e);
+            log.error("提示:", e);
         }
         return null;
     }
@@ -1241,13 +1360,17 @@ public class SampleServiceImpl implements SampleService {
     }
 
     @Override
-    public int getIdByCode(String code) {
+    public Integer getIdByCode(String code) {
         return sampleEntityMapper.getIdByCode(code);
     }
 
     @Override
     public void updateDayByCode(String code, String value) {
-        sampleEntityMapper.updateDayByCode(code,(int)Double.parseDouble(value));
+        Integer sampleId = sampleEntityMapper.getIdByCode(code);
+        if (sampleId != null) {
+            updateState1(sampleId, 3, null, null, (int) Double.parseDouble(value), null, null, null, null, null);
+//        sampleEntityMapper.updateDayByCode(code,(int)Double.parseDouble(value));
+        }
     }
 
     @Override

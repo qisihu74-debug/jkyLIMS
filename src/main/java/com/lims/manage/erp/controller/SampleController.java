@@ -850,19 +850,19 @@ public class SampleController {
         Cells cells = worksheet.getCells();
         //遍历excel，根据编号查询
         int num = 3;
-        while (num<=166){
-            String index = "C"+num;
+        while (num <= 26) {
+            String index = "C" + num;
             Thread.sleep(1000);
 //            String key = "I"+num;
 //            String string = cells.get(key).getValue().toString();
 //            if ("90d".equals(string)){
-                String code = cells.get(index).getValue().toString();
-                int sampleId = sampleService.getIdByCode(code);
+            String code = cells.get(index).getValue().toString();
+            Integer sampleId = sampleService.getIdByCode(code);
+            if (sampleId != null) {
                 SampleDetailVo sampleTagInfo = sampleService.getSampleTagInfo(sampleId);
-                if (sampleTagInfo != null) {
-                    sampleTagInfo.setSampleCode(code);
-                    sampleService.downloadNewSampleTab1(2, sampleId, sampleTagInfo, response);
-                }
+                sampleTagInfo.setSampleCode(code);
+                sampleService.downloadNewSampleTab(2, sampleId, sampleTagInfo, response);
+            }
 //            }
             num++;
         }
@@ -871,34 +871,34 @@ public class SampleController {
     @RequestMapping("/updateDayByCode")
     public void updateDayByCode() throws Exception {
         //读取excel
-        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\7月样品留样.xlsx");
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\10月样品留样.xlsx");
         Worksheet worksheet = workbook.getWorksheets().get(0);
         Cells cells = worksheet.getCells();
         //遍历excel，根据编号查询
         int num = 3;
-        while (num<=119){
-            String index = "C"+num;
-            String key = "I"+num;
+        while (num <= 26) {
+            String index = "C" + num;
+            String key = "I" + num;
             String code = cells.get(index).getValue().toString();
             String value = cells.get(key).getValue().toString();
-            sampleService.updateDayByCode(code,value);
+            sampleService.updateDayByCode(code, value.split("d")[0]);
             num++;
         }
 
-        //读取excel
-        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\样品留样8月.xlsx");
-        Worksheet worksheet1 = workbook1.getWorksheets().get(0);
-        Cells cells1 = worksheet1.getCells();
-        //遍历excel，根据编号查询
-        int num1 = 3;
-        while (num1<=127){
-            String index = "C"+num1;
-            String key = "I"+num1;
-            String code = cells1.get(index).getValue().toString();
-            String value = cells1.get(key).getValue().toString();
-            sampleService.updateDayByCode(code,value);
-            num1++;
-        }
+//        //读取excel
+//        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\样品留样8月.xlsx");
+//        Worksheet worksheet1 = workbook1.getWorksheets().get(0);
+//        Cells cells1 = worksheet1.getCells();
+//        //遍历excel，根据编号查询
+//        int num1 = 3;
+//        while (num1<=127){
+//            String index = "C"+num1;
+//            String key = "I"+num1;
+//            String code = cells1.get(index).getValue().toString();
+//            String value = cells1.get(key).getValue().toString();
+//            sampleService.updateDayByCode(code,value);
+//            num1++;
+//        }
     }
 
     /**
