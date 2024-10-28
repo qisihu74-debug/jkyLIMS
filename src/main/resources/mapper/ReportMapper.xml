@@ -657,6 +657,12 @@ FROM
             OR t2.task_code = #{reportCode}
 		 )
         </if>
+        <if test="searchName!=null and searchName!=''">
+            AND (
+            t6.report_code LIKE CONCAT('%', #{searchName}, '%')
+            OR t2.task_code LIKE CONCAT('%', #{searchName}, '%')
+            )
+        </if>
 	) tb1
 WHERE
 	tb1.report_producer LIKE CONCAT('%', #{userId}, '%')

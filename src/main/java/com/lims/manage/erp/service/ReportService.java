@@ -53,7 +53,7 @@ public interface ReportService {
      * 报告下载列表--科室权限
      * @return
      */
-    PageInfo reportDownloadList(Integer pageNum,Integer pageSize,String search);
+    PageInfo reportDownloadList(Integer pageNum,Integer pageSize,String search,String searchName);
 
     /**
      * 提交审批—— 二次

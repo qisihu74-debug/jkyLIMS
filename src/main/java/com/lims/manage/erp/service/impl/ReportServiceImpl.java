@@ -248,7 +248,7 @@ public class ReportServiceImpl implements ReportService {
 
 
     @Override
-    public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search) {
+    public PageInfo reportDownloadList(Integer pageNum, Integer pageSize, String search,String searchName) {
         //List<Long> userTeamIds = teamMapper.getUserTeamIds(ShiroUtils.getUserInfo().getUserId());
         //根据当前登录人获取所属团队和旧团队集合
         List<Integer> userTeamIds = teamMapper.getTeamIdsByUserId(ShiroUtils.getUserInfo().getUserId());
@@ -261,12 +261,12 @@ public class ReportServiceImpl implements ReportService {
             }else {
                 PageHelper.clearPage();
                 PageHelper.startPage(pageNum, pageSize);
-                list = reportMapper.reportDownloadList0512(null, search);
+                list = reportMapper.reportDownloadList0512(null, search,searchName);
             }
         }else {
             PageHelper.clearPage();
             PageHelper.startPage(pageNum, pageSize);
-            list = reportMapper.reportDownloadList0512(ShiroUtils.getUserInfo().getUserId(), search);
+            list = reportMapper.reportDownloadList0512(ShiroUtils.getUserInfo().getUserId(), search,searchName);
         }
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list)){
             //重构

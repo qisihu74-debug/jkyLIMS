@@ -170,11 +170,11 @@ public class ReportController {
      * @return
      */
     @GetMapping("/reportDownloadList")
-    public Result reportDownloadList(Integer pageNum,Integer pageSize,String search) {
+    public Result reportDownloadList(Integer pageNum,Integer pageSize,String search,String searchName) {
         if (pageNum == null || pageSize == null) {
             return ResultUtil.error("缺少分页参数！");
         }
-        return ResultUtil.success("获取报告下载列表成功！", reportService.reportDownloadList(pageNum,pageSize,search));
+        return ResultUtil.success("获取报告下载列表成功！", reportService.reportDownloadList(pageNum,pageSize,search,searchName));
     }
 
     /**
