@@ -9,7 +9,8 @@
         FROM
         (
         SELECT
-        hd.*, tl.`name` AS laboratoryName
+        hd.*, CONCAT(tl.`name`,"(",tl.`code`,")"
+        ) AS laboratoryName
         FROM
         hk_door hd
         LEFT JOIN hk_door_laboratory_rel hr ON hd.index_code = hr.index_code

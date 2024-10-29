@@ -381,7 +381,7 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         if (CollectionUtil.isNotEmpty(laboratories)) {
             StringBuffer stringBuffer = new StringBuffer();
             for (TestLaboratory testLaboratory : laboratories) {
-                stringBuffer.append(testLaboratory.getName() + ",");
+                stringBuffer.append(testLaboratory.getName() + "(" + testLaboratory.getCode() + ")" + ",");
             }
             data.setLaboratoryName(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
         }
@@ -609,6 +609,15 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
         // 门禁集合
         List<String> indexCodes = hkDoorLaboratoryRelEntities.stream().map(HKDoorLaboratoryRelEntity::getIndexCode).collect(Collectors.toList());
+
+        // 通过门禁标识获取 对应层级开关
+        List<String> indexCodeHierarchys = hkDoorLaboratoryRelEntityMapper.selectIndexCodeHierarchys(indexCodes);
+        if (CollectionUtil.isNotEmpty(indexCodeHierarchys)) {
+            for (String indexCode : indexCodeHierarchys) {
+                indexCodes.add(indexCode);
+            }
+        }
+
         // 获取任务单 最终报告流转日期 进行 下发即可
         LambdaQueryWrapper<TestEntrustedTaskRelEntity> entityWrapper = new LambdaQueryWrapper<>();
         entityWrapper.eq(TestEntrustedTaskRelEntity::getEntrustId, taskTestEntity.getEntrustmentId());
