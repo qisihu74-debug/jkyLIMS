@@ -463,6 +463,8 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
 
         // 获取 人员集合
         Set<Long> userIDs = new HashSet<>();
+        // 接收人
+        userIDs.add(Long.parseLong(taskTestEntity.getReceiver()));
 
         // 检测人
         if (org.apache.commons.lang.StringUtils.isNotEmpty(taskTestEntity.getInspector())) {

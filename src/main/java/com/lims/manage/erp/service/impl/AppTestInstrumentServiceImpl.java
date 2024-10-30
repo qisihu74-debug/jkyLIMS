@@ -1,5 +1,6 @@
 package com.lims.manage.erp.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.api.client.util.Lists;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.*;
@@ -347,24 +348,28 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
             testDetectionDao.batchUpdateSampleItemInstrumentEntity(entrustSampleItems);
         }
         //更新任务单状态
-        if(!CollectionUtils.isEmpty(taskTestEntities)){
+        if (!CollectionUtils.isEmpty(taskTestEntities)) {
             taskMapper.batchUpdateTestTaskState(taskTestEntities);
         }
         //更新委托单状态
-        if(!CollectionUtils.isEmpty(entrustIds)){
-            taskMapper.batchUpdateEntrustById(entrustIds,3);
+        if (!CollectionUtils.isEmpty(entrustIds)) {
+            taskMapper.batchUpdateEntrustById(entrustIds, 3);
         }
         //更新样品状态
-        if(!CollectionUtils.isEmpty(updateSampleIds)){
-            sampleEntityMapper.batchUpdateSampleState(updateSampleIds,1);
+        if (!CollectionUtils.isEmpty(updateSampleIds)) {
+            sampleEntityMapper.batchUpdateSampleState(updateSampleIds, 1);
         }
         //新增样品流转信息
-        if(!CollectionUtils.isEmpty(circulationRecords)){
+        if (!CollectionUtils.isEmpty(circulationRecords)) {
             sampleEntityMapper.batchSaveSampleCirculationRecord(circulationRecords);
+        }
+        // 批量更新任务单操作时间
+        if (CollectionUtil.isNotEmpty(taskIds)) {
+            taskMapper.bathUpdateTaskUpdateTime(taskIds);
         }
         //更新队伍试验状态
         instrumentRecordEntityMapper.updateGroupState(id);
-        return ResultUtil.success("开始实验成功！",null);
+        return ResultUtil.success("开始实验成功！", null);
     }
 
     @Override
@@ -483,17 +488,21 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
         }
         //更新委托单状态
         if(!CollectionUtils.isEmpty(entrustIds)){
-            taskMapper.batchUpdateEntrustById(entrustIds,3);
+            taskMapper.batchUpdateEntrustById(entrustIds, 3);
         }
         //更新样品状态
-        if(!CollectionUtils.isEmpty(updateSampleIds)){
-            sampleEntityMapper.batchUpdateSampleState(updateSampleIds,1);
+        if (!CollectionUtils.isEmpty(updateSampleIds)) {
+            sampleEntityMapper.batchUpdateSampleState(updateSampleIds, 1);
         }
         //新增样品流转信息
-        if(!CollectionUtils.isEmpty(circulationRecords)){
+        if (!CollectionUtils.isEmpty(circulationRecords)) {
             sampleEntityMapper.batchSaveSampleCirculationRecord(circulationRecords);
         }
-        return ResultUtil.success("开始实验成功！",null);
+        // 批量更新任务单操作时间
+        if (CollectionUtil.isNotEmpty(taskIds)) {
+            taskMapper.bathUpdateTaskUpdateTime(taskIds);
+        }
+        return ResultUtil.success("开始实验成功！", null);
     }
 
     @Override
@@ -640,17 +649,21 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
         }
         //更新委托单状态
         if(!CollectionUtils.isEmpty(entrustIds)){
-            taskMapper.batchUpdateEntrustById(entrustIds,3);
+            taskMapper.batchUpdateEntrustById(entrustIds, 3);
         }
         //更新样品状态
-        if(!CollectionUtils.isEmpty(updateSampleIds)){
-            sampleEntityMapper.batchUpdateSampleState(updateSampleIds,1);
+        if (!CollectionUtils.isEmpty(updateSampleIds)) {
+            sampleEntityMapper.batchUpdateSampleState(updateSampleIds, 1);
         }
         //新增样品流转信息
-        if(!CollectionUtils.isEmpty(circulationRecords)){
+        if (!CollectionUtils.isEmpty(circulationRecords)) {
             sampleEntityMapper.batchSaveSampleCirculationRecord(circulationRecords);
         }
-        return ResultUtil.success("开始实验成功！",null);
+        // 批量更新任务单操作时间
+        if (CollectionUtil.isNotEmpty(taskIds)) {
+            taskMapper.bathUpdateTaskUpdateTime(taskIds);
+        }
+        return ResultUtil.success("开始实验成功！", null);
     }
 
     @Override
