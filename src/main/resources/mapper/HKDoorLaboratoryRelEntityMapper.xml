@@ -2,4 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lims.manage.erp.mapper.HKDoorLaboratoryRelEntityMapper">
 
+    <select id="selectIndexCodeHierarchys" resultType="java.lang.String">
+        SELECT DISTINCT index_code_hierarchy FROM hk_door_hierarchy WHERE index_code in
+        <foreach collection="indexCodes" item="index" open="(" close=")" separator=",">
+            #{index}
+        </foreach>
+    </select>
+
 </mapper>

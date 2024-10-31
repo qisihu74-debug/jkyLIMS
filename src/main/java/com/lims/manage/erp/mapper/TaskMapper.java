@@ -639,20 +639,28 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<TestInitDataEntity> selectEntrustBasis(Integer TypeId);
+
     /**
      * 批量更新任务单状态
+     *
      * @param list
      * @return
      */
     int batchUpdateTestTaskState(@Param("list") List<TaskTestEntity> list);
 
     /**
+     * 批量更新任务单操作时间
+     */
+    int bathUpdateTaskUpdateTime(@Param("taskIds") Set<Long> taskIds);
+
+    /**
      * 批量更新委托单状态
+     *
      * @param entrustIds
      * @param state
      * @return
      */
-    int batchUpdateEntrustById(@Param("entrustIds")List<Long> entrustIds,@Param("state")Integer state);
+    int batchUpdateEntrustById(@Param("entrustIds") List<Long> entrustIds, @Param("state") Integer state);
 
     /**
      *  更新 test_task working_hours_id = 1
