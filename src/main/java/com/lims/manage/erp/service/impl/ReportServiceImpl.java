@@ -2537,6 +2537,9 @@ public class ReportServiceImpl implements ReportService {
                                             //代表数量
                                             cells.get(n, j).setValue(sampleEntity.getGeneration() == null ? "——" : sampleEntity.getGeneration());
                                         }
+                                        //参数
+
+
                                     }
                                 }
                             }

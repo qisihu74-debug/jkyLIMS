@@ -240,18 +240,19 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
         if (map != null){
             String msg = map.get("msg").toString();
             if ("success".equals(msg)){
-                //权限下发
-                Map<String, Object> grant = HkUtils.personGrant(hkConfig.getGrant(), hkGrantDoorReq);
-                if (grant != null) {
-                    String msg1 = map.get("msg").toString();
-                    if ("success".equals(msg1)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
+                //权限下发,综合安防管理平台配置自动下发后，下面的代码可以省略
+//                Map<String, Object> grant = HkUtils.personGrant(hkConfig.getGrant(), hkGrantDoorReq);
+//                if (grant != null) {
+//                    String msg1 = map.get("msg").toString();
+//                    if ("success".equals(msg1)) {
+//                        return true;
+//                    } else {
+//                        return false;
+//                    }
+//                } else {
+//                    return false;
+//                }
+                return true;
             }else {
                 return false;
             }

@@ -3,7 +3,9 @@ package com.lims.manage.erp.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageInfo;
+import com.google.api.client.util.Lists;
 import com.lims.manage.erp.config.HkConfig;
 import com.lims.manage.erp.entity.*;
 import com.lims.manage.erp.mapper.HKPersonDoorProvisionalAuthorityRelEntityMapper;
@@ -156,7 +158,33 @@ public class HkController {
      * @return
      */
     @PostMapping("personBandDoor")
-    public Result personBandDoor(@RequestBody HkDoorReq hkDoorReq){
+    public Result personBandDoor(){
+        HkDoorReq hkDoorReq = new HkDoorReq();
+        hkDoorReq.setStartTime("2024-10-28T17:30:08.000+08:00");
+        hkDoorReq.setEndTime("2024-12-26T17:30:08.000+08:00");
+        List<PersonDoorReq> personDatas = Lists.newArrayList();
+        PersonDoorReq personDoorReq = new PersonDoorReq();
+        List<String> stringList = Lists.newArrayList();
+//        stringList.add("075f15376c7f4432ac78ce2d57ce0740");//院长
+//        stringList.add("1c9b8024c0da420597e07491979c0a75");//许部长
+//        stringList.add("a3ec6e5b1f8f4183afd55ba71d1fe44e");//赵文军
+        stringList.add("d2892d4254da4d209eda49c4efadf798");//本人
+//        stringList.add("5aa6c61cea064fd4a79c95072449d209");//石小于
+//        stringList.add("4fb2c350f8144a9f80e4f21b64ceae1c");//王琰
+        personDoorReq.setIndexCodes(stringList);
+        personDatas.add(personDoorReq);
+        hkDoorReq.setPersonDatas(personDatas);
+        //查询所有门禁
+        LambdaQueryWrapper<HkDoor> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(HkDoor::getName,"实验楼505人脸");
+        List<HkDoor> list = hkDoorService.list(queryWrapper);
+        List<ResourceInfo> reqResourceInfos = Lists.newArrayList();
+        for (HkDoor hkDoor :list){
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setResourceIndexCode(hkDoor.getIndexCode());
+            reqResourceInfos.add(resourceInfo);
+        }
+        hkDoorReq.setResourceInfos(reqResourceInfos);
         if (CollectionUtils.isEmpty(hkDoorReq.getPersonDatas())){
             return ResultUtil.error("请选择绑定的人员");
         }
@@ -182,7 +210,40 @@ public class HkController {
      * @return
      */
     @PostMapping("personGrant")
-    public Result personGrant(@RequestBody HkGrantDoorReq hkGrantDoorReq){
+    public Result personGrant(){
+        HkGrantDoorReq hkGrantDoorReq = new HkGrantDoorReq();
+        hkGrantDoorReq.setTaskType(4);
+        List<ResourceInfo> reqResourceInfos = Lists.newArrayList();
+        LambdaQueryWrapper<HkDoor> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.like(HkDoor::getName,"实验楼1")
+                .or()
+                .like(HkDoor::getName,"实验楼2")
+                .or()
+                .like(HkDoor::getName,"实验楼3")
+                .or()
+                .like(HkDoor::getName,"实验楼511人脸识别")
+                .or()
+                .like(HkDoor::getName,"实验楼4");
+        List<HkDoor> list = hkDoorService.list(queryWrapper);
+
+        List<HkDoor> list1 = Lists.newArrayList();
+        List<HkDoor> list2 = Lists.newArrayList();
+        for (int i=0;i<list.size();i++){
+            if (i<=99){
+                list1.add(list.get(i));
+            }else {
+                list2.add(list.get(i));
+            }
+        }
+
+        for (HkDoor hkDoor :list1){
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setResourceIndexCode(hkDoor.getIndexCode());
+            resourceInfo.setResourceType("door");
+            reqResourceInfos.add(resourceInfo);
+        }
+        hkGrantDoorReq.setResourceInfos(reqResourceInfos);
+
         if (CollectionUtils.isEmpty(hkGrantDoorReq.getResourceInfos())){
             return ResultUtil.error("请选择下发权限的门禁");
         }
