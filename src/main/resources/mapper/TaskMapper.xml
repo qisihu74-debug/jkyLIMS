@@ -1291,7 +1291,7 @@
                  or t3.alias_name like CONCAT('%',#{search},'%') )
             </if>
         ORDER BY
-            t1.create_time desc
+        t1.update_time desc
     </select>
 
     <select id="taskList" resultMap="taskSampleResultMap">
