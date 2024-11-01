@@ -1,7 +1,6 @@
 package com.lims.manage.erp.util;
 
 
-import com.alibaba.fastjson.JSON;
 import com.aspose.cells.Workbook;
 import com.aspose.words.Document;
 import com.aspose.words.SaveFormat;
@@ -10,7 +9,6 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.Maps;
 import com.lims.manage.erp.entity.ImagePro;
 import com.lims.manage.erp.entity.ReportRecordEntity;
-import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.vo.CustomXWPFDocument;
 import io.minio.MinioClient;
 import lombok.SneakyThrows;
@@ -33,7 +31,6 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
@@ -547,11 +544,12 @@ public class AsposeUtil {
     /**
      * word转excel
      * @param file
-     * @param response
      */
-    public static ServletOutputStream doc2excel(MultipartFile file, HttpServletResponse response,String path) throws Exception {
+    public static String doc2excel(MultipartFile file,String path) throws Exception {
+        String fileName = file.getOriginalFilename();
+        String pdfPath = path+fileName.split("\\.")[0]+".pdf";
+        String excelPath = path+fileName.split("\\.")[0]+".xlsx";
         FileInputStream inputStream = null;
-        ServletOutputStream responseOutputStream = null;
         File toFile = AsposeUtil.MultipartFileToFile(file);
         long old = System.currentTimeMillis();
         try {
@@ -562,25 +560,23 @@ public class AsposeUtil {
             OutputStream os = new FileOutputStream(fileDoc);
             doc.save(os, SaveFormat.PDF);//设置转换文件类型并转换
             //pdf数据流转excel
-            File file1 = new File(path);
+            File file1 = new File(pdfPath);
             FileInputStream fileInputStream = new FileInputStream(file1);
             com.aspose.pdf.Document doc1 = new com.aspose.pdf.Document(fileInputStream);//加载源文件数据
             System.out.println("开始转换");
-            responseOutputStream = response.getOutputStream();
-            doc1.save(responseOutputStream, com.aspose.pdf.SaveFormat.Excel);//设置转换文件类型并转换;
+            doc1.save(excelPath, com.aspose.pdf.SaveFormat.Excel);//设置转换文件类型并转换;
             inputStream.close();
             os.close();
             fileInputStream.close();
         } catch (Exception e) {
             log.error("word 转 excel 失败...：{}",e);
         }
+        FileAndFolderUtil.delete(pdfPath);
+        System.out.println("临时文件删除成功");
         //转化用时
         long now = System.currentTimeMillis();
         System.out.println("word 转 excel 共耗时：" + ((now - old) / 1000.0) + "秒");
-        //删除临时pdf文件
-        FileAndFolderUtil.delete(path);
-        System.out.println("临时文件删除成功");
-        return responseOutputStream;
+        return excelPath;
     }
 
     public static void main(String[] args) {
