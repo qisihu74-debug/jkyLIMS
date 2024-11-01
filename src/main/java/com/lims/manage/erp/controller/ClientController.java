@@ -1,19 +1,18 @@
 package com.lims.manage.erp.controller;
 
+import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.util.AsposeUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author gjl
@@ -23,9 +22,12 @@ import java.nio.file.StandardCopyOption;
  * @date 2024-10-24 15:35
  * @Copyright © 河南交科院
  */
+@Slf4j
 @RestController
 @RequestMapping("/client/")
 public class ClientController {
+    @Autowired
+    private QiYueSuoEntity qiYueSuoEntity;
 
     /**
      * 接收客户端上传的文件
@@ -33,42 +35,30 @@ public class ClientController {
      * @return
      */
     @PostMapping("receiveFile")
-    public Result receiveFile(MultipartFile file, HttpServletRequest request){
-
-        try {
-            request.setCharacterEncoding("UTF-8");
-            if (file != null){
-                String UPLOAD_DIR = "D:\\Users\\Administrator\\My Document\\WeChat Files\\wxid_ry85h8s4iqzz21\\FileStorage\\File\\2024-10\\";
-                File uploadDir = new File(UPLOAD_DIR);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdirs();
-                }
-                String fileName = file.getOriginalFilename();
-                System.out.println("转码前:"+fileName);
-                String name = "";
-                try {
-                    name = new String(fileName.getBytes(),"UTF-8");
-                    System.out.println("转码后:"+name);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                java.nio.file.Path filePath = Paths.get(UPLOAD_DIR, name);
-                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                return ResultUtil.success("文件接收成功");
-            }else {
-                return ResultUtil.error("文件为空请上传");
+    public Result receiveFile(MultipartFile file, HttpServletResponse response){
+        Boolean flag = true;
+        if (file != null){
+            //转换文档为excel，保存
+            ServletOutputStream outputStream = null;
+            try {
+                outputStream = AsposeUtil.doc2excel(file, response, qiYueSuoEntity.getAutographPath());
+                outputStream.flush();
+            } catch (Exception e) {
+                flag = false;
+               log.error("文件转换异常:{}",e.getMessage());
             }
-        }catch (Exception e){
-            System.out.println("解析失败:{}"+e.getMessage());
+            if (flag){
 
+
+            }else {
+                return ResultUtil.error("failed",null);
+            }
+
+
+            return ResultUtil.success("success",null);
+        }else {
+            return ResultUtil.error("failed",null);
         }
-        String des = "";
-        try {
-            des = new String("上传成功".getBytes(),"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return ResultUtil.success(des);
     }
 
 }

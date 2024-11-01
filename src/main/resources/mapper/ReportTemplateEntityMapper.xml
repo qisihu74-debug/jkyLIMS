@@ -148,6 +148,7 @@ FROM
 LEFT JOIN test_report_template_product_ref t4 ON t2.product_id = t4.product_id
 WHERE
 	t3.report_file_uri IS NOT NULL
+	AND t3.del_flag=0
           AND t1.entrust_id = #{entrustId}
           AND t1.sample_id = #{sampleId}
     </select>
