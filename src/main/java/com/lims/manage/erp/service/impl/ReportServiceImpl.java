@@ -1821,7 +1821,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public ApproveInfo approveInfo(String reportCode) {
         List<ApproveInfo> approveInfoList = recordEntityMapper.approveInfo(reportCode);
-        List<LabelValueVo> jcMap = Lists.newArrayList();
+        Map<Long, LabelValueVo> jcMap = new HashMap<>();
         List<KeyValue> shMap = Lists.newArrayList();
         List<KeyValue> qfMap = Lists.newArrayList();
         for (ApproveInfo approveInfo :approveInfoList){
@@ -1834,7 +1834,7 @@ public class ReportServiceImpl implements ReportService {
                         LabelValueVo keyValue = new LabelValueVo();
                         keyValue.setValue(Long.valueOf(jcr.split("&")[1]));
                         keyValue.setLabel(jcr.split("&")[0]);
-                        jcMap.add(keyValue);
+                        jcMap.put(keyValue.getValue(), keyValue);
                     }
                 }
             }
@@ -1845,7 +1845,7 @@ public class ReportServiceImpl implements ReportService {
                         LabelValueVo keyValue = new LabelValueVo();
                         keyValue.setValue(Long.valueOf(jcr.split("&")[1]));
                         keyValue.setLabel(jcr.split("&")[0]);
-                        jcMap.add(keyValue);
+                        jcMap.put(keyValue.getValue(), keyValue);
                     }
                 }
             }
@@ -1877,7 +1877,14 @@ public class ReportServiceImpl implements ReportService {
         // 从LocalDateTime对象中获取LocalDate对象，即只有日期部分
         LocalDate dateOnly = localDateTime.toLocalDate();
         approveInfo.setReportTime(dateOnly.toString());
-        approveInfo.setJcrMap(jcMap);
+        if (CollectionUtil.isNotEmpty(jcMap.keySet())) {
+            List<LabelValueVo> jcList = new ArrayList<>();
+            for (Long id : jcMap.keySet()) {
+                jcList.add(jcMap.get(id));
+            }
+            approveInfo.setJcrMap(jcList);
+        }
+
         approveInfo.setShrMap(shMap);
         approveInfo.setQfrMap(qfMap);
         return approveInfo;

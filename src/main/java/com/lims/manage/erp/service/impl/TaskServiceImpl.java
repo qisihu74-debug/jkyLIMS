@@ -27,6 +27,7 @@ import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -56,6 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1722,11 +1724,10 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             result.put("result", originalData);
             // 原始记录模板 比对信息
             try {
-                Workbook workbook = methodPlugTheData(data.getFileUrl(),result, null,dataEntitys.get(0).getTaskId());
+                Workbook workbook = methodPlugTheData(data.getFileUrl(), result, null, dataEntitys.get(0).getTaskId());
                 workbook.write(outputStream);
-            }
-            catch (Exception e){
-                log.info("输出异常\t"+e);
+            } catch (Exception e) {
+                log.info("输出异常\t" + e);
             }
         }
         // 关闭输入流
@@ -1734,8 +1735,35 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         return outputStream;
     }
 
+    public void packagingUrlSWorkbookXls(List<String> urls, HttpServletResponse response) throws IOException {
+
+        // 通过检测项id 获取 相应的 id关联信息。
+        for (int i = 0; i < urls.size(); i++) {
+            String url = urls.get(i);
+            String[] strings = url.split("\\/");
+            String bluckName = strings[3];
+            String fileName = strings[4];
+            InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
+            response.reset();
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("UTF-8");
+            try {
+                fileName = URLEncoder.encode(fileName, "UTF-8");
+                response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
+                OutputStream outputStream = response.getOutputStream();
+                IOUtils.copy(fileStream, outputStream);
+                fileStream.close();
+                outputStream.close();
+            } catch (Exception e) {
+                log.error("下载附件异常");
+            }
+        }
+    }
+
     /**
      * 查询任务列表
+     *
      * @param paramVo
      * @param deptIds
      * @return

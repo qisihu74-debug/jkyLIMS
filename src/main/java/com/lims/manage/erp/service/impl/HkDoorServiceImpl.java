@@ -347,12 +347,6 @@ public class HkDoorServiceImpl extends ServiceImpl<HkDoorDao, HkDoor> implements
     @Override
     public Result addtemporaryVisit(HKPersonDoorProvisionalAuthorityRelEntity data) {
 
-        if (data == null) {
-            return ResultUtil.error("缺少必填参数");
-        }
-        if (StringUtils.isEmpty(data.getLaboratoryMessage())) {
-            return ResultUtil.error("缺少必填参数");
-        }
 
         // 进行转换： 年月日 时分秒 转成 UTC：东八区存放
         if (StringUtils.isNotEmpty(data.getStartTime())) {

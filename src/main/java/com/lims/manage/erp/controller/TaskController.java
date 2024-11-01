@@ -1049,12 +1049,21 @@ public class TaskController {
                     logger.error("下载契约锁报告文档失败:{}", e);
                 }
             } else {
+
+                // 通过检测项id 获取对应任务单附件有 则下载就行 da_task_record 读取 URL
+                //  da_task_record 读取 URL 附件
+                List<String> urls = taskMapper.getTaskRecordUrl(ids);
+                if (CollectionUtil.isNotEmpty(urls)) {
+                    // 下载附件即可
+
+                }
+
                 // 下载原始记录模板
                 // 效验 检测项url信息模板
                 // 通过检测项id 获取 相应的 id关联信息。
                 List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(ids);
                 // 判断 压缩数据=null 返回 null
-                if (!CollectionUtils.isEmpty(dataEntitys)) {
+                if (!CollectionUtils.isEmpty(dataEntitys) && CollectionUtil.isEmpty(urls)) {
                     // 处理条数 == 1 不需要zip打包
                     if (dataEntitys.size() == 1) {
                         response.reset();

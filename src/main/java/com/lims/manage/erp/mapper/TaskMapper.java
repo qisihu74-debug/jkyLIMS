@@ -803,4 +803,12 @@ public interface TaskMapper extends BaseMapper {
             "WHERE\n" +
             "\ttask_id = #{taskId}")
     List<Integer> getDistinctInstrumentIds(Long taskId);
+
+    /**
+     * 通过检测项id 获取附件集合
+     *
+     * @param array
+     * @return
+     */
+    List<String> getTaskRecordUrl(@Param(value = "array") Integer[] array);
 }
