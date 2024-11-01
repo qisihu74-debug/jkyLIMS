@@ -444,6 +444,39 @@ public class HkController {
     }
 
     /**
+     * 测试权限取消
+     */
+    @GetMapping("testCancelVisit")
+    public void testCancelVisit(){
+        HkDoorReq hkDoorReq = new HkDoorReq();
+        List<PersonDoorReq> personDatas = Lists.newArrayList();
+        PersonDoorReq personDoorReq = new PersonDoorReq();
+        List<String> personId = Lists.newArrayList();
+        personId.add("075f15376c7f4432ac78ce2d57ce0740");
+        personId.add("1c9b8024c0da420597e07491979c0a75");
+        personId.add("5aa6c61cea064fd4a79c95072449d209");
+        personId.add("4fb2c350f8144a9f80e4f21b64ceae1c");
+        personDoorReq.setIndexCodes(personId);
+        personDatas.add(personDoorReq);
+        hkDoorReq.setPersonDatas(personDatas);
+        LambdaQueryWrapper<HkDoor> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.like(HkDoor::getName,"实验楼5")
+                .or()
+                .like(HkDoor::getName,"实验楼6");
+        List<HkDoor> list = hkDoorService.list(queryWrapper);
+        List<ResourceInfo> resourceInfos = Lists.newArrayList();
+        for (HkDoor hkDoor :list){
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setResourceIndexCode(hkDoor.getIndexCode());
+            resourceInfos.add(resourceInfo);
+        }
+
+        hkDoorReq.setResourceInfos(resourceInfos);
+        Map<String, Object> map = HkUtils.cancleBandDoor(hkConfig.getCancelBandDoor(), hkDoorReq);
+        System.out.println("权限取消成功");
+    }
+
+    /**
      * 查询门禁点状态
      * @param indexCodes
      * @return
