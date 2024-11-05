@@ -519,12 +519,11 @@ public class HkController {
         }
 
         try {
-            hkDoorService.addtemporaryVisit(data);
+         return hkDoorService.addtemporaryVisit(data);
         } catch (Exception e) {
             return ResultUtil.error("授权失败");
         }
 
-        return ResultUtil.error("授权失败");
     }
 
     /**

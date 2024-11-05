@@ -1824,7 +1824,7 @@
         WHERE
         1=1
         <if test="array !=null">
-            t1.id IN
+            and t1.id IN
             <foreach collection="array" item="id" open="(" close=")" separator=",">
                 #{id}
             </foreach>
