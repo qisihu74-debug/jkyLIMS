@@ -185,6 +185,7 @@ public interface ReportMapper {
 
     ReportRecordEntity getDetailById(@Param("id") Long id);
     ReportRecordEntity getDetailByEntrustId(@Param("entrustId") Long entrustId);
+    List<ReportRecordEntity> getDetailByEntrustId1(@Param("entrustId") Long entrustId);
     ReportRecordEntity getDetailByEntrustIdZj(@Param("entrustId") Long entrustId);
     /**
      * 获取中间报告列表

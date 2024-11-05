@@ -1583,6 +1583,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<ReportRecordEntity> getDetailByEntrustId1(Long entrustId) {
+        return reportMapper.getDetailByEntrustId1(entrustId);
+    }
+
+    @Override
     public ReportRecordEntity getDetailByEntrustIdZj(Long entrustId) {
         return reportMapper.getDetailByEntrustIdZj(entrustId);
     }

@@ -441,4 +441,6 @@ public interface EntrustService {
      * @return
      */
     Result getTaskSource();
+
+    List<Long> getIds();
 }

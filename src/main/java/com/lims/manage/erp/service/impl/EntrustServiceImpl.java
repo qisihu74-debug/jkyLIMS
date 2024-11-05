@@ -6208,6 +6208,11 @@ public class EntrustServiceImpl implements EntrustService {
         return ResultUtil.success(taskSource);
     }
 
+    @Override
+    public List<Long> getIds() {
+        return entityMapper.getIds();
+    }
+
     //    @Transactional(rollbackFor = Exception.class)
     public Result entrustApprovedMethod(EntrustAddVo entrustDetails, long entrustId) {
         // 效验后： 针对预委托单进行审核通过操作 更新委托单

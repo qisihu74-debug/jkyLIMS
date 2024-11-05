@@ -1077,6 +1077,26 @@ ORDER BY
     <select id="getDetailByEntrustId" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         select * from test_report_record where entrustment_id=#{entrustId}
     </select>
+    <select id="getDetailByEntrustId1" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
+        SELECT
+	*
+FROM
+	test_report_record
+WHERE
+	category = '电子章'
+AND (
+	entrustment_id = #{entrustId}
+	OR entrust_id = #{entrustId}
+)
+UNION ALL
+	SELECT
+		*
+	FROM
+		test_report_record_mid
+	WHERE
+		category = '电子章'
+	AND entrust_id = #{entrustId}
+    </select>
     <select id="getDetailByEntrustIdZj" resultType="com.lims.manage.erp.entity.ReportRecordEntity">
         select * from test_report_record_mid where entrust_id=#{entrustId}
     </select>

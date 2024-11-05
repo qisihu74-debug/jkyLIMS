@@ -856,4 +856,14 @@ public interface EntrustEntityMapper extends BaseMapper {
             "</foreach>",
             "</script>"})
     List<Integer> getOperateResultByEntrustIds(@Param("items") List<String> items);
+
+    @Select("SELECT\n" +
+            "\tid\n" +
+            "FROM\n" +
+            "\ttest_entrusted_info\n" +
+            "WHERE\n" +
+            "\tentrust_company = '中交第一航务工程局有限公司兰太高速四标项目经理部'\n" +
+            "AND entrust_people = '雷思豪'\n" +
+            "AND state = 200")
+    List<Long> getIds();
 }

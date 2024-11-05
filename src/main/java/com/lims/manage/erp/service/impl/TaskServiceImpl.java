@@ -1711,6 +1711,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         return out;
     }
 
+    @Override
     public OutputStream packagingWorkbookXls(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException {
         // 通过输入参数 返回 对应的处理成功的EXCEL数据。
         ServletOutputStream outputStream = response.getOutputStream();
@@ -2750,6 +2751,11 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     @Override
     public Long getIdByCode(String taskCode) {
         return taskMapper.getIdByCode(taskCode);
+    }
+
+    @Override
+    public List<Integer> selectList1(String toString) {
+        return null;
     }
 
     /**
