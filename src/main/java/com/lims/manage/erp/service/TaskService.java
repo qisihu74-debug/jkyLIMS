@@ -336,5 +336,11 @@ public interface TaskService {
      */
     Result getplugOperation(String olCode, String taskCode);
 
+    List<Integer> selectList(String toString, String toString1);
+
+    Long getIdByCode(String toString);
+
+    List<Integer> selectList1(String toString);
+
     void storeReportInformation(Long reportId, Long entrustId, com.aspose.cells.Workbook document);
 }

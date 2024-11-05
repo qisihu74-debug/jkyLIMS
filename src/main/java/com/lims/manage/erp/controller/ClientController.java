@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * @author gjl
@@ -50,7 +52,7 @@ public class ClientController {
             //转换文档为xcel，保存
             String path = "";
             try {
-                path = AsposeUtil.doc2excel(file, qiYueSuoEntity.getAutographPath());
+                path = AsposeUtil.doc2excel(file, "D:\\Users\\Administrator\\Desktop\\20241105需要导入lims仪器清单设备标签\\");
             } catch (Exception e) {
                 flag = false;
                log.error("文件转换异常:{}",e.getMessage());
@@ -59,8 +61,11 @@ public class ClientController {
                 try {
                     //将ServletOutputStream转为MultipartFile
                     InputStream inputStream = new FileInputStream(path);
+                    //处理名称
+                    Path path1 = Paths.get(path);
+                    String fileName = path1.getFileName().toString();
                     //将文件上传文件服务器，数据插入表
-                    String upload = MinIoUtil.upload("device-file", file.getOriginalFilename(),inputStream,null );
+                    String upload = MinIoUtil.upload("device-file",fileName ,inputStream,null );
                     String[] fileUrls = upload.split("\\?");
                     String url = fileUrls[0];
                     String[] split = file.getOriginalFilename().split("\\.");

@@ -563,8 +563,25 @@ public class TestInstrumentController extends ApiController {
     }
 
     @GetMapping("printDeviceLables")
-    public void printDeviceLables( HttpServletResponse response){
-        List<Integer> list = testInstrumentService.getAllIds();
+    public void printDeviceLables( HttpServletResponse response) throws Exception{
+        List<Integer> list = Lists.newArrayList();
+        //获取excel表格的设备
+        //读取excel
+        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\20241105需要导入lims仪器清单.xlsx");
+        Worksheet worksheet1 = workbook1.getWorksheets().get(0);
+        Cells cells1 = worksheet1.getCells();
+        //遍历excel，根据编号查询
+        int num1 = 2;
+
+        while (num1<=80) {
+            String codeIndex = "B" + num1;
+            String code = cells1.get(codeIndex).getValue().toString();
+            LambdaQueryWrapper<TestInstrument> queryWrapper = new LambdaQueryWrapper();
+            queryWrapper.eq(TestInstrument::getCode,code);
+            List<TestInstrument> instruments = testInstrumentService.list(queryWrapper);
+            list.add(instruments.get(0).getId());
+            num1++;
+        }
         for (Integer id :list){
             if (id != null){
                 //根据设备id获取设备详情
@@ -689,13 +706,13 @@ public class TestInstrumentController extends ApiController {
 
 
         //读取excel
-        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\20231227设备清单(1).xlsx");
+        com.aspose.cells.Workbook workbook1 = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\20241105需要导入lims仪器清单.xlsx");
         Worksheet worksheet1 = workbook1.getWorksheets().get(0);
         Cells cells1 = worksheet1.getCells();
         //遍历excel，根据编号查询
         int num1 = 2;
 
-        while (num1<=557){
+        while (num1<=80){
             DeviceEntity deviceEntity = new DeviceEntity();
             String codeIndex = "B"+num1;
             String fileState = "C" +num1;

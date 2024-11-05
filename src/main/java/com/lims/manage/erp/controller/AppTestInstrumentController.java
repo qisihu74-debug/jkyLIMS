@@ -1,12 +1,24 @@
 package com.lims.manage.erp.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.aspose.cells.Cells;
+import com.aspose.cells.Worksheet;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.api.client.util.Lists;
+import com.lims.manage.erp.entity.DeviceEntity;
+import com.lims.manage.erp.entity.InstrumentRecordEntity;
 import com.lims.manage.erp.entity.InstrumentUseGroup;
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.entity.TestInstrument;
+import com.lims.manage.erp.mapper.InstrumentRecordEntityMapper;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.AppTestInstrumentService;
 import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.service.TestInstrumentService;
+import com.lims.manage.erp.util.DateUtil;
+import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -14,12 +26,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.naming.ldap.HasControls;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: DLC
@@ -34,6 +52,10 @@ public class AppTestInstrumentController {
     AppTestInstrumentService appTestInstrumentService;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private TestInstrumentService testInstrumentService;
+    @Autowired
+    private InstrumentRecordEntityMapper instrumentRecordEntityMapper;
 
     /**
      * 新增检测任务列表 (根据检测人id 返回待任务单检测列表)
@@ -272,5 +294,190 @@ public class AppTestInstrumentController {
         return ResultUtil.success(appTestInstrumentService.getRecordDetails(recordId));
     }
 
+    /**
+     * 导入设备使用记录
+     * @param file
+     * @return
+     */
+    @PostMapping("importRecord")
+    public Result importRecord(MultipartFile file) throws Exception{
+        Map<String,String> successList = new HashMap<>();
+        Map<String,String> failList = new HashMap<>();
+        //读取excel
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\使用记录.xlsx");
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        //遍历excel，根据编号查询
+        int num = 2;
+        List<InstrumentRecordEntity> list = Lists.newArrayList();
+        while (num <= 424) {
+            InstrumentRecordEntity recordEntity = new InstrumentRecordEntity();
+            String deviceCodeIndex = "A" + num;
+            String taskCodeIndex = "B" + num;
+            String itemNameIndex = "C" + num;
+            String wdIndex = "D" + num;
+            String sdIndex = "E" + num;
+            String useStateIndex = "F" + num;
+            String beforeStateIndex = "G" + num;
+            String userIndex = "H" + num;
+            String starTimeIndex = "I" + num;
+            String endTimeIndex = "J" + num;
+            //根据设备编号查询设备id
+            LambdaQueryWrapper<TestInstrument> queryWrapper = new LambdaQueryWrapper<>();
+            String value = cells.get(deviceCodeIndex).getValue().toString();
+            queryWrapper.eq(TestInstrument::getCode, value);
+            List<TestInstrument> testInstruments = testInstrumentService.list(queryWrapper);
+            if (org.apache.commons.collections4.CollectionUtils.isEmpty(testInstruments)){
+                failList.put(num+":"+cells.get(taskCodeIndex).getValue().toString(),"设备不存在");
+                num ++;
+                continue;
+            }
+            recordEntity.setId(GenID.getID());// 记录id
+            recordEntity.setInstrumentId(Long.parseLong(testInstruments.get(0).getId() + ""));// 仪器id
+            //根据任务单号和参数名称获取检测项的id
+            List<Integer> itemsIds = taskService.selectList(cells.get(taskCodeIndex).getValue().toString(),cells.get(itemNameIndex).getValue().toString());
+            if (org.apache.commons.collections.CollectionUtils.isEmpty(itemsIds)){
+                failList.put(num+":"+cells.get(taskCodeIndex).getValue().toString(),"任务参数未匹配上:");
+                num ++;
+                continue;
+            }
+            recordEntity.setEscRelId(Long.parseLong(itemsIds.get(0)+""));// 检测项主键
+            recordEntity.setType("试验使用");// 类型：试验使用
+            recordEntity.setStartTime(DateUtil.timeMinuteFormat(cells.get(starTimeIndex).getValue().toString()));// 开始时间
+            recordEntity.setEndTime(DateUtil.timeMinuteFormat(cells.get(endTimeIndex).getValue().toString()));
+            recordEntity.setTemperature(cells.get(wdIndex).getValue().toString());// 温度
+            recordEntity.setHumidity(cells.get(sdIndex).getValue().toString());// 湿度
+            recordEntity.setBeforeStatus(cells.get(useStateIndex).getValue().toString());// 使用前状态
+            recordEntity.setAfterStatus(cells.get(beforeStateIndex).getValue().toString());// 使用后状态
+            recordEntity.setUser(cells.get(userIndex).getValue().toString());// 操作人
+            recordEntity.setTime(new Date());
+            //根据任务单号获取任务id
+            Long taskId = taskService.getIdByCode(cells.get(taskCodeIndex).getValue().toString());
+            if (taskId == null){
+                failList.put(num+":"+cells.get(taskCodeIndex).getValue().toString(),"任务单号不存在");
+                num ++;
+                continue;
+            }
+            recordEntity.setTaskId(taskId);//任务id
+            recordEntity.setTaskCode(cells.get(taskCodeIndex).getValue().toString());//任务单号
+            recordEntity.setParallel(1);//并行数量
+            list.add(recordEntity);
+            successList.put(num+":"+cells.get(taskCodeIndex).getValue().toString(),"成功");
+            log.info("设备使用记录index:{}",num);
+            num = num+1;
+        }
+        log.info("仪器设备使用记录导入失败记录条数:{}", failList.size());
+        log.info("仪器设备使用记录导入失败记录:{}", JSON.toJSONString(failList));
+        log.info("仪器设备使用记录导入成功记录条数:{}", successList.size());
+        log.info("仪器设备使用记录导入成功记录:{}", JSON.toJSONString(successList));
+        instrumentRecordEntityMapper.batchInsert(list);
+        return ResultUtil.success("导入成功");
+    }
 
+    /**
+     * 导入设备使用记录
+     * @return
+     */
+    @PostMapping("importRecord1")
+    public Result importRecord1() throws Exception{
+        Map<String,String> successList = new HashMap<>();
+        Map<String,String> failList = new HashMap<>();
+        //读取excel
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook("D:\\Users\\Administrator\\Desktop\\使用记录.xlsx");
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        //遍历excel，根据编号查询
+        int num = 2;
+        List<InstrumentRecordEntity> list = Lists.newArrayList();
+        List<Integer> integerList = Arrays.asList(421
+                ,302
+                ,310
+                ,285
+                ,304
+                ,423
+                ,291
+                ,289
+                ,296
+                ,309
+                ,6
+                ,419
+                ,294
+                ,288
+                ,301
+                ,286
+                ,306
+                ,420
+                ,290
+                ,299
+                ,292
+                ,297
+                ,422
+                ,308
+                ,303
+                ,307
+                ,295
+                ,424
+                ,287
+                ,300
+                ,298
+                ,305
+                ,311
+                ,293);
+        while (num <= 424) {
+            if (integerList.contains(num)){
+                InstrumentRecordEntity recordEntity = new InstrumentRecordEntity();
+                String deviceCodeIndex = "A" + num;
+                String taskCodeIndex = "B" + num;
+                String itemNameIndex = "C" + num;
+                String wdIndex = "D" + num;
+                String sdIndex = "E" + num;
+                String useStateIndex = "F" + num;
+                String beforeStateIndex = "G" + num;
+                String userIndex = "H" + num;
+                String starTimeIndex = "I" + num;
+                String endTimeIndex = "J" + num;
+                //根据设备编号查询设备id
+                LambdaQueryWrapper<TestInstrument> queryWrapper = new LambdaQueryWrapper<>();
+                String value = cells.get(deviceCodeIndex).getValue().toString();
+                queryWrapper.eq(TestInstrument::getCode, value);
+                List<TestInstrument> testInstruments = testInstrumentService.list(queryWrapper);
+                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(testInstruments)){
+                    recordEntity.setInstrumentId(Long.parseLong(testInstruments.get(0).getId() + ""));// 仪器id
+                }
+                recordEntity.setId(GenID.getID());// 记录id
+                //根据任务单号和参数名称获取检测项的id
+                List<Integer> itemsIds = taskService.selectList1(cells.get(taskCodeIndex).getValue().toString());
+                if (org.apache.commons.collections.CollectionUtils.isNotEmpty(itemsIds)){
+                    //判断参数名cells.get(itemNameIndex).getValue().toString()
+
+                    recordEntity.setEscRelId(Long.parseLong(itemsIds.get(0)+""));// 检测项主键
+                }
+                recordEntity.setType("试验使用");// 类型：试验使用
+                recordEntity.setStartTime(DateUtil.timeMinuteFormat(cells.get(starTimeIndex).getValue().toString()));// 开始时间
+                recordEntity.setEndTime(DateUtil.timeMinuteFormat(cells.get(endTimeIndex).getValue().toString()));
+                recordEntity.setTemperature(cells.get(wdIndex).getValue().toString());// 温度
+                recordEntity.setHumidity(cells.get(sdIndex).getValue().toString());// 湿度
+                recordEntity.setBeforeStatus(cells.get(useStateIndex).getValue().toString());// 使用前状态
+                recordEntity.setAfterStatus(cells.get(beforeStateIndex).getValue().toString());// 使用后状态
+                recordEntity.setUser(cells.get(userIndex).getValue().toString());// 操作人
+                recordEntity.setTime(new Date());
+                //根据任务单号获取任务id
+                Long taskId = taskService.getIdByCode(cells.get(taskCodeIndex).getValue().toString());
+                if (taskId != null){
+                    recordEntity.setTaskId(taskId);//任务id
+                }
+                recordEntity.setTaskCode(cells.get(taskCodeIndex).getValue().toString());//任务单号
+                recordEntity.setParallel(1);//并行数量
+                list.add(recordEntity);
+                successList.put(num+":"+cells.get(taskCodeIndex).getValue().toString(),"成功");
+                log.info("设备使用记录index:{}",num);
+                num = num+1;
+            }else {
+                num++;
+            }
+        }
+        log.info("待插入的使用记录:{}",JSON.toJSONString(list));
+        //instrumentRecordEntityMapper.batchInsert(list);
+        return ResultUtil.success("导入成功");
+    }
 }

@@ -560,7 +560,7 @@ public class TestInstrumentServiceImpl extends ServiceImpl<TestInstrumentDao, Te
         //设置二维码和logo
         //worksheet.getPictures().add(1,3,imageStrem,30,30);
         worksheet.getPictures().add(5,8,stream,18,18);
-        workbook.save("D:\\Users\\Administrator\\Desktop\\dev\\"+testInstrument.getCode()+"_"+testInstrument.getName()+"_"+testInstrument.getSerialNumber()+"_"+testInstrument.getId()+".xlsx", SaveFormat.XLSX);
+        workbook.save("D:\\Users\\Administrator\\Desktop\\dev\\"+testInstrument.getCode()+"_"+GenID.getID()+".xlsx", SaveFormat.XLSX);
     }
 }
 

@@ -1713,6 +1713,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         return out;
     }
 
+    @Override
     public OutputStream packagingWorkbookXls(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException {
         // 通过输入参数 返回 对应的处理成功的EXCEL数据。
         ServletOutputStream outputStream = response.getOutputStream();
@@ -2744,51 +2745,19 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         return ResultUtil.success("操作成功 " + " 任务单单号信息为 " + taskEntity.getTaskCode());
     }
 
-
-    /**
-     * 读取任务单模版数据并写入 document 中。
-     *
-     * @param taskMap              任务单数据
-     * @param daProductDictionarys 报告检测项模版数据
-     * @param document             报告附件
-     */
-    public void writeReportWorkbook(Map<Integer, Object> taskMap, List<CheckItemInfoVo> daProductDictionarys, com.aspose.cells.Workbook document) {
-        for (CheckItemInfoVo checkItemInfoVo : daProductDictionarys) {
-            List<String> strings = (List<String>) taskMap.get(checkItemInfoVo.getItemId());
-            if (CollectionUtil.isNotEmpty(strings)) {
-                String[] cordinateInformationArrays = checkItemInfoVo.getOpinion().split("\\,");
-                for (int i = 0; i < cordinateInformationArrays.length; i++) {
-                    String[] values = cordinateInformationArrays[i].split("\\&");
-                    Worksheet worksheet = document.getWorksheets().get(Integer.parseInt(values[0]));
-                    Cells cells = worksheet.getCells();
-                    cells.get(values[1]).setValue(strings.get(i));
-                    String valuez1 = (String) cells.get(values[1]).getValue();
-                    System.out.println("写入 == " + values[1] + " 在文件中内容为 " + valuez1);
-                }
-            }
-        }
+    @Override
+    public List<Integer> selectList(String taskCode, String itemName) {
+        return taskMapper.selectItemIds(taskCode,itemName);
     }
 
-    /**
-     * 读取 任务单中 excel 坐标中数据
-     *
-     * @param map
-     * @param taskCodeExcel
-     */
-    public void readTaskSingleModeData(Map<Integer, Object> map, com.aspose.cells.Workbook taskCodeExcel) {
+    @Override
+    public Long getIdByCode(String taskCode) {
+        return taskMapper.getIdByCode(taskCode);
+    }
 
-        Worksheet worksheet = taskCodeExcel.getWorksheets().get(0);
-        Cells cells = worksheet.getCells();
-        for (Integer key : map.keySet()) {
-            // 读取坐标集合
-            List<String> strings = (List<String>) map.get(key);
-            // 存储坐标值内容
-            List<String> values = new ArrayList<>();
-            for (String value : strings) {
-                values.add(cells.get(value).getStringValue());
-            }
-            map.put(key, values);
-        }
+    @Override
+    public List<Integer> selectList1(String toString) {
+        return null;
     }
 
     /**
@@ -2798,7 +2767,6 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
      * @param entrustId 委托单id
      * @param reportId  报告附件 Excel格式
      */
-    @Override
     public void storeReportInformation(Long reportId, Long entrustId, com.aspose.cells.Workbook document) {
 
         // 效验当前任务单 是否出具 客户端附件信息
@@ -2808,7 +2776,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         }
 
         // 读取 任务单附件 对应坐标值。
-        Map<Integer, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
 
         String url = urls.get(0);
         String[] strings = url.split("\\/");
@@ -2829,43 +2797,19 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 for (int i = 0; i < arrays.length; i++) {
                     stringList.add(arrays[i]);
                 }
-                map.put(data.getItemId(), stringList);
+                map.put(String.valueOf(data.getItemId()), stringList);
             }
-
-            // 1.1.3 读取 任务单中 excel 坐标中数据
-            readTaskSingleModeData(map, taskCodeExcel);
 
             // 2.1 读取任务单模版数据并写入 document 中。
 
             // 2.1.1 获取报告模版数据
-            // 通过委托单id 获取 检测项报告标识坐标信息
-            List<CheckItemInfoVo> daProductDictionarys = taskMapper.getDaProductDictionaryPosition(entrustId);
-            if (CollectionUtil.isEmpty(daProductDictionarys)) {
-                // 当前委托单中 样品中 产品id 与报告模版标识没有绑定
-                return;
-            }
 
-            // 标记
-            Boolean markers = false;
-            for (CheckItemInfoVo checkItemInfoVo : daProductDictionarys) {
-                if (CollectionUtil.isNotEmpty((Iterable<?>) map.get(checkItemInfoVo.getItemId()))) {
-                    markers = true;
-                }
-            }
-            if (!markers) {
-                // daProductDictionarys 记录表中 无 任务单附件信息
-                return;
-            }
-
-            // 读取任务单模版数据并写入 document 中。
-            writeReportWorkbook(map, daProductDictionarys, document);
-
-            inputStream.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
 
         }
+
+        // 进行设置
+
     }
 }

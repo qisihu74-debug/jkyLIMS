@@ -1,6 +1,5 @@
 package com.lims.manage.erp.controller;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.aspose.cells.Cells;
@@ -16,12 +15,10 @@ import com.lims.manage.erp.entity.ConclusionEntity;
 import com.lims.manage.erp.entity.EntrustEntity;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.entity.QiYueSuoReqBean;
-import com.lims.manage.erp.entity.QiYueSuoSeaLBean;
 import com.lims.manage.erp.entity.QrCodeAuthRes;
 import com.lims.manage.erp.entity.ReportEditReq;
 import com.lims.manage.erp.entity.ReportRecordEntity;
 import com.lims.manage.erp.entity.ReportResBean;
-import com.lims.manage.erp.entity.ReportTools;
 import com.lims.manage.erp.entity.ReqBean;
 import com.lims.manage.erp.entity.SealDefData;
 import com.lims.manage.erp.entity.SealEntity;
@@ -35,8 +32,13 @@ import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultEnum;
 import com.lims.manage.erp.result.ResultUtil;
-import com.lims.manage.erp.service.*;
-import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.service.AlertService;
+import com.lims.manage.erp.service.DeptService;
+import com.lims.manage.erp.service.EntrustService;
+import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.service.TaskService;
+import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.DownloadUtils;
 import com.lims.manage.erp.util.FileAndFolderUtil;
@@ -44,20 +46,15 @@ import com.lims.manage.erp.util.GenID;
 import com.lims.manage.erp.util.MinIoUtil;
 import com.lims.manage.erp.util.PDFHelper3;
 import com.lims.manage.erp.util.RedisUtil;
-import com.lims.manage.erp.util.RedisUtils;
-import com.lims.manage.erp.util.ReturnResponse;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.EntrustAddVo;
-import com.lims.manage.erp.vo.LabelValueVo;
 import com.lims.manage.erp.vo.ReportDetailListParamVo;
 import com.lims.manage.erp.vo.ReportDetailListVo;
 import com.lims.manage.erp.vo.ReportPreserveVo;
 import com.lims.manage.erp.vo.ReportProductRelVo;
-import com.lims.manage.erp.vo.TeamVo;
 import com.zhuozhengsoft.pageoffice.FileSaver;
 import com.zhuozhengsoft.pageoffice.OpenModeType;
 import com.zhuozhengsoft.pageoffice.PageOfficeCtrl;
-import com.zhuozhengsoft.pageoffice.excelwriter.Sheet;
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
@@ -65,22 +62,15 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.ibatis.annotations.Param;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.UsernamePasswordToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -89,8 +79,15 @@ import org.xmlpull.v1.XmlPullParserException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.math.BigDecimal;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
@@ -586,6 +583,37 @@ public class ReportController {
             logger.error("下载契约锁报告文档失败:{}",e);
         }
         return null;
+    }
+
+    /**
+     * 契约锁报告下载
+     * @return
+     */
+    @GetMapping("batchDownloadQysFile")
+    public Result batchDownloadQysFile() {
+        // 查询中交第一航务工程局有限公司兰太高速四标项目经理部
+        List<Long> stringList = entrustService.getIds();
+        String downloadPath = "D:\\Users\\Administrator\\My Document\\WeChat Files\\wxid_ry85h8s4iqzz21\\FileStorage\\File\\2024-10\\";
+
+        for (Long entrustId : stringList) {
+            List<ReportRecordEntity> list = reportService.getDetailByEntrustId1(entrustId);
+            if (CollectionUtils.isNotEmpty(list)){
+                for (ReportRecordEntity bean:list){
+                    byte[] bytes = reportService.downloadQysFile(entrustId, Long.parseLong(bean.getContractId()), "李路遥", "17698918131");
+                    String fileName = GenID.getID()+"-"+bean.getReportCode() + ".zip";
+                    File file = new File(downloadPath + fileName);
+                    try (FileOutputStream fos = new FileOutputStream(file)) {
+                        fos.write(bytes);
+                        fos.flush();
+                        fos.close();
+                        Thread.sleep(50L);
+                    } catch (Exception e) {
+                        log.error("下载契约锁报告文档失败: " + e.getMessage());
+                    }
+                }
+            }
+        }
+        return ResultUtil.success("文件下载成功");
     }
 
     /**

@@ -481,4 +481,6 @@ public interface ReportService {
     Boolean isExist(String reportCode);
 
     List<ReportRecordEntity> getEntrustIdsByIds(List<String> ids);
+
+    List<ReportRecordEntity> getDetailByEntrustId1(Long entrustId);
 }
