@@ -1743,17 +1743,37 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             String[] strings = url.split("\\/");
             String bluckName = strings[3];
             String fileName = strings[4];
-            InputStream fileStream = MinIoUtil.getFileStream(bluckName, fileName);
-            response.reset();
-            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            response.setContentType("application/x-msdownload");
+            String suffix = fileName.split("\\.")[1];
+            InputStream inputStream = MinIoUtil.getFileStream(bluckName, fileName);
+            //编码格式为UTF-8
             response.setCharacterEncoding("UTF-8");
+            //让服务器告诉浏览器它发送的数据属于excel文件类型
+            response.setContentType("application/octet-stream");
+
+            response.setHeader("Content-Transfer-Encoding", "binary");
+
+            //描述内容在传输过程中的编码格式，BINARY可能不止包含非ASCII字符，还可能不是一个短行（超过1000字符）。
+
+            response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+
+            //must-revalidate：强制页面不缓存，post-check=0, pre-check=0：0秒后，在显示给用户之前，该对象被选中进行更新过
+
+            response.setHeader("Pragma", "public");
+
+            //表示响应可能是任何缓存的，即使它只是通常是非缓存或可缓存的仅在非共享缓存中。
+
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
             try {
-                fileName = URLEncoder.encode(fileName, "UTF-8");
-                response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
-                OutputStream outputStream = response.getOutputStream();
-                IOUtils.copy(fileStream, outputStream);
-                fileStream.close();
+
+                // 获取响应输出流
+                ServletOutputStream outputStream = response.getOutputStream();
+                byte[] buffer = new byte[255];
+                int bytesRead = -1;
+                // 将文件内容写入响应输出流
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                inputStream.close();
                 outputStream.close();
             } catch (Exception e) {
                 log.error("下载附件异常");
@@ -2720,5 +2740,58 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         }
 
         return ResultUtil.success("操作成功 " + " 任务单单号信息为 " + taskEntity.getTaskCode());
+    }
+
+    /**
+     * 通过报告id 进行动态存储信息。
+     *
+     * @param reportId  报告id
+     * @param entrustId 委托单id
+     * @param reportId  报告附件 Excel格式
+     */
+    public void storeReportInformation(Long reportId, Long entrustId, com.aspose.cells.Workbook document) {
+
+        // 效验当前任务单 是否出具 客户端附件信息
+        List<String> urls = taskMapper.getTaskRecordUrl(null, entrustId);
+        if (CollectionUtil.isEmpty(urls)) {
+            return;
+        }
+
+        // 读取 任务单附件 对应坐标值。
+        Map<String, Object> map = new HashMap<>();
+
+        String url = urls.get(0);
+        String[] strings = url.split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        try {
+            // 获取任务单附件
+            InputStream inputStream = MinIoUtil.getFileStream(bluckName, fileName);
+            com.aspose.cells.Workbook taskCodeExcel = new com.aspose.cells.Workbook(inputStream);
+
+            // 1.1 读取表格中数值 da_template_item_position 通过委托单ID
+            List<CheckItemInfoVo> itemInfoVos = taskMapper.getCheckItemTemplateItemPosition(entrustId);
+
+            // 1.1.2 读取信息写入信息
+            for (CheckItemInfoVo data : itemInfoVos) {
+                List<String> stringList = new ArrayList<>();
+                String[] arrays = data.getOpinion().split("\\,");
+                for (int i = 0; i < arrays.length; i++) {
+                    stringList.add(arrays[i]);
+                }
+                map.put(String.valueOf(data.getItemId()), stringList);
+            }
+
+            // 2.1 读取任务单模版数据并写入 document 中。
+
+            // 2.1.1 获取报告模版数据
+
+
+        } catch (Exception e) {
+
+        }
+
+        // 进行设置
+
     }
 }

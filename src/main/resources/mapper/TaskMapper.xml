@@ -1822,13 +1822,31 @@
         LEFT JOIN test_task AS t2 ON t1.task_id = t2.id
         LEFT JOIN da_task_record as t3 ON t3.task_code = t2.task_code
         WHERE
-        t1.id IN
-        <foreach collection="array" item="id" open="(" close=")" separator=",">
-            #{id}
-        </foreach>
+        1=1
+        <if test="array !=null">
+            t1.id IN
+            <foreach collection="array" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="entrustId !=null">
+            and t2.entrustment_id = #{entrustId}
+        </if>
         and t1.task_id is not null
         and t3.url is not null
         GROUP BY t2.task_code
-
     </select>
+
+    <select id="getCheckItemTemplateItemPosition" resultType="com.lims.manage.erp.vo.CheckItemInfoVo">
+        SELECT
+            t2.product_id AS productId,
+            t2.item_id AS itemId,
+            t2.position AS opinion
+        FROM
+            test_entrusted_sample_checkitem_rel AS t1
+            LEFT JOIN da_template_item_position AS t2 ON t1.check_item_id = t2.item_id
+        WHERE
+            t1.entrust_id = #{entrustId}
+    </select>
+
 </mapper>

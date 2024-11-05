@@ -964,14 +964,21 @@ public class TaskController {
      */
     @RequestMapping("/batchDownloadOriginalRecord")
     public void batchDownloadOriginalRecord(@RequestBody TaskStatsVo taskStatsVo,HttpServletResponse response) throws IOException {
-        if(taskStatsVo.getIntegers().length==0||taskStatsVo.getIntegers()==null){
-            log.info("批量下载原始记录 integers = "+ taskStatsVo.getIntegers().toString());
+        if (taskStatsVo.getIntegers().length == 0 || taskStatsVo.getIntegers() == null) {
+            log.info("批量下载原始记录 integers = " + taskStatsVo.getIntegers().toString());
+        }
+        // 通过检测项id 获取对应任务单附件有 则下载就行 da_task_record 读取 URL
+        //  da_task_record 读取 URL 附件
+        List<String> urls = taskMapper.getTaskRecordUrl(taskStatsVo.getIntegers(), null);
+        if (CollectionUtil.isNotEmpty(urls)) {
+            // 下载附件即可
+            taskService.packagingUrlSWorkbookXls(urls, response);
         }
         // 效验 检测项url信息模板
         // 通过检测项id 获取 相应的 id关联信息。
         List<TaskIdEntity> dataEntitys = taskMapper.selectconditionId(taskStatsVo.getIntegers());
         // 判断 压缩数据=null 返回 null
-        if(!CollectionUtils.isEmpty(dataEntitys)) {
+        if (!CollectionUtils.isEmpty(dataEntitys) && CollectionUtil.isEmpty(urls)) {
             if (!CollectionUtils.isEmpty(dataEntitys)) {
                 // 处理条数 == 1 不需要zip打包
                 if (dataEntitys.size() == 1) {
@@ -1052,10 +1059,10 @@ public class TaskController {
 
                 // 通过检测项id 获取对应任务单附件有 则下载就行 da_task_record 读取 URL
                 //  da_task_record 读取 URL 附件
-                List<String> urls = taskMapper.getTaskRecordUrl(ids);
+                List<String> urls = taskMapper.getTaskRecordUrl(ids, null);
                 if (CollectionUtil.isNotEmpty(urls)) {
                     // 下载附件即可
-
+                    taskService.packagingUrlSWorkbookXls(urls, response);
                 }
 
                 // 下载原始记录模板

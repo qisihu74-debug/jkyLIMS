@@ -2685,6 +2685,7 @@ public class ReportServiceImpl implements ReportService {
         EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(id);
         logger.debug("本次报告总页数:{}", totalPageNew);
         setReportTop1(topDoc, entrustAddVo, reportRecordEntity, totalPageNew, entrustHistoryDetail);
+        // 塞入报告检测项数据
         //合并成一个excel
         Workbook document = workbookCopy(topDoc, map);
         //处理页码
