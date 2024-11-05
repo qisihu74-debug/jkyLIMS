@@ -556,7 +556,7 @@ public class AsposeUtil {
             inputStream = new FileInputStream(toFile);
             com.aspose.words.Document doc = new com.aspose.words.Document(inputStream);//加载源文件数据
             System.out.println("开始转换");
-            File fileDoc = new File(path);
+            File fileDoc = new File(pdfPath);
             OutputStream os = new FileOutputStream(fileDoc);
             doc.save(os, SaveFormat.PDF);//设置转换文件类型并转换
             //pdf数据流转excel
