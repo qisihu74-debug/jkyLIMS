@@ -335,4 +335,6 @@ public interface TaskService {
      * @return
      */
     Result getplugOperation(String olCode, String taskCode);
+
+    void storeReportInformation(Long reportId, Long entrustId, com.aspose.cells.Workbook document);
 }
