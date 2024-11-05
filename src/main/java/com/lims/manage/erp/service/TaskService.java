@@ -221,14 +221,25 @@ public interface TaskService {
 
     /**
      * 批量 通过或驳回
+     *
      * @return
      */
     String batchReview(TaskStatsVo taskStatsVo);
 
 
-    ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response,Long taskId) throws IOException;
+    ZipOutputStream packagingWorkbookZip(List<TaskIdEntity> dataEntitys, HttpServletResponse response, Long taskId) throws IOException;
 
     OutputStream packagingWorkbookXls(List<TaskIdEntity> dataEntitys, HttpServletResponse response) throws IOException;
+
+    /**
+     * 根据url 返回附件信息
+     *
+     * @param urls
+     * @param response
+     * @return
+     * @throws IOException
+     */
+    void packagingUrlSWorkbookXls(List<String> urls, HttpServletResponse response) throws IOException;
 
     /**
      * 检测询任务列表——并设置分页
@@ -236,7 +247,7 @@ public interface TaskService {
      * @param paramVo
      * @return
      */
-    PagingToolVo getTaskList(TaskListParamVo paramVo, String [] deptIds);
+    PagingToolVo getTaskList(TaskListParamVo paramVo, String[] deptIds);
 
     /**
      * 检测询任务列表——并设置分页-视图

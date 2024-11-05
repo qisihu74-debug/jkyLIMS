@@ -827,4 +827,21 @@ public interface TaskMapper extends BaseMapper {
             "\tWHERE\n" +
             "\t\ttask_code = #{taskCode}")
     Long getIdByCode(@Param("taskCode") String taskCode);
+
+    /**
+     * 通过检测项id 或委托单id 获取附件集合
+     *
+     * @param array 检测项id集合
+     * @param array 委托单id
+     * @return
+     */
+    List<String> getTaskRecordUrl(@Param(value = "array") Integer[] array, @Param(value = "entrustId") Long entrustId);
+
+    /**
+     * 通过委托单ID 获取 检测项坐标信息
+     *
+     * @param entrustId
+     * @return
+     */
+    List<CheckItemInfoVo> getCheckItemTemplateItemPosition(@Param(value = "entrustId") Long entrustId);
 }

@@ -511,7 +511,20 @@ public class HkController {
     @PostMapping("addtemporaryVisit")
     public Result addtemporaryVisit(@RequestBody HKPersonDoorProvisionalAuthorityRelEntity data) {
 
-        return hkDoorService.addtemporaryVisit(data);
+        if (data == null) {
+            return ResultUtil.error("缺少必填参数");
+        }
+        if (StringUtils.isEmpty(data.getLaboratoryMessage())) {
+            return ResultUtil.error("缺少必填参数");
+        }
+
+        try {
+            hkDoorService.addtemporaryVisit(data);
+        } catch (Exception e) {
+            return ResultUtil.error("授权失败");
+        }
+
+        return ResultUtil.error("授权失败");
     }
 
     /**
