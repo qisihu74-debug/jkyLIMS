@@ -803,4 +803,28 @@ public interface TaskMapper extends BaseMapper {
             "WHERE\n" +
             "\ttask_id = #{taskId}")
     List<Integer> getDistinctInstrumentIds(Long taskId);
+
+    @Select("SELECT DISTINCT\n" +
+            "\titem_id\n" +
+            "FROM\n" +
+            "\ttest_check_items_task_rel\n" +
+            "WHERE\n" +
+            "\tcheck_item_name LIKE CONCAT('%',#{itemName},'%')\n" +
+            "AND task_id = (\n" +
+            "\tSELECT\n" +
+            "\t\tid\n" +
+            "\tFROM\n" +
+            "\t\ttest_task\n" +
+            "\tWHERE\n" +
+            "\t\ttask_code = #{taskCode}\n" +
+            ")")
+    List<Integer> selectItemIds(@Param("taskCode") String taskCode, @Param("itemName") String itemName);
+
+    @Select("SELECT\n" +
+            "\t\tid\n" +
+            "\tFROM\n" +
+            "\t\ttest_task\n" +
+            "\tWHERE\n" +
+            "\t\ttask_code = #{taskCode}")
+    Long getIdByCode(@Param("taskCode") String taskCode);
 }

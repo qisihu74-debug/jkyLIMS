@@ -2693,4 +2693,14 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
 
         return ResultUtil.success("操作成功 " + " 任务单单号信息为 " + taskEntity.getTaskCode());
     }
+
+    @Override
+    public List<Integer> selectList(String taskCode, String itemName) {
+        return taskMapper.selectItemIds(taskCode,itemName);
+    }
+
+    @Override
+    public Long getIdByCode(String taskCode) {
+        return taskMapper.getIdByCode(taskCode);
+    }
 }
