@@ -2808,7 +2808,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
      * @param document 报告附件 Excel格式
      */
     @Override
-    public void storeReportInformation(int sampleId, com.aspose.cells.Workbook document) {
+    public void storeReportInformation(int sampleId, com.aspose.cells.Workbook document) throws Exception {
         PDFHelper3.getLicense();
         // 效验当前任务单 是否出具 客户端附件信息
         List<String> urls = taskMapper.getTaskRecordUrlBySampleId(sampleId);
@@ -2824,7 +2824,6 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         String[] strings = split[0].split("\\/");
         String bluckName = strings[3];
         String fileName = strings[4];
-        try {
             // 获取任务单附件
             InputStream inputStream = MinIoUtil.getFileStream(bluckName, fileName);
             com.aspose.cells.Workbook taskCodeExcel = new com.aspose.cells.Workbook(inputStream);
@@ -2871,10 +2870,6 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             writeReportWorkbook(map, daProductDictionarys, document);
 
             inputStream.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 

@@ -2447,7 +2447,12 @@ public class ReportServiceImpl implements ReportService {
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
             // 调用方法填充数据
-            taskService.storeReportInformation(conclusionEntity.getSampleId(), doc);
+            try {
+                taskService.storeReportInformation(conclusionEntity.getSampleId(), doc);
+            } catch (Exception e) {
+                log.error("调用方法填充数据：{}", e.getMessage());
+            }
+
             if (checkItemList != null) {
                 int size = doc.getWorksheets().getCount();
                 countMap.put(index, size);
