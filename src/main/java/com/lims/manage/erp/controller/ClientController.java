@@ -6,6 +6,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.DaTaskRecordService;
 import com.lims.manage.erp.util.AsposeUtil;
+import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.FileAndFolderUtil;
 import com.lims.manage.erp.util.MinIoUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class ClientController {
             //转换文档为xcel，保存
             String path = "";
             try {
-                path = AsposeUtil.doc2excel(file, "D:\\Users\\Administrator\\Desktop\\20241105需要导入lims仪器清单设备标签\\");
+                path = AsposeUtil.doc2excel(file, qiYueSuoEntity.getAutographPath());
             } catch (Exception e) {
                 flag = false;
                log.error("文件转换异常:{}",e.getMessage());
@@ -72,6 +73,7 @@ public class ClientController {
                     DaTaskRecord daTaskRecord = new DaTaskRecord();
                     daTaskRecord.setTaskCode(split[0]);
                     daTaskRecord.setUrl(url);
+                    daTaskRecord.setTime(DateUtil.getCurrentTime());
                     daTaskRecordService.save(daTaskRecord);
                     //删除临时pdf文件
                     FileAndFolderUtil.delete(path);
