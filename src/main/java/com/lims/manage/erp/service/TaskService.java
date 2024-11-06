@@ -341,4 +341,6 @@ public interface TaskService {
     Long getIdByCode(String toString);
 
     List<Integer> selectList1(String toString);
+
+    void storeReportInformation(Long reportId, Long entrustId, com.aspose.cells.Workbook document);
 }

@@ -844,4 +844,28 @@ public interface TaskMapper extends BaseMapper {
      * @return
      */
     List<CheckItemInfoVo> getCheckItemTemplateItemPosition(@Param(value = "entrustId") Long entrustId);
+
+    /**
+     * 通过委托单id 获取 检测项报告标识坐标信息
+     *
+     * @param entrustId
+     * @return
+     */
+    @Select("        SELECT\n" +
+            "            item_id as itemId,\n" +
+            "            ` report_item_position` as opinion \n" +
+            "        FROM\n" +
+            "            da_product_dictionary\n" +
+            "        WHERE\n" +
+            "            report_model_id IN (\n" +
+            "        SELECT\n" +
+            "            t3.id AS report_model_id\n" +
+            "        FROM\n" +
+            "            test_entrusted_sample_details_rel AS t1\n" +
+            "            LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id\n" +
+            "            LEFT JOIN test_report_template AS t3 ON t3.product_id = t2.product_id\n" +
+            "        WHERE\n" +
+            "            t1.entrustment_id = #{entrustId}\n" +
+            "            )")
+    List<CheckItemInfoVo> getDaProductDictionaryPosition(@Param(value = "entrustId") Long entrustId);
 }

@@ -57,6 +57,7 @@ import com.lims.manage.erp.mapper.*;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.ReportService;
+import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.util.AsposeUtil;
 import com.lims.manage.erp.util.ConvertUtil;
 import com.lims.manage.erp.util.DateUtil;
@@ -186,6 +187,10 @@ public class ReportServiceImpl implements ReportService {
     private DingNotifyUtils dingNotifyUtils;
     @Autowired
     private TestTaskOrderWorkingHoursScoreEntityMapper testTaskOrderWorkingHoursScoreEntityMapper;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private EntrustNoStrUtils entrustNoStrUtils;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -2694,7 +2699,9 @@ public class ReportServiceImpl implements ReportService {
         //合并成一个excel
         Workbook document = workbookCopy(topDoc, map);
         //处理页码
-        handlerPage(document, countMap,null);
+        handlerPage(document, countMap, null);
+        // 调用方法填充数据
+        taskService.storeReportInformation(reportRecordEntity.getId(), id, document);
         //上传合并完成的excel到服务器
         long name = GenID.getID();
         String path = qiYueSuoEntity.getAutographPath() + name + ".xlsx";
@@ -3416,7 +3423,7 @@ public class ReportServiceImpl implements ReportService {
         }
         //拆分委托编号
         if (!StringUtils.isEmpty(paramVo.getEntrustmentNostr())) {
-            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(paramVo.getEntrustmentNostr());
+            EntrustCategoryVo entrustCategoryVo = entrustNoStrUtils.splitEntrustNo(paramVo.getEntrustmentNostr());
             paramVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             if (entrustCategoryVo.getEntrustmentNo() != null) {
                 paramVo.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));

@@ -1,6 +1,8 @@
 package com.lims.manage.erp.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.aspose.cells.Cells;
+import com.aspose.cells.Worksheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.pagehelper.PageHelper;
@@ -14,15 +16,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.TaskService;
-import com.lims.manage.erp.util.AsposeUtil;
-import com.lims.manage.erp.util.Const;
-import com.lims.manage.erp.util.ConvertUtil;
-import com.lims.manage.erp.util.DateUtil;
-import com.lims.manage.erp.util.ExcelReplaceUtil;
-import com.lims.manage.erp.util.FileAndFolderUtil;
-import com.lims.manage.erp.util.GenID;
-import com.lims.manage.erp.util.MinIoUtil;
-import com.lims.manage.erp.util.ShiroUtils;
+import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -2759,14 +2753,61 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     }
 
     /**
+     * 读取任务单模版数据并写入 document 中。
+     *
+     * @param taskMap              任务单数据
+     * @param daProductDictionarys 报告检测项模版数据
+     * @param document             报告附件
+     */
+    public void writeReportWorkbook(Map<Integer, Object> taskMap, List<CheckItemInfoVo> daProductDictionarys, com.aspose.cells.Workbook document) {
+        for (CheckItemInfoVo checkItemInfoVo : daProductDictionarys) {
+            List<String> strings = (List<String>) taskMap.get(checkItemInfoVo.getItemId());
+            if (CollectionUtil.isNotEmpty(strings)) {
+                String[] cordinateInformationArrays = checkItemInfoVo.getOpinion().split("\\,");
+                for (int i = 0; i < cordinateInformationArrays.length; i++) {
+                    String[] values = cordinateInformationArrays[i].split("\\&");
+                    Worksheet worksheet = document.getWorksheets().get(Integer.parseInt(values[0]));
+                    Cells cells = worksheet.getCells();
+                    cells.get(values[1]).setValue(strings.get(i));
+                    String valuez1 = (String) cells.get(values[1]).getValue();
+                    System.out.println("写入 == " + values[1] + " 在文件中内容为 " + valuez1);
+                }
+            }
+        }
+    }
+
+    /**
+     * 读取 任务单中 excel 坐标中数据
+     *
+     * @param map
+     * @param taskCodeExcel
+     */
+    public void readTaskSingleModeData(Map<Integer, Object> map, com.aspose.cells.Workbook taskCodeExcel) {
+
+        Worksheet worksheet = taskCodeExcel.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        for (Integer key : map.keySet()) {
+            // 读取坐标集合
+            List<String> strings = (List<String>) map.get(key);
+            // 存储坐标值内容
+            List<String> values = new ArrayList<>();
+            for (String value : strings) {
+                values.add(cells.get(value).getStringValue());
+            }
+            map.put(key, values);
+        }
+    }
+
+    /**
      * 通过报告id 进行动态存储信息。
      *
      * @param reportId  报告id
      * @param entrustId 委托单id
      * @param reportId  报告附件 Excel格式
      */
+    @Override
     public void storeReportInformation(Long reportId, Long entrustId, com.aspose.cells.Workbook document) {
-
+        PDFHelper3.getLicense();
         // 效验当前任务单 是否出具 客户端附件信息
         List<String> urls = taskMapper.getTaskRecordUrl(null, entrustId);
         if (CollectionUtil.isEmpty(urls)) {
@@ -2774,10 +2815,11 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         }
 
         // 读取 任务单附件 对应坐标值。
-        Map<String, Object> map = new HashMap<>();
+        Map<Integer, Object> map = new HashMap<>();
 
         String url = urls.get(0);
-        String[] strings = url.split("\\/");
+        String[] split = url.split("\\?");
+        String[] strings = split[0].split("\\/");
         String bluckName = strings[3];
         String fileName = strings[4];
         try {
@@ -2795,19 +2837,43 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 for (int i = 0; i < arrays.length; i++) {
                     stringList.add(arrays[i]);
                 }
-                map.put(String.valueOf(data.getItemId()), stringList);
+                map.put(data.getItemId(), stringList);
             }
+
+            // 1.1.3 读取 任务单中 excel 坐标中数据
+            readTaskSingleModeData(map, taskCodeExcel);
 
             // 2.1 读取任务单模版数据并写入 document 中。
 
             // 2.1.1 获取报告模版数据
+            // 通过委托单id 获取 检测项报告标识坐标信息
+            List<CheckItemInfoVo> daProductDictionarys = taskMapper.getDaProductDictionaryPosition(entrustId);
+            if (CollectionUtil.isEmpty(daProductDictionarys)) {
+                // 当前委托单中 样品中 产品id 与报告模版标识没有绑定
+                return;
+            }
 
+            // 标记
+            Boolean markers = false;
+            for (CheckItemInfoVo checkItemInfoVo : daProductDictionarys) {
+                if (CollectionUtil.isNotEmpty((Iterable<?>) map.get(checkItemInfoVo.getItemId()))) {
+                    markers = true;
+                }
+            }
+            if (!markers) {
+                // daProductDictionarys 记录表中 无 任务单附件信息
+                return;
+            }
+
+            // 读取任务单模版数据并写入 document 中。
+            writeReportWorkbook(map, daProductDictionarys, document);
+
+            inputStream.close();
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
-
-        // 进行设置
-
     }
+
+
 }
