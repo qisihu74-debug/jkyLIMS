@@ -2446,6 +2446,8 @@ public class ReportServiceImpl implements ReportService {
             logger.debug("报告页数:{}", totalPageNew);
             //写入数据
             List<ReportRecordDetailEntity> checkItemList = getCheckInfoByRecordId(reportRecordEntity.getId());
+            // 调用方法填充数据
+            taskService.storeReportInformation(conclusionEntity.getSampleId(), doc);
             if (checkItemList != null) {
                 int size = doc.getWorksheets().getCount();
                 countMap.put(index, size);
@@ -2700,8 +2702,6 @@ public class ReportServiceImpl implements ReportService {
         Workbook document = workbookCopy(topDoc, map);
         //处理页码
         handlerPage(document, countMap, null);
-        // 调用方法填充数据
-        taskService.storeReportInformation(reportRecordEntity.getId(), id, document);
         //上传合并完成的excel到服务器
         long name = GenID.getID();
         String path = qiYueSuoEntity.getAutographPath() + name + ".xlsx";
