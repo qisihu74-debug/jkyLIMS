@@ -189,6 +189,8 @@ public class ReportServiceImpl implements ReportService {
     private TestTaskOrderWorkingHoursScoreEntityMapper testTaskOrderWorkingHoursScoreEntityMapper;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private EntrustNoStrUtils entrustNoStrUtils;
 
     @Override
     public List<ReportListVo> getReportList() {
@@ -3421,7 +3423,7 @@ public class ReportServiceImpl implements ReportService {
         }
         //拆分委托编号
         if (!StringUtils.isEmpty(paramVo.getEntrustmentNostr())) {
-            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(paramVo.getEntrustmentNostr());
+            EntrustCategoryVo entrustCategoryVo = entrustNoStrUtils.splitEntrustNo(paramVo.getEntrustmentNostr());
             paramVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             if (entrustCategoryVo.getEntrustmentNo() != null) {
                 paramVo.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));

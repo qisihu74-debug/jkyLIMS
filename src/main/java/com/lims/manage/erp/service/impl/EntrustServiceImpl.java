@@ -186,7 +186,9 @@ public class EntrustServiceImpl implements EntrustService {
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
     @Autowired
-    private  TestCheckItemsTaskRelMapper testCheckItemsTaskRelMapper;
+    private TestCheckItemsTaskRelMapper testCheckItemsTaskRelMapper;
+    @Autowired
+    private EntrustNoStrUtils entrustNoStrUtils;
 
     public static HttpHeaders getHttpHeaders(String fileName) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -2060,7 +2062,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         //拆分委托编号
         if(!StringUtils.isEmpty(entrustHistoryEntity.getEntrustmentNostr())){
-            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(entrustHistoryEntity.getEntrustmentNostr());
+            EntrustCategoryVo entrustCategoryVo = entrustNoStrUtils.splitEntrustNo(entrustHistoryEntity.getEntrustmentNostr());
             entrustHistoryEntity.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
                 entrustHistoryEntity.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
@@ -2158,7 +2160,7 @@ public class EntrustServiceImpl implements EntrustService {
         }
         //拆分委托编号
         if(!StringUtils.isEmpty(entrustHistoryEntity.getEntrustmentNostr())){
-            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(entrustHistoryEntity.getEntrustmentNostr());
+            EntrustCategoryVo entrustCategoryVo = entrustNoStrUtils.splitEntrustNo(entrustHistoryEntity.getEntrustmentNostr());
             entrustHistoryEntity.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
                 entrustHistoryEntity.setEntrustmentNo(String.valueOf(entrustCategoryVo.getEntrustmentNo()));
@@ -5105,39 +5107,35 @@ public class EntrustServiceImpl implements EntrustService {
     /**
      * 生成委托编号
      * 编号类别： null 常规原材试验、MN模拟试验、BD比对试验
-     * @param EntrustCategory 常规原材试验、模拟试验、比对试验
-     * @param acceptanceDate 受理时间：受理时间（202208）
-     *   受理时间（202208） if 当前月份有委托编号（2022080100）、往后跟委托编号（生成2022080101）
-     *        else 没有（null）(202208+1)则默认 2022080001
+     *
+     * @param entrustCategory 常规原材试验、模拟试验、比对试验
+     * @param acceptanceDate  受理时间：受理时间（202208）
+     *                        受理时间（202208） if 当前月份有委托编号（2022080100）、往后跟委托编号（生成2022080101）
+     *                        else 没有（null）(202208+1)则默认 2022080001
      * @return
      */
-    public EntrustCategoryVo returnEntrustCategoryVo(String EntrustCategory,String acceptanceDate) {
+    public EntrustCategoryVo returnEntrustCategoryVo(String entrustCategory, String acceptanceDate) {
         // 接收按类型返回数据
         EntrustCategoryVo data = new EntrustCategoryVo();
         // 入参
         String categoryType = null;
-        if(StringUtils.isEmpty(EntrustCategory)){
+        List<TestInitDataEntity> dataEntityList = taskMapper.selectEntrustBasis(15);
+        if (StringUtils.isEmpty(entrustCategory)) {
             // 常规原材试验或参数null
             PageHelper.clearPage();
-            data = entityMapper.selectEntrustMaxNo(categoryType,acceptanceDate);
-        }
-        else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("常规原材试验")){
-            // 常规原材试验或参数null
-            PageHelper.clearPage();
-            data = entityMapper.selectEntrustMaxNo(categoryType,acceptanceDate);
-        }
-        else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("模拟试验")){
-            categoryType = "MN";
-            PageHelper.clearPage();
-            data = entityMapper.selectEntrustMaxNo(categoryType,acceptanceDate);
-        }
-        else if(!StringUtils.isEmpty(EntrustCategory) && EntrustCategory.equals("比对试验")){
-            categoryType = "BD";
-            PageHelper.clearPage();
-            data = entityMapper.selectEntrustMaxNo(categoryType,acceptanceDate);
+            data = entityMapper.selectEntrustMaxNo(categoryType, acceptanceDate);
+        } else {
+            // 遍历委托单类别信息
+            for (TestInitDataEntity testInitDataEntity : dataEntityList) {
+                if (testInitDataEntity.getName().equals(entrustCategory)) {
+                    categoryType = testInitDataEntity.getRemark();
+                    PageHelper.clearPage();
+                    data = entityMapper.selectEntrustMaxNo(categoryType, acceptanceDate);
+                }
+            }
         }
         Integer code = 0;
-        if(!StringUtils.isEmpty(data)){
+        if (!StringUtils.isEmpty(data)) {
             if (data.getEntrustmentNo() != null && data.getEntrustmentNo() > 0) {
                 String substring = data.getEntrustmentNo().toString().substring(0, 6);
                 if (substring.equals(acceptanceDate)) {
@@ -5150,7 +5148,7 @@ public class EntrustServiceImpl implements EntrustService {
             }
             data.setEntrustmentNo(code);
             data.setEntrustCategoryType(categoryType);
-            data.setEntrustCategory((EntrustCategory!=null?EntrustCategory:"常规原材试验"));
+            data.setEntrustCategory((entrustCategory != null ? entrustCategory : "常规原材试验"));
         }
         else {
             // 重新赋值
@@ -5158,7 +5156,7 @@ public class EntrustServiceImpl implements EntrustService {
             code = Integer.parseInt(acceptanceDate + "0001");
             data1.setEntrustmentNo(code);
             data1.setEntrustCategoryType(categoryType);
-            data1.setEntrustCategory((EntrustCategory!=null?EntrustCategory:"常规原材试验"));
+            data1.setEntrustCategory((entrustCategory != null ? entrustCategory : "常规原材试验"));
             return data1;
         }
         return data;
@@ -5474,7 +5472,7 @@ public class EntrustServiceImpl implements EntrustService {
         List<TestEntrustedTaskRelVo> list = Lists.newArrayList();
         //拆分委托编号
         if(!StringUtils.isEmpty(testEntrustedTaskRelVo.getEntrustmentNostr())){
-            EntrustCategoryVo entrustCategoryVo = EntrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
+            EntrustCategoryVo entrustCategoryVo = entrustNoStrUtils.splitEntrustNo(testEntrustedTaskRelVo.getEntrustmentNostr());
             testEntrustedTaskRelVo.setEntrustCategoryType(entrustCategoryVo.getEntrustCategoryType());
             testEntrustedTaskRelVo.setEntrustNo(entrustCategoryVo.getEntrustmentNo().toString());
             if(!StringUtils.isEmpty(entrustCategoryVo.getEntrustmentNo())){
@@ -6223,9 +6221,10 @@ public class EntrustServiceImpl implements EntrustService {
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         // 获取委托单号
         SimpleDateFormat yyyyMMddHH_NOT_ = new SimpleDateFormat("yyyyMMdd");
-        Date acceptanceTime = new Date();
+//        Date acceptanceTime = new Date();
+        Date acceptanceTime = entrustDetails.getAcceptanceDate();
         StringBuffer stringBuffer1 = new StringBuffer();
-        stringBuffer1.append("委托id"+entrustId+"委托state="+entrustDetails.getState() +"委托单号"+ entrustDetails.getEntrustmentNo());
+        stringBuffer1.append("委托id" + entrustId + "委托state=" + entrustDetails.getState() + "委托单号" + entrustDetails.getEntrustmentNo());
         // 委托单 = 201 符合预委托单
         if (entrustDetails.getState() == 201) {
             //设置委托编号

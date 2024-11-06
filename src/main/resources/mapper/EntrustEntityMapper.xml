@@ -1474,42 +1474,36 @@
     <select id="selectEntrustMaxNo" resultType="com.lims.manage.erp.vo.EntrustCategoryVo">
     SELECT
 	entrustment_no AS entrustmentNo,
-	entrust_category_type AS entrustCategoryType,
-	entrust_category AS entrustCategory ,
-	IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) AS entrustmentNoStr
-    FROM
+        entrust_category_type AS entrustCategoryType,
+        entrust_category AS entrustCategory ,
+        IFNULL(CONCAT(entrust_category_type,entrustment_no),entrustment_no) AS entrustmentNoStr
+        FROM
         test_entrusted_info
-    WHERE
+        WHERE
         1 = 1
         <if test="categoryType == null">
-            and  entrust_category_type IS NULL
+            and entrust_category_type IS NULL
         </if>
-        <if test="categoryType != null and categoryType=='BD' ">
-            and entrust_category_type = "BD"
-        </if>
-        <if test="categoryType != null and categoryType=='MN' ">
-            and entrust_category_type = "MN"
+        <if test="categoryType != null and categoryType!='' ">
+            and entrust_category_type = #{categoryType}
         </if>
         and DATE_FORMAT(acceptance_date, '%Y%m')=#{acceptanceDate}
         and state != 201
-    ORDER BY
+        ORDER BY
         entrustment_no DESC
         LIMIT 1 FOR UPDATE;
     </select>
 
     <select id="getByDataEntrustMaxNo" resultType="com.lims.manage.erp.vo.EntrustAddVo">
         SELECT id,
-               entrustment_no
+        entrustment_no
         FROM test_entrusted_info
         WHERE entrustment_no = #{code}
         <if test="categoryType == null">
-            and  entrust_category_type IS NULL
+            and entrust_category_type IS NULL
         </if>
-        <if test="categoryType != null and categoryType=='BD' ">
-            and entrust_category_type = "BD"
-        </if>
-        <if test="categoryType != null and categoryType=='MN' ">
-            and entrust_category_type = "MN"
+        <if test="categoryType != null and categoryType!='' ">
+            and entrust_category_type = #{categoryType}
         </if>
         and state != 201
         LIMIT 1
