@@ -2768,9 +2768,11 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                     String[] values = cordinateInformationArrays[i].split("\\&");
                     Worksheet worksheet = document.getWorksheets().get(Integer.parseInt(values[0]));
                     Cells cells = worksheet.getCells();
-                    cells.get(values[1]).setValue(strings.get(i));
-                    String valuez1 = (String) cells.get(values[1]).getValue();
-                    System.out.println("写入 == " + values[1] + " 在文件中内容为 " + valuez1);
+                    // 判断 strings.get(i) 不为空 存储
+                    if (!StringUtils.isEmpty(strings.get(i))) {
+                        cells.get(values[1]).setValue(strings.get(i));
+                    }
+
                 }
             }
         }
@@ -2792,24 +2794,24 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             // 存储坐标值内容
             List<String> values = new ArrayList<>();
             for (String value : strings) {
-                values.add(cells.get(value).getStringValue());
+                String valueData = cells.get(value).getStringValue();
+                values.add(valueData);
             }
             map.put(key, values);
         }
     }
 
     /**
-     * 通过报告id 进行动态存储信息。
+     * 通过样品id 进行动态存储信息。
      *
-     * @param reportId  报告id
-     * @param entrustId 委托单id
-     * @param reportId  报告附件 Excel格式
+     * @param sampleId 样品id
+     * @param document 报告附件 Excel格式
      */
     @Override
-    public void storeReportInformation(Long reportId, Long entrustId, com.aspose.cells.Workbook document) {
+    public void storeReportInformation(int sampleId, com.aspose.cells.Workbook document) throws Exception {
         PDFHelper3.getLicense();
         // 效验当前任务单 是否出具 客户端附件信息
-        List<String> urls = taskMapper.getTaskRecordUrl(null, entrustId);
+        List<String> urls = taskMapper.getTaskRecordUrlBySampleId(sampleId);
         if (CollectionUtil.isEmpty(urls)) {
             return;
         }
@@ -2822,13 +2824,12 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         String[] strings = split[0].split("\\/");
         String bluckName = strings[3];
         String fileName = strings[4];
-        try {
             // 获取任务单附件
             InputStream inputStream = MinIoUtil.getFileStream(bluckName, fileName);
             com.aspose.cells.Workbook taskCodeExcel = new com.aspose.cells.Workbook(inputStream);
 
             // 1.1 读取表格中数值 da_template_item_position 通过委托单ID
-            List<CheckItemInfoVo> itemInfoVos = taskMapper.getCheckItemTemplateItemPosition(entrustId);
+            List<CheckItemInfoVo> itemInfoVos = taskMapper.getCheckItemTemplateItemPosition(sampleId);
 
             // 1.1.2 读取信息写入信息
             for (CheckItemInfoVo data : itemInfoVos) {
@@ -2846,8 +2847,8 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             // 2.1 读取任务单模版数据并写入 document 中。
 
             // 2.1.1 获取报告模版数据
-            // 通过委托单id 获取 检测项报告标识坐标信息
-            List<CheckItemInfoVo> daProductDictionarys = taskMapper.getDaProductDictionaryPosition(entrustId);
+            // 通过sampleId 获取 检测项报告标识坐标信息
+            List<CheckItemInfoVo> daProductDictionarys = taskMapper.getDaProductDictionaryPosition(sampleId);
             if (CollectionUtil.isEmpty(daProductDictionarys)) {
                 // 当前委托单中 样品中 产品id 与报告模版标识没有绑定
                 return;
@@ -2869,10 +2870,6 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             writeReportWorkbook(map, daProductDictionarys, document);
 
             inputStream.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 

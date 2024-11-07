@@ -1846,7 +1846,8 @@
             test_entrusted_sample_checkitem_rel AS t1
             LEFT JOIN da_template_item_position AS t2 ON t1.check_item_id = t2.item_id
         WHERE
-            t1.entrust_id = #{entrustId}
+            t1.sample_id = #{sampleId}
     </select>
+
 
 </mapper>

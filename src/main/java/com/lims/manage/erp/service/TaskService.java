@@ -342,5 +342,5 @@ public interface TaskService {
 
     List<Integer> selectList1(String toString);
 
-    void storeReportInformation(Long reportId, Long entrustId, com.aspose.cells.Workbook document);
+    void storeReportInformation(int sampleId, com.aspose.cells.Workbook document) throws Exception;
 }

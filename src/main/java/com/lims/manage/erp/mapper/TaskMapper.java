@@ -838,34 +838,54 @@ public interface TaskMapper extends BaseMapper {
     List<String> getTaskRecordUrl(@Param(value = "array") Integer[] array, @Param(value = "entrustId") Long entrustId);
 
     /**
-     * 通过委托单ID 获取 检测项坐标信息
+     * 通过样品id 获取 检测项坐标信息
      *
-     * @param entrustId
+     * @param sampleId 样品id
      * @return
      */
-    List<CheckItemInfoVo> getCheckItemTemplateItemPosition(@Param(value = "entrustId") Long entrustId);
+    List<CheckItemInfoVo> getCheckItemTemplateItemPosition(@Param(value = "sampleId") int sampleId);
 
     /**
-     * 通过委托单id 获取 检测项报告标识坐标信息
+     * 通过sampleId 获取 检测项报告标识坐标信息
      *
-     * @param entrustId
+     * @param sampleId
      * @return
      */
-    @Select("        SELECT\n" +
-            "            item_id as itemId,\n" +
-            "            ` report_item_position` as opinion \n" +
-            "        FROM\n" +
-            "            da_product_dictionary\n" +
-            "        WHERE\n" +
-            "            report_model_id IN (\n" +
-            "        SELECT\n" +
-            "            t3.id AS report_model_id\n" +
-            "        FROM\n" +
-            "            test_entrusted_sample_details_rel AS t1\n" +
-            "            LEFT JOIN test_sample AS t2 ON t1.sample_id = t2.id\n" +
-            "            LEFT JOIN test_report_template AS t3 ON t3.product_id = t2.product_id\n" +
-            "        WHERE\n" +
-            "            t1.entrustment_id = #{entrustId}\n" +
-            "            )")
-    List<CheckItemInfoVo> getDaProductDictionaryPosition(@Param(value = "entrustId") Long entrustId);
+    @Select("SELECT\n" +
+            "\titem_id AS itemId,\n" +
+            "\t` report_item_position` AS opinion \n" +
+            "FROM\n" +
+            "\tda_product_dictionary \n" +
+            "WHERE\n" +
+            "\treport_model_id IN (\n" +
+            "SELECT\n" +
+            "\tt2.template_id \n" +
+            "FROM\n" +
+            "\ttest_sample AS t1\n" +
+            "\tLEFT JOIN test_report_template_product_ref AS t2 ON t2.product_id = t1.product_id \n" +
+            "WHERE\n" +
+            "\tt1.id = #{sampleId} \n" +
+            "\t)")
+    List<CheckItemInfoVo> getDaProductDictionaryPosition(@Param(value = "sampleId") int sampleId);
+
+    /**
+     * 通过 sampleId 获取附件集合
+     *
+     * @param sampleId 样品id
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tt3.url \n" +
+            "FROM\n" +
+            "\ttest_entrusted_sample_checkitem_rel AS t1\n" +
+            "\tLEFT JOIN test_task AS t2 ON t1.task_id = t2.id\n" +
+            "\tLEFT JOIN da_task_record AS t3 ON t3.task_code = t2.task_code \n" +
+            "WHERE\n" +
+            "\t1 = 1 \n" +
+            "\tAND t1.sample_id = #{sampleId} \n" +
+            "\tAND t1.task_id IS NOT NULL \n" +
+            "\tAND t3.url IS NOT NULL \n" +
+            "GROUP BY\n" +
+            "\tt2.task_code")
+    List<String> getTaskRecordUrlBySampleId(@Param(value = "sampleId") int sampleId);
 }
