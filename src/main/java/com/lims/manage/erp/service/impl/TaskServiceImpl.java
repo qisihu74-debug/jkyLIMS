@@ -1730,30 +1730,29 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
         return outputStream;
     }
 
-    public void packagingUrlSWorkbookXls(List<String> urls, HttpServletResponse response) throws IOException {
+    public OutputStream packagingUrlSWorkbookXls(List<String> urls, HttpServletResponse response) throws IOException {
 
         // 通过检测项id 获取 相应的 id关联信息。
-        for (int i = 0; i < urls.size(); i++) {
-            String url = urls.get(i);
-            String[] strings = url.split("\\/");
-            String bluckName = strings[3];
-            String fileName = strings[4];
-            String suffix = fileName.split("\\.")[1];
-            InputStream inputStream = MinIoUtil.getFileStream(bluckName, fileName);
-            //编码格式为UTF-8
-            response.setCharacterEncoding("UTF-8");
-            //让服务器告诉浏览器它发送的数据属于excel文件类型
-            response.setContentType("application/octet-stream");
+        String url = urls.get(0);
+        String[] strings = url.split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        String suffix = fileName.split("\\.")[1];
+        InputStream inputStream = MinIoUtil.getFileStream(bluckName, fileName);
+        //编码格式为UTF-8
+        response.setCharacterEncoding("UTF-8");
+        //让服务器告诉浏览器它发送的数据属于excel文件类型
+        response.setContentType("application/octet-stream");
 
-            response.setHeader("Content-Transfer-Encoding", "binary");
+        response.setHeader("Content-Transfer-Encoding", "binary");
 
-            //描述内容在传输过程中的编码格式，BINARY可能不止包含非ASCII字符，还可能不是一个短行（超过1000字符）。
+        //描述内容在传输过程中的编码格式，BINARY可能不止包含非ASCII字符，还可能不是一个短行（超过1000字符）。
 
-            response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+        response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
 
-            //must-revalidate：强制页面不缓存，post-check=0, pre-check=0：0秒后，在显示给用户之前，该对象被选中进行更新过
+        //must-revalidate：强制页面不缓存，post-check=0, pre-check=0：0秒后，在显示给用户之前，该对象被选中进行更新过
 
-            response.setHeader("Pragma", "public");
+        response.setHeader("Pragma", "public");
 
             //表示响应可能是任何缓存的，即使它只是通常是非缓存或可缓存的仅在非共享缓存中。
 
@@ -1770,10 +1769,11 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 }
                 inputStream.close();
                 outputStream.close();
+                return outputStream;
             } catch (Exception e) {
                 log.error("下载附件异常");
             }
-        }
+        return null;
     }
 
     /**
