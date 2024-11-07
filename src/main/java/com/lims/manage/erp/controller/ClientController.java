@@ -1,5 +1,6 @@
 package com.lims.manage.erp.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lims.manage.erp.entity.DaTaskRecord;
 import com.lims.manage.erp.entity.QiYueSuoEntity;
 import com.lims.manage.erp.result.Result;
@@ -50,6 +51,15 @@ public class ClientController {
     public Result receiveFile(MultipartFile file){
         Boolean flag = true;
         if (file != null){
+            //判断文件是否已存在
+            String[] split = file.getOriginalFilename().split("\\.");
+            String code = split[0];
+            LambdaQueryWrapper<DaTaskRecord> queryWrapper = new LambdaQueryWrapper();
+            queryWrapper.eq(DaTaskRecord::getTaskCode,code);
+            DaTaskRecord one = daTaskRecordService.getOne(queryWrapper);
+            if (one != null){
+                return ResultUtil.error("file already exist!");
+            }
             //转换文档为xcel，保存
             String path = "";
             try {
@@ -69,9 +79,9 @@ public class ClientController {
                     String upload = MinIoUtil.upload("device-file",fileName ,inputStream,null );
                     String[] fileUrls = upload.split("\\?");
                     String url = fileUrls[0];
-                    String[] split = file.getOriginalFilename().split("\\.");
+
                     DaTaskRecord daTaskRecord = new DaTaskRecord();
-                    daTaskRecord.setTaskCode(split[0]);
+                    daTaskRecord.setTaskCode(code);
                     daTaskRecord.setUrl(url);
                     daTaskRecord.setTime(DateUtil.getCurrentTime());
                     daTaskRecordService.save(daTaskRecord);
