@@ -31,6 +31,7 @@ import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -1287,15 +1288,41 @@ public class EntrustController {
     @GetMapping("entrustApproved")
     public Result entrustApproved(Long entrustId) {
         // 委托单id = null 返回失败
-        if(org.springframework.util.StringUtils.isEmpty(entrustId)){
+        if (org.springframework.util.StringUtils.isEmpty(entrustId)) {
             return ResultUtil.error("委托单id不能为空");
         }
         // 审核发布-审核通过
-        return entrustService.entrustApproved(entrustId ,1);
+        return entrustService.entrustApproved(entrustId, 1);
+    }
+
+    /**
+     * 批量：审核发布-审核通过
+     *
+     * @param ids
+     * @return
+     */
+    @Log(title = "批量：审核委托单通过", businessType = BusinessType.OTHER)
+    @GetMapping("batchEntrustApproved")
+    public Result batchEntrustApproved(@Param("ids") Long[] ids) {
+
+        // 委托单id = null 返回失败
+        if (ids == null || ids.length == 0) {
+            return ResultUtil.error("委托单id不能为空");
+        }
+
+        for (Long entrustId : ids) {
+            // 审核发布-审核通过
+            Result result = entrustService.entrustApproved(entrustId, 1);
+            if (result.getCode() == null) {
+                return result;
+            }
+        }
+        return ResultUtil.success("审核通过");
     }
 
     /**
      * 审核并发布
+     *
      * @param entity
      * @return
      */

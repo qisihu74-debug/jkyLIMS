@@ -5974,7 +5974,7 @@ public class EntrustServiceImpl implements EntrustService {
             return ResultUtil.error("审核失败：委托单已驳回");
         }
         if (entrustDetails.getState() == 1) {
-            return ResultUtil.error("审核失败：委托单已发布成功");
+            return ResultUtil.error(entrustDetails.getEntrustmentNostr() + "审核失败：委托单已发布成功");
         }
 //        if (entrustDetails.getState() == 0 && state == 1) {
 //            return ResultUtil.error("审核失败：委托单已审核通过");

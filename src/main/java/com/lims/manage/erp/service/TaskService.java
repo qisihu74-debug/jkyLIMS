@@ -239,7 +239,7 @@ public interface TaskService {
      * @return
      * @throws IOException
      */
-    void packagingUrlSWorkbookXls(List<String> urls, HttpServletResponse response) throws IOException;
+    OutputStream packagingUrlSWorkbookXls(List<String> urls, HttpServletResponse response) throws IOException;
 
     /**
      * 检测询任务列表——并设置分页
