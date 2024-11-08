@@ -19,6 +19,7 @@ import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestInstrumentService;
 import com.lims.manage.erp.util.DateUtil;
 import com.lims.manage.erp.util.GenID;
+import com.lims.manage.erp.util.LevenshteinDistance;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -446,11 +447,25 @@ public class AppTestInstrumentController {
                 }
                 recordEntity.setId(GenID.getID());// 记录id
                 //根据任务单号和参数名称获取检测项的id
-                List<Integer> itemsIds = taskService.selectList1(cells.get(taskCodeIndex).getValue().toString());
+                List<TaskStatsItemVo> itemsIds = taskService.selectList1(cells.get(taskCodeIndex).getValue().toString());
+                Map<Integer,Double> map = new HashMap();
                 if (org.apache.commons.collections.CollectionUtils.isNotEmpty(itemsIds)){
-                    //判断参数名cells.get(itemNameIndex).getValue().toString()
-
-                    recordEntity.setEscRelId(Long.parseLong(itemsIds.get(0)+""));// 检测项主键
+                    //判断参数名cells.get(itemNameIndex).getValue().toString()与结果集中的相似度
+                    String key = cells.get(itemNameIndex).getValue().toString();
+                    for (TaskStatsItemVo itemVo :itemsIds){
+                        //判断相似度最高的参数id
+                        double ratio = LevenshteinDistance.similarityRatio(key, itemVo.getCheckItemName());
+                        map.put(itemVo.getItemId(),ratio);
+                    }
+                    //获取map值最大的key
+                    Map.Entry<Integer, Double> maxEntry = null;
+                    for (Map.Entry<Integer, Double> entry : map.entrySet()) {
+                        if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
+                            maxEntry = entry;
+                        }
+                    }
+                    Integer integer = maxEntry.getKey();
+                    recordEntity.setEscRelId(Long.parseLong(integer+""));// 检测项主键
                 }
                 recordEntity.setType("试验使用");// 类型：试验使用
                 recordEntity.setStartTime(DateUtil.timeMinuteFormat(cells.get(starTimeIndex).getValue().toString()));// 开始时间
@@ -477,7 +492,7 @@ public class AppTestInstrumentController {
             }
         }
         log.info("待插入的使用记录:{}",JSON.toJSONString(list));
-        //instrumentRecordEntityMapper.batchInsert(list);
+        instrumentRecordEntityMapper.batchInsert(list);
         return ResultUtil.success("导入成功");
     }
 }
