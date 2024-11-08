@@ -51,7 +51,7 @@ public class AppTestInstrumentServiceImpl implements AppTestInstrumentService {
 
     @Override
     public List<TaskListVo> detectionTaskList(String search, Long userId) {
-        return taskMapper.detectionTaskList(search, userId);
+        return taskMapper.detectionExcludeReceiveTimeTaskList(search, userId);
     }
 
     @Override

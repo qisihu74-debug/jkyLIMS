@@ -508,17 +508,22 @@ public interface TaskMapper extends BaseMapper {
             "\ttest_entrusted_sample_checkitem_rel \n" +
             "WHERE\n" +
             "\ttask_id = #{taskId}")
-    List<CheckItemInfoVo> getEntrustItemVos(@Param("taskId")Long taskId);
+    List<CheckItemInfoVo> getEntrustItemVos(@Param("taskId") Long taskId);
 
     /**
      * 新增检测任务列表 (根据检测人id 返回待任务单检测列表)
      */
-    List<TaskListVo> detectionTaskList(@Param("search")String search,@Param("userId")Long userId );
+    List<TaskListVo> detectionTaskList(@Param("search") String search, @Param("userId") Long userId);
+
+    /**
+     * 新增检测任务列表 (根据检测人id 返回待任务单检测列表) -- 排除 AND t1.receive_time IS NOT NULL and  <![CDATA[ t1.state < 4 ]]>
+     */
+    List<TaskListVo> detectionExcludeReceiveTimeTaskList(@Param("search") String search, @Param("userId") Long userId);
 
     /**
      * 当前任务列表 (根据设备id 返回列表)
      */
-    List<TaskListVo> taskList(@Param("search")String search,@Param("instrumentId")Long instrumentId );
+    List<TaskListVo> taskList(@Param("search") String search, @Param("instrumentId") Long instrumentId);
 
     List<TaskListParamVo> getUserSignatureUrls(@Param("list") List<Long> list);
 
