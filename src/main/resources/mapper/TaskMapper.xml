@@ -1869,6 +1869,7 @@
             LEFT JOIN da_template_item_position AS t2 ON t1.check_item_id = t2.item_id
         WHERE
             t1.sample_id = #{sampleId}
+            and t2.position is not null
     </select>
 
 
