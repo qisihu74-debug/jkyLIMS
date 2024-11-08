@@ -2748,8 +2748,8 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
     }
 
     @Override
-    public List<Integer> selectList1(String toString) {
-        return null;
+    public List<TaskStatsItemVo> selectList1(String taskCode) {
+        return taskMapper.selectItemIds1(taskCode);
     }
 
     /**

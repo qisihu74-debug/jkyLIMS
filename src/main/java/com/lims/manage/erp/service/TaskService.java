@@ -340,7 +340,7 @@ public interface TaskService {
 
     Long getIdByCode(String toString);
 
-    List<Integer> selectList1(String toString);
+    List<TaskStatsItemVo> selectList1(String toString);
 
     void storeReportInformation(int sampleId, com.aspose.cells.Workbook document) throws Exception;
 }

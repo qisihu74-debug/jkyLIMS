@@ -820,6 +820,20 @@ public interface TaskMapper extends BaseMapper {
             ")")
     List<Integer> selectItemIds(@Param("taskCode") String taskCode, @Param("itemName") String itemName);
 
+    @Select("SELECT DISTINCT\n" +
+            "\titem_id,check_item_name\n" +
+            "FROM\n" +
+            "\ttest_check_items_task_rel\n" +
+            "\tWHERE task_id = (\n" +
+            "\tSELECT\n" +
+            "\t\tid\n" +
+            "\tFROM\n" +
+            "\t\ttest_task\n" +
+            "\tWHERE\n" +
+            "\t\ttask_code = #{taskCode}\n" +
+            ")")
+    List<TaskStatsItemVo> selectItemIds1(@Param("taskCode") String taskCode);
+
     @Select("SELECT\n" +
             "\t\tid\n" +
             "\tFROM\n" +
