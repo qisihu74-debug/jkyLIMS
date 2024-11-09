@@ -872,7 +872,7 @@
 
     <select id="getOtherMaxCodeZX" resultType="java.lang.Integer">
         SELECT
-            MAX( SUBSTR( report_code FROM 12 )+0 )
+            MAX( SUBSTR( report_code FROM #{subLen} )+0 )
         FROM
             test_report_record
         WHERE
@@ -920,7 +920,7 @@
 
     <select id="getOtherMaxCodeMidZX" resultType="java.lang.Integer">
         SELECT
-            MAX( SUBSTR( report_code FROM 12 )+0 )
+            MAX( SUBSTR( report_code FROM #{subLen} )+0 )
         FROM
             test_report_record_mid
         WHERE

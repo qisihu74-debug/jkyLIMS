@@ -866,4 +866,7 @@ public interface EntrustEntityMapper extends BaseMapper {
             "AND entrust_people = '雷思豪'\n" +
             "AND state = 200")
     List<Long> getIds();
+
+    @Select("SELECT remark FROM test_init_data where type = #{num} AND `name`= #{entrustCategoryType} ")
+    Integer getLenByType(@Param("num") int num, @Param("entrustCategoryType") String entrustCategoryType);
 }

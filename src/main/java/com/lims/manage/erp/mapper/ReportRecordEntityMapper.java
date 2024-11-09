@@ -193,7 +193,7 @@ public interface ReportRecordEntityMapper {
      * @param type
      * @return
      */
-    Integer getOtherMaxCodeZX(String year,String type);
+    Integer getOtherMaxCodeZX(String year,String type,Integer subLen);
 
     /**
      * 获取委托编号类别
@@ -217,7 +217,7 @@ public interface ReportRecordEntityMapper {
      * @return
      */
     Integer getOtherMaxCodeMid(String year,String code,String type);
-    Integer getOtherMaxCodeMidZX(String year,String type);
+    Integer getOtherMaxCodeMidZX(String year,String type,Integer subLen);
 
     /**
      * 根据委托单id查询所用报告模板名称
