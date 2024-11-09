@@ -21,7 +21,6 @@ import com.lims.manage.erp.vo.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jxls.transformer.XLSTransformer;
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -51,9 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URLEncoder;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipOutputStream;
@@ -2834,11 +2831,15 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             // 1.1.2 读取信息写入信息
             for (CheckItemInfoVo data : itemInfoVos) {
                 List<String> stringList = new ArrayList<>();
-                String[] arrays = data.getOpinion().split("\\,");
-                for (int i = 0; i < arrays.length; i++) {
-                    stringList.add(arrays[i]);
+
+                if (!StringUtils.isEmpty(data.getOpinion())) {
+                    String[] arrays = data.getOpinion().split("\\,");
+                    for (int i = 0; i < arrays.length; i++) {
+                        stringList.add(arrays[i]);
+                    }
+                    map.put(data.getItemId(), stringList);
                 }
-                map.put(data.getItemId(), stringList);
+
             }
 
             // 1.1.3 读取 任务单中 excel 坐标中数据
