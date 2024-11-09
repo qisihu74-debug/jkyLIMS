@@ -185,7 +185,7 @@ public interface ReportRecordEntityMapper {
      * @param type
      * @return
      */
-    Integer getOtherMaxCode(String year,String code,String type);
+    Integer getOtherMaxCode(Integer subLen,String year,String code,String type);
 
     /**
      * 查询MN,BD类型的最大编号
@@ -193,7 +193,7 @@ public interface ReportRecordEntityMapper {
      * @param type
      * @return
      */
-    Integer getOtherMaxCodeZX(String year,String type,Integer subLen);
+    Integer getOtherMaxCodeZX(Integer subLen,String year,String type);
 
     /**
      * 获取委托编号类别
@@ -216,8 +216,8 @@ public interface ReportRecordEntityMapper {
      * @param type
      * @return
      */
-    Integer getOtherMaxCodeMid(String year,String code,String type);
-    Integer getOtherMaxCodeMidZX(String year,String type,Integer subLen);
+    Integer getOtherMaxCodeMid(Integer subLen,String year,String code,String type);
+    Integer getOtherMaxCodeMidZX(Integer subLen,String year,String type);
 
     /**
      * 根据委托单id查询所用报告模板名称

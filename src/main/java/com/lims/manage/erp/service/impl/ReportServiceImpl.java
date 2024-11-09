@@ -773,10 +773,18 @@ public class ReportServiceImpl implements ReportService {
         String year = sdf.format(new Date());
         //判断委托编号类型
         String entrustCategoryType = recordEntityMapper.getEntrustCategoryType(entrustId);
+        //查询字典
+        Integer subLen = 13;
+        if ("CNAS".equals(entrustCategoryType)){
+            subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
+        }
+        if ("CMA".equals(entrustCategoryType)){
+            subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
+        }
         if (entrustCategoryType != null) {
-            Integer maxCode = recordEntityMapper.getOtherMaxCode(year, topDepartmentCode, entrustCategoryType);
+            Integer maxCode = recordEntityMapper.getOtherMaxCode(subLen,year, topDepartmentCode, entrustCategoryType);
             if (maxCode != null) {
-                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMid(year, topDepartmentCode, entrustCategoryType);
+                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMid(subLen,year, topDepartmentCode, entrustCategoryType);
                 if (maxCodeMid != null && maxCode < maxCodeMid) {
                     maxCode = maxCodeMid;
                 }
@@ -856,9 +864,9 @@ public class ReportServiceImpl implements ReportService {
             subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
         }
         if (entrustCategoryType != null) {//MN或BD
-            Integer maxCode = recordEntityMapper.getOtherMaxCodeZX(year, entrustCategoryType,subLen);//先查最终报告
+            Integer maxCode = recordEntityMapper.getOtherMaxCodeZX(subLen,year, entrustCategoryType);//先查最终报告
             if (maxCode != null) {//再查中间报告
-                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMidZX(year, entrustCategoryType,subLen);
+                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMidZX(subLen,year, entrustCategoryType);
                 if (maxCodeMid != null && maxCode < maxCodeMid) {//小于中间报告的报告号
                     maxCode = maxCodeMid;//用中间报告里面的最大号
                 }
@@ -929,9 +937,17 @@ public class ReportServiceImpl implements ReportService {
         //判断委托编号类型
         String entrustCategoryType = null;
         if (entrustCategoryType != null) {
-            Integer maxCode = recordEntityMapper.getOtherMaxCode(year, topDepartmentCode, entrustCategoryType);
+            //查询字典
+            Integer subLen = 13;
+            if ("CNAS".equals(entrustCategoryType)){
+                subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
+            }
+            if ("CMA".equals(entrustCategoryType)){
+                subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
+            }
+            Integer maxCode = recordEntityMapper.getOtherMaxCode(subLen,year, topDepartmentCode, entrustCategoryType);
             if (maxCode != null) {
-                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMid(year, topDepartmentCode, entrustCategoryType);
+                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMid(subLen,year, topDepartmentCode, entrustCategoryType);
                 if (maxCodeMid != null && maxCode < maxCodeMid) {
                     maxCode = maxCodeMid;
                 }
