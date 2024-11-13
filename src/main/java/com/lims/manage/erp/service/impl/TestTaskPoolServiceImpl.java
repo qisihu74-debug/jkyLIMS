@@ -2527,67 +2527,80 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
     }
 
+    /**
+     * 整理map 数据
+     *
+     * @param taskOrderWorkingHours
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void addTaskOrderWorkingHours1(TestTaskOrderWorkingHours taskOrderWorkingHours) {
+    public List<TestTaskOrderWorkingHours> addTaskOrderWorkingHours1(TestTaskOrderWorkingHours taskOrderWorkingHours) {
 
+        List<TestTaskOrderWorkingHours> zongTaskWorkingHorusList = new ArrayList<>();
 
 //        // 0、
-//        taskOrderWorkingHours.setUserName("杨波");
-//        taskOrderWorkingHours.setUserId(1654681210551117L);
-//        taskOrderWorkingHours.setDetectionType("签发人");
-//        taskOrderWorkingHours.setProportion("16.84");
-//        taskOrderWorkingHours.setId(null);
-//        // 调用方法： 对每组检测项的人员信息进行新增。
-//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        taskOrderWorkingHours.setUserName("杨波");
+        taskOrderWorkingHours.setUserId(1654681210551117L);
+        taskOrderWorkingHours.setDetectionType("签发人");
+        taskOrderWorkingHours.setProportion("15.5");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data0 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data0);
+
 //        // 1、
-//        taskOrderWorkingHours.setUserName("刘秋芳");
-//        taskOrderWorkingHours.setUserId(1654681099998115L);
-//        taskOrderWorkingHours.setDetectionType("检测人员、记录人员");
-//        taskOrderWorkingHours.setProportion("16.34");
-//        taskOrderWorkingHours.setId(null);
-//        // 调用方法： 对每组检测项的人员信息进行新增。
-//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        taskOrderWorkingHours.setUserName("刘秋芳");
+        taskOrderWorkingHours.setUserId(1654681099998115L);
+        taskOrderWorkingHours.setDetectionType("检测人员、记录人员");
+        taskOrderWorkingHours.setProportion("15");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data1 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data1);
+
 //        // 2、
-//        taskOrderWorkingHours.setUserName("于胜楠");
-//        taskOrderWorkingHours.setUserId(4739625864645518L);
-//        taskOrderWorkingHours.setDetectionType("报告制作人");
-//        taskOrderWorkingHours.setProportion("15.84");
-//        taskOrderWorkingHours.setId(null);
-//        // 调用方法： 对每组检测项的人员信息进行新增。
-//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
-//
+        taskOrderWorkingHours.setUserName("于胜楠");
+        taskOrderWorkingHours.setUserId(4739625864645518L);
+        taskOrderWorkingHours.setDetectionType("报告制作人");
+        taskOrderWorkingHours.setProportion("13.5");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data2 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data2);
+
 //        // 3、
-//        taskOrderWorkingHours.setUserName("王巧利");
-//        taskOrderWorkingHours.setUserId(4573649232290487L);
-//        taskOrderWorkingHours.setDetectionType("检测人员");
-//        taskOrderWorkingHours.setProportion("15.34");
-//        taskOrderWorkingHours.setId(null);
-//        // 调用方法： 对每组检测项的人员信息进行新增。
-//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        taskOrderWorkingHours.setUserName("王巧利");
+        taskOrderWorkingHours.setUserId(4573649232290487L);
+        taskOrderWorkingHours.setDetectionType("检测人员");
+        taskOrderWorkingHours.setProportion("15");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data3 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data3);
+
 //        // 4、
-//        taskOrderWorkingHours.setUserName("高贯奇");
-//        taskOrderWorkingHours.setUserId(1652365586151107L);
-//        taskOrderWorkingHours.setDetectionType("检测人员");
-//        taskOrderWorkingHours.setProportion("14.84");
-//        taskOrderWorkingHours.setId(null);
-//        // 调用方法： 对每组检测项的人员信息进行新增。
-//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        taskOrderWorkingHours.setUserName("高贯奇");
+        taskOrderWorkingHours.setUserId(1652365586151107L);
+        taskOrderWorkingHours.setDetectionType("检测人员");
+        taskOrderWorkingHours.setProportion("13.5");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data4 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data4);
+
 //        // 5、
-//        taskOrderWorkingHours.setUserName("崔路伟");
-//        taskOrderWorkingHours.setUserId(1654682006912103L);
-//        taskOrderWorkingHours.setDetectionType("辅助人员");
-//        taskOrderWorkingHours.setProportion("14.9");
-//        taskOrderWorkingHours.setId(null);
-//        // 调用方法： 对每组检测项的人员信息进行新增。
-//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        taskOrderWorkingHours.setUserName("崔路伟");
+        taskOrderWorkingHours.setUserId(1654682006912103L);
+        taskOrderWorkingHours.setDetectionType("辅助人员");
+        taskOrderWorkingHours.setProportion("14");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data5 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data5);
+
 //        // 6、
-//        taskOrderWorkingHours.setUserName("邢洁");
-//        taskOrderWorkingHours.setUserId(1654682170405106L);
-//        taskOrderWorkingHours.setDetectionType("复核人");
-//        taskOrderWorkingHours.setProportion("5.9");
-//        taskOrderWorkingHours.setId(null);
-//        // 调用方法： 对每组检测项的人员信息进行新增。
-//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+        taskOrderWorkingHours.setUserName("邢洁");
+        taskOrderWorkingHours.setUserId(1654682170405106L);
+        taskOrderWorkingHours.setDetectionType("复核人");
+        taskOrderWorkingHours.setProportion("13.5");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data6 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data6);
+
+        return zongTaskWorkingHorusList;
 
 //        // 0、
 //        taskOrderWorkingHours.setUserName("孙含玉");
@@ -2649,14 +2662,14 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         // 调用方法： 对每组检测项的人员信息进行新增。
         testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);*/
         // 2、
-        taskOrderWorkingHours.setUserName("李晓洋");
-        taskOrderWorkingHours.setUserId(1654684210974125L);
-        taskOrderWorkingHours.setDetectionType("检测人员");
-        taskOrderWorkingHours.setProportion("0");
-        taskOrderWorkingHours.setWorkingHours("0");
-        taskOrderWorkingHours.setId(null);
-        // 调用方法： 对每组检测项的人员信息进行新增。
-        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
+//        taskOrderWorkingHours.setUserName("李晓洋");
+//        taskOrderWorkingHours.setUserId(1654684210974125L);
+//        taskOrderWorkingHours.setDetectionType("检测人员");
+//        taskOrderWorkingHours.setProportion("0");
+//        taskOrderWorkingHours.setWorkingHours("0");
+//        taskOrderWorkingHours.setId(null);
+//        // 调用方法： 对每组检测项的人员信息进行新增。
+//        testTaskOrderWorkingHoursMapper.insert(taskOrderWorkingHours);
 
     }
 
@@ -2674,62 +2687,41 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestTaskOrderWorkingHours::getTaskId, taskDetailInfo.getId());
         List<TestTaskOrderWorkingHours> latestWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
+        Map<String, TestTaskOrderWorkingHours> taskWorkingHorusMap = new HashMap<>();
 
-//
-//        if (CollectionUtil.isEmpty(latestWorkingHoursList)) {
-//            return null;
-//        }
-//
-//        for (TestTaskOrderWorkingHours data : latestWorkingHoursList) {
-//
-//            if (data.getUserName().equals("崔路伟")) {
-//                LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
-//                updateWrapper.set(TestTaskOrderWorkingHours::getProportion, "8.5");
-//                updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
-//                testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
-//            }
-//            if (data.getUserName().equals("邢洁")) {
-//                LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
-//                updateWrapper.set(TestTaskOrderWorkingHours::getProportion, "0");
-//                updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
-//                testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
-//            }
-//            if (data.getUserName().equals("杨波")) {
-//                LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
-//                updateWrapper.set(TestTaskOrderWorkingHours::getProportion, "8.5");
-//                updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
-//                testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
-//            }
-//            if (data.getUserName().equals("于胜楠")) {
-//                LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
-//                updateWrapper.set(TestTaskOrderWorkingHours::getProportion, "8");
-//                updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
-//                testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
-//            }
-//            if (data.getUserName().equals("王巧利")) {
-//                LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
-//                updateWrapper.set(TestTaskOrderWorkingHours::getProportion, "8.5");
-//                updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
-//                testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
-//            }
-//            if (data.getUserName().equals("高贯奇")) {
-//                LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
-//                updateWrapper.set(TestTaskOrderWorkingHours::getProportion, "8");
-//                updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
-//                testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
-//            }
-//            if (data.getUserName().equals("刘秋芳")) {
-//                LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
-//                updateWrapper.set(TestTaskOrderWorkingHours::getProportion, "8.5");
-//                updateWrapper.eq(TestTaskOrderWorkingHours::getId, data.getId());
-//                testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
-//            }
-//        }
+        if (CollectionUtil.isEmpty(latestWorkingHoursList)) {
+            return null;
+        }
 
-        // 获取一条数据
+
+        // 整理 当前任务单所属工时信息
+        for (TestTaskOrderWorkingHours data : latestWorkingHoursList) {
+            taskWorkingHorusMap.put(data.getUserName(), data);
+        }
+
+
+//        // 获取一条数据
         TestTaskOrderWorkingHours taskOrderWorkingHours = latestWorkingHoursList.get(0);
-//        // 执行新增
-        addTaskOrderWorkingHours1(taskOrderWorkingHours);
+//        // 整理map 数据 : 获取当前任务单 标准工时信息
+        List<TestTaskOrderWorkingHours> list1 = addTaskOrderWorkingHours1(taskOrderWorkingHours);
+
+        // 进行遍历比较 map
+        for (TestTaskOrderWorkingHours data : list1) {
+            if (data != null && taskWorkingHorusMap.get(data.getUserName()) != null) {
+                TestTaskOrderWorkingHours data1 = taskWorkingHorusMap.get(data.getUserName());
+                // 包含当前用户 工时不相等 则进行更新操作
+                if (!data1.getProportion().equals(data.getProportion())) {
+                    LambdaUpdateWrapper<TestTaskOrderWorkingHours> updateWrapper = new LambdaUpdateWrapper<>();
+                    updateWrapper.set(TestTaskOrderWorkingHours::getProportion, data.getProportion());
+                    updateWrapper.eq(TestTaskOrderWorkingHours::getId, data1.getId());
+                    testTaskOrderWorkingHoursMapper.update(null, updateWrapper);
+                }
+            } else {
+                // 数据为空 则进行新增即可
+                // 调用方法： 对每组检测项的人员信息进行新增。
+                testTaskOrderWorkingHoursMapper.insert(data);
+            }
+        }
 
         return null;
 
