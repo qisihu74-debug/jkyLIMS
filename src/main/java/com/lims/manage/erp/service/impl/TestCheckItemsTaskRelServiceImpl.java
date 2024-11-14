@@ -2129,11 +2129,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         BigDecimal bigDecimal = new BigDecimal("0");
         for (TestTaskOrderWorkingHours data : latestWorkingHoursList) {
             BigDecimal sum = bigDecimal.add(new BigDecimal(data.getProportion())).setScale(2, RoundingMode.FLOOR);
-            System.out.println("sum = " + sum.toString());
+//            System.out.println("sum = " + sum.toString());
             bigDecimal = sum;
         }
-        System.out.println("bigDecimal = " + bigDecimal.toString());
+
         if (bigDecimal.compareTo(new BigDecimal("100")) == 0) {
+            StringBuffer stringBuilder = new StringBuffer();
+//            stringBuilder.append(taskDetailInfo.getTaskCode());
+//            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder.toString(), Const.ENTRUST_FOUND, true);
+//            System.out.println("bigDecimal = " + bigDecimal.toString());
             updateOrAddTaskRelMap02(taskDetailInfo.getId(), latestWorkingHoursList);
         }
 
