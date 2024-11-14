@@ -3208,11 +3208,21 @@ public class ReportServiceImpl implements ReportService {
             List<ReportTemplateEntity> reportTemplates = templateEntity.getReportTemplates();
             listT.addAll(reportTemplates);
         }
+        //去重
+        List<ReportTemplateEntity> uniqueList = listT.stream()
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(
+                                ReportTemplateEntity::getId, // 根据id去重
+                                entity -> entity,
+                                (existing, replacement) -> existing // 保留第一个出现的元素
+                        ),
+                        map -> new ArrayList<>(map.values())
+                ));
         List<ConclusionEntity> list = Lists.newArrayList();
         EntrustAddVo entrustHistoryDetail = entrustService.getEntrustHistoryDetail(entrustId);
         List<SampleEntity> samples = entrustHistoryDetail.getSamples();
         List<SampleEntity> sampleEntities = Lists.newArrayList();
-        for (ReportTemplateEntity templateEntity : listT) {
+        for (ReportTemplateEntity templateEntity : uniqueList) {
             for (SampleEntity sampleEntity : samples) {
                 if (org.apache.commons.lang3.StringUtils.isNotEmpty(templateEntity.getProductId())){
                     if (templateEntity.getProductId().equals(sampleEntity.getProductId() + "")) {
