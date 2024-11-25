@@ -3265,7 +3265,6 @@ public class ReportServiceImpl implements ReportService {
 
     /**
      * 处理检测项描述
-     *
      * @param sampleCheckItem
      * @param url
      * @return

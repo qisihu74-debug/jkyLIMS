@@ -88,19 +88,19 @@ public class ClientController {
                     //删除临时pdf文件
                     FileAndFolderUtil.delete(path);
                     System.out.println("临时文件删除成功");
-                    return ResultUtil.success("success",null);
+                    return ResultUtil.success("文件上传成功",null);
                 }catch (Exception e){
                     log.error("文件上传失败:{}",e.getMessage());
                     //删除临时pdf文件
                     FileAndFolderUtil.delete(path);
                     System.out.println("临时文件删除成功");
-                    return ResultUtil.error("failed",null);
+                    return ResultUtil.error(500,"上传失败");
                 }
             }else {
-                return ResultUtil.error("failed",null);
+                return ResultUtil.error(500,"文件上传成功lims业务处理异常");
             }
         }else {
-            return ResultUtil.error("failed",null);
+            return ResultUtil.error(500,"上传失败文件为空");
         }
     }
 
