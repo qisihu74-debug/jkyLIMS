@@ -2006,6 +2006,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         String replace = seals.replace("综合甲级", "2934033400316387595").
+                replace("2024新综合甲级", "3299580910391886515").
                 replace("CMA", "2937188764910183324").
                 replace("2024新2937188764910183324", "3212968793413837357").
                 replace("CNAS", "2937178885881422636");
