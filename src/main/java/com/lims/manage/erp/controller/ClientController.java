@@ -58,7 +58,7 @@ public class ClientController {
             queryWrapper.eq(DaTaskRecord::getTaskCode,code);
             DaTaskRecord one = daTaskRecordService.getOne(queryWrapper);
             if (one != null){
-                return ResultUtil.error("file already exist!");
+                return ResultUtil.error(500,"file already exist!");
             }
             //转换文档为xcel，保存
             String path = "";
@@ -94,13 +94,13 @@ public class ClientController {
                     //删除临时pdf文件
                     FileAndFolderUtil.delete(path);
                     System.out.println("临时文件删除成功");
-                    return ResultUtil.error(500,"上传失败");
+                    return ResultUtil.error(500,"upload failed");
                 }
             }else {
-                return ResultUtil.error(500,"文件上传成功lims业务处理异常");
+                return ResultUtil.error(500,"file upload success but lims is exception");
             }
         }else {
-            return ResultUtil.error(500,"上传失败文件为空");
+            return ResultUtil.error(500,"file is empty");
         }
     }
 
