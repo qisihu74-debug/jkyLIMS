@@ -295,7 +295,7 @@ public class QiYueSuoHnadler {
                     location.setOffsetX(0.4);
                     location.setOffsetY(0.86);
                     locations.add(location);
-                }else if ("2934033400316387595".equals(sealId.toString()) || "3299580910391886515".equals(sealId.toString())){
+                }else if ("2934033400316387595".equals(sealId.toString()) || "3299597610046817078".equals(sealId.toString())){
                     Location location = new Location();
                     location.setRectType("SEAL_CORPORATE");
                     location.setPage(1);
