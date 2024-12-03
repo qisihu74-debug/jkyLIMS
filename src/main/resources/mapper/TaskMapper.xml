@@ -342,6 +342,7 @@
                 AND t1.intrusment_id = t3.instrument_id
         WHERE
             t1.id_item = #{idItem}
+            and t2.id is not null
             ORDER BY t1.id desc
     </select>
     <select id="getSampleList" resultMap="sampleResultMap" parameterType="com.lims.manage.erp.vo.TaskListParamVo">
