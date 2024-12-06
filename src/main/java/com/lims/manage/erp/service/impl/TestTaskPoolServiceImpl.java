@@ -2541,7 +2541,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskOrderWorkingHours.setUserName("杨波");
         taskOrderWorkingHours.setUserId(1654681210551117L);
         taskOrderWorkingHours.setDetectionType("签发人");
-        taskOrderWorkingHours.setProportion("15.5");
+        taskOrderWorkingHours.setProportion("15");
         taskOrderWorkingHours.setId(null);
         TestTaskOrderWorkingHours data0 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
         zongTaskWorkingHorusList.add(data0);
@@ -2550,7 +2550,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskOrderWorkingHours.setUserName("刘秋芳");
         taskOrderWorkingHours.setUserId(1654681099998115L);
         taskOrderWorkingHours.setDetectionType("检测人员、记录人员");
-        taskOrderWorkingHours.setProportion("15");
+        taskOrderWorkingHours.setProportion("14.5");
         taskOrderWorkingHours.setId(null);
         TestTaskOrderWorkingHours data1 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
         zongTaskWorkingHorusList.add(data1);
@@ -2559,7 +2559,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskOrderWorkingHours.setUserName("于胜楠");
         taskOrderWorkingHours.setUserId(4739625864645518L);
         taskOrderWorkingHours.setDetectionType("报告制作人");
-        taskOrderWorkingHours.setProportion("13.5");
+        taskOrderWorkingHours.setProportion("14");
         taskOrderWorkingHours.setId(null);
         TestTaskOrderWorkingHours data2 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
         zongTaskWorkingHorusList.add(data2);
@@ -2568,7 +2568,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskOrderWorkingHours.setUserName("王巧利");
         taskOrderWorkingHours.setUserId(4573649232290487L);
         taskOrderWorkingHours.setDetectionType("检测人员");
-        taskOrderWorkingHours.setProportion("15");
+        taskOrderWorkingHours.setProportion("14.5");
         taskOrderWorkingHours.setId(null);
         TestTaskOrderWorkingHours data3 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
         zongTaskWorkingHorusList.add(data3);
@@ -2577,7 +2577,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskOrderWorkingHours.setUserName("高贯奇");
         taskOrderWorkingHours.setUserId(1652365586151107L);
         taskOrderWorkingHours.setDetectionType("检测人员");
-        taskOrderWorkingHours.setProportion("13.5");
+        taskOrderWorkingHours.setProportion("14");
         taskOrderWorkingHours.setId(null);
         TestTaskOrderWorkingHours data4 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
         zongTaskWorkingHorusList.add(data4);
@@ -2595,7 +2595,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskOrderWorkingHours.setUserName("邢洁");
         taskOrderWorkingHours.setUserId(1654682170405106L);
         taskOrderWorkingHours.setDetectionType("复核人");
-        taskOrderWorkingHours.setProportion("13.5");
+        taskOrderWorkingHours.setProportion("14");
         taskOrderWorkingHours.setId(null);
         TestTaskOrderWorkingHours data6 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
         zongTaskWorkingHorusList.add(data6);
@@ -2702,9 +2702,10 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
 
 //        // 获取一条数据
         TestTaskOrderWorkingHours taskOrderWorkingHours = latestWorkingHoursList.get(0);
+        TestTaskOrderWorkingHours data66 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
 //        // 整理map 数据 : 获取当前任务单 标准工时信息
-        List<TestTaskOrderWorkingHours> list1 = addTaskOrderWorkingHours1(taskOrderWorkingHours);
-
+        List<TestTaskOrderWorkingHours> list1 = addTaskOrderWorkingHours1(data66);
+//
         // 进行遍历比较 map
         for (TestTaskOrderWorkingHours data : list1) {
             if (data != null && taskWorkingHorusMap.get(data.getUserName()) != null) {
@@ -2723,6 +2724,39 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             }
         }
 
+//        taskOrderWorkingHours.setUserName("李路遥");
+//        taskOrderWorkingHours.setUserId(1652407272842124L);
+//        taskOrderWorkingHours.setDetectionType("签发人");
+//        taskOrderWorkingHours.setProportion("0");
+//        taskOrderWorkingHours.setWorkingHours("0");
+//        taskOrderWorkingHours.setId(null);
+//        TestTaskOrderWorkingHours data0 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+//        if (taskWorkingHorusMap.get(data0.getUserName()) == null) {
+//            // 调用方法： 对每组检测项的人员信息进行新增。
+//            testTaskOrderWorkingHoursMapper.insert(data0);
+//        }
+//        taskOrderWorkingHours.setUserName("胡金龙");
+//        taskOrderWorkingHours.setUserId(1652405368958116L);
+//        taskOrderWorkingHours.setDetectionType("签发人");
+//        taskOrderWorkingHours.setProportion("0");
+//        taskOrderWorkingHours.setWorkingHours("0");
+//        taskOrderWorkingHours.setId(null);
+//        TestTaskOrderWorkingHours data1 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+//        if (taskWorkingHorusMap.get(data1.getUserName()) == null) {
+//            // 调用方法： 对每组检测项的人员信息进行新增。
+//            testTaskOrderWorkingHoursMapper.insert(data1);
+//        }
+//                taskOrderWorkingHours.setUserName("杨波");
+//        taskOrderWorkingHours.setUserId(1654681210551117L);
+//        taskOrderWorkingHours.setDetectionType("签发人");
+//        taskOrderWorkingHours.setProportion("0");
+//        taskOrderWorkingHours.setWorkingHours("0");
+//        taskOrderWorkingHours.setId(null);
+//        TestTaskOrderWorkingHours data3 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+//        if (taskWorkingHorusMap.get(data3.getUserName()) == null) {
+//            // 调用方法： 对每组检测项的人员信息进行新增。
+//            testTaskOrderWorkingHoursMapper.insert(data3);
+//        }
         return null;
 
 /*        // 获取 任务单详情：
