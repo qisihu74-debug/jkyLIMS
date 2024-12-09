@@ -401,6 +401,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         for (SampleEntity sampleEntity : addNewSamples) {
             if (CollectionUtil.isEmpty(sampleEntity.getSampleCheckItem())) {
                 times = times + 1;
+                sampleEntity.setSampleCheckItem(new ArrayList<>());
             }
         }
         if (addNewSamples.size() == times) {
@@ -2537,7 +2538,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
 
         List<TestTaskOrderWorkingHours> zongTaskWorkingHorusList = new ArrayList<>();
 
-//        // 0、
+/*//        // 0、
         taskOrderWorkingHours.setUserName("杨波");
         taskOrderWorkingHours.setUserId(1654681210551117L);
         taskOrderWorkingHours.setDetectionType("签发人");
@@ -2596,6 +2597,70 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         taskOrderWorkingHours.setUserId(1654682170405106L);
         taskOrderWorkingHours.setDetectionType("复核人");
         taskOrderWorkingHours.setProportion("14");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data6 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data6);*/
+
+
+//        韩笑团队 // 0、
+        taskOrderWorkingHours.setUserName("韩笑");
+        taskOrderWorkingHours.setUserId(4588250852745216L);
+        taskOrderWorkingHours.setDetectionType("签发人");
+        taskOrderWorkingHours.setProportion("11.11");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data0 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data0);
+
+//        // 1、
+        taskOrderWorkingHours.setUserName("卢俊龙");
+        taskOrderWorkingHours.setUserId(1652360733506103L);
+        taskOrderWorkingHours.setDetectionType("复核人");
+        taskOrderWorkingHours.setProportion("18.52");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data1 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data1);
+
+//        // 2、
+        taskOrderWorkingHours.setUserName("王亚玲");
+        taskOrderWorkingHours.setUserId(1652365523132106L);
+        taskOrderWorkingHours.setDetectionType("报告制作人");
+        taskOrderWorkingHours.setProportion("17");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data2 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data2);
+
+//        // 3、
+        taskOrderWorkingHours.setUserName("雷梦飞");
+        taskOrderWorkingHours.setUserId(1654682241625107L);
+        taskOrderWorkingHours.setDetectionType("检测人员");
+        taskOrderWorkingHours.setProportion("16.09");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data3 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data3);
+
+//        // 4、
+        taskOrderWorkingHours.setUserName("周朋可");
+        taskOrderWorkingHours.setUserId(1654683761046119L);
+        taskOrderWorkingHours.setDetectionType("记录人");
+        taskOrderWorkingHours.setProportion("13.66");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data4 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data4);
+
+//        // 5、
+        taskOrderWorkingHours.setUserName("张朋涛");
+        taskOrderWorkingHours.setUserId(1654683026922108L);
+        taskOrderWorkingHours.setDetectionType("报告制作");
+        taskOrderWorkingHours.setProportion("11.81");
+        taskOrderWorkingHours.setId(null);
+        TestTaskOrderWorkingHours data5 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+        zongTaskWorkingHorusList.add(data5);
+
+//        // 6、
+        taskOrderWorkingHours.setUserName("刘子浩");
+        taskOrderWorkingHours.setUserId(4689827516827022L);
+        taskOrderWorkingHours.setDetectionType("辅助人员");
+        taskOrderWorkingHours.setProportion("11.81");
         taskOrderWorkingHours.setId(null);
         TestTaskOrderWorkingHours data6 = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
         zongTaskWorkingHorusList.add(data6);

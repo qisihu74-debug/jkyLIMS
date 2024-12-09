@@ -1532,6 +1532,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         // 处理工时信息
         addTestTaskOrderWorkingHoursMapper(taskId, taskDetails.getEntrustmentId(), bitTaskRelList, updateSqlBasisList);
+        //  报告签发时 设置人员比例信息、 及进行通知授权签字人信息。
         return true;
     }
 
