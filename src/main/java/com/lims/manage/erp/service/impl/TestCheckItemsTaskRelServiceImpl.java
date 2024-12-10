@@ -1334,10 +1334,10 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     public String renturnWorkingHours(Long taskId, Long workingHoursId, String source) {
         // 1、 根据taskId 获取检测项工时。
         List<TestItemOrderWorkingHours> workingHoursList = testItemOrderWorkingHoursMapper.selectTaskList(taskId);
-        // 检测项工时-实现阶梯计算。
-        if (CollectionUtil.isNotEmpty(workingHoursList)) {
-            methodStepCharging(workingHoursList);
-        }
+//        // 检测项工时-实现阶梯计算。
+//        if (CollectionUtil.isNotEmpty(workingHoursList)) {
+//            methodStepCharging(workingHoursList);
+//        }
         // 1.1 根据taskId 获取检测项工时详情 可以为空
         LambdaQueryWrapper<TestItemOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestItemOrderWorkingHours::getTaskId, taskId);
@@ -2003,9 +2003,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             surplusProportion = proportion;
         }
         // 剩余工时 = 总工时 - 实际工时 保留小位点两位
-        BigDecimal zhi01 = BigDecimal.valueOf(Double.valueOf(data.getTotalWorkingHours())).setScale(2, BigDecimal.ROUND_FLOOR);
-        BigDecimal zhi02 = sqlTotalWorking.setScale(2, BigDecimal.ROUND_FLOOR);
-        BigDecimal zhi03 = zhi01.subtract(zhi02).setScale(2, BigDecimal.ROUND_FLOOR);
+        BigDecimal zhi01 = BigDecimal.valueOf(Double.valueOf(data.getTotalWorkingHours())).setScale(4, BigDecimal.ROUND_FLOOR);
+        BigDecimal zhi02 = sqlTotalWorking.setScale(4, BigDecimal.ROUND_FLOOR);
+        BigDecimal zhi03 = zhi01.subtract(zhi02).setScale(4, BigDecimal.ROUND_FLOOR);
         // 结果保留小位小数 = 剩余工时 + 最小工时相加
         BigDecimal workHours = zhi03.add(new BigDecimal(data.getWorkingHours()));
         data.setWorkingHours(workHours.toString());
@@ -2244,5 +2244,30 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             }
         }
 
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result updatedCheckItemParameters(String taskCode) {
+        LambdaQueryWrapper<TestTaskOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestTaskOrderWorkingHours::getTaskCode, taskCode);
+        List<TestTaskOrderWorkingHours> testTaskOrderWorkingHoursList = testTaskOrderWorkingHoursMapper.selectList(queryWrapper);
+        if (CollectionUtil.isEmpty(testTaskOrderWorkingHoursList)) {
+            return null;
+        }
+        TestTaskOrderWorkingHours data = testTaskOrderWorkingHoursList.get(0);
+
+
+        // 通过任务单id 获取任务单下对应的检测项总工时
+        String totalWorkingHours = renturnWorkingHours(data.getTaskId(), Long.parseLong(data.getWorkingHoursId()), data.getSource());
+        // 更新工时
+        for (TestTaskOrderWorkingHours testTaskOrderWorkingHours : testTaskOrderWorkingHoursList) {
+            testTaskOrderWorkingHours.setTotalWorkingHours(totalWorkingHours);
+            testTaskOrderWorkingHoursMapper.updateById(testTaskOrderWorkingHours);
+        }
+        // 更新工时比例
+        adjustTheTimeAllocationRatio(taskCode);
+        return null;
     }
 }

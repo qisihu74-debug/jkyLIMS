@@ -170,6 +170,20 @@ public class StatisticAnalysisInterface {
     }
 
     /**
+     * 检测项参数-更新
+     *
+     * @return
+     */
+    @RequestMapping("/updatedCheckItemParameters")
+    public Result updatedCheckItemParameters(String str) {
+        String[] strings = str.split(",");
+        for (int i = 0; i < strings.length; i++) {
+            testCheckItemsTaskRelService.updatedCheckItemParameters(strings[i]);
+        }
+        return null;
+    }
+
+    /**
      * 工时统计-按照人员统计
      *
      * @return

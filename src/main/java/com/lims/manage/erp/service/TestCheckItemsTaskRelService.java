@@ -191,4 +191,12 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * 进行 调整工时比例
      */
     void adjustTheTimeAllocationRatio(String taskCode);
+
+
+    /**
+     * 检测项参数-更新
+     *
+     * @return
+     */
+    Result updatedCheckItemParameters(String taskCode);
 }
