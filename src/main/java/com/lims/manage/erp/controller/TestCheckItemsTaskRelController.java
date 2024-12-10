@@ -133,7 +133,11 @@ public class TestCheckItemsTaskRelController {
     public Result informationSubstitution(String str) {
         String[] strings = str.split(",");
         for (int i = 0; i < strings.length; i++) {
-            testTaskPoolService.informationSubstitution(strings[i]);
+            try {
+                testTaskPoolService.informationSubstitution(strings[i]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }

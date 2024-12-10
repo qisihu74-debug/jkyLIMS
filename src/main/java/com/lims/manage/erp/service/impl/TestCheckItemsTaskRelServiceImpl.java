@@ -86,6 +86,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     private TeamMapper teamMapper;
     @Autowired
     private TestEntrustedTaskRelDao testEntrustedTaskRelDao;
+    @Autowired
+    private TestTaskPoolService testTaskPoolService;
 
     @Override
     public IPage<WorkHourStatisticVo> getWorkHoursList(Page<WorkHourStatisticVo> page, Map<String, Object> paramMap) {
@@ -1500,6 +1502,41 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
     }
 
     /**
+     * 生成工时:钉钉 任务单通知
+     *
+     * @param planCreator
+     * @param publisher
+     */
+    void methodDingTalkNotification(String planCreator, String taskCode) {
+
+        DingNotifyUtils dingNotifyUtils = new DingNotifyUtils();
+
+        // 通知时间
+        Date now = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        String nowString = simpleDateFormat.format(now);
+        // 当前年份
+        SimpleDateFormat yyyyFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String yyyyString = yyyyFormat.format(now);
+        // 查询钉钉id
+        String dingId = "";
+        try {
+            // 获取 任务单下检测人信息 userId
+            LambdaQueryWrapper<SysUserEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SysUserEntity::getUserId, planCreator);
+            SysUserEntity userDetails = sysUserDao.selectOne(queryWrapper);
+            dingId = userDetails.getDingUserId();
+            StringBuffer titleBuffer = new StringBuffer();
+            titleBuffer.append(nowString + "工时生成通知");
+            StringBuffer contextBuffer = new StringBuffer();
+            contextBuffer.append(yyyyString + " 任务单号为：" + taskCode + "请登录公司系统生成分配工时，特此通知！");
+            dingNotifyUtils.OAWorkNotice(dingId, titleBuffer.toString(), "系统推送", contextBuffer.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 报告签发后：分配工时
      *
      * @param taskId
@@ -1532,7 +1569,17 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         }
         // 处理工时信息
         addTestTaskOrderWorkingHoursMapper(taskId, taskDetails.getEntrustmentId(), bitTaskRelList, updateSqlBasisList);
+
         //  报告签发时 设置人员比例信息、 及进行通知授权签字人信息。
+        try {
+
+            testTaskPoolService.informationSubstitution(taskDetails.getTaskCode());
+            // 钉钉通知授权签字人 任务单工时已生成
+            methodDingTalkNotification(taskDetails.getReceiver(), taskDetails.getTaskCode());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -2100,48 +2147,15 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             return;
         }
 
-//        for (TestTaskOrderWorkingHours data : latestWorkingHoursList) {
-//            if (data.getUserName().equals("代海燕")) {
-//                data.setProportion("15.00");
-//            }
-//            if (data.getUserName().equals("申永伟")) {
-//                data.setProportion("14.00");
-//            }
-//            if (data.getUserName().equals("马瑞玲")) {
-//                data.setProportion("12.20");
-//            }
-//            if (data.getUserName().equals("孙朋骄")) {
-//                data.setProportion("12.20");
-//            }
-//            if (data.getUserName().equals("李小华")) {
-//                data.setProportion("12.20");
-//            }
-//            if (data.getUserName().equals("林海娟")) {
-//                data.setProportion("12.20");
-//            }
-//            if (data.getUserName().equals("孙含玉")) {
-//                data.setProportion("12.20");
-//            }
-//            if (data.getUserName().equals("焦凯")) {
-//                data.setProportion("10");
-//            }
-//        }
-
         BigDecimal bigDecimal = new BigDecimal("0");
         for (TestTaskOrderWorkingHours data : latestWorkingHoursList) {
             BigDecimal sum = bigDecimal.add(new BigDecimal(data.getProportion())).setScale(2, RoundingMode.FLOOR);
-//            System.out.println("sum = " + sum.toString());
             bigDecimal = sum;
         }
 
         if (bigDecimal.compareTo(new BigDecimal("100")) == 0) {
-            StringBuffer stringBuilder = new StringBuffer();
-//            stringBuilder.append(taskDetailInfo.getTaskCode());
-//            logManagerService.addOpSysLog(ShiroUtils.getUserInfo(), stringBuilder.toString(), Const.ENTRUST_FOUND, true);
-//            System.out.println("bigDecimal = " + bigDecimal.toString());
             updateOrAddTaskRelMap02(taskDetailInfo.getId(), latestWorkingHoursList);
         }
-
     }
 
     /**

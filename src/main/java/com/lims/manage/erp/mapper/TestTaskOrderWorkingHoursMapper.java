@@ -150,4 +150,21 @@ public interface TestTaskOrderWorkingHoursMapper  extends BaseMapper<TestTaskOrd
      */
     @Select("SELECT sum(working_hours) FROM test_task_order_working_hours WHERE task_id = #{taskId} ")
     String selectTaskOrderWorkingSum(@Param("taskId") Long taskId);
+
+    /**
+     * 获取团队下人员比例
+     *
+     * @param teamId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tid,\n" +
+            "\tuser_name AS userName,\n" +
+            "\tuser_id AS userId,\n" +
+            "\tproportion AS proportion \n" +
+            "FROM\n" +
+            "\ttest_task_order_working_hours_scale \n" +
+            "WHERE\n" +
+            "\tteam_id = #{teamId} and add_operator = #{addOperator}")
+    List<TestTaskOrderWorkingHours> selectManHourRatio(@Param("teamId") Long teamId, @Param("addOperator") String addOperator);
 }
