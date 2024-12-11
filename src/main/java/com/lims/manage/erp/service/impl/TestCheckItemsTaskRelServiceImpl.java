@@ -1332,12 +1332,13 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
      */
     @Transactional(rollbackFor = Exception.class)
     public String renturnWorkingHours(Long taskId, Long workingHoursId, String source) {
+        PageHelper.clearPage();
         // 1、 根据taskId 获取检测项工时。
         List<TestItemOrderWorkingHours> workingHoursList = testItemOrderWorkingHoursMapper.selectTaskList(taskId);
-//        // 检测项工时-实现阶梯计算。
-//        if (CollectionUtil.isNotEmpty(workingHoursList)) {
-//            methodStepCharging(workingHoursList);
-//        }
+        // 检测项工时-实现阶梯计算。
+        if (CollectionUtil.isNotEmpty(workingHoursList)) {
+            methodStepCharging(workingHoursList);
+        }
         // 1.1 根据taskId 获取检测项工时详情 可以为空
         LambdaQueryWrapper<TestItemOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TestItemOrderWorkingHours::getTaskId, taskId);
@@ -1419,6 +1420,91 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             return testItemOrderWorkingHoursMapper.getTotalWorkingHours(taskId, workingHoursId);
         } else {
             return null;
+        }
+    }
+
+    /**
+     * 执行新增 工时信息
+     *
+     * @param taskId
+     * @param workingHoursId
+     * @param source
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void inserWorkingHours(Long taskId, Long workingHoursId, String source) {
+        PageHelper.clearPage();
+        // 1、 根据taskId 获取检测项工时。
+        List<TestItemOrderWorkingHours> workingHoursList = testItemOrderWorkingHoursMapper.selectTaskList(taskId);
+        // 1.1 根据taskId 获取检测项工时详情 可以为空
+        LambdaQueryWrapper<TestItemOrderWorkingHours> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TestItemOrderWorkingHours::getTaskId, taskId);
+        List<TestItemOrderWorkingHours> itemworkingHoursList = testItemOrderWorkingHoursMapper.selectList(queryWrapper);
+        if (CollectionUtil.isNotEmpty(itemworkingHoursList)) {
+            // 根据任务单id 查询 检测项工时 已经存在
+            //                             与 workingHoursList 进行比对后 获取 差集 后 进行新增。
+            // 检测项详情的差集
+            List<TestItemOrderWorkingHours> difference = new ArrayList<>();
+            if (CollectionUtil.isNotEmpty(workingHoursList)) {
+                for (TestItemOrderWorkingHours element : workingHoursList) {
+                    boolean found = false;
+                    for (TestItemOrderWorkingHours compareElement : itemworkingHoursList) {
+                        if (element.getSampleId().equals(compareElement.getSampleId()) && element.getCheckItemId().equals(compareElement.getCheckItemId())) {
+                            found = true;
+                            LambdaQueryWrapper<TestItemOrderWorkingHours> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                            lambdaQueryWrapper.eq(TestItemOrderWorkingHours::getTaskId, taskId);
+                            lambdaQueryWrapper.eq(TestItemOrderWorkingHours::getWorkingHoursId, workingHoursId);
+                            lambdaQueryWrapper.eq(TestItemOrderWorkingHours::getItemId, compareElement.getItemId());
+                            compareElement.setWorkingHours(element.getWorkingHours());
+                            compareElement.setUpdateTime(new Date());
+                            testItemOrderWorkingHoursMapper.update(compareElement, lambdaQueryWrapper);
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        difference.add(element);
+                    }
+                }
+            }
+            if (CollectionUtil.isNotEmpty(difference)) {
+                for (TestItemOrderWorkingHours itemOrderWorkingHours : difference) {
+                    itemOrderWorkingHours.setTaskId(taskId);
+                    itemOrderWorkingHours.setWorkingHoursId(workingHoursId);
+                    itemOrderWorkingHours.setSource(source);
+                    // 处理工时
+                    try {
+                        double zhi = Double.parseDouble(itemOrderWorkingHours.getWorkingHours());
+                        String context = String.format("%.2f", zhi);
+                        itemOrderWorkingHours.setWorkingHours(context);
+                    } catch (Exception e) {
+                        // 总工时 转double 失败的进 Exception
+                        itemOrderWorkingHours.setWorkingHours("0");
+                    }
+                    itemOrderWorkingHours.setCreateTime(new Date());
+                    // 2、 存储检测项工时信息
+                    testItemOrderWorkingHoursMapper.insert(itemOrderWorkingHours);
+                }
+            }
+        } else {
+            // 执行新增操作即可。
+            if (CollectionUtil.isNotEmpty(workingHoursList)) {
+                for (TestItemOrderWorkingHours itemOrderWorkingHours : workingHoursList) {
+                    itemOrderWorkingHours.setTaskId(taskId);
+                    itemOrderWorkingHours.setWorkingHoursId(workingHoursId);
+                    itemOrderWorkingHours.setSource(source);
+                    // 处理工时
+                    try {
+                        double zhi = Double.parseDouble(itemOrderWorkingHours.getWorkingHours());
+                        String context = String.format("%.2f", zhi);
+                        itemOrderWorkingHours.setWorkingHours(context);
+                    } catch (Exception e) {
+                        // 总工时 转double 失败的进 Exception
+                        itemOrderWorkingHours.setWorkingHours("0");
+                    }
+                    itemOrderWorkingHours.setCreateTime(new Date());
+                    // 2、 存储检测项工时信息
+                    testItemOrderWorkingHoursMapper.insert(itemOrderWorkingHours);
+                }
+            }
         }
     }
 
@@ -1575,7 +1661,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
 
             testTaskPoolService.informationSubstitution(taskDetails.getTaskCode());
             // 钉钉通知授权签字人 任务单工时已生成
-            methodDingTalkNotification(taskDetails.getReceiver(), taskDetails.getTaskCode());
+//            methodDingTalkNotification(taskDetails.getReceiver(), taskDetails.getTaskCode());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -1907,7 +1993,7 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             workingHoursId = Long.valueOf(workingHoursCount.get(0).getWorkingHoursId());
         }
         // 根据taskId 进行获取检测项 存储工时对应检测项信息 返回总工时。
-        renturnWorkingHours(taskId, workingHoursId, name);
+        inserWorkingHours(taskId, workingHoursId, name);
         // 通过任务单 获取样品信息
         List<String> sampleNames = taskMapper.getTaskSamples(taskDetails.getId());
         StringBuffer nameBuffer = new StringBuffer();
