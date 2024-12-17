@@ -51,15 +51,35 @@ public class HkConfig {
     @Value("${hikvision.api.video.manualCapture}")
     private String videoManualCapture;
 
+    // 访客模式
+    @Value("${hikvision.api.visitor.v2.appointment}")
+    private String visitorV2Mode;
+    // 预约免登记
+    @Value("${hikvision.api.visitor.v1.appointment.registration}")
+    private String visitorV1Registration;
+    // 生成访客动态二维码内容
+    @Value("${hikvision.api.visitor.v1.auth.qcode}")
+    private String visitorAuthQcode;
+
+    // 已预约登记
+    @Value("${hikvision.api.visitor.v1.order.register}")
+    private String visitorOrderRegister;
+
+    // 查询访客权限组
+    @Value("${hikvision.api.visitor.v1.privilege.group}")
+    private String visitorPrivilegeGroup;
+
+    // 查询访客预约记录v2
+    @Value("${hikvision.api.visitor.v2.appointment.records}")
+    private String visitorAppointmentRecords;
 
 
     @Bean
-    public ArtemisConfig setArtemisConfig(){
+    public ArtemisConfig setArtemisConfig() {
         ArtemisConfig artemisConfig = new ArtemisConfig();
         artemisConfig.setHost(hkHost);
         artemisConfig.setAppKey(hkKey);
         artemisConfig.setAppSecret(hkSecret);
         return artemisConfig;
     }
-
- }
+}

@@ -16,6 +16,7 @@ import com.lims.manage.erp.service.HkDoorService;
 import com.lims.manage.erp.service.HkPersonService;
 import com.lims.manage.erp.util.HkUtils;
 import com.lims.manage.erp.util.StringUtils;
+import com.lims.manage.erp.vo.VisitorVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -560,6 +561,78 @@ public class HkController {
     public Result taskListAuthorization(String taskId) {
 
         return hkDoorService.taskListAuthorization(taskId);
+    }
+
+    /**
+     * 访客预约v2
+     *
+     * @return
+     */
+    @PostMapping("visitorModeV2")
+    public Result visitorModeV2(@RequestBody VisitorVo visitorVo) {
+        Map<String, Object> map = HkUtils.visitorModeV2(hkConfig.getVisitorV2Mode(), visitorVo);
+        return ResultUtil.success(map);
+    }
+
+    /**
+     * 预约免登记
+     *
+     * @return
+     */
+    @GetMapping("visitorV1Registration")
+    public Result visitorV1Registration() {
+        Map<String, Object> map = HkUtils.visitorV1Registration(hkConfig.getVisitorV1Registration(), null);
+        return ResultUtil.success(map);
+    }
+
+    /**
+     * 生成访客动态二维码内容
+     *
+     * @return
+     */
+    @GetMapping("respondVisitorAuthQcode")
+    public Result respondVisitorAuthQcode() {
+        Map<String, Object> map = HkUtils.respondVisitorAuthQcode(hkConfig.getVisitorAuthQcode(), null);
+        return ResultUtil.success(map);
+    }
+
+    /**
+     * 已预约登记
+     *
+     * @return
+     */
+    @PostMapping("visitorOrderRegister")
+    public Result visitorOrderRegister(@RequestBody VisitorVo visitorVo) {
+        Map<String, Object> map = HkUtils.visitorOrderRegister(hkConfig.getVisitorOrderRegister(), visitorVo);
+        return ResultUtil.success(map);
+    }
+
+    /**
+     * 查询访客权限组
+     *
+     * @return
+     */
+    @GetMapping("visitorPrivilegeGroup")
+    public Result visitorPrivilegeGroup() {
+        Map<String, Object> map = HkUtils.visitorPrivilegeGroup(hkConfig.getVisitorPrivilegeGroup());
+        return ResultUtil.success(map);
+    }
+
+    /**
+     * 查询访客预约记录v2
+     *
+     * @param receptionistId
+     * @param visitorName
+     * @param phoneNo
+     * @return
+     */
+    @GetMapping("visitorAppointmentRecords")
+    public Result visitorAppointmentRecords(String receptionistId, String visitorName, String phoneNo) {
+//        if (StringUtils.isEmpty(receptionistId) && StringUtils.isEmpty(receptionistId) && StringUtils.isEmpty(receptionistId)) {
+//            return ResultUtil.error("缺少参数");
+//        }
+        Map<String, Object> map = HkUtils.visitorAppointmentRecords(hkConfig.getVisitorAppointmentRecords(), receptionistId, visitorName, phoneNo);
+        return ResultUtil.success(map);
     }
 
 

@@ -154,20 +154,21 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
             }
             taskDetailInfoVo.setJudgmentBasis(stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString());
         }
+        //设置原材样品信息
+        List<TestSampleEntity> nodeSampleArrlist = new ArrayList<>();
         // 根据itemId 查询设备仪器信息集合
         if (taskDetailInfoVo.getSampleDetailList() != null && !taskDetailInfoVo.getSampleDetailList().isEmpty()) {
             for (SampleDetailVo sampleDetailVo : taskDetailInfoVo.getSampleDetailList()) {
                 if (sampleDetailVo.getCheckItemInfoList() != null && !sampleDetailVo.getCheckItemInfoList().isEmpty()) {
                     for (CheckItemInfoVo checkItemInfoVo : sampleDetailVo.getCheckItemInfoList()) {
-                        if(org.apache.commons.lang.StringUtils.isNotEmpty(checkItemInfoVo.getOriginUrl())){
+                        if (org.apache.commons.lang.StringUtils.isNotEmpty(checkItemInfoVo.getOriginUrl())) {
                             String[] split = checkItemInfoVo.getOriginUrl().split("\\?");
                             String[] strings1 = split[0].split("\\/");
                             String fileName = strings1[4];
                             String[] names = fileName.split("\\.");
-                            if("pdf".equals(names[1]) || "xls".equals(names[1]) || "xlsx".equals(names[1])){
+                            if ("pdf".equals(names[1]) || "xls".equals(names[1]) || "xlsx".equals(names[1])) {
                                 checkItemInfoVo.setSuffixType("1");
-                            }
-                            else if("jpeg".equals(names[1]) || "png".equals(names[1]) || "jpg".equals(names[1])){
+                            } else if ("jpeg".equals(names[1]) || "png".equals(names[1]) || "jpg".equals(names[1])) {
                                 checkItemInfoVo.setSuffixType("2");
                             }
                         }
@@ -187,10 +188,18 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                         }
                     }
                 }
-                //设置原材样品信息
-                taskDetailInfoVo.setNodeSample(testSampleEntityMapper.selectByPid(sampleDetailVo.getId()));
+
+                List<TestSampleEntity> nodeSampleList = testSampleEntityMapper.selectByPid(sampleDetailVo.getId());
+                if (CollectionUtil.isNotEmpty(nodeSampleList)) {
+                    for (TestSampleEntity nodeSampleData : nodeSampleList) {
+                        nodeSampleArrlist.add(nodeSampleData);
+                    }
+
+                }
+
             }
         }
+        taskDetailInfoVo.setNodeSample(nodeSampleArrlist);
         return taskDetailInfoVo;
     }
 
