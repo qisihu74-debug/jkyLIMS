@@ -907,4 +907,19 @@ public interface TaskMapper extends BaseMapper {
             "GROUP BY\n" +
             "\tt2.task_code")
     List<String> getTaskRecordUrlBySampleId(@Param(value = "sampleId") int sampleId);
+
+    @Select("SELECT\n" +
+            "\ttask_code \n" +
+            "FROM\n" +
+            "\ttest_task \n" +
+            "WHERE\n" +
+            "\tid IN (\n" +
+            "SELECT\n" +
+            "\ttt.task_id \n" +
+            "FROM\n" +
+            "\t( SELECT * FROM test_item_order_working_hours WHERE check_item_id IN ( SELECT item_id FROM Sheet1 GROUP BY item_id ) GROUP BY task_id ) AS tt \n" +
+            "WHERE\n" +
+            "\ttt.task_id IN ( SELECT id FROM test_task WHERE entrustment_id IN ( SELECT entrustment_id FROM test_report_record WHERE issuer_time BETWEEN \"2024-09-01 00:00:00\" AND \"2024-11-30 23:59:59\" ) ) \n" +
+            "\t) limit 496,2761")
+    List<String> selectTaskCodeTest();
 }

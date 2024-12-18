@@ -2347,11 +2347,12 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
 
         // 通过任务单id 获取任务单下对应的检测项总工时
         String totalWorkingHours = renturnWorkingHours(data.getTaskId(), Long.parseLong(data.getWorkingHoursId()), data.getSource());
-        BigDecimal he = new BigDecimal(totalWorkingHours).multiply(new BigDecimal("0.85")).setScale(4, BigDecimal.ROUND_HALF_UP);
+//        BigDecimal he = new BigDecimal(totalWorkingHours).multiply(new BigDecimal("0.85")).setScale(4, BigDecimal.ROUND_HALF_UP);
+        BigDecimal he = new BigDecimal(totalWorkingHours).setScale(4, BigDecimal.ROUND_HALF_UP);
+
         // 更新工时
         for (TestTaskOrderWorkingHours testTaskOrderWorkingHours : testTaskOrderWorkingHoursList) {
             testTaskOrderWorkingHours.setTotalWorkingHours(String.valueOf(he));
-//            testTaskOrderWorkingHours.setTotalWorkingHours(totalWorkingHours);
             testTaskOrderWorkingHoursMapper.updateById(testTaskOrderWorkingHours);
         }
         // 更新工时比例

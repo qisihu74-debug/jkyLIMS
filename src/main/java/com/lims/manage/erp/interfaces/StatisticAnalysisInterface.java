@@ -176,10 +176,23 @@ public class StatisticAnalysisInterface {
      */
     @RequestMapping("/updatedCheckItemParameters")
     public Result updatedCheckItemParameters(String str) {
-        String[] strings = str.split(",");
-        for (int i = 0; i < strings.length; i++) {
-            testCheckItemsTaskRelService.updatedCheckItemParameters(strings[i]);
+//        String[] strings = str.split(",");
+        List<String> strings = taskMapper.selectTaskCodeTest();
+        System.out.println("长度" + strings.size());
+
+
+        for (String taskCode : strings) {
+            System.out.println("taskCode == " + taskCode);
+            try {
+                testCheckItemsTaskRelService.updatedCheckItemParameters(taskCode);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
+//        for (int i = 0; i < strings.length; i++) {
+//            testCheckItemsTaskRelService.updatedCheckItemParameters(strings[i]);
+//        }
         return null;
     }
 
