@@ -199,6 +199,52 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         return ResultUtil.success(jsonObject);
     }
 
+    /**
+     * 私有方法：配合比优先级处理
+     * 检测项信息中 ：1、检测项与对应样品id。2、检测项与授权团队
+     *
+     * @param falg         = true 当前样品中信息默认全部勾选、=flase 当前团队所属参数默认为空
+     * @param sampleEntity 样品信息
+     * @param itemList     所有检测项信息
+     * @param teamRelList  团队下检测项授权信息
+     * @param teamId       登录人所属团队id
+     */
+    private void mixRatioPriorityProcessing(Boolean falg, SampleEntity sampleEntity, List<SampleItemEntity> itemList, List<TestCheckItemTeamRel> teamRelList, Long teamId) {
+
+        // 检测项遍历
+        for (SampleItemEntity sampleItemEntity : itemList) {
+            // 当前检测项 未领时
+            if (sampleItemEntity.getTechnicistId() == null) {
+                // 当前样品id 对应 所属检测项
+                if (sampleEntity.getId().equals(sampleItemEntity.getSampleId())) {
+                    if (falg) {
+                        // 配合比下原材
+                        sampleItemEntity.setPriority("1");
+                        sampleItemEntity.setTeamName("当前团队领取");
+                    }
+
+                    for (TestCheckItemTeamRel checkItemTeamData : teamRelList) {
+
+                        // 检测项id相同 && 团队不相同 && 授权信息 已授权
+                        if (checkItemTeamData.getCheckItemId().longValue() == sampleItemEntity.getCheckItemId().longValue() && checkItemTeamData.getTeamId().longValue() != teamId
+                                && checkItemTeamData.getPriority() != null && checkItemTeamData.getPriority().equals("1")) {
+                            sampleItemEntity.setPriority(null);
+                            sampleItemEntity.setTeamName("配合比授权团队领取");
+                        }
+                    }
+
+                    for (TestCheckItemTeamRel checkItemTeamData : teamRelList) {
+                        // 检测项id相同 && 团队相同 && 检测项配合比已授权
+                        if (checkItemTeamData.getCheckItemId().longValue() == sampleItemEntity.getCheckItemId() && checkItemTeamData.getTeamId().longValue() == teamId
+                                && checkItemTeamData.getPriority() != null && checkItemTeamData.getPriority().equals("1")) {
+                            sampleItemEntity.setPriority("1");
+                            sampleItemEntity.setTeamName("配合比授权团队领取");
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * 新增样品与未分配样品处理
@@ -209,7 +255,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
      * @param addNewSamples ： 新增样品信息下检测项（返回信息）
      * @param taskId        ： 当前登录人的任务单id 有可能为空
      */
-    private void newSamplesAndUnallocatedSamplesAreProcessed(List<SampleItemEntity> itemList,
+    private void newSamplesAndUnallocatedSamplesAreProcessed(List<SampleItemEntity> itemList, List<TestCheckItemTeamRel> teamRelList,
                                                              Long teamId, List<SampleEntity> sampleList, List<SampleEntity> addNewSamples, Long taskId) {
         // 进行检测项 与样品信息 归类:
         if (CollectionUtil.isNotEmpty(itemList) && CollectionUtil.isNotEmpty(sampleList)) {
@@ -217,20 +263,14 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
             List<SampleItemEntity> addNewSampleItemEntities = new ArrayList<>();
             for (SampleEntity sampleEntity : sampleList) {
                 // 当前样品属于配合比原材时： 配合比实验交叉参数默认分配给已拥有配合比实验的团队
+                // TODO: 2024年12月18日：当前样品属于配合比原材时： 配合比实验交叉参数默认分配给已拥有配合比实验的团队（参数配合比授权团队 存在 优先级设置）
                 Boolean falg = false;
                 if (sampleEntity.getPid() != null) {
 
                     // 通过样品父级pid 查询 返回团队id
                     falg = verifyMixRatioSampleInformation(sampleEntity.getPid(), teamId);
-                    for (SampleItemEntity sampleItemEntity : itemList) {
-                        if (falg) {
-                            sampleItemEntity.setPriority("1");
-                        } else {
-                            // 所有检测项不可领取：需要配合比试验团队领取后才行
-                            sampleItemEntity.setPriority(null);
-                            sampleItemEntity.setTeamName("专属团队领取");
-                        }
-                    }
+                    // 私有方法：配合比优先级处理
+                    mixRatioPriorityProcessing(falg, sampleEntity, itemList, teamRelList, teamId);
                 }
                 List<SampleItemEntity> sampleItemEntities = new ArrayList<>();
                 // 遍历检测项数据 存放至 样品中
@@ -239,6 +279,12 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
                     // 当前任务id 不为空 并且检测项 选中：获取 对应的检测管理
                     SampleItemEntity sampleItemData = new SampleItemEntity();
                     for (SampleItemEntity sampleItemEntity : itemList) {
+                        // 当前检测项任务单id 不为空 进行授权
+                        if (sampleItemEntity.getTechnicistId() == teamId) {
+                            sampleItemEntity.setPriority("1");
+                            sampleItemEntity.setTeamName("本团队");
+                        }
+
                         if (sampleItemEntity.getPriority() != null && sampleItemEntity.getInspector() != null) {
                             sampleItemData = sampleItemEntity;
                         }
@@ -396,7 +442,7 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
         }
 
         // 新增样品与未分配样品处理
-        newSamplesAndUnallocatedSamplesAreProcessed(itemList, teamId, sampleList, addNewSamples, taskId);
+        newSamplesAndUnallocatedSamplesAreProcessed(itemList, teamRelList, teamId, sampleList, addNewSamples, taskId);
 
         // addNewSamples 下 无检测项信息时 则 为空
         Integer times = 0;

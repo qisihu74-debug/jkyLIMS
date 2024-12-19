@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lims.manage.erp.entity.TestCheckItemTeamRel;
 import com.lims.manage.erp.result.Result;
+import com.lims.manage.erp.vo.JsonVo;
 import com.lims.manage.erp.vo.TestCheckItemTeamRelVo;
 
 import java.util.List;
@@ -31,5 +32,13 @@ public interface TestCheckItemTeamRelService extends IService<TestCheckItemTeamR
      * @return
      */
     Result updateTeamDetectionItems();
+
+    /**
+     * 批量更新优先级
+     *
+     * @param jsonVo
+     * @return
+     */
+    Result batchUpdatePriority(JsonVo jsonVo);
 }
 

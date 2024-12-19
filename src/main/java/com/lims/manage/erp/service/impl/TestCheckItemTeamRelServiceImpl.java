@@ -3,6 +3,8 @@ package com.lims.manage.erp.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -18,10 +20,12 @@ import com.lims.manage.erp.service.TestCheckItemTeamRelService;
 import com.lims.manage.erp.util.Const;
 import com.lims.manage.erp.util.ShiroUtils;
 import com.lims.manage.erp.util.StringUtils;
+import com.lims.manage.erp.vo.JsonVo;
 import com.lims.manage.erp.vo.TestCheckItemTeamRelVo;
 import com.lims.manage.erp.vo.TestTeamVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -185,6 +189,17 @@ public class TestCheckItemTeamRelServiceImpl extends ServiceImpl<TestCheckItemTe
         return ResultUtil.success(teamRelArrayList);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Result batchUpdatePriority(JsonVo jsonVo) {
+        // 执行批量更新操作
+        LambdaUpdateWrapper<TestCheckItemTeamRel> updateWrapper1 = new LambdaUpdateWrapper<>();
+        updateWrapper1.in(TestCheckItemTeamRel::getId, jsonVo.getIds());
+        TestCheckItemTeamRel entity = new TestCheckItemTeamRel();
+        entity.setPriority(jsonVo.getContent());
+        testCheckItemTeamRelDao.update(entity, updateWrapper1);
+        return ResultUtil.success("操作成功");
+    }
 
 }
 

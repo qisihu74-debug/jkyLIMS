@@ -176,7 +176,7 @@ public class TaskListToolSortUtils {
                 for (TestCheckItemsTaskRel testCheckItemsTaskRel : itemsTaskRels) {
                     // 进行每组检测项 与 检测项指派人员的集成。
                     if (testCheckItemsTaskRel.getItemId().equals(sampleItemEntity.getId()) && (sampleItemEntity.getTaskId() != null && sampleItemEntity.getTechnicistId().equals(teamId))) {
-                        //TDODDO: 假如： 检测项重复使用 需要通过任务单进行区分。暂时未过滤
+                        //TODO: 假如： 检测项重复使用 需要通过任务单进行区分。暂时未过滤
                         itemsTaskRels1.add(testCheckItemsTaskRel);
                     }
                 }

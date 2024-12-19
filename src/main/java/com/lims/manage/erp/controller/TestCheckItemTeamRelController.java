@@ -11,6 +11,7 @@ import com.lims.manage.erp.entity.TestInstrumentAppraisalRecord;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.TestCheckItemTeamRelService;
+import com.lims.manage.erp.vo.JsonVo;
 import com.lims.manage.erp.vo.TestCheckItemTeamRelVo;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -125,6 +126,21 @@ public class TestCheckItemTeamRelController extends ApiController {
         List<TestCheckItemTeamRel> teamRelArrayList = (List<TestCheckItemTeamRel>) result.getData();
         testCheckItemTeamRelService.saveBatch(teamRelArrayList);
         return ResultUtil.success("操作成功");
+    }
+
+    /**
+     * 批量更新优先级
+     *
+     * @param jsonVo 实体类
+     * @return 批量更新优先级
+     */
+    @PostMapping("/batchUpdatePriority")
+    public Result batchUpdatePriority(@RequestBody JsonVo jsonVo) {
+        if (jsonVo.getIds().size() != 0) {
+            return this.testCheckItemTeamRelService.batchUpdatePriority(jsonVo);
+        } else {
+            return ResultUtil.error("数据为空");
+        }
     }
 }
 
