@@ -401,6 +401,7 @@ public interface EntrustEntityMapper extends BaseMapper {
 
     /**
      * 查询该委托下所有的样品id
+     *
      * @param entrustmentId
      * @return
      */
@@ -409,8 +410,12 @@ public interface EntrustEntityMapper extends BaseMapper {
     @Select("select report_edit_url from test_entrusted_sample_details_rel where entrustment_id=#{entrustmentId} and completion_status=1")
     List<String> getAllReportEditUrlByEntrustId(@Param("entrustmentId") Long entrustmentId);
 
+    @Select("select sample_id as id ,report_edit_url as fileUrl from test_entrusted_sample_details_rel where entrustment_id=#{entrustmentId} and completion_status=1")
+    List<SampleEntity> getAllReportEditUrlByEntrustIdList(@Param("entrustmentId") Long entrustmentId);
+
     /**
      * 修改委托下样品委托单位
+     *
      * @return
      */
     int updateSampleCompany(@Param("list") List<TestSampleEntity> list);

@@ -1583,10 +1583,10 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                 // "创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 未进行excel在线编辑 "
                 status = false;
             }
-            if (org.apache.commons.lang3.StringUtils.isNotEmpty(excelInsertVo.getSignUrl())) {
-                // "创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 电子印章signUrl已存在 "
-                status = false;
-            }
+//            if (org.apache.commons.lang3.StringUtils.isNotEmpty(excelInsertVo.getSignUrl())) {
+//                // "创建合同失败：当前检测项 " + excelInsertVo.getCheckItemName() + " 电子印章signUrl已存在 "
+//                status = false;
+//            }
             // 条件成立
             if (status) {
                 // 进行赋值

@@ -4389,7 +4389,8 @@ public class ReportServiceImpl implements ReportService {
         InputStream inputStream = null;
         //合并委托下所有样品报告
         ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
-        List<String> urls = entrustEntityMapper.getAllReportEditUrlByEntrustId(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+//        List<String> urls = entrustEntityMapper.getAllReportEditUrlByEntrustId(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
+        List<SampleEntity> sampleEntitieUrls = entrustEntityMapper.getAllReportEditUrlByEntrustIdList(entity.getEntrustmentId() == null ? entity.getEntrustId() : entity.getEntrustmentId());
         //设置合并报告
         Map<Integer, Integer> countMap = new LinkedHashMap();
         Map<Integer, Workbook> map = new HashMap<>();
@@ -4398,7 +4399,8 @@ public class ReportServiceImpl implements ReportService {
         //获取报告总页数
         int totalPage = 0;
         int index = 1;
-        for (String url:urls) {
+        for (SampleEntity sampleData : sampleEntitieUrls) {
+            String url = sampleData.getFileUrl();
             int size = 0;
             String[] strings = url.split("\\/");
             String bluckName = strings[3];
@@ -4410,18 +4412,25 @@ public class ReportServiceImpl implements ReportService {
                 //摘取报告、报告sheet放到新的excel文件中
                 Workbook newWork = new Workbook();
                 newWork.getWorksheets().clear();
-                for (int i=0;i<count;i++){
-                    if (workbook.getWorksheets().get(i).getName().contains("第")){
+                for (int i = 0; i < count; i++) {
+                    if (workbook.getWorksheets().get(i).getName().contains("第")) {
                         size = size + 1;
                         totalPage = totalPage + 1;
                         //合并sheet
-                        Worksheet worksheetS = newWork.getWorksheets().add("第"+totalPage);
+                        Worksheet worksheetS = newWork.getWorksheets().add("第" + totalPage);
                         worksheetS.copy(workbook.getWorksheets().get(i));
                     }
                 }
-                map.put(index,newWork);
+
+                // 调用方法填充数据
+                try {
+                    taskService.storeReportInformation(sampleData.getId(), newWork);
+                } catch (Exception e) {
+                    log.error("调用方法填充数据：{}", e.getMessage());
+                }
+                map.put(index, newWork);
                 countMap.put(index, size);
-                index=index+1;
+                index = index + 1;
             } catch (Exception e) {
                 log.error("报告文件加载失败:{}",e);
             }
