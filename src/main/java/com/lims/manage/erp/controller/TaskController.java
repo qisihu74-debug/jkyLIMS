@@ -1106,62 +1106,107 @@ public class TaskController {
 
     /**
      * 复核：中间及最终检测项(返回pdf)
-     *  list
-     *  checkReview
+     * list
+     * checkReview
      */
     @RequestMapping(value = "/checkItemReview")
-    public void previewDownLoad(String list , HttpServletResponse response) throws Exception {
-        String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
-        String path = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf";
-        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+    public void previewDownLoad(String list, HttpServletResponse response) throws Exception {
+
         String[] items = list.split(",");
         Integer[] ids = new Integer[items.length];
         for (int j = 0; j < items.length; j++) {
             ids[j] = Integer.parseInt(items[j]);
         }
-        // 查询检测项对应的 sheet下标
-        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
-        if (!CollectionUtils.isEmpty(sheetItems)) {
-            List<Integer> idList = new ArrayList<>();
-            for (int i = 0; i < sheetItems.size(); i++) {
-                ExcelInsertVo excelInsertVo1 = sheetItems.get(i);
-                if (StringUtils.isNotEmpty(excelInsertVo1.getTestSetUrl()) && StringUtils.isNotEmpty(excelInsertVo1.getRecordSetUrl())) {
-                    idList.add(excelInsertVo1.getItemId());
+
+        String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
+        String path = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf";
+
+        try {
+            // 预览原始记录
+            previewOriginalRecordConvertToPdf(ids, response, newFilePath, path);
+        } catch (Exception e) {
+            log.error("检测项 获取机器码Excel异常{}" + e);
+        }
+
+        // 删除附件
+        FileAndFolderUtil.delete(newFilePath);
+        FileAndFolderUtil.delete(path);
+    }
+
+    /**
+     * 预览原始记录 转 pdf
+     *
+     * @param ids
+     * @param response
+     */
+    public void previewOriginalRecordConvertToPdf(Integer[] ids, HttpServletResponse response, String newFilePath, String path) throws Exception {
+
+        ExcelInsertVo excelInsertVo = new ExcelInsertVo();
+        // 检测项Excel
+        XSSFWorkbook itemsWb = null;
+        try {
+            // 查询检测项对应的 sheet下标
+            List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
+            if (!CollectionUtils.isEmpty(sheetItems)) {
+                List<Integer> idList = new ArrayList<>();
+                for (int i = 0; i < sheetItems.size(); i++) {
+                    ExcelInsertVo excelInsertVo1 = sheetItems.get(i);
+                    if (StringUtils.isNotEmpty(excelInsertVo1.getTestSetUrl()) && StringUtils.isNotEmpty(excelInsertVo1.getRecordSetUrl())) {
+                        idList.add(excelInsertVo1.getItemId());
+                    }
+                }
+                excelInsertVo.setList(idList);
+                // 判断检测数据不为空
+                if (CollectionUtil.isNotEmpty(excelInsertVo.getList())) {
+                    // excel 转 pdf
+                    itemsWb = taskService.getOriginalRecordAttachment(excelInsertVo);
                 }
             }
-            excelInsertVo.setList(idList);
-            // 判断检测数据不为空
-            if (CollectionUtil.isNotEmpty(excelInsertVo.getList())) {
-                // excel 转 pdf
-                XSSFWorkbook wb = taskService.getOriginalRecordAttachment(excelInsertVo);
-                FileOutputStream out = new FileOutputStream(newFilePath);
-                wb.write(out);
-                out.flush();//刷新
-                InputStream out000 = new FileInputStream(newFilePath);
-                //相应pdf
-                ByteArrayOutputStream b1 = PDFHelper3.excel2pdf(out000, path);
-                InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-                ServletOutputStream outputStream = response.getOutputStream();
-                int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
-                inputStream.close();
-                outputStream.close();
-                out000.close();
-                b1.close();
-                out.close();//关闭
-                // 删除附件
-                FileAndFolderUtil.delete(newFilePath);
-                FileAndFolderUtil.delete(path);
-            }
-        } else {
-            // 检测项无Sheet页
-
+        } catch (Exception e) {
+            logger.error("批量预览原始记录 " + e);
         }
+        // 任务单Excel
+        XSSFWorkbook taskWb = null;
+        if (taskWb == null) {
+            try {
+                // 读取机器生成taskExcel文件
+                taskWb = taskService.getTaskUrlExcel(ids);
+            } catch (Exception e) {
+                logger.error("读取机器生成taskExcel文件 " + e);
+            }
+        }
+
+        // 进行excel 转pdf 文件输出
+        if (itemsWb != null && taskWb != null) {
+            reportService.mergingExcelFiles(itemsWb, taskWb, newFilePath);
+        } else if (itemsWb != null) {
+            FileOutputStream out = new FileOutputStream(newFilePath);
+            itemsWb.write(out);
+            out.flush();//刷新
+            out.close();//关闭
+        } else if (taskWb != null) {
+            FileOutputStream out2 = new FileOutputStream(newFilePath);
+            taskWb.write(out2);
+            out2.flush();//刷新
+            out2.close();//关闭
+        }
+
+        InputStream out000 = new FileInputStream(newFilePath);
+        //相应pdf
+        ByteArrayOutputStream b1 = PDFHelper3.excel2pdf(out000, path);
+        InputStream inputStream = FileAndFolderUtil.parseOut(b1);
+        ServletOutputStream outputStream = response.getOutputStream();
+        int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
+        inputStream.close();
+        outputStream.close();
+        out000.close();
+        b1.close();
     }
 
     /**
      * 完成复核：中间检测项 及 最终复核
-     *  list
-     *  checkReview
+     * list
+     * checkReview
      */
     @RequestMapping(value = "/finishCheckItemReview")
     public Result finishCheckItemReview(@RequestBody ExcelInsertVo excelInsertVo) throws Exception {
@@ -1202,53 +1247,26 @@ public class TaskController {
         // 根据报告主键 获取所属检测项主键列表
         List<Integer> itemIds = testProductItemDao.selectGROUPBYItemId(Long.parseLong(reportId));
         if (CollectionUtil.isNotEmpty(itemIds)) {
-            String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
-            String path = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf";
-            ExcelInsertVo excelInsertVo = new ExcelInsertVo();
             Integer[] ids = new Integer[itemIds.size()];
             for (int j = 0; j < itemIds.size(); j++) {
                 ids[j] = itemIds.get(j);
             }
-            // 查询检测项对应的 sheet下标
-            List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetIndex(ids);
-            if (!CollectionUtils.isEmpty(sheetItems)) {
-                List<Integer> idList = new ArrayList<>();
-                for (int i = 0; i < sheetItems.size(); i++) {
-                    ExcelInsertVo excelInsertVo1 = sheetItems.get(i);
-                    if (StringUtils.isNotEmpty(excelInsertVo1.getTestSetUrl()) && StringUtils.isNotEmpty(excelInsertVo1.getRecordSetUrl())) {
-                        idList.add(excelInsertVo1.getItemId());
-                    }
-                }
-                excelInsertVo.setList(idList);
-                // 判断检测数据不为空
-                if (CollectionUtil.isNotEmpty(excelInsertVo.getList())) {
-                    // excel 转 pdf
-                    XSSFWorkbook wb = taskService.getOriginalRecordAttachment(excelInsertVo);
-                    FileOutputStream out = new FileOutputStream(newFilePath);
-                    wb.write(out);
-                    out.flush();//刷新
-                    InputStream out000 = new FileInputStream(newFilePath);
-                    //相应pdf
-                    ByteArrayOutputStream b1 = PDFHelper3.excel2pdf(out000, path);
-                    InputStream inputStream = FileAndFolderUtil.parseOut(b1);
-                    ServletOutputStream outputStream = response.getOutputStream();
-                    int i = IOUtils.copy(inputStream, outputStream);   // copy流数据,i为字节数
-                    inputStream.close();
-                    outputStream.close();
-                    out000.close();
-                    b1.close();
-                    out.close();//关闭
-                    // 删除附件
-                    FileAndFolderUtil.delete(newFilePath);
-                    FileAndFolderUtil.delete(path);
-                }
-            } else {
-                // 检测项无Sheet页
 
+            String newFilePath = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
+            String path = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".pdf";
+
+            try {
+                // 预览原始记录
+                previewOriginalRecordConvertToPdf(ids, response, newFilePath, path);
+            } catch (Exception e) {
+                log.error("检测项 获取机器码Excel异常{}" + e);
             }
+
+            // 删除附件
+            FileAndFolderUtil.delete(newFilePath);
+            FileAndFolderUtil.delete(path);
+
         }
-//        // 检测项无Sheet页
-//        new ModelAndView("error");
     }
 
     /**

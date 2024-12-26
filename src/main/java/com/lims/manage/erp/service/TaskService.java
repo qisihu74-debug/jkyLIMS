@@ -343,4 +343,21 @@ public interface TaskService {
     List<TaskStatsItemVo> selectList1(String toString);
 
     void storeReportInformation(int sampleId, com.aspose.cells.Workbook document) throws Exception;
+
+    /**
+     * 线上报告附件塞值
+     *
+     * @param sampleId
+     * @param document
+     * @throws Exception
+     */
+    void storeOnlineReportInformation(int sampleId, com.aspose.cells.Workbook document) throws Exception;
+
+    /**
+     * 返回taskUrl
+     * list 检测项主键
+     *
+     * @return
+     */
+    XSSFWorkbook getTaskUrlExcel(Integer[] ids) throws IOException;
 }

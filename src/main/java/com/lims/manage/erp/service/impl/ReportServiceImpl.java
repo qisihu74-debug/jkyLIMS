@@ -83,6 +83,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.Range;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -1614,6 +1615,53 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ReportRecordEntity> getDetailByEntrustId1(Long entrustId) {
         return reportMapper.getDetailByEntrustId1(entrustId);
+    }
+
+    /**
+     * 执行文件合并
+     *
+     * @param itemsWb
+     * @param taskWb
+     * @return
+     */
+    @Override
+    public void mergingExcelFiles(XSSFWorkbook itemsWb, XSSFWorkbook taskWb, String newFilePath) {
+
+        String path1 = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
+        String path2 = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
+
+        try {
+
+            FileOutputStream out = new FileOutputStream(path1);
+            taskWb.write(out);
+            out.flush();//刷新
+            out.close();//关闭
+
+            FileOutputStream out2 = new FileOutputStream(path2);
+            itemsWb.write(out2);
+            out2.flush();//刷新
+            out2.close();//关闭
+
+            InputStream fileStream = new FileInputStream(path1);
+            Workbook topDoc = new Workbook(fileStream);
+
+
+            InputStream fileStream2 = new FileInputStream(path2);
+            Workbook topDoc2 = new Workbook(fileStream2);
+            Map<Integer, Workbook> map = new HashMap<>();
+            map.put(0, topDoc2);
+            // 合并文件
+            Workbook docWorkbookCopy = workbookCopy(topDoc, map);
+            docWorkbookCopy.save(newFilePath);
+
+            fileStream.close();
+            fileStream2.close();
+        } catch (Exception e) {
+            log.error("执行文件合并 抛出 " + e);
+        }
+
+        FileAndFolderUtil.delete(path1);
+        FileAndFolderUtil.delete(path2);
     }
 
     @Override
@@ -4302,6 +4350,12 @@ public class ReportServiceImpl implements ReportService {
             } catch (Exception e) {
                 log.error("报告制作加载模板文件失败:{}", e);
             }
+            // 针对线上报告数据进行填充处理
+            try {
+                taskService.storeOnlineReportInformation(reportEditReq.getSampleId(), workbook);
+            } catch (Exception e) {
+                log.error("调用方法填充数据：{}", e.getMessage());
+            }
             String loacl = handlerReportHeader(detail, workbook, localPath, fileName, reportEditReq);
             return loacl;
         }
@@ -4389,8 +4443,7 @@ public class ReportServiceImpl implements ReportService {
         InputStream inputStream = null;
         //合并委托下所有样品报告
         ReportRecordEntity entity = recordEntityMapper.getEntrust(reportCode);
-//        List<String> urls = entrustEntityMapper.getAllReportEditUrlByEntrustId(entity.getEntrustmentId()==null?entity.getEntrustId():entity.getEntrustmentId());
-        List<SampleEntity> sampleEntitieUrls = entrustEntityMapper.getAllReportEditUrlByEntrustIdList(entity.getEntrustmentId() == null ? entity.getEntrustId() : entity.getEntrustmentId());
+        List<String> urls = entrustEntityMapper.getAllReportEditUrlByEntrustId(entity.getEntrustmentId() == null ? entity.getEntrustId() : entity.getEntrustmentId());
         //设置合并报告
         Map<Integer, Integer> countMap = new LinkedHashMap();
         Map<Integer, Workbook> map = new HashMap<>();
@@ -4399,8 +4452,7 @@ public class ReportServiceImpl implements ReportService {
         //获取报告总页数
         int totalPage = 0;
         int index = 1;
-        for (SampleEntity sampleData : sampleEntitieUrls) {
-            String url = sampleData.getFileUrl();
+        for (String url : urls) {
             int size = 0;
             String[] strings = url.split("\\/");
             String bluckName = strings[3];
@@ -4420,13 +4472,6 @@ public class ReportServiceImpl implements ReportService {
                         Worksheet worksheetS = newWork.getWorksheets().add("第" + totalPage);
                         worksheetS.copy(workbook.getWorksheets().get(i));
                     }
-                }
-
-                // 调用方法填充数据
-                try {
-                    taskService.storeReportInformation(sampleData.getId(), newWork);
-                } catch (Exception e) {
-                    log.error("调用方法填充数据：{}", e.getMessage());
                 }
                 map.put(index, newWork);
                 countMap.put(index, size);

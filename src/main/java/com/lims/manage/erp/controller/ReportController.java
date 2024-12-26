@@ -1363,19 +1363,19 @@ public class ReportController {
             for (int i=0; i<count; i++){
                 String name = workbook.getWorksheets().get(i).getName();
                 name = name.replaceAll(" ", "");
-                if ("报告第1页,报告第2页,报告第3页,指标选择".contains(name)){
+                if ("报告第1页,报告第2页,报告第3页,指标选择".contains(name)) {
                     workbook.getWorksheets().get(i).setVisible(true);
                     //设置当工作表只读时，是否允许用户手动调整行列。
                     wb.openSheet(workbook.getWorksheets().get(i).getName()).setAllowAdjustRC(true);
                     //如果值为true，处于可编辑的Sheet将变成只读。如果值为false，处于只读的Sheet将变成可编辑。
                     wb.openSheet(workbook.getWorksheets().get(i).getName()).setReadOnly(false);
-                }else {
+                } else {
                     workbook.getWorksheets().get(i).setVisible(false);
                 }
             }
             workbook.save(localPath, SaveFormat.XLSX);
         } catch (Exception e) {
-            logger.error("加载需要编辑的报告文件失败:{}",e);
+            logger.error("加载需要编辑的报告文件失败:{}", e);
         }
         poCtrl.setWriter(wb);
         //添加自定义按钮

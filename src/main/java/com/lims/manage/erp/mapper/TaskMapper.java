@@ -865,7 +865,7 @@ public interface TaskMapper extends BaseMapper {
     List<CheckItemInfoVo> getCheckItemTemplateItemPosition(@Param(value = "sampleId") int sampleId);
 
     /**
-     * 通过sampleId 获取 检测项报告标识坐标信息
+     * 通过sampleId 获取 线下 检测项报告标识坐标信息
      *
      * @param sampleId
      * @return
@@ -886,6 +886,39 @@ public interface TaskMapper extends BaseMapper {
             "\tt1.id = #{sampleId} \n" +
             "\t)")
     List<CheckItemInfoVo> getDaProductDictionaryPosition(@Param(value = "sampleId") int sampleId);
+
+    /**
+     * 通过样品id 读取对应的产品下的 线上报告
+     *
+     * @param sampleId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tproduct_id as productId,\n" +
+            "\treport_original_id as reportId\n" +
+            "FROM\n" +
+            "\tproduct_report_original_rel \n" +
+            "WHERE\n" +
+            "\tproduct_id = ( SELECT product_id FROM test_sample WHERE id = #{sampleId} )")
+    TestProduct getProductInfo(@Param(value = "sampleId") int sampleId);
+
+    /**
+     * 通过产品id 及 报告id 读取 对应线上模版坐标内容
+     *
+     * @param productId
+     * @param reportModelId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\titem_id AS itemId,\n" +
+            "\t`report_item_position` AS opinion \n" +
+            "FROM\n" +
+            "\tda_product_online_dictionary \n" +
+            "WHERE\n" +
+            "\treport_model_id = #{reportModelId} \n" +
+            "\tAND product_id = #{productId}")
+    List<CheckItemInfoVo> getDaProductOnlineDictionaryPosition(@Param(value = "productId") int productId, @Param(value = "reportModelId") Long reportModelId);
+
 
     /**
      * 通过 sampleId 获取附件集合

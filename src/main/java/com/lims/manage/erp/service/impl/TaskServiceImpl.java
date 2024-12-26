@@ -2776,7 +2776,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                     Cells cells = worksheet.getCells();
                     // 判断 strings.get(i) 不为空 存储
                     if (!StringUtils.isEmpty(strings.get(i))) {
-                        cells.get(values[1]).setValue(strings.get(i));
+                        cells.get(values[1]).setValue(Double.valueOf(strings.get(i)));
                     }
 
                 }
@@ -2851,35 +2851,142 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
 
             }
 
-            // 1.1.3 读取 任务单中 excel 坐标中数据
-            readTaskSingleModeData(map, taskCodeExcel);
+        // 1.1.3 读取 任务单中 excel 坐标中数据
+        readTaskSingleModeData(map, taskCodeExcel);
 
-            // 2.1 读取任务单模版数据并写入 document 中。
+        // 2.1 读取任务单模版数据并写入 document 中。
 
-            // 2.1.1 获取报告模版数据
-            // 通过sampleId 获取 检测项报告标识坐标信息
-            List<CheckItemInfoVo> daProductDictionarys = taskMapper.getDaProductDictionaryPosition(sampleId);
-            if (CollectionUtil.isEmpty(daProductDictionarys)) {
-                // 当前委托单中 样品中 产品id 与报告模版标识没有绑定
-                return;
+        // 2.1.1 获取报告模版数据
+        // 通过sampleId 获取 检测项报告标识坐标信息
+        List<CheckItemInfoVo> daProductDictionarys = taskMapper.getDaProductDictionaryPosition(sampleId);
+        if (CollectionUtil.isEmpty(daProductDictionarys)) {
+            // 当前委托单中 样品中 产品id 与报告模版标识没有绑定
+            return;
+        }
+
+        // 标记
+        Boolean markers = false;
+        for (CheckItemInfoVo checkItemInfoVo : daProductDictionarys) {
+            if (CollectionUtil.isNotEmpty((Iterable<?>) map.get(checkItemInfoVo.getItemId()))) {
+                markers = true;
             }
+        }
+        if (!markers) {
+            // daProductDictionarys 记录表中 无 任务单附件信息
+            return;
+        }
 
-            // 标记
-            Boolean markers = false;
-            for (CheckItemInfoVo checkItemInfoVo : daProductDictionarys) {
-                if (CollectionUtil.isNotEmpty((Iterable<?>) map.get(checkItemInfoVo.getItemId()))) {
-                    markers = true;
+        // 读取任务单模版数据并写入 document 中。
+        writeReportWorkbook(map, daProductDictionarys, document);
+
+        inputStream.close();
+    }
+
+    /**
+     * 在线编辑读取 产品Excel 附件
+     *
+     * @param sampleId
+     * @param document
+     * @throws Exception
+     */
+    @Override
+    public void storeOnlineReportInformation(int sampleId, com.aspose.cells.Workbook document) throws Exception {
+        PDFHelper3.getLicense();
+        // 效验当前任务单 是否出具 客户端附件信息
+        List<String> urls = taskMapper.getTaskRecordUrlBySampleId(sampleId);
+        if (CollectionUtil.isEmpty(urls)) {
+            return;
+        }
+
+        // 读取 任务单附件 对应坐标值。
+        Map<Integer, Object> map = new HashMap<>();
+
+        String url = urls.get(0);
+        String[] split = url.split("\\?");
+        String[] strings = split[0].split("\\/");
+        String bluckName = strings[3];
+        String fileName = strings[4];
+        // 获取任务单附件
+        InputStream inputStream = MinIoUtil.getFileStream(bluckName, fileName);
+        com.aspose.cells.Workbook taskCodeExcel = new com.aspose.cells.Workbook(inputStream);
+
+        // 1.1 读取表格中数值 da_template_item_position 通过委托单ID
+        List<CheckItemInfoVo> itemInfoVos = taskMapper.getCheckItemTemplateItemPosition(sampleId);
+
+        // 1.1.2 读取信息写入信息
+        for (CheckItemInfoVo data : itemInfoVos) {
+            List<String> stringList = new ArrayList<>();
+
+            if (!StringUtils.isEmpty(data.getOpinion())) {
+                String[] arrays = data.getOpinion().split("\\,");
+                for (int i = 0; i < arrays.length; i++) {
+                    stringList.add(arrays[i]);
                 }
-            }
-            if (!markers) {
-                // daProductDictionarys 记录表中 无 任务单附件信息
-                return;
+                map.put(data.getItemId(), stringList);
             }
 
-            // 读取任务单模版数据并写入 document 中。
-            writeReportWorkbook(map, daProductDictionarys, document);
+        }
 
-            inputStream.close();
+        // 1.1.3 读取 任务单中 excel 坐标中数据
+        readTaskSingleModeData(map, taskCodeExcel);
+
+        // 2.1 读取任务单模版数据并写入 document 中。
+
+        // 2.1.1 获取报告模版数据
+        TestProduct testProduct = taskMapper.getProductInfo(sampleId);
+        if (testProduct == null) {
+            return;
+        }
+        // 通过 产品id 及 对应线上 报告id 获取 检测项报告标识坐标信息
+
+        List<CheckItemInfoVo> daProductDictionarys = taskMapper.getDaProductOnlineDictionaryPosition(testProduct.getProductId(), testProduct.getReportId());
+        if (CollectionUtil.isEmpty(daProductDictionarys)) {
+            // 当前委托单中 样品中 产品id 与报告模版标识没有绑定
+            return;
+        }
+
+        // 标记
+        Boolean markers = false;
+        for (CheckItemInfoVo checkItemInfoVo : daProductDictionarys) {
+            if (CollectionUtil.isNotEmpty((Iterable<?>) map.get(checkItemInfoVo.getItemId()))) {
+                markers = true;
+            }
+        }
+        if (!markers) {
+            // daProductDictionarys 记录表中 无 任务单附件信息
+            return;
+        }
+
+        // 读取任务单模版数据并写入 document 中。
+        writeReportWorkbook(map, daProductDictionarys, document);
+
+        inputStream.close();
+    }
+
+    @Override
+    public XSSFWorkbook getTaskUrlExcel(Integer[] ids) throws IOException {
+        // 通过检测项id 获取样品id
+        List<SampleItemEntity> sampleItemEntities = testDetectionDao.selectItemList(ids[0]);
+
+        // 通过样品id 获取 task附件信息
+
+        List<String> urls = taskMapper.getTaskRecordUrlBySampleId(sampleItemEntities.get(0).getSampleId());
+
+        if (CollectionUtil.isEmpty(urls)) {
+            return null;
+        }
+        InputStream fileStream = null;
+        // 获取公网 附件
+        try {
+            fileStream = FileAndFolderUtil.getInputStream(urls.get(0));
+        } catch (Exception e) {
+            logger.info("task附件信息 " + urls.get(0) + e);
+        }
+        if (fileStream == null) {
+            return null;
+        }
+        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+        return wb;
     }
 
 

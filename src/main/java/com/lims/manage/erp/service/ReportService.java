@@ -21,6 +21,7 @@ import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.vo.*;
 import io.minio.MinioClient;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -483,4 +484,13 @@ public interface ReportService {
     List<ReportRecordEntity> getEntrustIdsByIds(List<String> ids);
 
     List<ReportRecordEntity> getDetailByEntrustId1(Long entrustId);
+
+    /**
+     * excel文件合并
+     *
+     * @param itemsWb
+     * @param taskWb
+     * @return
+     */
+    void mergingExcelFiles(XSSFWorkbook itemsWb, XSSFWorkbook taskWb, String newFilePath);
 }
