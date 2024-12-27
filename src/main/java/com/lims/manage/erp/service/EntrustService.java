@@ -315,6 +315,7 @@ public interface EntrustService {
 
     /**
      * 客户委托查询 适用于 Excel 导出
+     *
      * @param clientOrderdetailVo
      * @return
      */
@@ -323,9 +324,21 @@ public interface EntrustService {
     /**
      * 导出Excel 表
      */
-    InputStream exportPersonDetails(List<ClientOrderdetailVo> list,ClientOrderdetailVo clientOrderdetailVo) throws Exception;
+    InputStream exportPersonDetails(List<ClientOrderdetailVo> list, ClientOrderdetailVo clientOrderdetailVo) throws Exception;
+
+    /**
+     * 导出带单价及备注表格
+     *
+     * @param list
+     * @param clientOrderdetailVo
+     * @return
+     * @throws Exception
+     */
+    InputStream exportUnitPricePersonDetails(List<ClientOrderdetailVo> list, ClientOrderdetailVo clientOrderdetailVo) throws Exception;
+
     /**
      * 客户委托查询
+     *
      * @param clientOrderdetailVo
      * @return
      */

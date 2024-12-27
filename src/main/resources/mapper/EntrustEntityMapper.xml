@@ -1086,16 +1086,19 @@
         <result property="acceptanceDate" column="acceptance_date"></result>
         <result property="entrustmentNostr" column="entrustmentNostr"></result>
         <result property="operatingPersonnel" column="operating_personnel"></result>
+        <result property="remark" column="remark"></result>
         <collection property="samples" ofType="com.lims.manage.erp.entity.SampleEntity">
             <result property="id" column="sampleId"></result>
             <result property="sampleName" column="alias_name"></result>
             <result property="specs" column="specs"></result>
             <result property="batchNumber" column="batch_number"></result>
-             <collection property="sampleCheckItem" ofType="com.lims.manage.erp.entity.SampleItemEntity">
-                 <result property="id" column="itemId"></result>
-                 <result property="checkItemName" column="check_item_name"></result>
-                 <result property="checkItemId" column="check_item_id"></result>
-             </collection>
+            <collection property="sampleCheckItem" ofType="com.lims.manage.erp.entity.SampleItemEntity">
+                <result property="id" column="itemId"></result>
+                <result property="checkItemName" column="check_item_name"></result>
+                <result property="checkItemId" column="check_item_id"></result>
+                <result property="times" column="times"></result>
+                <result property="unitPrice" column="unit_price"></result>
+            </collection>
         </collection>
         <collection property="taskEntities" ofType="com.lims.manage.erp.entity.TaskEntity">
             <result property="id" column="taskId"></result>
@@ -1121,6 +1124,7 @@
         t1.entrust_company_id ,
         t1.actual_price system_price,
         t1.operating_personnel,
+        t1.remark,
         t3.id sampleId,
         t3.alias_name ,
         t3.specs,
@@ -1128,6 +1132,8 @@
         t4.id itemId,
         t4.check_item_name,
         t4.check_item_id,
+        t4.times,
+        t4.unit_price,
         t5.id taskId,
         t5.task_code,
         t6.id reportId,
@@ -1165,6 +1171,12 @@
         </if>
         <if test="operatingPersonnel!=null and operatingPersonnel!=''">
             and t1.operating_personnel LIKE CONCAT('%',#{operatingPersonnel},'%')
+        </if>
+        <if test="entrustIds!=null">
+            and t1.id in
+            <foreach collection="entrustIds" item="name" index="index" open="(" close=")" separator=",">
+                #{name}
+            </foreach>
         </if>
         ORDER BY t1.entrustment_no asc, t1.request_date asc
     </select>

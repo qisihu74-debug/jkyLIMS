@@ -4535,35 +4535,50 @@ public class EntrustServiceImpl implements EntrustService {
         list = entityMapper.selectClientOrderdetailVoList(clientOrderdetailVo);
         if(!CollectionUtils.isEmpty(list)){
             for(ClientOrderdetailVo clientOrderdetailVo1 :list){
-                if(StringUtils.isEmpty(clientOrderdetailVo1.getProjectName())){
+                if (StringUtils.isEmpty(clientOrderdetailVo1.getProjectName())) {
                     clientOrderdetailVo1.setProjectName("--");
                 }
-                if(StringUtils.isEmpty(clientOrderdetailVo1.getProjectPart())){
+                if (StringUtils.isEmpty(clientOrderdetailVo1.getProjectPart())) {
                     clientOrderdetailVo1.setProjectPart("--");
                 }
-                if(StringUtils.isEmpty(clientOrderdetailVo1.getOperatingPersonnel())){
+                if (StringUtils.isEmpty(clientOrderdetailVo1.getOperatingPersonnel())) {
                     clientOrderdetailVo1.setOperatingPersonnel("--");
+                }
+                if (StringUtils.isEmpty(clientOrderdetailVo1.getRemark())) {
+                    clientOrderdetailVo1.setRemark("--");
                 }
                 HashSet<String> SampleNameSet = new HashSet<>();
                 HashSet<String> SpecsSet = new HashSet<>();
                 HashSet<String> BatchNumberSet = new HashSet<>();
                 HashSet<String> CheckItemNameSet = new HashSet<>();
+                List<String> checkItemNameUnitPriceSet = new ArrayList<>();
                 // 处理样品信息及检测项信息
-                if(!CollectionUtils.isEmpty(clientOrderdetailVo1.getSamples())){
-                    for(SampleEntity sampleEntity :clientOrderdetailVo1.getSamples()){
-                        if(!StringUtils.isEmpty(sampleEntity.getSampleName())){
+                if (!CollectionUtils.isEmpty(clientOrderdetailVo1.getSamples())) {
+                    for (SampleEntity sampleEntity : clientOrderdetailVo1.getSamples()) {
+                        if (!StringUtils.isEmpty(sampleEntity.getSampleName())) {
                             SampleNameSet.add(sampleEntity.getSampleName());
                         }
-                        if(!StringUtils.isEmpty(sampleEntity.getSpecs())){
+                        if (!StringUtils.isEmpty(sampleEntity.getSpecs())) {
                             SpecsSet.add(sampleEntity.getSpecs());
                         }
-                        if(!StringUtils.isEmpty(sampleEntity.getBatchNumber())){
+                        if (!StringUtils.isEmpty(sampleEntity.getBatchNumber())) {
                             BatchNumberSet.add(sampleEntity.getBatchNumber());
                         }
-                        if(!CollectionUtils.isEmpty(sampleEntity.getSampleCheckItem())){
-                            for(SampleItemEntity sampleItemEntity :sampleEntity.getSampleCheckItem())
-                            {
+                        if (!CollectionUtils.isEmpty(sampleEntity.getSampleCheckItem())) {
+                            for (SampleItemEntity sampleItemEntity : sampleEntity.getSampleCheckItem()) {
                                 CheckItemNameSet.add(sampleItemEntity.getCheckItemName());
+                            }
+                        }
+                        // 通过检测项名称进行对应次数及单价
+                        if (!CollectionUtils.isEmpty(sampleEntity.getSampleCheckItem()) && !CollectionUtils.isEmpty(CheckItemNameSet)) {
+                            for (String checkItemName : CheckItemNameSet) {
+                                Boolean flag = true;
+                                for (SampleItemEntity sampleItemEntity : sampleEntity.getSampleCheckItem()) {
+                                    if (sampleItemEntity.getCheckItemName().equals(checkItemName) && flag) {
+                                        checkItemNameUnitPriceSet.add(sampleItemEntity.getTimes() + "*" + String.valueOf(sampleItemEntity.getUnitPrice()));
+                                        flag = false;
+                                    }
+                                }
                             }
                         }
                     }
@@ -4579,43 +4594,49 @@ public class EntrustServiceImpl implements EntrustService {
                     SpecsB.append("、");
                 }
                 StringBuilder BatchNumberB = new StringBuilder();
-                for(String BatchNumber:BatchNumberSet){
+                for (String BatchNumber : BatchNumberSet) {
                     BatchNumberB.append(BatchNumber);
                     BatchNumberB.append("、");
                 }
                 StringBuilder CheckItemNameB = new StringBuilder();
-                for(String CheckItemName:CheckItemNameSet){
+                for (String CheckItemName : CheckItemNameSet) {
                     CheckItemNameB.append(CheckItemName);
                     CheckItemNameB.append("、");
                 }
-                if(SampleNameB.length()>1){
-                    clientOrderdetailVo1.setSampleName(SampleNameB.deleteCharAt(SampleNameB.length()-1).toString());
+                StringBuilder checkItemNameUnitPriceSetB = new StringBuilder();
+                for (String checkItemNameUnitPrice : checkItemNameUnitPriceSet) {
+                    checkItemNameUnitPriceSetB.append(checkItemNameUnitPrice);
+                    checkItemNameUnitPriceSetB.append("+");
                 }
-                else {
+                if (SampleNameB.length() > 1) {
+                    clientOrderdetailVo1.setSampleName(SampleNameB.deleteCharAt(SampleNameB.length() - 1).toString());
+                } else {
                     clientOrderdetailVo1.setSampleName("--");
                 }
-                if(SpecsB.length()>1){
-                    clientOrderdetailVo1.setSpecs(SpecsB.deleteCharAt(SpecsB.length()-1).toString());
-                }
-                else {
+                if (SpecsB.length() > 1) {
+                    clientOrderdetailVo1.setSpecs(SpecsB.deleteCharAt(SpecsB.length() - 1).toString());
+                } else {
                     clientOrderdetailVo1.setSpecs("--");
                 }
-                if(BatchNumberB.length()>1){
-                    clientOrderdetailVo1.setBatchNumber(BatchNumberB.deleteCharAt(BatchNumberB.length()-1).toString());
-                }
-                else {
+                if (BatchNumberB.length() > 1) {
+                    clientOrderdetailVo1.setBatchNumber(BatchNumberB.deleteCharAt(BatchNumberB.length() - 1).toString());
+                } else {
                     clientOrderdetailVo1.setBatchNumber("--");
                 }
-                if(CheckItemNameB.length()>1){
-                    clientOrderdetailVo1.setCheckItemName(CheckItemNameB.deleteCharAt(CheckItemNameB.length()-1).toString());
-                }
-                else {
+                if (CheckItemNameB.length() > 1) {
+                    clientOrderdetailVo1.setCheckItemName(CheckItemNameB.deleteCharAt(CheckItemNameB.length() - 1).toString());
+                } else {
                     clientOrderdetailVo1.setCheckItemName("--");
+                }
+                if (checkItemNameUnitPriceSetB.length() > 1) {
+                    clientOrderdetailVo1.setCheckItemNameUnitPrice(checkItemNameUnitPriceSetB.deleteCharAt(checkItemNameUnitPriceSetB.length() - 1).toString());
+                } else {
+                    clientOrderdetailVo1.setCheckItemNameUnitPrice("--");
                 }
                 // 处理任务单信息。
                 StringBuilder taskCodeB = new StringBuilder();
-                if(!CollectionUtils.isEmpty(clientOrderdetailVo1.getTaskEntities())){
-                    for(TaskEntity taskEntity : clientOrderdetailVo1.getTaskEntities()){
+                if (!CollectionUtils.isEmpty(clientOrderdetailVo1.getTaskEntities())) {
+                    for (TaskEntity taskEntity : clientOrderdetailVo1.getTaskEntities()) {
                         taskCodeB.append(taskEntity.getCode());
                         taskCodeB.append("、");
                     }
@@ -4623,31 +4644,29 @@ public class EntrustServiceImpl implements EntrustService {
                 // 报告编号 和 发出日期
                 StringBuilder reportCodeB = new StringBuilder();
                 StringBuilder reportTimeB = new StringBuilder();
-                if(!CollectionUtils.isEmpty(clientOrderdetailVo1.getReportRecordEntities())){
-                    for(ReportRecordEntity reportRecordEntity : clientOrderdetailVo1.getReportRecordEntities()){
+                if (!CollectionUtils.isEmpty(clientOrderdetailVo1.getReportRecordEntities())) {
+                    for (ReportRecordEntity reportRecordEntity : clientOrderdetailVo1.getReportRecordEntities()) {
                         reportCodeB.append(reportRecordEntity.getReportCode());
                         reportCodeB.append("、");
-                        if(reportRecordEntity.getReportTime()!=null){
-                        reportTimeB.append(DateUtil.formatDate(reportRecordEntity.getReportTime()));
-                        reportTimeB.append("、");
-                      }
+                        if (reportRecordEntity.getReportTime() != null) {
+                            reportTimeB.append(DateUtil.formatDate(reportRecordEntity.getReportTime()));
+                            reportTimeB.append("、");
+                        }
                     }
                 }
-                if(reportCodeB.length()>1){
-                    clientOrderdetailVo1.setReportCode(reportCodeB.deleteCharAt(reportCodeB.length()-1).toString());
-                }else {
+                if (reportCodeB.length() > 1) {
+                    clientOrderdetailVo1.setReportCode(reportCodeB.deleteCharAt(reportCodeB.length() - 1).toString());
+                } else {
                     clientOrderdetailVo1.setReportCode("--");
                 }
-                if(reportTimeB.length()>1){
-                    clientOrderdetailVo1.setReportTime(reportTimeB.deleteCharAt(reportTimeB.length()-1).toString());
-                }
-                else {
+                if (reportTimeB.length() > 1) {
+                    clientOrderdetailVo1.setReportTime(reportTimeB.deleteCharAt(reportTimeB.length() - 1).toString());
+                } else {
                     clientOrderdetailVo1.setReportTime("--");
                 }
-                if(taskCodeB.length()>1){
-                    clientOrderdetailVo1.setTaskCode(taskCodeB.deleteCharAt(taskCodeB.length()-1).toString());
-                }
-                else {
+                if (taskCodeB.length() > 1) {
+                    clientOrderdetailVo1.setTaskCode(taskCodeB.deleteCharAt(taskCodeB.length() - 1).toString());
+                } else {
                     clientOrderdetailVo1.setTaskCode("--");
                 }
             }
@@ -4690,7 +4709,7 @@ public class EntrustServiceImpl implements EntrustService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         StringBuilder deptBuilder = new StringBuilder();
         if(clientOrderdetailVo.getCompanyStrs()!=null&&clientOrderdetailVo.getCompanyStrs().length>0){
-            for(int i=0; i < clientOrderdetailVo.getCompanyStrs().length;i++){
+            for (int i = 0; i < clientOrderdetailVo.getCompanyStrs().length; i++) {
                 deptBuilder.append(clientOrderdetailVo.getCompanyStrs()[i]);
                 deptBuilder.append("、");
             }
@@ -4741,23 +4760,108 @@ public class EntrustServiceImpl implements EntrustService {
             row = letterCycle.getNextUpEn(row);
             cells.get(row+n).setValue(personVo.getSystemPrice());
             row = letterCycle.getNextUpEn(row);
-            cells.get(row+n).setValue(personVo.getTaskCode());
+            cells.get(row + n).setValue(personVo.getTaskCode());
             row = letterCycle.getNextUpEn(row);
-            cells.get(row+n).setValue(personVo.getReportCode());
+            cells.get(row + n).setValue(personVo.getReportCode());
             row = letterCycle.getNextUpEn(row);
-            cells.get(row+n).setValue(personVo.getReportTime());
+            cells.get(row + n).setValue(personVo.getReportTime());
             row = "A";
             n++;
         }
         //输出Excel文件 字节输出流
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        workbook.save(qiYueSuoEntity.getAutographPath()+"sealList.xlsx");
-        File file = new File(qiYueSuoEntity.getAutographPath()+"sealList.xlsx");
+        workbook.save(qiYueSuoEntity.getAutographPath() + "sealList.xlsx");
+        File file = new File(qiYueSuoEntity.getAutographPath() + "sealList.xlsx");
         byte[] bytes = FileAndFolderUtil.file2byte(file);
         os.write(bytes);
         os.close();
         return new ByteArrayInputStream(os.toByteArray());
     }
+
+    @Override
+    public InputStream exportUnitPricePersonDetails(List<ClientOrderdetailVo> list, ClientOrderdetailVo clientOrderdetailVo) throws Exception {
+        InputStream fileStream = MinIoUtil.getFileStream("entrust-template", "客户委托单价详情表.xlsx");
+        PDFHelper3.getLicense();
+        Workbook workbook = new Workbook(fileStream);
+        Worksheet worksheet = workbook.getWorksheets().get(0);
+        Cells cells = worksheet.getCells();
+        // 第一行 标题
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        StringBuilder deptBuilder = new StringBuilder();
+        if (clientOrderdetailVo.getCompanyStrs() != null && clientOrderdetailVo.getCompanyStrs().length > 0) {
+            for (int i = 0; i < clientOrderdetailVo.getCompanyStrs().length; i++) {
+                deptBuilder.append(clientOrderdetailVo.getCompanyStrs()[i]);
+                deptBuilder.append("、");
+            }
+        }
+        if (deptBuilder.length() > 0) {
+            deptBuilder = deptBuilder.deleteCharAt(deptBuilder.length() - 1);
+        }
+        deptBuilder.append("委托详情表");
+        if (clientOrderdetailVo.getAcceptancebeganDate() != null && clientOrderdetailVo.getAcceptanceoverDate() != null) {
+            String Begandate = formatter.format(clientOrderdetailVo.getAcceptancebeganDate());
+            String Overdate = formatter.format(clientOrderdetailVo.getAcceptanceoverDate());
+            deptBuilder.append(Begandate + "~" + Overdate);
+        }
+        cells.get("A1").setValue(deptBuilder.toString());
+        Integer n = 3;
+        String row = "A";
+        ReportServiceImpl letterCycle = new ReportServiceImpl();
+        for (int i = 0; i < list.size(); i++) {
+            ClientOrderdetailVo personVo = list.get(i);
+            //在sheet里创建第三行
+            cells.get(row + n).setValue(personVo.getEntrustmentNostr());
+            row = letterCycle.getNextUpEn(row);
+            if (personVo.getAcceptanceDate() != null) {
+                String dateString = formatter.format(personVo.getAcceptanceDate());
+                cells.get(row + n).setValue(dateString);
+            }
+//            row = letterCycle.getNextUpEn(row);
+//            if (personVo.getRequestDate() != null) {
+//                String dateString = formatter.format(personVo.getRequestDate());
+//                cells.get(row+n).setValue(dateString);
+//            }
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row + n).setValue(personVo.getEntrustPeople());
+//            row = letterCycle.getNextUpEn(row);
+//            cells.get(row+n).setValue(personVo.getOperatingPersonnel());
+//            row = letterCycle.getNextUpEn(row);
+//            cells.get(row+n).setValue(personVo.getProjectName());
+//            row = letterCycle.getNextUpEn(row);
+//            cells.get(row+n).setValue(personVo.getProjectPart());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row + n).setValue(personVo.getSampleName());
+//            row = letterCycle.getNextUpEn(row);
+//            cells.get(row+n).setValue(personVo.getSpecs());
+//            row = letterCycle.getNextUpEn(row);
+//            cells.get(row+n).setValue(personVo.getBatchNumber());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row + n).setValue(personVo.getCheckItemName());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row + n).setValue(personVo.getSystemPrice());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row + n).setValue(personVo.getCheckItemNameUnitPrice());
+//            row = letterCycle.getNextUpEn(row);
+//            cells.get(row+n).setValue(personVo.getTaskCode());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row + n).setValue(personVo.getReportCode());
+            row = letterCycle.getNextUpEn(row);
+            cells.get(row + n).setValue(personVo.getRemark());
+//            row = letterCycle.getNextUpEn(row);
+//            cells.get(row+n).setValue(personVo.getReportTime());
+            row = "A";
+            n++;
+        }
+        //输出Excel文件 字节输出流
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        workbook.save(qiYueSuoEntity.getAutographPath() + "sealList.xlsx");
+        File file = new File(qiYueSuoEntity.getAutographPath() + "sealList.xlsx");
+        byte[] bytes = FileAndFolderUtil.file2byte(file);
+        os.write(bytes);
+        os.close();
+        return new ByteArrayInputStream(os.toByteArray());
+    }
+
     /**
      * 处理样品来样时间 与委托单受理日期
      * @param Id 样品id

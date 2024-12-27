@@ -969,7 +969,43 @@ public class EntrustController {
             System.out.println(pageInfo.getList().size());
             list =  pageInfo.getList();
         }
-        InputStream inputStream = entrustService.exportPersonDetails(list,clientOrderdetailVo);
+        InputStream inputStream = entrustService.exportPersonDetails(list, clientOrderdetailVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+    }
+
+    /**
+     * 客户委托检测项单价查询 导出
+     *
+     * @param clientOrderdetailVo
+     * @param response
+     * @throws IOException
+     */
+    @GetMapping("/getClientUnitPriceListExport")
+    public void getClientUnitPriceListExport(ClientOrderdetailVo clientOrderdetailVo, HttpServletResponse response) throws Exception {
+        clientOrderdetailVo.setPageNum(1);
+        clientOrderdetailVo.setPageSize(100000);
+        BufferedOutputStream bos = null;
+        String fileName = "企业委托单检测项单价详情表" + DateUtil.formatDate(new Date());
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
+        PageInfo pageInfo = entrustService.getClientListExport(clientOrderdetailVo);
+        List<ClientOrderdetailVo> list = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(pageInfo.getList())) {
+            System.out.println(pageInfo.getList().size());
+            list = pageInfo.getList();
+        }
+        InputStream inputStream = entrustService.exportUnitPricePersonDetails(list, clientOrderdetailVo);
         ServletOutputStream outputStream = response.getOutputStream();
         BufferedInputStream bis = new BufferedInputStream(inputStream);
         bos = new BufferedOutputStream(outputStream);
@@ -986,8 +1022,8 @@ public class EntrustController {
      * 对客户下的委托单进行受理
      */
     @GetMapping("acceptEntrust")
-    public Result acceptEntrust(Long id){
-        if (id == null){
+    public Result acceptEntrust(Long id) {
+        if (id == null) {
             return ResultUtil.error("缺少必要参数");
         }
         boolean b = entrustService.acceptEntrust(id);

@@ -80,17 +80,22 @@ public class ClientOrderdetailVo {
     /**
      * 检测项名称
      */
-    @TableField(exist=false)
+    @TableField(exist = false)
     private String checkItemName;
+    /**
+     * 检测项价格
+     */
+    @TableField(exist = false)
+    private String checkItemNameUnitPrice;
     /**
      * 检测项Id
      */
-    @TableField(exist=false)
+    @TableField(exist = false)
     private Integer checkItemId;
     /**
      * 任务编号
      */
-    @TableField(exist=false)
+    @TableField(exist = false)
     private String taskCode;
     /**
      * 报告编号
@@ -178,4 +183,12 @@ public class ClientOrderdetailVo {
      */
     @TableField(exist = false)
     private String remark;
+
+    /**
+     * 备注
+     */
+    @TableField(exist = false)
+    private List<Long> entrustIds;
+
+
 }
