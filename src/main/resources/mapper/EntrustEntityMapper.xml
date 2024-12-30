@@ -207,8 +207,8 @@
         SELECT * FROM (SELECT
         id,
         create_time,
-        GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ',') As taskCode,
-        GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ',') As teamName,
+        GROUP_CONCAT( DISTINCT IFNULL( taskCode, "——" ) SEPARATOR ',') As taskCode,
+        GROUP_CONCAT( DISTINCT IFNULL(teamName,"——") SEPARATOR ',') As teamName,
         entrustment_no,
         IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
         entrust_company,
@@ -396,8 +396,8 @@
         (SELECT
         id,
         create_time,
-        GROUP_CONCAT( IFNULL( taskCode, "——" ) SEPARATOR ',') As taskCode,
-        GROUP_CONCAT(IFNULL(teamName,"——") SEPARATOR ',') As teamName,
+        GROUP_CONCAT( DISTINCT IFNULL( taskCode, "——" ) SEPARATOR ',') As taskCode,
+        GROUP_CONCAT( DISTINCT IFNULL(teamName,"——") SEPARATOR ',') As teamName,
         entrustment_no,
         IFNULL( CONCAT( entrust_category_type, entrustment_no ), entrustment_no ) AS entrustmentNostr,
         entrust_company,
