@@ -771,21 +771,23 @@ public class ReportServiceImpl implements ReportService {
         Long deptId = taskMapper.getDeptByEntrustId(entrustId);
         String topDepartmentCode = teamMapper.getTopDepartmentCode(deptId);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-        String year = sdf.format(new Date());
+        //TODO： 根据委托单完成日期-设置报告编号
+        EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(entrustId);
+        String year = sdf.format(entrustAddVo.getRequestDate());
         //判断委托编号类型
         String entrustCategoryType = recordEntityMapper.getEntrustCategoryType(entrustId);
         //查询字典
         Integer subLen = 13;
-        if ("CNAS".equals(entrustCategoryType)){
-            subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
+        if ("CNAS".equals(entrustCategoryType)) {
+            subLen = entrustEntityMapper.getLenByType(100, entrustCategoryType);
         }
-        if ("CMA".equals(entrustCategoryType)){
-            subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
+        if ("CMA".equals(entrustCategoryType)) {
+            subLen = entrustEntityMapper.getLenByType(100, entrustCategoryType);
         }
         if (entrustCategoryType != null) {
-            Integer maxCode = recordEntityMapper.getOtherMaxCode(subLen,year, topDepartmentCode, entrustCategoryType);
+            Integer maxCode = recordEntityMapper.getOtherMaxCode(subLen, year, topDepartmentCode, entrustCategoryType);
             if (maxCode != null) {
-                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMid(subLen,year, topDepartmentCode, entrustCategoryType);
+                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMid(subLen, year, topDepartmentCode, entrustCategoryType);
                 if (maxCodeMid != null && maxCode < maxCodeMid) {
                     maxCode = maxCodeMid;
                 }
@@ -848,26 +850,29 @@ public class ReportServiceImpl implements ReportService {
 
     /**
      * 2024年4月10日后执行的报告编号规则 ZX-2024-YC-0001
+     *
      * @param entrustId
      * @return
      */
-    private String getMaxCodeZX(Long entrustId){
+    private String getMaxCodeZX(Long entrustId) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-        String year = sdf.format(new Date());
+        //TODO： 根据委托单完成日期-设置报告编号
+        EntrustAddVo entrustAddVo = entrustEntityMapper.selectByKeyId(entrustId);
+        String year = sdf.format(entrustAddVo.getRequestDate());
         //判断委托编号类型
         String entrustCategoryType = recordEntityMapper.getEntrustCategoryType(entrustId);
         //查询字典
         Integer subLen = 12;
-        if ("CNAS".equals(entrustCategoryType)){
-            subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
+        if ("CNAS".equals(entrustCategoryType)) {
+            subLen = entrustEntityMapper.getLenByType(100, entrustCategoryType);
         }
-        if ("CMA".equals(entrustCategoryType)){
-            subLen = entrustEntityMapper.getLenByType(100,entrustCategoryType);
+        if ("CMA".equals(entrustCategoryType)) {
+            subLen = entrustEntityMapper.getLenByType(100, entrustCategoryType);
         }
         if (entrustCategoryType != null) {//MN或BD
-            Integer maxCode = recordEntityMapper.getOtherMaxCodeZX(subLen,year, entrustCategoryType);//先查最终报告
+            Integer maxCode = recordEntityMapper.getOtherMaxCodeZX(subLen, year, entrustCategoryType);//先查最终报告
             if (maxCode != null) {//再查中间报告
-                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMidZX(subLen,year, entrustCategoryType);
+                Integer maxCodeMid = recordEntityMapper.getOtherMaxCodeMidZX(subLen, year, entrustCategoryType);
                 if (maxCodeMid != null && maxCode < maxCodeMid) {//小于中间报告的报告号
                     maxCode = maxCodeMid;//用中间报告里面的最大号
                 }
