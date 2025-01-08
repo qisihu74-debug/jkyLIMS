@@ -199,4 +199,12 @@ public interface TestCheckItemsTaskRelService extends IService<TestCheckItemsTas
      * @return
      */
     Result updatedCheckItemParameters(String taskCode);
+
+    /**
+     * 工时统计-按照人员统计-导出
+     *
+     * @param taskStatisticsVo
+     * @return
+     */
+    InputStream getPersonnelStatisticsDetailsExport(TaskStatisticsVo taskStatisticsVo) throws IOException;
 }

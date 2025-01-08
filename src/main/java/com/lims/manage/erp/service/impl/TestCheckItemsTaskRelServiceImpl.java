@@ -2359,4 +2359,48 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
         adjustTheTimeAllocationRatio(taskCode);
         return null;
     }
+
+    @Override
+    public InputStream getPersonnelStatisticsDetailsExport(TaskStatisticsVo taskStatisticsVo) throws IOException {
+        taskStatisticsVo.setPageNum(1);
+        taskStatisticsVo.setPageSize(100000);
+        Result result = getPersonnelStatisticsDetails(taskStatisticsVo);
+        PageInfo<TestTaskOrderWorkingHours> pageInfo = (PageInfo<TestTaskOrderWorkingHours>) result.getData();
+        List<TestTaskOrderWorkingHours> list = pageInfo.getList();
+// 我的工时统计-导出
+        //创建HSSFWorkbook对象(excel的文档对象)
+        HSSFWorkbook wb = new HSSFWorkbook();
+        //建立新的sheet对象（excel的表单）
+        HSSFSheet sheet = wb.createSheet("sheet0");
+        //在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
+        HSSFRow row1 = sheet.createRow(0);
+        //创建单元格并设置单元格内容
+        row1.createCell(0).setCellValue("任务单编号");
+        row1.createCell(1).setCellValue("样品名称");
+        row1.createCell(2).setCellValue("工时");
+        row1.createCell(3).setCellValue("获得时间");
+        row1.createCell(4).setCellValue("来源");
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (int i = 0; i < list.size(); i++) {
+                TestTaskOrderWorkingHours statisticsVo = list.get(i);
+                //在sheet里创建第二行
+                HSSFRow row3 = sheet.createRow(i + 1);
+                // 任务单编号
+                row3.createCell(0).setCellValue(statisticsVo.getTaskCode());
+                // 样品名称
+                row3.createCell(1).setCellValue(statisticsVo.getSampleName() != null ? statisticsVo.getSampleName().toString() : "-");
+                // 工时
+                row3.createCell(2).setCellValue(statisticsVo.getWorkingHours() != null ? statisticsVo.getWorkingHours().toString() : "-");
+                // 获得时间
+                row3.createCell(3).setCellValue(statisticsVo.getCreateTime() != null ? DateUtil.formatDate(statisticsVo.getCreateTime()) : "-");
+                // 来源
+                row3.createCell(4).setCellValue(statisticsVo.getSource() != null ? statisticsVo.getSource() : "-");
+            }
+        }
+        //输出Excel文件 字节输出流
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        wb.write(os);
+        os.close();
+        return new ByteArrayInputStream(os.toByteArray());
+    }
 }

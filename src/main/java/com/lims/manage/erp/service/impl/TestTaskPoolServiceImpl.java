@@ -2586,14 +2586,20 @@ public class TestTaskPoolServiceImpl extends ServiceImpl<TestTaskPoolMapper, Tes
 
         // 获取团队下人员比例
         List<TestTaskOrderWorkingHours> zongTaskWorkingHorusList = testTaskOrderWorkingHoursMapper.selectManHourRatio(deptId, taskOrderWorkingHours.getAddOperator());
-        for (TestTaskOrderWorkingHours data : zongTaskWorkingHorusList) {
-            taskOrderWorkingHours.setProportion(data.getProportion());
-            taskOrderWorkingHours.setUserName(data.getUserName());
-            taskOrderWorkingHours.setUserId(data.getUserId());
-            data = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
-            data.setId(null);
+        if (CollectionUtil.isNotEmpty(zongTaskWorkingHorusList)) {
+            List<TestTaskOrderWorkingHours> list = new ArrayList<>();
+            for (int i = 0; i < zongTaskWorkingHorusList.size(); i++) {
+                TestTaskOrderWorkingHours data = zongTaskWorkingHorusList.get(i);
+                taskOrderWorkingHours.setProportion(data.getProportion());
+                taskOrderWorkingHours.setUserName(data.getUserName());
+                taskOrderWorkingHours.setUserId(data.getUserId());
+                data = new TestTaskOrderWorkingHours(taskOrderWorkingHours);
+                data.setId(null);
+                list.add(data);
+            }
+            return list;
         }
-        return zongTaskWorkingHorusList;
+        return null;
     }
 
     /**

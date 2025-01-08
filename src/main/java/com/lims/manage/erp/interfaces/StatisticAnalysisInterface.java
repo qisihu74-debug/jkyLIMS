@@ -26,10 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -252,6 +249,35 @@ public class StatisticAnalysisInterface {
     public Result<?> getPersonnelStatisticsDetails(TaskStatisticsVo taskStatisticsVo) {
 
         return testCheckItemsTaskRelService.getPersonnelStatisticsDetails(taskStatisticsVo);
+    }
+
+    /**
+     * 工时统计-按照人员统计-详情-导出
+     *
+     * @return
+     */
+    @GetMapping(value = "getPersonnelStatisticsDetailsExport")
+    public void getPersonnelStatisticsDetailsExport(TaskStatisticsVo taskStatisticsVo, HttpServletResponse response) throws IOException {
+
+
+        BufferedOutputStream bos = null;
+        String fileName = "工时统计-人员详情统计_导出" + DateUtil.formatDate(new Date());
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
+        InputStream inputStream = testCheckItemsTaskRelService.getPersonnelStatisticsDetailsExport(taskStatisticsVo);
+        ServletOutputStream outputStream = response.getOutputStream();
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(outputStream);
+        byte[] buff = new byte[2048];
+        int bytesRead;
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+            bos.flush();
+        }
+        bos.close();
+
     }
 
 
