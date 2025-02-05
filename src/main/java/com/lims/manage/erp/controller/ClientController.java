@@ -88,7 +88,7 @@ public class ClientController {
                     //删除临时pdf文件
                     FileAndFolderUtil.delete(path);
                     System.out.println("临时文件删除成功");
-                    return ResultUtil.success("文件上传成功",null);
+                    return ResultUtil.success("file uploaded successfully ", null);
                 }catch (Exception e){
                     log.error("文件上传失败:{}",e.getMessage());
                     //删除临时pdf文件

@@ -135,5 +135,9 @@ public class ExcelInsertVo {
      * 样品id
      */
     Integer sampleId;
+    /**
+     * 最大页码
+     */
+    Integer maxPage;
 
 }

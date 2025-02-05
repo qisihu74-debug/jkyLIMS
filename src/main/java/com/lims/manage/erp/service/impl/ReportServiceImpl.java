@@ -1636,16 +1636,15 @@ public class ReportServiceImpl implements ReportService {
         String path2 = qiYueSuoEntity.getAutographPath() + GenID.getID() + ".xlsx";
 
         try {
+            FileOutputStream out2 = new FileOutputStream(path2);
+            itemsWb.write(out2);
+            out2.flush();//刷新
+            out2.close();//关闭
 
             FileOutputStream out = new FileOutputStream(path1);
             taskWb.write(out);
             out.flush();//刷新
             out.close();//关闭
-
-            FileOutputStream out2 = new FileOutputStream(path2);
-            itemsWb.write(out2);
-            out2.flush();//刷新
-            out2.close();//关闭
 
             InputStream fileStream = new FileInputStream(path1);
             Workbook topDoc = new Workbook(fileStream);
@@ -1657,6 +1656,23 @@ public class ReportServiceImpl implements ReportService {
             map.put(0, topDoc2);
             // 合并文件
             Workbook docWorkbookCopy = workbookCopy(topDoc, map);
+//            // 进行排序-替换sheet页码
+            int max = docWorkbookCopy.getWorksheets().getCount();
+            try {
+                Worksheet sheetData1 = docWorkbookCopy.getWorksheets().get(0);
+                sheetData1.setName("Sheet" + 2);
+                sheetData1.moveTo(2);
+                Worksheet sheetData2 = docWorkbookCopy.getWorksheets().get(1);
+                sheetData2.moveTo(0);
+                sheetData1.setName("Sheet" + 1);
+                Worksheet sheetData3 = docWorkbookCopy.getWorksheets().get(2);
+                sheetData2.moveTo(1);
+                sheetData1.setName("Sheet" + 1);
+            } catch (Exception e) {
+                log.error("进行排序-替换sheet页码 异常" + e);
+            }
+
+
             docWorkbookCopy.save(newFilePath);
 
             fileStream.close();

@@ -126,8 +126,12 @@ public interface PageOfficeCopyService {
 
     /**
      * 通过任务单id 获取检测项主键集合
+     *
      * @param taskId
      * @return key = sampleId,value=itemId
      */
     Map<Integer, List<Integer>> selectTaskIds(Long taskId);
+    /**
+     * 通过检测项id 更新对应预览附件
+     */
 }

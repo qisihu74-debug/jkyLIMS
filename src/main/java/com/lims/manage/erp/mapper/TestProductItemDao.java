@@ -173,17 +173,36 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
 
     /**
      * 根据检测项主键 查询检测项的sheet下标
+     *
      * @param array
      * @return
      */
     List<ExcelInsertVo> selectItemSheetIndex(@Param(value = "array") Integer[] array);
 
     /**
+     * 根据检测项主键 查询检测项的sheet下标
+     *
+     * @param taskId
+     * @return
+     */
+    List<ExcelInsertVo> selectItemSheetByTestIdIndex(@Param(value = "taskId") Long taskId);
+
+    @Select("SELECT\n" +
+            "\tcountofpage \n" +
+            "FROM\n" +
+            "\ttest_item_sheet_rel_extend \n" +
+            "WHERE\n" +
+            "\tcheck_item_id IN ( SELECT check_item_id FROM test_entrusted_sample_checkitem_rel WHERE task_id = #{taskId} )\n" +
+            "\tGROUP BY countofpage")
+    String selectItemSheetRelExtend(@Param(value = "taskId") Long taskId);
+
+    /**
      * 批量更新检测项数据 set edit_data = 1
+     *
      * @param array
      * @return
      */
-    int updateBatchItemData(@Param(value = "array") Integer[] array , @Param(value = "testSet") String testSet ,
+    int updateBatchItemData(@Param(value = "array") Integer[] array, @Param(value = "testSet") String testSet,
                             @Param(value = "recordSet") String recordSet);
 
     /**

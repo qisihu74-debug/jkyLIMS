@@ -108,6 +108,40 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     }
 
     /**
+     * 处理合并完整的excel每个报告的页码
+     *
+     * @param document
+     * @param countMap
+     * @param map      key= sheet页， value对应的sheet内容数据
+     */
+    private static void handlerPageNew(Workbook document, Map<Integer, Integer> countMap, Map<Integer, Object> map) {
+        for (Integer sheetIndex : map.keySet()) {
+            ExcelInsertVo data = (ExcelInsertVo) map.get(sheetIndex);
+            Worksheet worksheet = document.getWorksheets().get(data.getSheetIndex());
+            countMap.put(data.getSheetIndex(), data.getNumber());
+            Cells cells = worksheet.getCells();
+            int maxRow = cells.getMaxRow();
+            int column = cells.getMaxColumn();
+            for (int n = 0; n < maxRow; n++) {
+                for (int j = 0; j < column; j++) {
+                    Cell cell = cells.get(n, j);
+                    if (cell != null) {
+                        Object value = cell.getValue();
+                        if (value != null) {
+                            String string = value.toString();
+                            String regex = "第.*\\s.*页，共.*\\s.*页";
+                            Pattern pattern = Pattern.compile(regex);
+                            if (pattern.matcher(string).matches()) {
+                                cells.get(n, j).setValue("第" + data.getStartPag() + "页，共" + data.getMaxPage() + "页");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * 通过检测项主键 获取样品生成附件是否存在。
      *
      * @param itemId
@@ -258,14 +292,14 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
                                 try {
                                     methodSheetTime(sheet, excelSheetDataVo, excelInsertVo1.getSheetIndex(), data.getStartTime());
                                 } catch (Exception e) {
-                                    System.out.println("编辑原始记录异常抛出");
+                                    log.error("编辑原始记录异常抛出");
                                     e.printStackTrace();
                                 }
                                 try {
                                     // 首次填充 设置原始记录 头部信息
                                     methodSheetHead(data, sampleMapSerial, excelInsertVo1.getSampleId(), recordNumberMap, sheet, excelInsertVo1.getSheetIndex(), status, mapMap);
                                 } catch (Exception e) {
-                                    System.out.println("编辑原始记录异常抛出");
+                                    log.error("编辑原始记录异常抛出");
                                     e.printStackTrace();
                                 }
                             } else {
@@ -334,7 +368,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         Map<String, OriginalRecordDataVo> result = Maps.newHashMap();
         // 设置组数
         int number = sampleMapSerial.get(sampleId);
-        originalData.setRecordNumber(originalData.getRecordNumber() + "-" + number);
+        originalData.setRecordNumber(originalData.getRecordNumber());
         // 获取检测项中记录编号
         if (recordNumberMap.get(data.getIdItem()) == null) {
             recordNumberMap.put(data.getIdItem(), originalData.getRecordNumber() + "&" + GenID.getID());
@@ -981,7 +1015,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     }
 
     /**
-     * 获取检测项中 对应的excel页码。
+     * 通过任务单id 获取对应检测项中 对应的excel页码。
      *
      * @param taskId
      * @return
@@ -1043,19 +1077,70 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         return map;
     }
 
-//    public Map<Integer, Integer> getCountMap(InputStream fileStream,Long taskId) throws Exception {
-//        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
-//        Map<Integer, Integer> countMap = inserItemPage(wb, taskId);
-//        fileStream.close();
-//        return countMap;
-//
-//    }
+    /**
+     * 通过任务单id 获取对应检测项中 对应的excel页码。
+     *
+     * @param taskId
+     * @return
+     */
+    public Map<Integer, Object> inserItemPageNew(Long taskId) {
+        // key= checkItemId， value对应的下标数据
+        HashMap<Integer, Object> map = new HashMap<>();
+        // 通过检测项 查询检测项对应的 sheet下标
+        List<ExcelInsertVo> sheetItems = testProductItemDao.selectItemSheetByTestIdIndex(taskId);
+        // 当前任务单下检测项没有对应sheet下标 返回空
+        if (CollectionUtils.isEmpty(sheetItems)) {
+            return null;
+        }
+        // 通过任务单id 获取对应检测项对应页码（是否有机器码）
+        String countofpage = testProductItemDao.selectItemSheetRelExtend(taskId);
+
+        // 进行排序
+        TreeSet<Integer> integerList = new TreeSet<>();
+        for (ExcelInsertVo data : sheetItems) {
+            // 进行排序操作
+            if (data.getSheetIndex() != null) {
+                integerList.add(data.getSheetIndex());
+            }
+        }
+
+        // 最大页码
+        Integer maxPage = 0;
+        try {
+            maxPage = (org.apache.commons.lang.StringUtils.isNotEmpty(countofpage) ? Integer.parseInt(countofpage) : 0) + integerList.size();
+        } catch (Exception e) {
+            log.error("任务单id {} + 对应检测项页码为空", taskId);
+        }
+
+        // for 循环 进行存储
+        Iterator<Integer> iterator = integerList.iterator();
+        int xuhao = 0;
+        while (iterator.hasNext()) {
+
+            int sheetIndex = iterator.next();
+
+            // 设置每组检测项中信息
+            ExcelInsertVo insertVo = new ExcelInsertVo();
+            // 序号 自增
+            xuhao += 1;
+            // 序号
+            insertVo.setNumber(xuhao);
+            // sheet下标
+            insertVo.setSheetIndex(sheetIndex);
+            // 起始页
+            insertVo.setStartPag(xuhao);
+            // 最大页码
+            insertVo.setMaxPage(maxPage);
+            map.put(sheetIndex, insertVo);
+        }
+        return map;
+    }
 
     public ExcelSheetDataVo getSaveFile(InputStream fileStream, Long taskId) throws Exception {
         ExcelSheetDataVo excelSheetDataVo = new ExcelSheetDataVo();
         XSSFWorkbook wb = new XSSFWorkbook(fileStream);
         // key= checkItemId， value对应的下标数据
-        Map<Integer, Object> map = inserItemPage(taskId);
+        Map<Integer, Object> map = inserItemPageNew(taskId);
         // key = sheet标号 、value = 序号
         Map<Integer, Integer> countMap = new HashMap<>();
         // key = sheet标号 、value = ExcelInsertVo 中 topRow、leftColumn
@@ -1064,7 +1149,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         // 把 XSSFWorkbook 转为 InputStream
         InputStream input = AsposeUtil.createExcelStream(wb);
         Workbook document = new Workbook(input);
-        handlerPage(document, countMap, map);
+        handlerPageNew(document, countMap, map);
         for (Integer index : countMap.keySet()) {
             // 1、进行 根据标号 添加 日期内容 2、sheet 指定位置 填充文字 3、设置图表插入的位置
             ExcelInsertVo data = new ExcelInsertVo();

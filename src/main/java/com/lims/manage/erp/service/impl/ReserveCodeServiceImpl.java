@@ -137,23 +137,30 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
             int maxRow = worksheet.getCells().getMaxRow();
             int index = 2;
             for (int i = 0; i < maxRow; i++) {
-                String entrustmentNo = cells.get("A"+index).getValue().toString().trim();
-                String reportCode = cells.get("B"+index).getValue().toString().trim();//预留编号
+                String entrustmentNo = cells.get("A" + index).getValue().toString().trim();
+                String reportCode = cells.get("B" + index).getValue().toString().trim();//预留编号
                 String remark = null;
-                if(cells.get("C"+index).getValue() != null){
-                    remark =cells.get("C"+index).getValue().toString();//备注
+                if (cells.get("C" + index).getValue() != null) {
+                    remark = cells.get("C" + index).getValue().toString();//备注
                 }
 //                System.out.println(entrustmentNo + "*----*" + reportCode + "*----*" + remark);
                 ReserveCodeEntity entity = new ReserveCodeEntity();
 //                entity.setId(GenID.getID());
-                entity.setEntrustmentNo(Integer.parseInt(entrustmentNo));
-                entity.setReportCode(reportCode);
-                entity.setType("报告编号");
-                entity.setState("未使用");
-                entity.setCreateDate(new Date());
-                entity.setRemark(remark);
-                allList.add(entity);
-                index ++;
+                try {
+                    entity.setEntrustmentNo(Integer.parseInt(entrustmentNo));
+                    entity.setReportCode(reportCode);
+                    entity.setType("报告编号");
+                    entity.setState("未使用");
+                    entity.setCreateDate(new Date());
+                    entity.setRemark(remark);
+                    allList.add(entity);
+                    index++;
+                } catch (Exception e) {
+                    log.error("异常 reportCode ==" + reportCode);
+                    index++;
+                }
+
+
             }
         }catch (IOException e) {
             e.printStackTrace();
@@ -168,9 +175,9 @@ public class ReserveCodeServiceImpl implements ReserveCodeService {
                     insertList.add(entity);
                 }
             }
-            if (!CollectionUtils.isEmpty(noInsertList)) {
-                return ResultUtil.error("下方编号已存在，请重新编辑后再导入！", noInsertList);
-            }
+//            if (!CollectionUtils.isEmpty(noInsertList)) {
+//                return ResultUtil.error("下方编号已存在，请重新编辑后再导入！", noInsertList);
+//            }
         }
         if (!CollectionUtils.isEmpty(insertList)) {
             reserveCodeEntityMapper.batchInsert(insertList);
