@@ -62,6 +62,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -1033,7 +1034,7 @@ public class EntrustController {
             return ResultUtil.error("受理失败");
         }
     }
-
+/*
     @GetMapping("exportAllEntrust")
     public void exportAllEntrust() throws Exception{
 
@@ -1080,6 +1081,7 @@ public class EntrustController {
                 log.info("导出失败：{}", ex);
             }
         }*/
+/*
         for (EntrustAddVo bean:yesList) {
             String path = "D:\\AAnono\\"+bean.getEntrustmentNo()+".docx";
             try {
@@ -1096,10 +1098,98 @@ public class EntrustController {
                 log.info("导出失败：{}", ex);
             }
         }
+    }*/
+
+    /**
+     * 委托单下载
+     *
+     * @param entrustId
+     * @return
+     */
+    @RequestMapping("exportAllEntrust")
+    public void exportAllEntrust(Long entrustId, HttpServletResponse response) {
+        List<EntrustAddVo> yesList = entrustEntityMapper.getAllEntrustIdBySearch();
+        for (EntrustAddVo data : yesList) {
+            entrustId = data.getId();
+            EntrustAddVo detail = entrustService.getEntrustHistoryDetail(data.getId());
+//        String message = entrustService.getMessage();
+//        String[] strings = message.split("/");
+//        String fileName = strings[1];
+//        //20230314及之前的单子，单位名称用老的BD20210021-old.docx
+//        String dayString = DateUtil.getDayString(detail.getAcceptanceDate().getTime());
+//        if (Integer.parseInt(dayString)<20230313){
+//            fileName = "BD20210021-old.docx";
+//        }
+//        //2023七月1号之后用新的委托模板
+//        if (Integer.parseInt(dayString)>= 20230801){
+//            fileName = "033检验委托单.docx";
+//        }
+            XWPFDocument document = null;
+            String fileName = "";
+            Boolean status = false;
+            String bucketName = "";
+            // 委托单 - 调用受控文件信息工具类 返回map信息
+            try {
+                HashMap<String, String> map = testControlledDocumentsService.returnBucketInformation(entrustId, 59);
+                if (CollectionUtil.isNotEmpty(map.keySet())) {
+                    // 桶名
+                    bucketName = map.get("bucketName");
+                    // 文件名
+                    fileName = map.get("content");
+                    // 状态信息 == 0 是最新的
+                    if (map.get("status").equals("0")) {
+                        status = true;
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            try {
+//            MinioClient client = MinIoUtil.minioClient;
+//            InputStream object = client.getObject(strings[0], fileName);
+//            //填充数据
+//            log.debug("====aaa:{}",JSON.toJSONString(detail));
+//            if ("033检验委托单.docx".equals(fileName)){
+//                document = entrustService.downloadEntrustNew(detail, object);
+//            }else {
+//                document = entrustService.downloadEntrust(detail, object);
+//            }
+                MinioClient client = MinIoUtil.minioClient;
+                InputStream object = client.getObject(bucketName, fileName);
+                //填充数据
+                log.info("====aaa:{}", JSON.toJSONString(detail));
+                if (status == true) {
+                    document = entrustService.downloadEntrustNew(detail, object);
+                } else {
+                    document = entrustService.downloadEntrust(detail, object);
+                }
+                response.reset();
+                response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+                response.setContentType("application/x-msdownload");
+                response.setCharacterEncoding("UTF-8");
+//            response.setHeader("Content-Disposition", "attachment;fileName=" + detail.getEntrustmentNo() + ".docx");
+                //                String file = taskDetailInfo.getTaskCode() + ".docx";
+                //                file = URLEncoder.encode(file, "UTF-8");
+                //                File fileOut2 = new File("D:\\AAno\\" + file);
+                //                OutputStream fileOut = new FileOutputStream(fileOut2.getPath());
+                String file = detail.getEntrustmentNo() + ".docx";
+                file = URLEncoder.encode(file, "UTF-8");
+                File fileOut2 = new File("D:\\AAno\\" + file);
+                OutputStream outputStream = new FileOutputStream(fileOut2.getPath());
+
+//            OutputStream outputStream = response.getOutputStream();
+                document.write(outputStream);
+                outputStream.close();
+            } catch (Exception ex) {
+                log.info("导出失败：{}", ex);
+            }
+
+        }
     }
 
+
     @GetMapping("merge")
-    public void mergeDoc(){
+    public void mergeDoc() {
         List<File> fileList = getAllFiles("D:\\AAnono");
         try{
             Document doc3 = new Document();

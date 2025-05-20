@@ -695,6 +695,9 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
                 Integer count = taskMapper.selectTaskTDetectionType(paramVo);
                 // 已经接的工作量
                 statisticsVo.setReceivedTaskVolume(String.valueOf(count));
+                // 已经接的工作量-任务单产值信息
+                String receivedTaskVolumeTaskPrice = taskMapper.selectTaskTDetectionTypeTaskPrice(paramVo);
+                statisticsVo.setReceivedTaskVolumeTaskPrice(receivedTaskVolumeTaskPrice);
             }
         }
         PageInfo<TaskStatisticsVo> result = new PageInfo<>(list);
@@ -1540,13 +1543,41 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             }
             Double price = teamOutputValueVos.stream().mapToDouble(TeamOutputValueVo::getPrice)
                     .sum();
-            for (HourCount hourCount :hourCounts){
+            for (HourCount hourCount : hourCounts) {
                 hourCount.setTeamPrice(price.intValue());
                 if (price != null) {
                     double result = price * (0.05);
                     result = Math.abs(result);
                     hourCount.setPerformance(result);
                 }
+            }
+            // 进行产值信息
+            for (HourCount hourCount : hourCounts) {
+                TaskListParamVo paramVo = new TaskListParamVo();
+                paramVo.setStartDate(bean.getStartDate());
+                paramVo.setStopDate(bean.getStopDate());
+                // 复核人
+                paramVo.setReviewer(hourCount.getUserId().toString());
+                // 检测人
+                paramVo.setInspector(hourCount.getUserId().toString());
+                //记录人
+                paramVo.setRecorder(hourCount.getUserId().toString());
+                //报告制作人
+                paramVo.setReportProducer(hourCount.getUserId().toString());
+                // 见习生：实习的新手
+                paramVo.setProbationer(hourCount.getUserId().toString());
+                // 实习生
+                paramVo.setInterns(hourCount.getUserId().toString());
+                // 辅助人员
+                paramVo.setAuxiliaryPersonnel(hourCount.getUserId().toString());
+                // 签发人
+                paramVo.setReceiver(hourCount.getUserId().toString());
+                Integer count = taskMapper.selectTaskTDetectionType(paramVo);
+                // 已经接的工作量
+                hourCount.setReceivedTaskVolume(String.valueOf(count));
+                // 已经接的工作量-任务单产值信息
+                String receivedTaskVolumeTaskPrice = taskMapper.selectTaskTDetectionTypeTaskPrice(paramVo);
+                hourCount.setReceivedTaskVolumeTaskPrice(receivedTaskVolumeTaskPrice);
             }
         }
         return hourCounts;
@@ -1576,6 +1607,8 @@ public class TestCheckItemsTaskRelServiceImpl extends ServiceImpl<TestCheckItems
             double aValue = Double.parseDouble(percentage.replace("%", "")) / 100;
             double result = Math.abs(aValue * performance);
             cells.get("I" + index).setValue(result);
+            cells.get("J" + index).setValue(hourCount.getReceivedTaskVolume());// 已接任务单量
+            cells.get("K" + index).setValue(hourCount.getReceivedTaskVolumeTaskPrice()); // 已接任务单量-价格
             index++;
         }
         response.reset();

@@ -1796,6 +1796,17 @@
         </if>
     </select>
 
+    <select id="selectTaskTDetectionTypeTaskPrice" resultType="java.lang.String">
+        SELECT SUM(task_price) FROM test_task WHERE 1=1
+        and receiver like CONCAT( '%',#{receiver}, '%')
+        <if test="startDate!=null">
+            AND receive_time >= #{startDate}
+        </if>
+        <if test="stopDate!=null">
+            AND #{stopDate} >= receive_time
+        </if>
+    </select>
+
     <select id="selectTeamMemberInformation" resultType="com.lims.manage.erp.vo.LabelValueVo">
         SELECT
         t2.user_id as value,
@@ -1806,7 +1817,13 @@
         LEFT JOIN sys_user AS t2 ON t1.user_id = t2.user_id
         LEFT JOIN test_team AS t3 ON t1.team_id = t3.id
         WHERE
-        team_id = #{teamId}
+        1=1
+        <if test="teamId!=null">
+            AND team_id = #{teamId}
+        </if>
+        and t3.NAME is not null
+        and t2.user_id is not null
+        and t1.del_flag = 0
         ORDER BY
         t1.update_time DESC
     </select>

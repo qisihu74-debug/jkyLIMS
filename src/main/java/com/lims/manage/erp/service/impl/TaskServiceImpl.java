@@ -2640,7 +2640,7 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
                 returnSet.setTeamVo(null);
             } else {
                 // 3、获取当前团队成员
-                List<LabelValueVo> teamVos = taskMapper.selectTeamMemberInformation(teamId);
+                List<LabelValueVo> teamVos = taskMapper.selectTeamMemberInformation(null);
                 returnSet.setTeamVo(teamVos);
                 // 报告制作人
                 returnSet.setReviewVo(teamVos);
@@ -2965,6 +2965,15 @@ public class TaskServiceImpl<labelValueVos> implements TaskService {
 
     @Override
     public XSSFWorkbook getTaskUrlExcel(Integer[] ids) throws IOException {
+        // 判断当前信息 是否有机器码
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < ids.length; i++) {
+            list.add(ids[i]);
+        }
+        if (CollectionUtil.isEmpty(testDetectionDao.getItemPositons(list))) {
+            return null;
+        }
+
         // 通过检测项id 获取样品id
         List<SampleItemEntity> sampleItemEntities = testDetectionDao.selectItemList(ids[0]);
 

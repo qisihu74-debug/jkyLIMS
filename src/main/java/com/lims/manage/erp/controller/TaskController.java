@@ -1167,6 +1167,16 @@ public class TaskController {
         }
         // 任务单Excel
         XSSFWorkbook taskWb = null;
+        /** TODO  试验结束时 已经把机器码进行整合 预览时直接输出就行
+         *         if (taskWb == null) {
+         *             try {
+         *                 // 读取机器生成taskExcel文件
+         *                 taskWb = taskService.getTaskUrlExcel(ids);
+         *             } catch (Exception e) {
+         *                 logger.error("读取机器生成taskExcel文件 " + e);
+         *             }
+         *         }
+         */
         if (taskWb == null) {
             try {
                 // 读取机器生成taskExcel文件

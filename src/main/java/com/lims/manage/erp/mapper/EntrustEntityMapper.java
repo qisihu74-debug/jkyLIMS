@@ -581,7 +581,7 @@ public interface EntrustEntityMapper extends BaseMapper {
      */
     EntrustAddVo getByDataEntrustMaxNo(@Param("code")Integer code,@Param("categoryType") String categoryType);
 
-    @Select("select DISTINCT id As id,entrustment_no As entrustmentNo,state As state from test_entrusted_info WHERE state != 144")
+    @Select("\t\tselect DISTINCT id As id,entrustment_no As entrustmentNo,state As state from test_entrusted_info WHERE entrust_people  = \"孙佰军\" and state != 144 and acceptance_date BETWEEN \"2025-01-01 00:00:00\" and \"2025-06-01 00:00:00\" ")
     List<EntrustAddVo> getAllEntrustIdBySearch();
 
     @Select("select DISTINCT id As id,entrustment_no As entrustmentNo,state As state from test_entrusted_info WHERE state != 144 and state=1 and entrustment_no > 2023010000")

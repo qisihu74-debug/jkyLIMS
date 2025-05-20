@@ -80,6 +80,7 @@ public interface TestDetectionDao {
      * @return
      */
     List<SampleItemInstrumentEntity> getTestEntrustedSampleCheckitemRelDetailList(List<Integer> list);
+
     /**
      * 通过委托单id 和部门ID为条件  遍历（判断每个状态 state = 3）
      */
@@ -90,15 +91,25 @@ public interface TestDetectionDao {
             "WHERE\n" +
             "\tentrust_id = #{entrustId} \n" +
             "\tAND dept_id = #{deptId} AND unit_price is not null")
-    List<Integer> getSampleCheckitemRelDetailState(Long entrustId,Integer deptId);
+    List<Integer> getSampleCheckitemRelDetailState(Long entrustId, Integer deptId);
+
     /**
      * 实验完成-依据检测项主键 展示 所属仪器列表
      */
     List<TestInstrumentEntity> getInstrumentTestItem(Integer checkItemId);
+
     /**
      * 根据检测项主键 获取仪器信息
      */
     List<TestChItemInstrumentMiddleEntity> getInstrumentCollection(Integer sidItem);
+
+    /**
+     * 通过检测项主键列表 获取对应机器码集合
+     *
+     * @param list
+     * @return
+     */
+    List<Integer> getItemPositons(List<Integer> list);
 
     /**
      * 根据检测项id 获取所有检测项信息

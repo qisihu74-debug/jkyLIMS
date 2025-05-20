@@ -1,5 +1,6 @@
 package com.lims.manage.erp.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 /**
@@ -57,4 +58,15 @@ public class HourCount {
      * 个人占部门绩效
      */
     private Double performance;
+
+    /**
+     * 已经接任务量
+     */
+    @TableField(exist = false)
+    private String receivedTaskVolume;
+    /**
+     * 已经接任务量-产值
+     */
+    @TableField(exist = false)
+    private String receivedTaskVolumeTaskPrice;
 }

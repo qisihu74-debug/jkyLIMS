@@ -738,6 +738,11 @@ public interface TaskMapper extends BaseMapper {
      */
     Integer selectTaskTDetectionType(TaskListParamVo paramVo);
 
+    /**
+     * 查询任务单中 已接任务单信息-产值
+     */
+    String selectTaskTDetectionTypeTaskPrice(TaskListParamVo paramVo);
+
     @Update("update test_task set report_complete = #{state} WHERE entrustment_id = #{entrustId}")
     void updateTaskReportComplete(@Param("entrustId") Long entrustId, @Param("state") String state);
 
@@ -952,7 +957,7 @@ public interface TaskMapper extends BaseMapper {
             "FROM\n" +
             "\t( SELECT * FROM test_item_order_working_hours WHERE check_item_id IN ( SELECT item_id FROM Sheet1 GROUP BY item_id ) GROUP BY task_id ) AS tt \n" +
             "WHERE\n" +
-            "\ttt.task_id IN ( SELECT id FROM test_task WHERE entrustment_id IN ( SELECT entrustment_id FROM test_report_record WHERE issuer_time BETWEEN \"2024-12-01 00:00:00\" AND \"2024-12-31 23:59:59\" ) ) \n" +
+            "\ttt.task_id IN ( SELECT id FROM test_task WHERE entrustment_id IN ( SELECT entrustment_id FROM test_report_record WHERE issuer_time BETWEEN \"2025-01-01 00:00:00\" AND \"2025-03-31 23:59:59\" ) ) \n" +
             "\t)")
     List<String> selectTaskCodeTest();
 }

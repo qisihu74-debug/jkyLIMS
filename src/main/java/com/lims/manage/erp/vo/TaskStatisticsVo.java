@@ -134,4 +134,9 @@ public class TaskStatisticsVo {
      * 折扣率
      */
     private String discount;
+    /**
+     * 已经接任务量-产值
+     */
+    @TableField(exist = false)
+    private String receivedTaskVolumeTaskPrice;
 }

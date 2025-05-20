@@ -13,6 +13,7 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.PageOfficeCopyService;
+import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.util.*;
 import com.lims.manage.erp.vo.*;
 import com.zhuozhengsoft.pageoffice.FileSaver;
@@ -69,6 +70,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
     private SysUserDao sysUserDao;
     @Autowired
     private QiYueSuoEntity qiYueSuoEntity;
+    @Autowired
+    private ReportService reportService;
 
     /**
      * 处理合并完整的excel每个报告的页码
@@ -1519,11 +1522,43 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         for (int i = 0; i < excelInsertVo.getList().size(); i++) {
             ids[i] = excelInsertVo.getList().get(i);
         }
-        // excel 转 pdf
-        XSSFWorkbook wb = getOriginalRecordAttachment(excelInsertVo);
-        FileOutputStream out = new FileOutputStream(newFilePath);
-        wb.write(out);
-        out.flush();//刷新
+        // 原始记录中 excel 转 pdf
+        XSSFWorkbook itemsWb = getOriginalRecordAttachment(excelInsertVo);
+/*        FileOutputStream out = new FileOutputStream(newFilePath);
+//        itemsWb.write(out);
+//        out.flush();//刷新
+        */
+        // 读取机器码中 Excel 合并原始记录Excel
+        try {
+            // 任务单Excel
+            XSSFWorkbook taskWb = null;
+            if (taskWb == null) {
+                try {
+                    // 读取机器生成taskExcel文件
+                    taskWb = taskService.getTaskUrlExcel(ids);
+                } catch (Exception e) {
+                    logger.error("读取机器生成taskExcel文件 " + e);
+                }
+            }
+
+            // 进行excel 转pdf 文件输出
+            if (itemsWb != null && taskWb != null) {
+                reportService.mergingExcelFiles(itemsWb, taskWb, newFilePath);
+            } else if (itemsWb != null) {
+                FileOutputStream out = new FileOutputStream(newFilePath);
+                itemsWb.write(out);
+                out.flush();//刷新
+                out.close();//关闭
+            } else if (taskWb != null) {
+                FileOutputStream out2 = new FileOutputStream(newFilePath);
+                taskWb.write(out2);
+                out2.flush();//刷新
+                out2.close();//关闭
+            }
+        } catch (Exception e) {
+            logger.error("检测项对应sheet异常抛出");
+            e.printStackTrace();
+        }
         InputStream out000 = new FileInputStream(newFilePath);
         //相应pdf
         ByteArrayOutputStream b1 = PDFHelper3.excel2pdf(out000, path);
@@ -1533,7 +1568,7 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
         inputStream.close();
         out000.close();
         b1.close();
-        out.close();//关闭
+//        out.close();//关闭
         // 删除附件
         FileAndFolderUtil.delete(newFilePath);
         FileAndFolderUtil.delete(path);

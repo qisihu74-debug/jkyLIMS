@@ -638,7 +638,7 @@ public class ReportController {
         //TODO 兼容中间报告
         if (contractId == null) {
             bean = reportService.getDetailByEntrustIdZj(entrustId);
-            if(bean == null){
+            if (bean != null) {
                 if (bean.getId().equals(reportId) && bean.getContractId() != null) {
                     contractId = Long.parseLong(bean.getContractId());
                 }

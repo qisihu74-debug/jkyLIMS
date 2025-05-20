@@ -1648,8 +1648,6 @@ public class ReportServiceImpl implements ReportService {
 
             InputStream fileStream = new FileInputStream(path1);
             Workbook topDoc = new Workbook(fileStream);
-
-
             InputStream fileStream2 = new FileInputStream(path2);
             Workbook topDoc2 = new Workbook(fileStream2);
             Map<Integer, Workbook> map = new HashMap<>();
@@ -1659,15 +1657,27 @@ public class ReportServiceImpl implements ReportService {
 //            // 进行排序-替换sheet页码
             int max = docWorkbookCopy.getWorksheets().getCount();
             try {
+                // sheet序号+100
+                int number = max + 100;
+                // 序号
+                int serialNumber = max;
+
+//                for (int i = 0; i < max; i++) {
+//                    Worksheet sheetData1 = docWorkbookCopy.getWorksheets().get(i);
+//                    sheetData1.moveTo(max - serialNumber);
+//                    sheetData1.setName("Sheet" + number);
+//                    number = number + 1;
+//                }
+//                if()
                 Worksheet sheetData1 = docWorkbookCopy.getWorksheets().get(0);
-                sheetData1.setName("Sheet" + 2);
-                sheetData1.moveTo(2);
-                Worksheet sheetData2 = docWorkbookCopy.getWorksheets().get(1);
-                sheetData2.moveTo(0);
-                sheetData1.setName("Sheet" + 1);
-                Worksheet sheetData3 = docWorkbookCopy.getWorksheets().get(2);
-                sheetData2.moveTo(1);
-                sheetData1.setName("Sheet" + 1);
+//                sheetData1.setName("Sheet" + 2);
+                sheetData1.moveTo(max - 1);
+//                Worksheet sheetData2 = docWorkbookCopy.getWorksheets().get(1);
+//                sheetData2.moveTo(0);
+//                sheetData1.setName("Sheet" + 1);
+//                Worksheet sheetData3 = docWorkbookCopy.getWorksheets().get(2);
+//                sheetData2.moveTo(1);
+//                sheetData1.setName("Sheet" + 1);
             } catch (Exception e) {
                 log.error("进行排序-替换sheet页码 异常" + e);
             }
