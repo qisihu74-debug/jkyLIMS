@@ -130,4 +130,6 @@ public interface StatisticsService {
      * @throws IOException
      */
     InputStream teamStatisticsNodeDetailExportFunction(List<StatisticsNodeDetailVo> list) throws IOException;
+
+    java.util.List<com.lims.manage.erp.vo.QualificationRateVo> qualificationRate(String startDate, String stopDate);
 }

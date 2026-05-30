@@ -407,4 +407,13 @@ public class StatisticsController {
 
 
     }
+
+    /**
+     * 合格率分析 — 按检测大类
+     */
+    @GetMapping("/qualificationRate")
+    public Result qualificationRate(@RequestParam(required = false) String startDate,
+                                    @RequestParam(required = false) String stopDate) {
+        return ResultUtil.success("合格率分析", statisticsService.qualificationRate(startDate, stopDate));
+    }
 }

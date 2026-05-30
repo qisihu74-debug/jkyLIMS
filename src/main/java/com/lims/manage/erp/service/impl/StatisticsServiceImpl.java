@@ -763,4 +763,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         os.close();
         return new ByteArrayInputStream(os.toByteArray());
     }
+
+    @Override
+    public java.util.List<com.lims.manage.erp.vo.QualificationRateVo> qualificationRate(String startDate, String stopDate) {
+        return statisticsMapper.qualificationRate(startDate, stopDate);
+    }
 }

@@ -257,4 +257,25 @@ public interface StatisticsMapper {
     List<StatisticsNodeDetailVo> getTeamStatisticsNode(@Param("teamId") String teamId, @Param("beginDate") String beginDate, @Param("endDate") String endDate);
 
 
+
+    /**
+     * 合格率分析 — 按检测大类统计判定结果
+     */
+    @Select("<script>" +
+            "SELECT pt.product_type_id AS typeId, pt.product_type_name AS typeName, " +
+            "  CAST(SUM(d.judge_result = '合格') AS SIGNED) AS qualified, " +
+            "  CAST(SUM(d.judge_result = '不合格') AS SIGNED) AS unqualified, " +
+            "  COUNT(*) AS total " +
+            "FROM test_report_record_detail d " +
+            "JOIN test_product_item pi ON d.check_item_id = pi.check_item_id " +
+            "JOIN test_product p ON pi.product_id = p.product_id " +
+            "JOIN test_product_type pt ON p.product_type_id = pt.product_type_id " +
+            "LEFT JOIN test_task t ON d.task_id = t.id " +
+            "WHERE d.judge_result IN ('合格','不合格') " +
+            "<if test='startDate != null and startDate != \"\"'> AND t.create_time &gt;= #{startDate} </if>" +
+            "<if test='stopDate != null and stopDate != \"\"'> AND t.create_time &lt; DATE_ADD(#{stopDate}, INTERVAL 1 DAY) </if>" +
+            "GROUP BY pt.product_type_id, pt.product_type_name ORDER BY total DESC" +
+            "</script>")
+    List<QualificationRateVo> qualificationRate(@Param("startDate") String startDate, @Param("stopDate") String stopDate);
+
 }
