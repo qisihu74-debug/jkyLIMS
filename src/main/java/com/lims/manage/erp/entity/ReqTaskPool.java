@@ -57,4 +57,6 @@ public class ReqTaskPool {
      */
     @TableField(exist = false)
     private String searchType;
+    private Integer technicistId;
+    private java.util.List<Integer> productItemIds;
 }

@@ -315,5 +315,7 @@ int insertOrUpdateBatch(@Param("entities") List<TestProductItem> entities);
 
     @Update("update test_product_item set working_hours=#{hour} where check_item_id=#{id}")
     void updateHourById(@Param("id") Integer id, @Param("hour") Integer hour);
+
+    List<com.lims.manage.erp.vo.FlatItemTypeVo> getItemsForTree();
 }
 

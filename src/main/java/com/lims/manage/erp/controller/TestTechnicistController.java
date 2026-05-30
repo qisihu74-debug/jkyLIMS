@@ -19,12 +19,14 @@ import com.lims.manage.erp.service.TestTechnicistService;
 import com.lims.manage.erp.vo.TestTechnicistVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lims.manage.erp.mapper.TestTechnicistDao;
 import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -46,6 +48,10 @@ public class TestTechnicistController extends ApiController {
      */
     @Resource
     private TestTechnicistService testTechnicistService;
+    @Resource
+    private TestTechnicistDao testTechnicistDao;
+    @Resource
+    private com.lims.manage.erp.mapper.SysUserDao sysUserDao;
 
     /**
      * 分页查询所有数据
@@ -156,6 +162,25 @@ public class TestTechnicistController extends ApiController {
      * @param idList 主键结合
      * @return 删除结果
      */
+
+    @GetMapping("/authorizedFor")
+    public Result authorizedFor(@RequestParam String productItemIds) {
+        if (com.lims.manage.erp.util.ShiroUtils.getUserInfo() == null || sysUserDao.isManagerOrAbove(com.lims.manage.erp.util.ShiroUtils.getUserInfo().getUserId()) == 0) {
+            return ResultUtil.error(403, "权限不足");
+        }
+        if (productItemIds == null || productItemIds.isEmpty()) {
+            return ResultUtil.error("缺少 productItemIds");
+        }
+        java.util.List<Integer> ids = new java.util.ArrayList<>();
+        for (String s : productItemIds.split(",")) {
+            try { ids.add(Integer.parseInt(s.trim())); } catch (NumberFormatException ignored) {}
+        }
+        if (ids.isEmpty()) {
+            return ResultUtil.error("productItemIds 格式错误");
+        }
+        return ResultUtil.success(testTechnicistDao.authorizedFor(ids));
+    }
+
     @Log(title = "删除技术人员", businessType = BusinessType.DELETE)
     @PostMapping("/del")
     public Result delete(@RequestBody List<Long> idList) {

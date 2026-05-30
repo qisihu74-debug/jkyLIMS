@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lims.manage.erp.mapper.TestTechnicistAuthorizationDao">
+
+    <insert id="insertBatchExcluded" parameterType="com.lims.manage.erp.entity.TestTechnicistAuthorization">
+        INSERT INTO test_technicist_authorization(technicist_id, product_item_id, granted, operator_id)
+        VALUES
+        <foreach collection="list" item="e" separator=",">
+            (#{e.technicistId}, #{e.productItemId}, 0, #{e.operatorId})
+        </foreach>
+    </insert>
+
+    <!-- 查该检测员有效授权项（全集 - 差集） -->
+    <select id="getAuthorizedItems" resultType="com.lims.manage.erp.vo.AuthorizationItemVo">
+        SELECT
+            pi.check_item_id  AS productItemId,
+            pi.check_item_name AS itemName,
+            pt.product_type_id AS productTypeId,
+            pt.product_type_name AS productTypeName
+        FROM test_product_item pi
+        INNER JOIN test_product p ON pi.product_id = p.product_id
+        INNER JOIN test_product_type pt ON p.product_type_id = pt.product_type_id
+        WHERE pi.del_flag = 0
+          AND pi.check_item_id NOT IN (
+              SELECT product_item_id FROM test_technicist_authorization
+              WHERE technicist_id = #{technicistId} AND granted = 0
+          )
+        ORDER BY pt.product_type_id, pi.check_item_id
+    </select>
+
+
+    <select id="countExistingItems" resultType="int">
+        SELECT COUNT(*) FROM test_product_item
+        WHERE del_flag = 0 AND check_item_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

@@ -50,6 +50,8 @@ public interface TestProductItemService extends IService<TestProductItem> {
 
     List<TestProductItemTreeVo> getTreeList(TestProductItem testProductItem);
 
+    List<com.lims.manage.erp.vo.ProductTypeWithItemsVo> getFullTree();
+
     /**
      * 查询产品标准模板的sheet
      * @param productId

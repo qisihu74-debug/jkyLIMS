@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="/jkyErp/favicon.ico">
+    <!-- <title>zt-lims</title> -->
+    <title>公路水运试验室原材检测管理信息系统</title>
+
+    <style>
+        html,
+        body,
+        #app {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .chromeframe {
+            margin: 0.2em 0;
+            background: #409EFF;
+            color: #000;
+            padding: 0.1em 0;
+        }
+
+        .dark #loader-wrapper {
+            background-color: #141414;
+        }
+
+        #loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999999;
+            background-color: #fff;
+        }
+
+        #loader {
+            display: block;
+            position: relative;
+            left: 50%;
+            top: 50%;
+            width: 50px;
+            height: 50px;
+            margin: -25px 0 0 -25px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            /* COLOR 1 */
+            border-top-color: #409EFF;
+            -webkit-animation: spin 2s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -ms-animation: spin 2s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -moz-animation: spin 2s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -o-animation: spin 2s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            animation: spin 2s linear infinite;
+            /* Chrome, Firefox 16+, IE 10+, Opera */
+            z-index: 1001;
+        }
+
+        #loader:before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            /* COLOR 2 */
+            border-top-color: #409EFF;
+            -webkit-animation: spin 3s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -moz-animation: spin 3s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -o-animation: spin 3s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -ms-animation: spin 3s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            animation: spin 3s linear infinite;
+            /* Chrome, Firefox 16+, IE 10+, Opera */
+        }
+
+        #loader:after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #409EFF;
+            /* COLOR 3 */
+            -moz-animation: spin 1.5s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -o-animation: spin 1.5s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -ms-animation: spin 1.5s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            -webkit-animation: spin 1.5s linear infinite;
+            /* Chrome, Opera 15+, Safari 5+ */
+            animation: spin 1.5s linear infinite;
+            /* Chrome, Firefox 16+, IE 10+, Opera */
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                /* Chrome, Opera 15+, Safari 3.1+ */
+                -ms-transform: rotate(0deg);
+                /* IE 9 */
+                transform: rotate(0deg);
+                /* Firefox 16+, IE 10+, Opera */
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+                /* Chrome, Opera 15+, Safari 3.1+ */
+                -ms-transform: rotate(360deg);
+                /* IE 9 */
+                transform: rotate(360deg);
+                /* Firefox 16+, IE 10+, Opera */
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                /* Chrome, Opera 15+, Safari 3.1+ */
+                -ms-transform: rotate(0deg);
+                /* IE 9 */
+                transform: rotate(0deg);
+                /* Firefox 16+, IE 10+, Opera */
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+                /* Chrome, Opera 15+, Safari 3.1+ */
+                -ms-transform: rotate(360deg);
+                /* IE 9 */
+                transform: rotate(360deg);
+                /* Firefox 16+, IE 10+, Opera */
+            }
+        }
+
+        .loaded #loader {
+            opacity: 0;
+            -webkit-transition: all 0.3s ease-out;
+            transition: all 0.3s ease-out;
+        }
+
+        .loaded #loader-wrapper {
+            visibility: hidden;
+            -webkit-transform: translateY(-100%);
+            /* Chrome, Opera 15+, Safari 3.1+ */
+            -ms-transform: translateY(-100%);
+            /* IE 9 */
+            transform: translateY(-100%);
+            /* Firefox 16+, IE 10+, Opera */
+            -webkit-transition: all 0.3s 1s ease-out;
+            transition: all 0.3s 1s ease-out;
+        }
+
+        /* JavaScript Turned Off */
+
+        .no-js #loader-wrapper {
+            display: none;
+        }
+
+        .no-js h1 {
+            color: #222222;
+        }
+
+        #loader-wrapper .load_title {
+            font-family: 'Open Sans';
+            color: #409EFF;
+            font-size: 19px;
+            width: 100%;
+            text-align: center;
+            z-index: 9999999999999;
+            position: absolute;
+            top: calc(50% + 60px);
+            opacity: 1;
+            line-height: 30px;
+        }
+    </style>
+<link href="/jkyErp/js/0.js" rel="prefetch"><link href="/jkyErp/js/1.js" rel="prefetch"><link href="/jkyErp/js/10.js" rel="prefetch"><link href="/jkyErp/js/100.js" rel="prefetch"><link href="/jkyErp/js/101.js" rel="prefetch"><link href="/jkyErp/js/102.js" rel="prefetch"><link href="/jkyErp/js/103.js" rel="prefetch"><link href="/jkyErp/js/104.js" rel="prefetch"><link href="/jkyErp/js/105.js" rel="prefetch"><link href="/jkyErp/js/106.js" rel="prefetch"><link href="/jkyErp/js/107.js" rel="prefetch"><link href="/jkyErp/js/108.js" rel="prefetch"><link href="/jkyErp/js/109.js" rel="prefetch"><link href="/jkyErp/js/11.js" rel="prefetch"><link href="/jkyErp/js/110.js" rel="prefetch"><link href="/jkyErp/js/111.js" rel="prefetch"><link href="/jkyErp/js/112.js" rel="prefetch"><link href="/jkyErp/js/113.js" rel="prefetch"><link href="/jkyErp/js/114.js" rel="prefetch"><link href="/jkyErp/js/115.js" rel="prefetch"><link href="/jkyErp/js/116.js" rel="prefetch"><link href="/jkyErp/js/117.js" rel="prefetch"><link href="/jkyErp/js/118.js" rel="prefetch"><link href="/jkyErp/js/119.js" rel="prefetch"><link href="/jkyErp/js/12.js" rel="prefetch"><link href="/jkyErp/js/120.js" rel="prefetch"><link href="/jkyErp/js/121.js" rel="prefetch"><link href="/jkyErp/js/122.js" rel="prefetch"><link href="/jkyErp/js/123.js" rel="prefetch"><link href="/jkyErp/js/124.js" rel="prefetch"><link href="/jkyErp/js/125.js" rel="prefetch"><link href="/jkyErp/js/126.js" rel="prefetch"><link href="/jkyErp/js/127.js" rel="prefetch"><link href="/jkyErp/js/128.js" rel="prefetch"><link href="/jkyErp/js/129.js" rel="prefetch"><link href="/jkyErp/js/13.js" rel="prefetch"><link href="/jkyErp/js/130.js" rel="prefetch"><link href="/jkyErp/js/131.js" rel="prefetch"><link href="/jkyErp/js/132.js" rel="prefetch"><link href="/jkyErp/js/133.js" rel="prefetch"><link href="/jkyErp/js/14.js" rel="prefetch"><link href="/jkyErp/js/15.js" rel="prefetch"><link href="/jkyErp/js/16.js" rel="prefetch"><link href="/jkyErp/js/17.js" rel="prefetch"><link href="/jkyErp/js/18.js" rel="prefetch"><link href="/jkyErp/js/19.js" rel="prefetch"><link href="/jkyErp/js/2.js" rel="prefetch"><link href="/jkyErp/js/20.js" rel="prefetch"><link href="/jkyErp/js/21.js" rel="prefetch"><link href="/jkyErp/js/22.js" rel="prefetch"><link href="/jkyErp/js/23.js" rel="prefetch"><link href="/jkyErp/js/24.js" rel="prefetch"><link href="/jkyErp/js/25.js" rel="prefetch"><link href="/jkyErp/js/26.js" rel="prefetch"><link href="/jkyErp/js/27.js" rel="prefetch"><link href="/jkyErp/js/28.js" rel="prefetch"><link href="/jkyErp/js/29.js" rel="prefetch"><link href="/jkyErp/js/3.js" rel="prefetch"><link href="/jkyErp/js/30.js" rel="prefetch"><link href="/jkyErp/js/31.js" rel="prefetch"><link href="/jkyErp/js/32.js" rel="prefetch"><link href="/jkyErp/js/33.js" rel="prefetch"><link href="/jkyErp/js/34.js" rel="prefetch"><link href="/jkyErp/js/35.js" rel="prefetch"><link href="/jkyErp/js/36.js" rel="prefetch"><link href="/jkyErp/js/37.js" rel="prefetch"><link href="/jkyErp/js/38.js" rel="prefetch"><link href="/jkyErp/js/39.js" rel="prefetch"><link href="/jkyErp/js/4.js" rel="prefetch"><link href="/jkyErp/js/40.js" rel="prefetch"><link href="/jkyErp/js/41.js" rel="prefetch"><link href="/jkyErp/js/42.js" rel="prefetch"><link href="/jkyErp/js/43.js" rel="prefetch"><link href="/jkyErp/js/44.js" rel="prefetch"><link href="/jkyErp/js/45.js" rel="prefetch"><link href="/jkyErp/js/46.js" rel="prefetch"><link href="/jkyErp/js/47.js" rel="prefetch"><link href="/jkyErp/js/48.js" rel="prefetch"><link href="/jkyErp/js/49.js" rel="prefetch"><link href="/jkyErp/js/5.js" rel="prefetch"><link href="/jkyErp/js/50.js" rel="prefetch"><link href="/jkyErp/js/51.js" rel="prefetch"><link href="/jkyErp/js/52.js" rel="prefetch"><link href="/jkyErp/js/53.js" rel="prefetch"><link href="/jkyErp/js/54.js" rel="prefetch"><link href="/jkyErp/js/55.js" rel="prefetch"><link href="/jkyErp/js/56.js" rel="prefetch"><link href="/jkyErp/js/57.js" rel="prefetch"><link href="/jkyErp/js/58.js" rel="prefetch"><link href="/jkyErp/js/59.js" rel="prefetch"><link href="/jkyErp/js/6.js" rel="prefetch"><link href="/jkyErp/js/60.js" rel="prefetch"><link href="/jkyErp/js/61.js" rel="prefetch"><link href="/jkyErp/js/62.js" rel="prefetch"><link href="/jkyErp/js/63.js" rel="prefetch"><link href="/jkyErp/js/64.js" rel="prefetch"><link href="/jkyErp/js/65.js" rel="prefetch"><link href="/jkyErp/js/66.js" rel="prefetch"><link href="/jkyErp/js/67.js" rel="prefetch"><link href="/jkyErp/js/68.js" rel="prefetch"><link href="/jkyErp/js/69.js" rel="prefetch"><link href="/jkyErp/js/7.js" rel="prefetch"><link href="/jkyErp/js/70.js" rel="prefetch"><link href="/jkyErp/js/71.js" rel="prefetch"><link href="/jkyErp/js/72.js" rel="prefetch"><link href="/jkyErp/js/73.js" rel="prefetch"><link href="/jkyErp/js/74.js" rel="prefetch"><link href="/jkyErp/js/75.js" rel="prefetch"><link href="/jkyErp/js/76.js" rel="prefetch"><link href="/jkyErp/js/77.js" rel="prefetch"><link href="/jkyErp/js/78.js" rel="prefetch"><link href="/jkyErp/js/79.js" rel="prefetch"><link href="/jkyErp/js/8.js" rel="prefetch"><link href="/jkyErp/js/80.js" rel="prefetch"><link href="/jkyErp/js/81.js" rel="prefetch"><link href="/jkyErp/js/82.js" rel="prefetch"><link href="/jkyErp/js/83.js" rel="prefetch"><link href="/jkyErp/js/84.js" rel="prefetch"><link href="/jkyErp/js/85.js" rel="prefetch"><link href="/jkyErp/js/86.js" rel="prefetch"><link href="/jkyErp/js/87.js" rel="prefetch"><link href="/jkyErp/js/88.js" rel="prefetch"><link href="/jkyErp/js/89.js" rel="prefetch"><link href="/jkyErp/js/9.js" rel="prefetch"><link href="/jkyErp/js/90.js" rel="prefetch"><link href="/jkyErp/js/91.js" rel="prefetch"><link href="/jkyErp/js/92.js" rel="prefetch"><link href="/jkyErp/js/93.js" rel="prefetch"><link href="/jkyErp/js/94.js" rel="prefetch"><link href="/jkyErp/js/95.js" rel="prefetch"><link href="/jkyErp/js/96.js" rel="prefetch"><link href="/jkyErp/js/97.js" rel="prefetch"><link href="/jkyErp/js/98.js" rel="prefetch"><link href="/jkyErp/js/99.js" rel="prefetch"><link href="/jkyErp/js/about.js" rel="prefetch"><link href="/jkyErp/js/app.js" rel="preload" as="script"><link href="/jkyErp/js/chunk-vendors.js" rel="preload" as="script"></head>
+
+
+<body>
+
+    <noscript>
+        <strong>We're sorry but zt-lims doesn't work properly without
+                JavaScript enabled.
+                Please enable it to continue.</strong>
+    </noscript>
+    <div id="app">
+        <div id="loader-wrapper">
+            <div id="loader"></div>
+            <div class="load_title">正在加载，请耐心等待!</div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="./haikang/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="./haikang/jsencrypt.min.js"></script>
+    <script type="text/javascript" src="./haikang/web-control_1.2.5.min.js"></script>
+
+    <!-- built files will be auto injected -->
+<script type="text/javascript" src="/jkyErp/js/chunk-vendors.js"></script><script type="text/javascript" src="/jkyErp/js/app.js"></script></body>
+<!--引用后端项目samples-springboot-back项目根目录下pageoffice.js文件，一定要在vue项目的index.html文件中引用此文件--->
+
+            <script type="text/javascript" src="http://110.41.67.219:8088/jkyErp/pageoffice.js"></script>
+            
+
+</html>

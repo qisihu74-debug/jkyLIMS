@@ -221,5 +221,22 @@
         </foreach>
         LIMIT 1
     </select>
+
+    <select id="getItemsForTree" resultType="com.lims.manage.erp.vo.FlatItemTypeVo">
+        SELECT
+            pt.product_type_id  AS productTypeId,
+            pt.product_type_name AS productTypeName,
+            pi.check_item_id    AS productItemId,
+            pi.check_item_name  AS itemName,
+            pi.check_item_code  AS itemCode
+        FROM test_product_item pi
+        INNER JOIN test_product p  ON pi.product_id = p.product_id
+        INNER JOIN test_product_type pt ON p.product_type_id = pt.product_type_id
+        WHERE pi.del_flag = 0
+          AND p.del_flag = 0
+          AND pt.del_flag = 0
+        ORDER BY pt.product_type_id, pi.check_item_id
+    </select>
+
 </mapper>
 

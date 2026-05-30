@@ -173,6 +173,13 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
     @Select("select id from  test_technicist where user_id=#{userId} limit 1")
     Integer getTechnicistIdByUserId(@Param("userId") Long userId);
 
+    // A3 领域授权权限判断
+    @Select("SELECT COUNT(*) FROM sys_user_role WHERE user_id = #{userId} AND role_id = 1652359989314100")
+    int isAdmin(@Param("userId") Long userId);
+
+    @Select("SELECT COUNT(*) FROM sys_user_role WHERE user_id = #{userId} AND role_id IN (1652359989314100, 5, 1655371808564113, 1655372073196115, 6, 12, 102)")
+    int isManagerOrAbove(@Param("userId") Long userId);
+
     @Select("SELECT\n" +
             "\tt1.user_id,\n" +
             "\tt1.name\n" +

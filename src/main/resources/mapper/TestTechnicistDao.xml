@@ -119,4 +119,27 @@ AND t2.del_flag = 0
             #{id}
         </foreach>
     </delete>
+
+    <select id="authorizedFor" resultType="com.lims.manage.erp.vo.AuthorizedTechnicistVo">
+        SELECT
+            t.id        AS technicistId,
+            u.name      AS userName,
+            tm.name     AS teamName
+        FROM test_technicist t
+        LEFT JOIN sys_user u  ON t.user_id = u.user_id
+        LEFT JOIN test_team tm ON tm.id = t.team_id
+        WHERE t.del_flag = 0
+          AND t.status = '0'
+          AND t.id NOT IN (
+              SELECT DISTINCT technicist_id
+              FROM test_technicist_authorization
+              WHERE granted = 0
+                AND product_item_id IN
+                <foreach collection="productItemIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+          )
+        ORDER BY u.name
+    </select>
+
 </mapper>

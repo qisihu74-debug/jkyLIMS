@@ -1292,6 +1292,8 @@ public class TaskController {
         if (teamId != null){
             //Integer id = testTechnicistDao.getPidById(teamId);
             bean.setTeamId(teamId);
+            Integer technicistId = testTechnicistDao.getTechnicistIdByUserId(bean.getUserId());
+            bean.setTechnicistId(technicistId);
             PageInfo<TestTaskPool> pageInfo = taskService.taskHall(bean);
             return ResultUtil.success(pageInfo);
         }else {

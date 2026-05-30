@@ -185,8 +185,7 @@ public class ShiroConfig {
     @Bean
     public RedisManager redisManager() {
         RedisManager redisManager = new RedisManager();
-        redisManager.setHost(host);
-        redisManager.setPort(port);
+        redisManager.setHost(host + ":" + port);
         //redisManager.setTimeout(timeout);
         if (StringUtils.isNotEmpty(password)){
             redisManager.setPassword(password);

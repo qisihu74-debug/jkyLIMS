@@ -1641,6 +1641,26 @@
         <if test="item.entrustmentNo != null and item.entrustmentNo != ''">
             AND t4.entrustment_no LIKE CONCAT('%', #{item.entrustmentNo}, '%')
         </if>
+        <if test="item.technicistId != null">
+            AND NOT EXISTS (
+                SELECT 1 FROM test_product_item pi
+                INNER JOIN test_technicist_authorization auth
+                    ON pi.check_item_id = auth.product_item_id
+                WHERE auth.technicist_id = #{item.technicistId}
+                  AND auth.granted = 0
+                  AND pi.product_id = tba.productId
+            )
+        </if>
+        <if test="item.productItemIds != null and item.productItemIds.size() &gt; 0">
+            AND EXISTS (
+                SELECT 1 FROM test_product_item pi
+                WHERE pi.product_id = tba.productId
+                  AND pi.check_item_id IN
+                <foreach collection="item.productItemIds" item="pid" open="(" separator="," close=")">
+                    #{pid}
+                </foreach>
+            )
+        </if>
         order by t1.id desc
     </select>
 

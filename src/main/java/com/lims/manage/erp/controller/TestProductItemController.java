@@ -252,6 +252,11 @@ public class TestProductItemController extends ApiController {
     /**
      * 剔除无效原始记录
      */
+
+    @GetMapping("/tree")
+    public com.lims.manage.erp.result.Result getFullTree() {
+        return com.lims.manage.erp.result.ResultUtil.success(this.testProductItemService.getFullTree());
+    }
     @GetMapping("removeUnvilableUrl")
     public void removeUnvilableUrl(){
         List<TestOriginalRecordTemplate> list = service.list();

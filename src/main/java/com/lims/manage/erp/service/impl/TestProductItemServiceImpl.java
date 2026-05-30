@@ -642,6 +642,29 @@ public class TestProductItemServiceImpl extends ServiceImpl<TestProductItemDao, 
         return map;
     }
 
+
+    @Override
+    public List<com.lims.manage.erp.vo.ProductTypeWithItemsVo> getFullTree() {
+        List<com.lims.manage.erp.vo.FlatItemTypeVo> flat = testProductItemDao.getItemsForTree();
+        List<com.lims.manage.erp.vo.ProductTypeWithItemsVo> result = new java.util.ArrayList<>();
+        java.util.Map<Integer, com.lims.manage.erp.vo.ProductTypeWithItemsVo> typeMap = new java.util.LinkedHashMap<>();
+        for (com.lims.manage.erp.vo.FlatItemTypeVo row : flat) {
+            typeMap.computeIfAbsent(row.getProductTypeId(), k -> {
+                com.lims.manage.erp.vo.ProductTypeWithItemsVo t = new com.lims.manage.erp.vo.ProductTypeWithItemsVo();
+                t.setProductTypeId(row.getProductTypeId());
+                t.setProductTypeName(row.getProductTypeName());
+                t.setItems(new java.util.ArrayList<>());
+                return t;
+            });
+            com.lims.manage.erp.vo.ProductItemNodeVo node = new com.lims.manage.erp.vo.ProductItemNodeVo();
+            node.setProductItemId(row.getProductItemId());
+            node.setItemName(row.getItemName());
+            node.setItemCode(row.getItemCode());
+            typeMap.get(row.getProductTypeId()).getItems().add(node);
+        }
+        result.addAll(typeMap.values());
+        return result;
+    }
     @Override
     public void updateHourById(Integer id, Integer hour) {
         testProductItemDao.updateHourById(id, hour);

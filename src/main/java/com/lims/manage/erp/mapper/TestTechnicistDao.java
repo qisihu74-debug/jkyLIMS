@@ -62,5 +62,10 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
 
     @Select("select pid from test_team where id=#{id}")
     Integer getPidById(@Param("id") Integer id);
+
+    List<com.lims.manage.erp.vo.AuthorizedTechnicistVo> authorizedFor(@Param("productItemIds") java.util.List<Integer> productItemIds);
+
+    @org.apache.ibatis.annotations.Select("SELECT id FROM test_technicist WHERE user_id = #{userId} AND del_flag = 0 LIMIT 1")
+    Integer getTechnicistIdByUserId(@Param("userId") Long userId);
 }
 
