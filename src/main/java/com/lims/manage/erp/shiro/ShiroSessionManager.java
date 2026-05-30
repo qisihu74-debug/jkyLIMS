@@ -58,7 +58,13 @@ public class ShiroSessionManager extends DefaultWebSessionManager {
             if (token.equals("null")){
                 return null;
             }
-            Object o = redisUtils.get("shiro:session:" + token);
+            Object o = null;
+            try {
+                o = redisUtils.get("shiro:session:" + token);
+                log.info("redis get result: {}", o == null ? "NULL" : "NOT_NULL(len=" + o.toString().length() + ")");
+            } catch (Exception ex) {
+                log.error("redisUtils.get error: {}", ex.getMessage(), ex);
+            }
             if (o == null){
                 Result result = new Result();
                 result.setCode(-1);
