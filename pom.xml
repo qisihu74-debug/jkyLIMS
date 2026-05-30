@@ -141,17 +141,18 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- Jedis 3.x for shiro-redis session management (Spring Boot uses Lettuce, not this) -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>3.6.3</version>
+        </dependency>
         <!-- Shiro-redis插件 -->
         <dependency>
             <groupId>org.crazycake</groupId>
             <artifactId>shiro-redis</artifactId>
             <version>3.3.1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jedis</artifactId>
-                    <groupId>redis.clients</groupId>
-                </exclusion>
-            </exclusions>
+
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
