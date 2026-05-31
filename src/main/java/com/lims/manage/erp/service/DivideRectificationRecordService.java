@@ -12,4 +12,6 @@ import com.lims.manage.erp.entity.DivideRectificationRecord;
  * @Copyright © 河南交科院
  */
 public interface DivideRectificationRecordService extends IService<DivideRectificationRecord> {
+
+    java.util.List<com.lims.manage.erp.vo.NonconformityVo> nonconformityList(String state, String deptName);
 }

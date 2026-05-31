@@ -16,4 +16,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DivideRectificationRecordServiceImpl extends ServiceImpl<DivideRectificationRecordDao, DivideRectificationRecord> implements DivideRectificationRecordService {
+
+    @javax.annotation.Resource
+    private com.lims.manage.erp.mapper.DivideRectificationRecordDao nonconformityDao;
+
+    @Override
+    public java.util.List<com.lims.manage.erp.vo.NonconformityVo> nonconformityList(String state, String deptName) {
+        return nonconformityDao.nonconformityList(state, deptName);
+    }
 }

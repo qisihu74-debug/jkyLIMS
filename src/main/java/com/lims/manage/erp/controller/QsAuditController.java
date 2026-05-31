@@ -1092,4 +1092,13 @@ public class QsAuditController {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 不符合项聚合视图 — 跨内审活动汇总整改记录及状态
+     */
+    @GetMapping("nonconformityList")
+    public Result nonconformityList(@RequestParam(required = false) String state,
+                                    @RequestParam(required = false) String deptName) {
+        return ResultUtil.success("不符合项列表", divideRectificationRecordService.nonconformityList(state, deptName));
+    }
 }
