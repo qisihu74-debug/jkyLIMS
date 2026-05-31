@@ -48,7 +48,7 @@ public class TestProductItemMethodRelServiceImpl extends ServiceImpl<TestProduct
         if (testProductItemMethodRel.getMethodId()==null){
             return ResultUtil.error("检测方法ID不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestProductItemMethodRel>().eq("method_id",testProductItemMethodRel.getMethodId()).eq("check_item_id",testProductItemMethodRel.getCheckItemId()).eq("del_flag",0).ne("id",testProductItemMethodRel.getId()))!=null){
+        if (this.getOne(new QueryWrapper<TestProductItemMethodRel>().eq("method_id",testProductItemMethodRel.getMethodId()).eq("check_item_id",testProductItemMethodRel.getCheckItemId()).ne("id",testProductItemMethodRel.getId()))!=null){
             return ResultUtil.error("检测方法重复");
         }
         if (this.save(testProductItemMethodRel)){
@@ -60,13 +60,8 @@ public class TestProductItemMethodRelServiceImpl extends ServiceImpl<TestProduct
 
     @Override
     public Result delTestMethodRel(List<Long> idList) {
-        List<TestProductItemMethodRel> testMethods=new ArrayList<>();
-        for (Long aLong : idList) {
-            TestProductItemMethodRel testMethod=new TestProductItemMethodRel();
-            testMethod.setId(aLong.intValue());
-            testMethods.add(testMethod);
-        }
-        if (this.updateBatchById(testMethods)){
+        if (idList == null || idList.isEmpty()) { return ResultUtil.error("数据为空"); }
+        if (this.removeByIds(idList)){
             return ResultUtil.success("删除成功");
         }else {
             return ResultUtil.error("删除失败");

@@ -44,7 +44,6 @@ public class TestProductItemMethodRelController extends ApiController {
     @GetMapping("/list")
     public Result selectAll(Page<TestProductItemMethodRel> page, TestProductItemMethodRel testProductItemMethodRel) {
         QueryWrapper<TestProductItemMethodRel> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("del_flag",0);
         queryWrapper.orderByDesc("create_time");
         return ResultUtil.success(this.testProductItemMethodRelService.page(page, queryWrapper));
     }
@@ -58,7 +57,7 @@ public class TestProductItemMethodRelController extends ApiController {
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
-            TestProductItemMethodRel testMethod=this.testProductItemMethodRelService.getOne(new QueryWrapper<TestProductItemMethodRel>().eq("id",id).eq("del_flag",0));
+            TestProductItemMethodRel testMethod=this.testProductItemMethodRelService.getOne(new QueryWrapper<TestProductItemMethodRel>().eq("id",id));
             return ResultUtil.success(testMethod);
         }else {
             return ResultUtil.error("参数为空");
