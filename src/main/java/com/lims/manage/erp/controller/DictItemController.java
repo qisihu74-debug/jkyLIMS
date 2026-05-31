@@ -10,6 +10,8 @@ import com.lims.manage.erp.entity.Dict;
 import com.lims.manage.erp.entity.DictItem;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.util.ShiroUtils;
+import java.util.Date;
 import com.lims.manage.erp.service.DictItemService;
 import com.lims.manage.erp.service.DictService;
 import com.lims.manage.erp.util.CopyBeanUtils;
@@ -107,12 +109,19 @@ public class DictItemController extends ApiController {
 
     @PostMapping(value = "/add")
     public Result<?> add(@RequestBody DictItem e) {
+        String u = ShiroUtils.getUserInfo() != null ? ShiroUtils.getUserInfo().getUsername() : "system";
+        e.setCreateBy(u);
+        e.setCreateTime(new Date());
+        e.setUpdateBy(u);
+        e.setUpdateTime(new Date());
         dictItemService.save(e);
         return ResultUtil.success("新增成功");
     }
 
     @PostMapping(value = "/edit")
     public Result<?> edit(@RequestBody DictItem e) {
+        e.setUpdateBy(ShiroUtils.getUserInfo() != null ? ShiroUtils.getUserInfo().getUsername() : "system");
+        e.setUpdateTime(new Date());
         dictItemService.updateById(e);
         return ResultUtil.success("修改成功");
     }

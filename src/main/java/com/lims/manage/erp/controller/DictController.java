@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lims.manage.erp.entity.Dict;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
+import com.lims.manage.erp.util.ShiroUtils;
+import java.util.Date;
 import com.lims.manage.erp.service.DictService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -72,12 +74,19 @@ public class DictController extends ApiController {
 
     @PostMapping(value = "/add")
     public Result<?> add(@RequestBody Dict e) {
+        String u = ShiroUtils.getUserInfo() != null ? ShiroUtils.getUserInfo().getUsername() : "system";
+        e.setCreateBy(u);
+        e.setCreateTime(new Date());
+        e.setUpdateBy(u);
+        e.setUpdateTime(new Date());
         dsDictService.save(e);
         return ResultUtil.success("新增成功");
     }
 
     @PostMapping(value = "/edit")
     public Result<?> edit(@RequestBody Dict e) {
+        e.setUpdateBy(ShiroUtils.getUserInfo() != null ? ShiroUtils.getUserInfo().getUsername() : "system");
+        e.setUpdateTime(new Date());
         dsDictService.updateById(e);
         return ResultUtil.success("修改成功");
     }
