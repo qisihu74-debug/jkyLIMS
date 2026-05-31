@@ -101,10 +101,14 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
         }
         //角色菜单重新更新
         sysRoleFuncMenuDao.delFuncByRoleId(entity.getRoleId());
-        sysRoleFuncMenuDao.insertBatchRoleFunc(roleFunctions);
+        if (!roleFunctions.isEmpty()) {
+            sysRoleFuncMenuDao.insertBatchRoleFunc(roleFunctions);
+        }
         //角色权限重新更新
         sysRoleFuncMenuDao.delMenuByRoleId(entity.getRoleId());
-        sysRoleFuncMenuDao.insertBatchRoleMenu(roleMenuEntities);
+        if (!roleMenuEntities.isEmpty()) {
+            sysRoleFuncMenuDao.insertBatchRoleMenu(roleMenuEntities);
+        }
         flag = true;
         return flag;
     }
