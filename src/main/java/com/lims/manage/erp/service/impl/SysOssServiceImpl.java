@@ -55,7 +55,8 @@ public class SysOssServiceImpl implements SysOssService {
     @Override
     public Boolean delAnnounce(String fileUrl) {
         try {
-            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/")+1,fileUrl.indexOf("?"));
+            int q = fileUrl.indexOf("?");
+            String fileName = q >= 0 ? fileUrl.substring(fileUrl.lastIndexOf("/")+1, q) : fileUrl.substring(fileUrl.lastIndexOf("/")+1);
             MinIoUtil.deleteFile(BucketsConst.file_syn, fileName);
             return true;
         } catch (Exception e) {

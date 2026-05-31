@@ -60,9 +60,9 @@ public class TestReportTemplateController extends ApiController {
         IPage<TestReportTemplate> iPage = this.testReportTemplateService.page(page, queryWrapper);
         for (TestReportTemplate bean : iPage.getRecords()) {
             if (StringUtils.isNotEmpty(bean.getReportFileUri())) {
-                bean.setReportFileUri(bean.getReportFileUri().substring(0, bean.getReportFileUri().indexOf("?")));
-                String substring = bean.getReportFileUri().substring(bean.getReportFileUri().lastIndexOf(".") + 1);
-                bean.setRemark(substring);
+                String uri = bean.getReportFileUri();
+                String noQuery = uri.contains("?") ? uri.substring(0, uri.indexOf("?")) : uri;
+                bean.setRemark(noQuery.substring(noQuery.lastIndexOf(".") + 1));
             }
         }
         return ResultUtil.success(iPage);

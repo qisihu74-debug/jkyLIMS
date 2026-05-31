@@ -37,7 +37,7 @@ public class TestMethodServiceImpl extends ServiceImpl<TestMethodDao, TestMethod
         if (TestMethod.getName()==null){
             return ResultUtil.error("检测方法名称不能为空");
         }
-        if (this.getOne(new QueryWrapper<TestMethod>().eq("name",TestMethod.getName()))!=null){
+        if (this.getOne(new QueryWrapper<TestMethod>().eq("name",TestMethod.getName()).eq("del_flag",0))!=null){
             return ResultUtil.error("检测方法名称重复");
         }
         TestMethod.setStatus("0");
