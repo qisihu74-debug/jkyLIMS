@@ -416,4 +416,13 @@ public class StatisticsController {
                                     @RequestParam(required = false) String stopDate) {
         return ResultUtil.success("合格率分析", statisticsService.qualificationRate(startDate, stopDate));
     }
+
+    /**
+     * 设备利用率 — 各仪器使用次数与累计时长
+     */
+    @GetMapping("/instrumentUsage")
+    public Result instrumentUsage(@RequestParam(required = false) String startDate,
+                                  @RequestParam(required = false) String stopDate) {
+        return ResultUtil.success("设备利用率", statisticsService.instrumentUsage(startDate, stopDate));
+    }
 }

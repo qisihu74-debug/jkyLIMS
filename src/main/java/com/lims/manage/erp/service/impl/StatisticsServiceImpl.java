@@ -768,4 +768,9 @@ public class StatisticsServiceImpl implements StatisticsService {
     public java.util.List<com.lims.manage.erp.vo.QualificationRateVo> qualificationRate(String startDate, String stopDate) {
         return statisticsMapper.qualificationRate(startDate, stopDate);
     }
+
+    @Override
+    public java.util.List<com.lims.manage.erp.vo.InstrumentUsageVo> instrumentUsage(String startDate, String stopDate) {
+        return statisticsMapper.instrumentUsage(startDate, stopDate);
+    }
 }

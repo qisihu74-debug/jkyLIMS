@@ -278,4 +278,21 @@ public interface StatisticsMapper {
             "</script>")
     List<QualificationRateVo> qualificationRate(@Param("startDate") String startDate, @Param("stopDate") String stopDate);
 
+
+    /**
+     * 设备利用率 — 各仪器使用次数与累计时长
+     */
+    @Select("<script>" +
+            "SELECT i.name AS name, i.code AS code, i.laboratory_name AS lab, " +
+            "  CAST(COUNT(*) AS SIGNED) AS useCount, " +
+            "  ROUND(SUM(CASE WHEN r.end_time >= r.start_time THEN TIMESTAMPDIFF(MINUTE, r.start_time, r.end_time) ELSE 0 END)/60, 1) AS useHours " +
+            "FROM test_instrument_use_record r " +
+            "JOIN test_instrument i ON r.instrument_id = i.id " +
+            "WHERE r.start_time IS NOT NULL " +
+            "<if test='startDate != null and startDate != \"\"'> AND r.start_time &gt;= #{startDate} </if>" +
+            "<if test='stopDate != null and stopDate != \"\"'> AND r.start_time &lt; DATE_ADD(#{stopDate}, INTERVAL 1 DAY) </if>" +
+            "GROUP BY i.id, i.name, i.code, i.laboratory_name ORDER BY useCount DESC" +
+            "</script>")
+    List<InstrumentUsageVo> instrumentUsage(@Param("startDate") String startDate, @Param("stopDate") String stopDate);
+
 }
