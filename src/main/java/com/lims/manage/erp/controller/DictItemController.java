@@ -104,4 +104,24 @@ public class DictItemController extends ApiController {
             childrenList.forEach(this::findAllChild);
         }
     }
+
+    @PostMapping(value = "/add")
+    public Result<?> add(@RequestBody DictItem e) {
+        dictItemService.save(e);
+        return ResultUtil.success("新增成功");
+    }
+
+    @PostMapping(value = "/edit")
+    public Result<?> edit(@RequestBody DictItem e) {
+        dictItemService.updateById(e);
+        return ResultUtil.success("修改成功");
+    }
+
+    @PostMapping(value = "/del")
+    public Result<?> removeItems(@RequestBody java.util.List<String> ids) {
+        if (ids == null || ids.isEmpty()) { return ResultUtil.error("数据为空"); }
+        dictItemService.removeByIds(ids);
+        return ResultUtil.success("删除成功");
+    }
+
 }

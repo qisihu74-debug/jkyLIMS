@@ -69,4 +69,24 @@ public class DictController extends ApiController {
     }
 
 
+
+    @PostMapping(value = "/add")
+    public Result<?> add(@RequestBody Dict e) {
+        dsDictService.save(e);
+        return ResultUtil.success("新增成功");
+    }
+
+    @PostMapping(value = "/edit")
+    public Result<?> edit(@RequestBody Dict e) {
+        dsDictService.updateById(e);
+        return ResultUtil.success("修改成功");
+    }
+
+    @PostMapping(value = "/del")
+    public Result<?> removeItems(@RequestBody java.util.List<String> ids) {
+        if (ids == null || ids.isEmpty()) { return ResultUtil.error("数据为空"); }
+        dsDictService.removeByIds(ids);
+        return ResultUtil.success("删除成功");
+    }
+
 }
