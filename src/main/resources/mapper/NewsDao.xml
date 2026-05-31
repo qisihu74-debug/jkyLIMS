@@ -5,10 +5,10 @@
 
     <insert id="addBatchLinkedData" parameterType="com.lims.manage.erp.vo.LinkedDataVo">
         insert into sys_linked_data
-        (id,name,url,sys_news_id)
+        (name,url,sys_news_id)
         values
         <foreach collection="items" item="item" open="" separator="," close="">
-        (id,#{item.name},#{item.url},#{item.sysNewsId})
+        (#{item.name},#{item.url},#{item.sysNewsId})
         </foreach>
     </insert>
 
