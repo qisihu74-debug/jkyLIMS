@@ -190,5 +190,28 @@ public class TestTechnicistController extends ApiController {
             return ResultUtil.error("数据为空");
         }
     }
+
+    @GetMapping("/authorizedForTask")
+    public Result authorizedForTask(@RequestParam Long taskId) {
+        if (com.lims.manage.erp.util.ShiroUtils.getUserInfo() == null || sysUserDao.isManagerOrAbove(com.lims.manage.erp.util.ShiroUtils.getUserInfo().getUserId()) == 0) {
+            return ResultUtil.error(403, "权限不足");
+        }
+        if (taskId == null) {
+            return ResultUtil.error("缺少 taskId");
+        }
+        java.util.List<Integer> ids = testTechnicistDao.checkItemIdsByTask(taskId);
+        if (ids == null || ids.isEmpty()) {
+            return ResultUtil.success(testTechnicistDao.allOnDutyTechnicists());
+        }
+        return ResultUtil.success(testTechnicistDao.authorizedFor(ids));
+    }
+
+    @GetMapping("/isManager")
+    public Result isManager() {
+        if (com.lims.manage.erp.util.ShiroUtils.getUserInfo() == null) {
+            return ResultUtil.success(false);
+        }
+        return ResultUtil.success(sysUserDao.isManagerOrAbove(com.lims.manage.erp.util.ShiroUtils.getUserInfo().getUserId()) > 0);
+    }
 }
 

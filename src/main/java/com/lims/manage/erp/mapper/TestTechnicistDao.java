@@ -67,5 +67,9 @@ int insertOrUpdateBatch(@Param("entities") List<TestTechnicist> entities);
 
     @org.apache.ibatis.annotations.Select("SELECT id FROM test_technicist WHERE user_id = #{userId} AND del_flag = 0 LIMIT 1")
     Integer getTechnicistIdByUserId(@Param("userId") Long userId);
+
+    java.util.List<Integer> checkItemIdsByTask(@Param("taskId") Long taskId);
+
+    java.util.List<com.lims.manage.erp.vo.AuthorizedTechnicistVo> allOnDutyTechnicists();
 }
 
