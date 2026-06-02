@@ -67,6 +67,7 @@ public class ShiroConfig {
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         // 注意过滤器配置顺序不能颠倒
         filterChainDefinitionMap.put("/source/**", "anon");
+        filterChainDefinitionMap.put("/public/**", "anon");
         filterChainDefinitionMap.put("/word/**", "anon");
         filterChainDefinitionMap.put("/sample/sampleInfo", "anon");
         filterChainDefinitionMap.put("/sample/retentionInfo", "anon");
