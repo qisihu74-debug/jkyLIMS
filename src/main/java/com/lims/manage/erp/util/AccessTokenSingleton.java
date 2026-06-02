@@ -76,25 +76,21 @@ public class AccessTokenSingleton {
             return accessToken;
         } else {
             try {
-                //获取token
-                OapiGettokenResponse rsp = null;
-                try {
-                    DingTalkClient client = new DefaultDingTalkClient(token);
-                    OapiGettokenRequest request = new OapiGettokenRequest();
-                    request.setAppkey(appkey);
-                    request.setAppsecret(appsecret);
-                    request.setHttpMethod("GET");
-                    rsp = client.execute(request);
-                    logger.info("获取token成功:{}", JSON.toJSONString(rsp));
-                } catch (Exception e) {
-                    logger.error("通过钉钉接口获取企业内部token失败:{}", e);
+                // 钉钉 Java SDK 在本 JVM client.execute 静默返回 null（curl/HTTP 正常），改直连 HTTP 获取 token
+                String getUrl = (token != null && token.length() > 0 ? token : "https://oapi.dingtalk.com/gettoken")
+                        + "?appkey=" + appkey + "&appsecret=" + appsecret;
+                String resp = cn.hutool.http.HttpUtil.get(getUrl, 10000);
+                com.alibaba.fastjson.JSONObject obj = com.alibaba.fastjson.JSON.parseObject(resp);
+                if (obj != null && Integer.valueOf(0).equals(obj.getInteger("errcode"))) {
+                    accessToken = obj.getString("access_token");
+                    map.put("time", nowDate + "");
+                    map.put("access_token", accessToken);
+                    logger.info("获取token成功(HTTP)");
+                } else {
+                    logger.error("钉钉获取token失败:{}", resp);
                 }
-                accessToken = rsp.getAccessToken();
-                // 将信息保存进缓存
-                map.put("time", nowDate + "");
-                map.put("access_token", accessToken);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("钉钉获取token异常:{}", e);
             }
             return accessToken;
         }

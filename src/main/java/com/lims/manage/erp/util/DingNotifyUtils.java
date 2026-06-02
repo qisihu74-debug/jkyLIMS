@@ -47,39 +47,38 @@ public class DingNotifyUtils {
         AccessTokenSingleton instance = AccessTokenSingleton.getInstance();
         String token = instance.getToken(tokenUrl, appKey, appsecret);
 
-        DingTalkClient client = new DefaultDingTalkClient(url);
-        OapiMessageCorpconversationAsyncsendV2Request request = new OapiMessageCorpconversationAsyncsendV2Request();
-        request.setAgentId(agentId);
-        request.setUseridList(dingId);
-        request.setToAllUser(false);
-
-        OapiMessageCorpconversationAsyncsendV2Request.Msg msg = new OapiMessageCorpconversationAsyncsendV2Request.Msg();
-        OapiMessageCorpconversationAsyncsendV2Request.OA oa = new OapiMessageCorpconversationAsyncsendV2Request.OA();
-
-
-        OapiMessageCorpconversationAsyncsendV2Request.Head head = new OapiMessageCorpconversationAsyncsendV2Request.Head();
-        head.setBgcolor("FFFF6A00");
-        head.setText("lims消息通知");
-        OapiMessageCorpconversationAsyncsendV2Request.Body body = new OapiMessageCorpconversationAsyncsendV2Request.Body();
-        if (StringUtils.isNotEmpty(publisher)){
-            List<OapiMessageCorpconversationAsyncsendV2Request.Form> list = new ArrayList<>();
-            OapiMessageCorpconversationAsyncsendV2Request.Form form1 = new OapiMessageCorpconversationAsyncsendV2Request.Form();
-            form1.setKey("任务发布人:");
-            form1.setValue(publisher);
-
-            list.add(form1);
-            body.setForm(list);
+        if (token == null || token.length() == 0) { return; }
+        com.alibaba.fastjson.JSONObject headJson = new com.alibaba.fastjson.JSONObject();
+        headJson.put("bgcolor", "FFFF6A00");
+        headJson.put("text", "lims消息通知");
+        com.alibaba.fastjson.JSONObject bodyJson = new com.alibaba.fastjson.JSONObject();
+        bodyJson.put("title", title);
+        bodyJson.put("content", content);
+        if (StringUtils.isNotEmpty(publisher)) {
+            com.alibaba.fastjson.JSONArray formArr = new com.alibaba.fastjson.JSONArray();
+            com.alibaba.fastjson.JSONObject f1 = new com.alibaba.fastjson.JSONObject();
+            f1.put("key", "任务发布人:");
+            f1.put("value", publisher);
+            formArr.add(f1);
+            bodyJson.put("form", formArr);
         }
-        body.setTitle(title);
-        body.setContent(content);
-        //oa.setPcMessageUrl("http://www.baidu.com");
-        oa.setBody(body);
-        oa.setHead(head);
-        msg.setOa(oa);
-        msg.setMsgtype("oa");
-        request.setMsg(msg);
-        OapiMessageCorpconversationAsyncsendV2Response rsp = client.execute(request, token);
-        System.out.println("消息发送成功:"+ JSON.toJSONString(rsp));
+        com.alibaba.fastjson.JSONObject oaJson = new com.alibaba.fastjson.JSONObject();
+        oaJson.put("head", headJson);
+        oaJson.put("body", bodyJson);
+        com.alibaba.fastjson.JSONObject msgJson = new com.alibaba.fastjson.JSONObject();
+        msgJson.put("msgtype", "oa");
+        msgJson.put("oa", oaJson);
+        com.alibaba.fastjson.JSONObject reqJson = new com.alibaba.fastjson.JSONObject();
+        reqJson.put("agent_id", agentId);
+        reqJson.put("userid_list", dingId);
+        reqJson.put("to_all_user", false);
+        reqJson.put("msg", msgJson);
+        // 钉钉 SDK client.execute 在本 JVM 返回 null，改直连 HTTP 发送
+        String sendResp = cn.hutool.http.HttpRequest.post(url + "?access_token=" + token)
+                .body(reqJson.toJSONString())
+                .timeout(10000)
+                .execute().body();
+        System.out.println("消息发送(HTTP):" + sendResp);
     }
 
     /**
