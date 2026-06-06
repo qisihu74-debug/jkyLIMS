@@ -1439,7 +1439,7 @@ public class ReportController {
         String localPath = reportService.handlerReportMessage(detail,reportEditReq,qiYueSuoEntity.getAutographPath());
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
-        poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
+        poCtrl.setServerPage("https://hnti.lims.design/jkyErp/poserver.zz");
         //禁止拷贝文档内容到外部
         poCtrl.setDisableCopyOnly(true);
         //poCtrl.setCustomToolbar(false);

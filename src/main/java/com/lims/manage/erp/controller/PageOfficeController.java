@@ -161,7 +161,7 @@ public class PageOfficeController {
         }
         //设置服务页面
         PageOfficeCtrl poCtrl = new PageOfficeCtrl(request);
-        poCtrl.setServerPage(request.getContextPath() + "/poserver.zz");
+        poCtrl.setServerPage("https://hnti.lims.design/jkyErp/poserver.zz");
         //禁止拷贝文档内容到外部
         poCtrl.setDisableCopyOnly(true);
         //设置委托样品下未勾选检测项对应的指定sheet不可编辑状态 TODO
