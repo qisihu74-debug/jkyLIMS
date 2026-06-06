@@ -886,4 +886,22 @@ public class ReportApprovalServiceImpl implements ReportApprovalService {
         FileAndFolderUtil.delete(localPath);
         return fileUrls[0];
     }
+
+    /**
+     * 报告退回到下级环节（带意见回退）
+     * targetState="0" 退回到制作（清校核人+签发人，复位检测任务 report_complete，委托单回到制作态4）
+     * targetState="3" 退回到校核（仅清签发人，保留校核人，让原校核人重新处理）
+     */
+    @Override
+    @Transactional
+    public Boolean sendBack(Long id, String targetState, String reason, boolean clearVerifyer, Long entrustmentId) {
+        // 1、更新报告记录：状态回退 + 写退回原因 + 清签发人（+ 可选清校核人）
+        reportApprovalMapper.sendBackReport(id, targetState, reason, clearVerifyer);
+        // 2、退回到制作环节时：检测任务报告完成标记复位、委托单状态回到制作(4)
+        if (clearVerifyer && entrustmentId != null) {
+            taskMapper.updateTestTaskReportComplete(entrustmentId);
+            taskMapper.updateEntrustById(entrustmentId, 4);
+        }
+        return true;
+    }
 }

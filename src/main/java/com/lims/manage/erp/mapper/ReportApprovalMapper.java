@@ -176,4 +176,24 @@ public interface ReportApprovalMapper {
             "\ttt.task_code ASC")
     List<Long> getTaskList();
 
+    /**
+     * 报告退回：按报告编号定位报告记录（取最新一条）
+     * 仅取退回逻辑需要的字段：主键、当前状态、委托单id
+     */
+    @Select("SELECT id, state, entrustment_id AS entrustmentId, entrust_id AS entrustId " +
+            "FROM test_report_record WHERE report_code = #{reportCode} ORDER BY id DESC LIMIT 1")
+    ReportRecordEntity getReportRecordByCode(@Param("reportCode") String reportCode);
+
+    /**
+     * 报告退回：状态回退 + 写退回原因 + 清签发人；clearVerifyer=true 时一并清校核人（退回到制作）
+     * @param id            报告记录主键
+     * @param state         目标状态（"0"=回制作 / "3"=回校核）
+     * @param reason        退回意见
+     * @param clearVerifyer 是否清空校核人（退回到制作时为 true）
+     */
+    int sendBackReport(@Param("id") Long id,
+                       @Param("state") String state,
+                       @Param("reason") String reason,
+                       @Param("clearVerifyer") boolean clearVerifyer);
+
 }

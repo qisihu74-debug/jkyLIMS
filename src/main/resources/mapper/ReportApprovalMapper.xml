@@ -549,4 +549,22 @@
         from test_report_record
         where id = #{reportCode}
     </select>
+
+    <!-- 报告退回（带意见回退）：state 回退 + 写退回原因 + 清签发人；clearVerifyer 为 true 时一并清校核人 -->
+    <update id="sendBackReport">
+        UPDATE test_report_record
+        SET state = #{state},
+            issu_reason = #{reason},
+            issuer = NULL,
+            issuer_id = NULL,
+            issuer_time = NULL,
+            seal_type = NULL
+            <if test="clearVerifyer == true">
+                ,verifyer = NULL,
+                verifyer_id = NULL,
+                verifyer_time = NULL,
+                apply_reason = #{reason}
+            </if>
+        WHERE id = #{id}
+    </update>
 </mapper>

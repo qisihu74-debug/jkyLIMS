@@ -129,4 +129,14 @@ public interface ReportApprovalService {
      * @return
      */
     PageInfo verifyHistory(String search, Integer pageNum, Integer pageSize,Integer reportTypeStatus);
+
+    /**
+     * 报告退回到下级环节（带意见回退）
+     * @param id            报告记录主键
+     * @param targetState   目标状态（"0"=回制作 / "3"=回校核）
+     * @param reason        退回意见
+     * @param clearVerifyer 是否清空校核人（退回到制作时为 true，退回到校核时为 false）
+     * @param entrustmentId 委托单id（退回到制作时用于复位检测任务/委托单状态）
+     */
+    Boolean sendBack(Long id, String targetState, String reason, boolean clearVerifyer, Long entrustmentId);
 }

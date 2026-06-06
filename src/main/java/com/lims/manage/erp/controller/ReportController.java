@@ -27,6 +27,7 @@ import com.lims.manage.erp.entity.TestSampleMixInfoEntity;
 import com.lims.manage.erp.entity.TestTeam;
 import com.lims.manage.erp.http.QiYueSuoResponse;
 import com.lims.manage.erp.mapper.ReportApprovalMapper;
+import com.lims.manage.erp.mapper.EntrustEntityMapper;
 import com.lims.manage.erp.mapper.ReportRecordEntityMapper;
 import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.result.Result;
@@ -36,6 +37,7 @@ import com.lims.manage.erp.service.AlertService;
 import com.lims.manage.erp.service.DeptService;
 import com.lims.manage.erp.service.EntrustService;
 import com.lims.manage.erp.service.LogManagerService;
+import com.lims.manage.erp.service.ReportApprovalService;
 import com.lims.manage.erp.service.ReportService;
 import com.lims.manage.erp.service.TaskService;
 import com.lims.manage.erp.service.TestCheckItemsTaskRelService;
@@ -133,9 +135,13 @@ public class ReportController {
     @Autowired
     private ReportRecordEntityMapper recordEntityMapper;
     @Autowired
+    private EntrustEntityMapper entrustEntityMapper;
+    @Autowired
     private TestCheckItemsTaskRelService testCheckItemsTaskRelService;
     @Autowired
     private DeptService deptService;
+    @Autowired
+    private ReportApprovalService reportApprovalService;
 
     Logger logger = LoggerFactory.getLogger(ReportController.class);
     /**
@@ -146,6 +152,74 @@ public class ReportController {
     @GetMapping("/list1")
     public Result getSampleList1() {
         return ResultUtil.success("获取可制作报告任务单成功！", reportService.getReportList());
+    }
+
+    /**
+     * 报告退回到下级环节（三级审核：检测员制作 → 组长校核 → 技术负责人签发）
+     * 由报告审批/签发页发起，带意见把报告退回到「制作」或「校核」环节。
+     * 请求体：{ reportCode, targetStage(make=退回制作 / verify=退回校核), reason }
+     */
+    @PostMapping("/sendBack")
+    @Transactional
+    public Result sendBack(@RequestBody Map<String, Object> body) {
+        // 1、参数校验
+        String reportCode = body.get("reportCode") == null ? null : String.valueOf(body.get("reportCode")).trim();
+        String targetStage = body.get("targetStage") == null ? null : String.valueOf(body.get("targetStage")).trim();
+        String reason = body.get("reason") == null ? null : String.valueOf(body.get("reason")).trim();
+        if (reportCode == null || reportCode.isEmpty()) {
+            return ResultUtil.error(678, "报告编号不能为空！");
+        }
+        if (targetStage == null || targetStage.isEmpty()) {
+            return ResultUtil.error(678, "退回目标环节不能为空！");
+        }
+        if (reason == null || reason.isEmpty()) {
+            return ResultUtil.error(678, "退回意见不能为空！");
+        }
+        if (reason.length() > 500) {
+            return ResultUtil.error(678, "退回意见过长（最多500字）！");
+        }
+        if (!"make".equals(targetStage) && !"verify".equals(targetStage)) {
+            return ResultUtil.error(678, "非法的退回目标环节：" + targetStage);
+        }
+        // 2、登录态
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error(678, "token已经过期，请退出重新登录");
+        }
+        // 3、按报告编号定位报告记录
+        ReportRecordEntity rec = reportApprovalMapper.getReportRecordByCode(reportCode);
+        if (rec == null || rec.getId() == null) {
+            return ResultUtil.error(678, "未找到报告：" + reportCode);
+        }
+        // 4、当前状态校验（state：3=校核中，4=签发待抢单，5=签发已抢单）
+        String curState = rec.getState();
+        boolean inApproval = "3".equals(curState);
+        boolean inIssue = "4".equals(curState) || "5".equals(curState);
+        if (!inApproval && !inIssue) {
+            return ResultUtil.error(678, "当前报告状态(" + curState + ")不允许退回");
+        }
+        // 退回到校核 只能从签发环节发起
+        if ("verify".equals(targetStage) && !inIssue) {
+            return ResultUtil.error(678, "当前环节不允许退回到校核");
+        }
+        // 5、解析委托单id（退回到制作时用于复位检测任务/委托单状态）
+        EntrustAddVo entrust = reportApprovalMapper.getEntrustAddVoDetail(rec.getId());
+        Long entrustmentId = entrust == null ? null : entrust.getId();
+        // 6、计算目标状态 + 是否清校核人
+        String targetState;
+        boolean clearVerifyer;
+        if ("make".equals(targetStage)) {
+            targetState = "0";      // 报告被驳回 → 回到制作
+            clearVerifyer = true;   // 清校核人 + 签发人
+        } else {
+            targetState = "3";      // 审批(校核)已抢单 → 回到校核，保留校核人
+            clearVerifyer = false;  // 仅清签发人
+        }
+        Boolean ok = reportApprovalService.sendBack(rec.getId(), targetState, reason, clearVerifyer, entrustmentId);
+        if (Boolean.TRUE.equals(ok)) {
+            return ResultUtil.success("退回成功");
+        }
+        return ResultUtil.error(678, "退回失败");
     }
 
     /**
@@ -709,6 +783,20 @@ public class ReportController {
     @GetMapping("/getTemplateListOld")
     public Result getTemplateListOld(String productId) {
         return ResultUtil.success("查询产品报告模板成功！", reportService.getReportTemplateListOld(productId));
+    }
+
+    @PostMapping("prepareEditReport")
+    public Result prepareEditReport(@RequestBody ReportEditReq bean) {
+        if (bean.getEntrustId() == null || bean.getSampleId() == null || bean.getReportType() == null || StringUtils.isEmpty(bean.getReportEditUrl())) {
+            return ResultUtil.error("缺少参数");
+        }
+        String reportEditUrl = bean.getReportEditUrl();
+        int queryIndex = reportEditUrl.indexOf("?");
+        if (queryIndex >= 0) {
+            reportEditUrl = reportEditUrl.substring(0, queryIndex);
+        }
+        entrustEntityMapper.updateUrlByEntrustIdAndSampleId(bean.getEntrustId(), bean.getSampleId(), reportEditUrl, bean.getReportType());
+        return ResultUtil.success("初始化报告编辑模板成功！", true);
     }
 
     @GetMapping("/getTemplateList")
