@@ -8,10 +8,10 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
-
       - name: Build JAR
         run: |
+          cd ~/jky_LIMS/lims_service
+          echo "Deploying: $(git log -1 --oneline)"
           export JAVA_HOME=/home/hxg/jdk-17.0.2
           export PATH=$JAVA_HOME/bin:$PATH
           MVN=/home/hxg/.m2/wrapper/dists/apache-maven-3.6.0-bin/2dakv70gp803gtm5ve1ufmvttn/apache-maven-3.6.0/bin/mvn
@@ -20,7 +20,7 @@ jobs:
       - name: Deploy to production
         run: |
           scp -o StrictHostKeyChecking=no -i /home/hxg/.ssh/prod_deploy_key \
-            target/jkyErp.jar root@b.huxg.online:/opt/lims/lims-service.jar
+            ~/jky_LIMS/lims_service/target/jkyErp.jar root@b.huxg.online:/opt/lims/lims-service.jar
 
       - name: Restart service
         run: |
