@@ -1141,7 +1141,8 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
 
     public ExcelSheetDataVo getSaveFile(InputStream fileStream, Long taskId) throws Exception {
         ExcelSheetDataVo excelSheetDataVo = new ExcelSheetDataVo();
-        XSSFWorkbook wb = new XSSFWorkbook(fileStream);
+        byte[] sourceBytes = FileAndFolderUtil.inputStramToByte(fileStream);
+        XSSFWorkbook wb = new XSSFWorkbook(new ByteArrayInputStream(sourceBytes));
         // key= checkItemId， value对应的下标数据
         Map<Integer, Object> map = inserItemPageNew(taskId);
         // key = sheet标号 、value = 序号
@@ -1162,7 +1163,28 @@ public class PageOfficeServiceCopyImpl implements PageOfficeCopyService {
             indexDataXYMap.put(index, data);
         }
         String path = dir + GenID.getID() + ".xlsx";
-        document.save(path);
+        File saveFile = new File(path);
+        File parentFile = saveFile.getParentFile();
+        if (parentFile != null && !parentFile.exists()) {
+            parentFile.mkdirs();
+        }
+        try (FileOutputStream outputStream = new FileOutputStream(saveFile)) {
+            outputStream.write(sourceBytes);
+        }
+        File asposeFile = new File(path + ".aspose");
+        try {
+            document.save(asposeFile.getAbsolutePath());
+            if (asposeFile.exists() && asposeFile.length() > 0) {
+                if (saveFile.exists()) {
+                    saveFile.delete();
+                }
+                asposeFile.renameTo(saveFile);
+            }
+        } finally {
+            if (asposeFile.exists()) {
+                asposeFile.delete();
+            }
+        }
         input.close();
         excelSheetDataVo.setCountMap(countMap);
         excelSheetDataVo.setSaveFile(path);

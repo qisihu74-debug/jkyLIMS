@@ -126,6 +126,10 @@ public class ShiroConfig {
 
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
         shiroFilterFactoryBean.setLoginUrl("index.html");
+        filterChainDefinitionMap.put("/cma/list", "authc");
+        filterChainDefinitionMap.put("/cma/domains", "authc");
+        filterChainDefinitionMap.put("/cma/syncStatus", "authc");
+        filterChainDefinitionMap.put("/cma/sync", "authc");
         filterChainDefinitionMap.put("/**", "authc");
         //shiroFilterFactoryBean.setLoginUrl("/userLogin/unauth");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);

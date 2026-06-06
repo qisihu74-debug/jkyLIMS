@@ -169,7 +169,8 @@ public class PageOfficeController {
         Workbook wb = new Workbook();
         //此处需要提供公共方法来批量设置sheet的不可编辑状态 TODO
         PDFHelper3.getLicense();
-        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(fileStream);
+        byte[] sourceBytes = FileAndFolderUtil.inputStramToByte(fileStream);
+        com.aspose.cells.Workbook workbook = new com.aspose.cells.Workbook(new ByteArrayInputStream(sourceBytes));
         int count = workbook.getWorksheets().getCount();
         // 读取 url 附件 设置为全部可读
         // 设置所有状态 可见。
@@ -233,7 +234,28 @@ public class PageOfficeController {
             return new ModelAndView("error");
         }
         String excel = dir + GenID.getID() + "." + "xlsx";
-        workbook.save(excel, SaveFormat.XLSX);
+        File excelFile = new File(excel);
+        File parentFile = excelFile.getParentFile();
+        if (parentFile != null && !parentFile.exists()) {
+            parentFile.mkdirs();
+        }
+        try (FileOutputStream outputStream = new FileOutputStream(excelFile)) {
+            outputStream.write(sourceBytes);
+        }
+        File asposeFile = new File(excel + ".aspose");
+        try {
+            workbook.save(asposeFile.getAbsolutePath(), SaveFormat.XLSX);
+            if (asposeFile.exists() && asposeFile.length() > 0) {
+                if (excelFile.exists()) {
+                    excelFile.delete();
+                }
+                asposeFile.renameTo(excelFile);
+            }
+        } finally {
+            if (asposeFile.exists()) {
+                asposeFile.delete();
+            }
+        }
         //此行必须
         poCtrl.setWriter(wb);
         //添加自定义按钮
