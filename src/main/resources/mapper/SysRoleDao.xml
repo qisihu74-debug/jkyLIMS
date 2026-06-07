@@ -9,6 +9,8 @@
         <result property="roleName" column="role_name"/>
         <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
+        <result property="roleType" column="role_type"/>
+        <result property="priority" column="priority"/>
     </resultMap>
 
 
@@ -19,13 +21,29 @@
         WHERE se.user_id = #{userId}
     </select>
 
+    <select id="listRoleTypesByUserId" parameterType="long" resultMap="sysRoleMap">
+        SELECT
+            MIN(sr.role_id) AS role_id,
+            sr.role_type,
+            MIN(COALESCE(sr.priority, 100)) AS priority
+        FROM sys_role sr
+        LEFT JOIN sys_user_role se ON sr.role_id = se.role_id
+        WHERE se.user_id = #{userId}
+          AND sr.role_type IS NOT NULL
+          AND sr.role_type != ''
+        GROUP BY sr.role_type
+        ORDER BY priority ASC
+    </select>
+
     <select id="selectSysRoleList" resultType="com.lims.manage.erp.entity.SysRoleEntity" parameterType="com.lims.manage.erp.entity.SysRoleEntity">
         SELECT
         role_id,
         role_name,
         role_remark,
         create_time,
-        is_delete
+        is_delete,
+        role_type,
+        priority
         FROM
         sys_role
         <trim prefix="WHERE" prefixOverrides="AND |OR ">

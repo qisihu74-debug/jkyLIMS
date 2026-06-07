@@ -22,6 +22,11 @@ public interface SysRoleService extends IService<SysRoleEntity> {
     List<SysRoleEntity> selectSysRoleByUserId(Long userId);
 
     /**
+     * 查询某用户拥有的所有角色大类，去重、排除 NULL，按 priority 升序。
+     */
+    List<SysRoleEntity> listRoleTypesByUserId(Long userId);
+
+    /**
      * 展示角色信息
      * @param sysRoleEntity
      * @return

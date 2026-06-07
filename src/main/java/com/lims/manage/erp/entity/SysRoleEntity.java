@@ -41,5 +41,13 @@ public class SysRoleEntity implements Serializable {
 	 * 是否删除=1不可删除
 	 */
     private Integer isDelete;
+    /**
+     * 角色大类：SYS_ADMIN/LAB_MANAGER/TECHNICIAN/CUSTOMER，NULL=不参与门户判定
+     */
+    private String roleType;
+    /**
+     * 门户优先级，数字越小优先级越高
+     */
+    private Integer priority;
 
 }

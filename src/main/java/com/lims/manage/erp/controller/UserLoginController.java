@@ -22,6 +22,7 @@ import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.DynamicImgService;
 import com.lims.manage.erp.service.LogManagerService;
 import com.lims.manage.erp.service.RtspToHlsService;
+import com.lims.manage.erp.service.SysRoleService;
 import com.lims.manage.erp.service.SysUserRoleService;
 import com.lims.manage.erp.service.SysUserService;
 import com.lims.manage.erp.util.*;
@@ -52,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +69,8 @@ public class UserLoginController {
     private LogManagerService logManagerService;
     @Autowired
     private SysUserService sysUserService;
+    @Autowired
+    private SysRoleService sysRoleService;
     @Autowired
     private SysUserRoleService sysUserRoleService;
     @Autowired
@@ -140,11 +144,26 @@ public class UserLoginController {
         //只保存角色id
         List<String> roleList=roleIdList.stream().map(a -> String.valueOf(a.getRoleId())).collect(Collectors.toList());
         userData.setRoleList(roleList);
+        List<String> roleTypes = listPortalRoleTypes(userData.getUserId());
+        map.put("roleTypes", roleTypes);
+        map.put("primaryRole", roleTypes.isEmpty() ? null : roleTypes.get(0));
         map.put("userInfo", userData);
         // 根据 token 存储 用户信息
         redisUtil.setRedisTokenUser((String) map.get("token"),userData);
 //        AsyncManager.me().execute(AsyncFactory.recordLogininfor(userData.getUsername(), Constants.LOGIN_SUCCESS, "登录成功"));
         return map;
+    }
+
+    private List<String> listPortalRoleTypes(Long userId) {
+        try {
+            return sysRoleService.listRoleTypesByUserId(userId)
+                    .stream()
+                    .map(item -> item.getRoleType())
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     /**

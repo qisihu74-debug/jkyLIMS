@@ -26,6 +26,11 @@ public interface SysRoleDao extends BaseMapper<SysRoleEntity> {
      */
     List<SysRoleEntity> selectSysRoleByUserId(Long userId);
 
+    /**
+     * 查询用户拥有的门户角色大类，排除不参与门户判定的角色。
+     */
+    List<SysRoleEntity> listRoleTypesByUserId(Long userId);
+
     List<SysRoleEntity> selectSysRoleList(SysRoleEntity sysRoleEntity);
 
     /**
