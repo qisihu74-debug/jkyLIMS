@@ -55,4 +55,10 @@ public class CmaController {
         new Thread(() -> cmaService.syncFromCma(), "cma-manual-sync").start();
         return ResultUtil.success("同步任务已启动，请稍后查看同步状态");
     }
+
+    @PostMapping("/triggerEnrich")
+    public Result<?> triggerEnrich() {
+        cmaService.enrichHcnoAsync();
+        return ResultUtil.success("hcno补充任务已启动");
+    }
 }

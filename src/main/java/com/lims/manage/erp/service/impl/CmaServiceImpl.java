@@ -34,6 +34,8 @@ import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,7 +52,7 @@ public class CmaServiceImpl extends ServiceImpl<CmaCapabilityItemMapper, CmaCapa
     private static final String OPENSTD_LIST_URL =
             "https://openstd.samr.gov.cn/bzgk/gb/std_list?p.p1=0&p.p90=circulation_date&p.p91=desc&p.p2=";
     private static final Pattern HCNO_PATTERN =
-            Pattern.compile("hcno=([A-F0-9]{32})", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("showInfo\\('([A-Fa-f0-9]{32})'\\)");
 
     @Resource
     private CmaSyncLogMapper cmaSyncLogMapper;
@@ -127,7 +129,24 @@ public class CmaServiceImpl extends ServiceImpl<CmaCapabilityItemMapper, CmaCapa
             int count = items.size();
             logger.info("解析CMA Excel完成，共{}条", count);
 
-            // 5. 清空并批量插入
+            // 5. 清空并批量插入（先保存已有的 hcno/pdf_url/pdf_state 标准全文数据，按 standard_code 匹配回填，避免每日同步覆盖之前下载的 PDF 关联信息）
+            Map<String, CmaCapabilityItem> enrichMap = new HashMap<>();
+            List<CmaCapabilityItem> enriched = baseMapper.selectList(
+                    new QueryWrapper<CmaCapabilityItem>()
+                            .select("standard_code", "hcno", "pdf_url", "pdf_state")
+                            .and(w -> w.isNotNull("hcno").or().isNotNull("pdf_url")));
+            for (CmaCapabilityItem e : enriched) {
+                enrichMap.put(e.getStandardCode(), e);
+            }
+            for (CmaCapabilityItem item : items) {
+                CmaCapabilityItem old = enrichMap.get(item.getStandardCode());
+                if (old != null) {
+                    item.setHcno(old.getHcno());
+                    item.setPdfUrl(old.getPdfUrl());
+                    item.setPdfState(old.getPdfState());
+                }
+            }
+
             baseMapper.delete(null);
             int batchSize = 500;
             for (int i = 0; i < items.size(); i += batchSize) {
@@ -190,13 +209,15 @@ public class CmaServiceImpl extends ServiceImpl<CmaCapabilityItemMapper, CmaCapa
             String url = OPENSTD_LIST_URL + URLEncoder.encode(code, "UTF-8");
             String html = StandardHander.sendGet(url, "UTF-8");
             if (StringUtils.isBlank(html)) return null;
+            // hcno 在 onclick="showInfo('HEX32')" 中
             Document doc = Jsoup.parse(html);
-            Elements links = doc.select("a[href*=hcno=]");
-            for (Element link : links) {
-                String href = link.attr("href");
-                Matcher m = HCNO_PATTERN.matcher(href);
+            Elements elems = doc.select("[onclick*=showInfo]");
+            for (Element el : elems) {
+                String onclick = el.attr("onclick");
+                Matcher m = HCNO_PATTERN.matcher(onclick);
                 if (m.find()) return m.group(1).toUpperCase();
             }
+            // 兜底：直接在整个 HTML 上匹配
             Matcher m = HCNO_PATTERN.matcher(html);
             if (m.find()) return m.group(1).toUpperCase();
         } catch (Exception e) {
