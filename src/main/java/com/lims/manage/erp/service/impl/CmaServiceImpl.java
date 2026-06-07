@@ -62,7 +62,8 @@ public class CmaServiceImpl extends ServiceImpl<CmaCapabilityItemMapper, CmaCapa
 
     @Override
     public PageInfo<CmaCapabilityItem> list(int pageNum, int pageSize, String domain,
-                                             String standardName, String standardCode) {
+                                             String standardName, String standardCode,
+                                             String sortField, String sortOrder) {
         PageHelper.startPage(pageNum, pageSize);
         QueryWrapper<CmaCapabilityItem> qw = new QueryWrapper<>();
         if (StringUtils.isNotBlank(domain)) {
@@ -74,7 +75,18 @@ public class CmaServiceImpl extends ServiceImpl<CmaCapabilityItemMapper, CmaCapa
         if (StringUtils.isNotBlank(standardCode)) {
             qw.like("standard_code", standardCode);
         }
-        qw.orderByAsc("domain", "standard_code");
+        Map<String, String> sortableColumns = new HashMap<>();
+        sortableColumns.put("domain", "domain");
+        sortableColumns.put("standardName", "standard_name");
+        sortableColumns.put("standardCode", "standard_code");
+        sortableColumns.put("remarks", "remarks");
+        sortableColumns.put("pdf", "CASE WHEN pdf_url IS NOT NULL AND pdf_url <> '' THEN 1 ELSE 0 END");
+        String sortColumn = sortableColumns.get(sortField);
+        if (sortColumn != null && ("ascend".equals(sortOrder) || "descend".equals(sortOrder))) {
+            qw.last("ORDER BY " + sortColumn + ("descend".equals(sortOrder) ? " DESC" : " ASC"));
+        } else {
+            qw.orderByAsc("domain", "standard_code");
+        }
         List<CmaCapabilityItem> items = baseMapper.selectList(qw);
         return new PageInfo<>(items);
     }

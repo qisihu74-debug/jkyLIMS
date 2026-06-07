@@ -26,8 +26,12 @@ public class CmaController {
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String domain,
             @RequestParam(required = false) String standardName,
-            @RequestParam(required = false) String standardCode) {
-        PageInfo<CmaCapabilityItem> page = cmaService.list(pageNum, pageSize, domain, standardName, standardCode);
+            @RequestParam(required = false) String standardCode,
+            @RequestParam(required = false) String sortField,
+            @RequestParam(required = false) String sortOrder) {
+        PageInfo<CmaCapabilityItem> page = cmaService.list(
+                pageNum, pageSize, domain, standardName, standardCode, sortField, sortOrder
+        );
         return ResultUtil.success(page);
     }
 

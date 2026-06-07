@@ -9,7 +9,9 @@ import java.util.List;
 
 public interface CmaService extends IService<CmaCapabilityItem> {
 
-    PageInfo<CmaCapabilityItem> list(int pageNum, int pageSize, String domain, String standardName, String standardCode);
+    PageInfo<CmaCapabilityItem> list(int pageNum, int pageSize, String domain,
+                                     String standardName, String standardCode,
+                                     String sortField, String sortOrder);
 
     List<String> domains();
 
