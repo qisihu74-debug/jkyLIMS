@@ -108,6 +108,14 @@ public class FinanceController {
         }
     }
 
+    @GetMapping("profit/analysis")
+    public Result profitAnalysis(Integer pageNum, Integer pageSize, String search) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success(financeService.profitAnalysis(pageNum, pageSize, search));
+    }
+
     @GetMapping("statement")
     public Result statement(Long entrustId) {
         if (entrustId == null) {

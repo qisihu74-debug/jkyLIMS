@@ -25,5 +25,7 @@ public interface FinanceService {
 
     void updateInvoiceStatus(Map<String, Object> payload);
 
+    Map<String, Object> profitAnalysis(Integer pageNum, Integer pageSize, String search);
+
     Map<String, Object> statement(Long entrustId);
 }

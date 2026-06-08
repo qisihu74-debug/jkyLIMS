@@ -35,6 +35,10 @@ public class FinanceServiceImpl implements FinanceService {
                     "SUM(CAST(NULLIF(REPLACE(REPLACE(amount, ',', ''), '￥', ''), '') AS DECIMAL(16,2))) paid_amount " +
                     "FROM test_entrust_remittance_registration GROUP BY entrusted_id) pay ON pay.entrusted_id = e.id ";
 
+    private static final String TASK_COST_SUBQUERY =
+            "LEFT JOIN (SELECT entrustment_id, COUNT(*) task_count, COALESCE(SUM(task_price), 0) task_cost " +
+                    "FROM test_task GROUP BY entrustment_id) task ON task.entrustment_id = e.id ";
+
     private static final String INVOICE_SUBQUERY =
             "LEFT JOIN (SELECT entrustment_id, " +
                     "SUM(CASE WHEN COALESCE(invoice_status, 'NORMAL') = 'NORMAL' THEN 1 ELSE 0 END) invoice_count, " +
@@ -286,6 +290,47 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
+    public Map<String, Object> profitAnalysis(Integer pageNum, Integer pageSize, String search) {
+        int offset = Math.max(pageNum - 1, 0) * pageSize;
+        List<Object> params = new ArrayList<>();
+        String where = buildWhere(search, params);
+
+        Long total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM test_entrusted_info e " + where,
+                params.toArray(),
+                Long.class);
+
+        String summarySql = "SELECT COUNT(*) entrustCount, " +
+                "COALESCE(SUM(x.revenue_amount), 0) revenueAmount, " +
+                "COALESCE(SUM(x.cost_amount), 0) costAmount, " +
+                "COALESCE(SUM(x.revenue_amount - x.cost_amount), 0) profitAmount, " +
+                "CASE WHEN COALESCE(SUM(x.revenue_amount), 0) > 0 " +
+                "THEN ROUND(COALESCE(SUM(x.revenue_amount - x.cost_amount), 0) / SUM(x.revenue_amount) * 100, 2) ELSE 0 END profitRate " +
+                "FROM (" + baseProfitSql(where) + ") x";
+        Map<String, Object> summaryRow = jdbcTemplate.queryForMap(summarySql, params.toArray());
+
+        List<Object> listParams = new ArrayList<>(params);
+        listParams.add(pageSize);
+        listParams.add(offset);
+        String listSql = "SELECT x.*, " +
+                "(x.revenue_amount - x.cost_amount) profit_amount, " +
+                "CASE WHEN x.revenue_amount > 0 THEN ROUND((x.revenue_amount - x.cost_amount) / x.revenue_amount * 100, 2) ELSE 0 END profit_rate " +
+                "FROM (" + baseProfitSql(where) + ") x " +
+                "ORDER BY profit_amount ASC, x.acceptance_date DESC, x.id DESC LIMIT ? OFFSET ?";
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(listSql, listParams.toArray());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("total", total == null ? 0 : total);
+        result.put("list", rows);
+        result.put("entrustCount", number(summaryRow.get("entrustCount")));
+        result.put("revenueAmount", money(summaryRow.get("revenueAmount")));
+        result.put("costAmount", money(summaryRow.get("costAmount")));
+        result.put("profitAmount", money(summaryRow.get("profitAmount")));
+        result.put("profitRate", money(summaryRow.get("profitRate")));
+        return result;
+    }
+
+    @Override
     public Map<String, Object> statement(Long entrustId) {
         ensureInvoiceLifecycleColumns();
         Map<String, Object> entrust = findFinanceRow(entrustId);
@@ -320,6 +365,20 @@ public class FinanceServiceImpl implements FinanceService {
                 PAID_SUBQUERY +
                 INVOICE_SUBQUERY +
                 whereSql;
+    }
+
+    private String baseProfitSql(String where) {
+        return "SELECT CAST(e.id AS CHAR) id, " +
+                "IFNULL(CONCAT(e.entrust_category_type, e.entrustment_no), e.entrustment_no) entrust_no, " +
+                "e.entrust_company customer, e.project_name project_name, e.entrust_test_type category, " +
+                "e.acceptance_date, " +
+                RECEIVABLE_AMOUNT + " revenue_amount, " +
+                "COALESCE(task.task_cost, 0) cost_amount, COALESCE(task.task_count, 0) task_count, " +
+                "COALESCE(pay.paid_amount, 0) paid_amount " +
+                "FROM test_entrusted_info e " +
+                PAID_SUBQUERY +
+                TASK_COST_SUBQUERY +
+                where;
     }
 
     private String buildWhere(String search, List<Object> params) {
