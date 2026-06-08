@@ -21,6 +21,8 @@ public interface FinanceService {
 
     void addInvoice(Map<String, Object> payload);
 
+    void updateInvoice(Map<String, Object> payload);
+
     Map<String, Object> invoiceLedger(Integer pageNum, Integer pageSize, String search, String status);
 
     void updateInvoiceStatus(Map<String, Object> payload);

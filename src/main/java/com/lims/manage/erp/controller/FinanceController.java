@@ -90,6 +90,16 @@ public class FinanceController {
         }
     }
 
+    @PostMapping("invoice/update")
+    public Result updateInvoice(@RequestBody Map<String, Object> payload) {
+        try {
+            financeService.updateInvoice(payload);
+            return ResultUtil.success("操作成功");
+        } catch (RuntimeException e) {
+            return ResultUtil.error(e.getMessage());
+        }
+    }
+
     @GetMapping("invoice/ledger")
     public Result invoiceLedger(Integer pageNum, Integer pageSize, String search, String status) {
         if (pageNum == null || pageSize == null) {

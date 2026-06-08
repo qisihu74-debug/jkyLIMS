@@ -201,11 +201,15 @@ public class FinanceServiceImpl implements FinanceService {
             throw new IllegalArgumentException("该委托单已登记开票");
         }
 
+        BigDecimal invoiceAmount = optionalPositiveMoney(payload.get("invoiceAmount"), money(entrust.get("receivable_amount")), "开票金额格式不正确");
+        BigDecimal taxRate = optionalNonNegativeMoney(payload.get("taxRate"), BigDecimal.ZERO, "税率格式不正确").setScale(4, BigDecimal.ROUND_HALF_UP);
+        BigDecimal taxAmount = invoiceTaxAmount(invoiceAmount, taxRate, payload.get("taxAmount"));
         SysUserEntity userInfo = ShiroUtils.getUserInfo();
         jdbcTemplate.update(
                 "INSERT INTO test_billing_registration " +
-                        "(entrustment_id, entrustment_no, entrust_company, sample_name, registration_time, registered_name, registered_userid, remark, crate_time, update_time) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+                        "(entrustment_id, entrustment_no, entrust_company, sample_name, registration_time, registered_name, registered_userid, " +
+                        "invoice_no, invoice_type, invoice_amount, tax_rate, tax_amount, invoice_file_url, remark, crate_time, update_time) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
                 entrustId,
                 stringValue(entrust.get("entrust_no")),
                 stringValue(entrust.get("customer")),
@@ -213,8 +217,80 @@ public class FinanceServiceImpl implements FinanceService {
                 registrationTime,
                 displayName(userInfo),
                 userInfo == null ? null : userInfo.getUserId(),
+                optionalString(payload.get("invoiceNo")),
+                optionalString(payload.get("invoiceType")),
+                invoiceAmount.toPlainString(),
+                taxRate.toPlainString(),
+                taxAmount.toPlainString(),
+                optionalString(payload.get("invoiceFileUrl")),
                 optionalString(payload.get("remark")));
         jdbcTemplate.update("UPDATE test_entrusted_info SET is_invoice = '是' WHERE id = ?", entrustId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateInvoice(Map<String, Object> payload) {
+        ensureInvoiceLifecycleColumns();
+        Long id = requiredLong(payload, "id", "发票记录不能为空");
+        Map<String, Object> invoice = findInvoice(id);
+        List<String> sets = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        if (payload.containsKey("registrationTime")) {
+            sets.add("registration_time = ?");
+            params.add(optionalDate(payload.get("registrationTime"), new Date(), "开票日期格式不正确"));
+        }
+        if (payload.containsKey("invoiceNo")) {
+            sets.add("invoice_no = ?");
+            params.add(optionalString(payload.get("invoiceNo")));
+        }
+        if (payload.containsKey("invoiceType")) {
+            sets.add("invoice_type = ?");
+            params.add(optionalString(payload.get("invoiceType")));
+        }
+
+        BigDecimal nextInvoiceAmount = money(invoice.get("invoice_amount"));
+        BigDecimal nextTaxRate = money(invoice.get("tax_rate"));
+        boolean amountChanged = payload.containsKey("invoiceAmount");
+        boolean taxRateChanged = payload.containsKey("taxRate");
+        if (amountChanged) {
+            nextInvoiceAmount = optionalPositiveMoney(payload.get("invoiceAmount"), nextInvoiceAmount, "开票金额格式不正确");
+            sets.add("invoice_amount = ?");
+            params.add(nextInvoiceAmount.toPlainString());
+        }
+        if (taxRateChanged) {
+            nextTaxRate = optionalNonNegativeMoney(payload.get("taxRate"), nextTaxRate, "税率格式不正确").setScale(4, BigDecimal.ROUND_HALF_UP);
+            sets.add("tax_rate = ?");
+            params.add(nextTaxRate.toPlainString());
+        }
+        if (payload.containsKey("taxAmount")) {
+            BigDecimal taxAmount = optionalNonNegativeMoney(payload.get("taxAmount"), BigDecimal.ZERO, "税额格式不正确");
+            sets.add("tax_amount = ?");
+            params.add(taxAmount.toPlainString());
+        } else if (amountChanged || taxRateChanged) {
+            sets.add("tax_amount = ?");
+            params.add(invoiceTaxAmount(nextInvoiceAmount, nextTaxRate, null).toPlainString());
+        }
+        if (payload.containsKey("invoiceFileUrl")) {
+            sets.add("invoice_file_url = ?");
+            params.add(optionalString(payload.get("invoiceFileUrl")));
+        }
+        if (payload.containsKey("remark")) {
+            sets.add("remark = ?");
+            params.add(optionalString(payload.get("remark")));
+        }
+        if (sets.isEmpty()) {
+            return;
+        }
+        sets.add("update_time = NOW()");
+        params.add(id);
+
+        int updated = jdbcTemplate.update(
+                "UPDATE test_billing_registration SET " + String.join(", ", sets) + " WHERE id = ?",
+                params.toArray());
+        if (updated == 0) {
+            throw new IllegalArgumentException("发票记录不存在");
+        }
     }
 
     @Override
@@ -235,7 +311,8 @@ public class FinanceServiceImpl implements FinanceService {
         listParams.add(offset);
         String sql = "SELECT CAST(b.id AS CHAR) id, CAST(b.entrustment_id AS CHAR) entrust_id, " +
                 "b.entrustment_no entrust_no, b.entrust_company customer, e.project_name project_name, " +
-                RECEIVABLE_AMOUNT + " invoice_amount, b.sample_name, b.registration_time, b.registered_name, " +
+                "b.invoice_no, b.invoice_type, COALESCE(b.invoice_amount, " + RECEIVABLE_AMOUNT + ") invoice_amount, " +
+                "b.tax_rate, b.tax_amount, b.invoice_file_url, b.sample_name, b.registration_time, b.registered_name, " +
                 "b.remark, b.crate_time, b.update_time, COALESCE(b.invoice_status, 'NORMAL') invoice_status, " +
                 "b.status_reason, b.status_time, b.status_user " +
                 "FROM test_billing_registration b " +
@@ -339,7 +416,8 @@ public class FinanceServiceImpl implements FinanceService {
                         "FROM test_entrust_remittance_registration WHERE entrusted_id = ? ORDER BY registration_date ASC, id ASC",
                 entrustId);
         List<Map<String, Object>> invoices = jdbcTemplate.queryForList(
-                "SELECT CAST(id AS CHAR) id, entrustment_no, entrust_company, sample_name, registration_time, registered_name, remark, crate_time, " +
+                "SELECT CAST(id AS CHAR) id, entrustment_no, entrust_company, sample_name, registration_time, registered_name, " +
+                        "invoice_no, invoice_type, invoice_amount, tax_rate, tax_amount, invoice_file_url, remark, crate_time, " +
                         "COALESCE(invoice_status, 'NORMAL') invoice_status, status_reason, status_time, status_user " +
                         "FROM test_billing_registration WHERE entrustment_id = ? OR entrustment_no = ? ORDER BY registration_time ASC, id ASC",
                 entrustId,
@@ -397,7 +475,8 @@ public class FinanceServiceImpl implements FinanceService {
         StringBuilder where = new StringBuilder("WHERE b.id > 0 ");
         if (search != null && !search.trim().isEmpty()) {
             String value = "%" + search.trim() + "%";
-            where.append("AND (b.entrustment_no LIKE ? OR b.entrust_company LIKE ? OR e.project_name LIKE ? OR b.registered_name LIKE ?) ");
+            where.append("AND (b.entrustment_no LIKE ? OR b.entrust_company LIKE ? OR e.project_name LIKE ? OR b.registered_name LIKE ? OR b.invoice_no LIKE ?) ");
+            params.add(value);
             params.add(value);
             params.add(value);
             params.add(value);
@@ -440,6 +519,7 @@ public class FinanceServiceImpl implements FinanceService {
         ensureInvoiceLifecycleColumns();
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                 "SELECT CAST(id AS CHAR) id, CAST(entrustment_id AS CHAR) entrust_id, entrustment_no, entrust_company, " +
+                        "invoice_no, invoice_type, invoice_amount, tax_rate, tax_amount, invoice_file_url, registration_time, remark, " +
                         "COALESCE(invoice_status, 'NORMAL') invoice_status, status_reason, status_time, status_user " +
                         "FROM test_billing_registration WHERE id = ?",
                 id);
@@ -507,6 +587,30 @@ public class FinanceServiceImpl implements FinanceService {
             jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
                     "ADD COLUMN status_user VARCHAR(100) NULL COMMENT '发票状态变更人'");
         }
+        if (!hasColumn("test_billing_registration", "invoice_no")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN invoice_no VARCHAR(100) NULL COMMENT '发票号码'");
+        }
+        if (!hasColumn("test_billing_registration", "invoice_type")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN invoice_type VARCHAR(50) NULL COMMENT '发票类型'");
+        }
+        if (!hasColumn("test_billing_registration", "invoice_amount")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN invoice_amount DECIMAL(16,2) NULL COMMENT '含税开票金额'");
+        }
+        if (!hasColumn("test_billing_registration", "tax_rate")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN tax_rate DECIMAL(8,4) NULL COMMENT '税率百分比'");
+        }
+        if (!hasColumn("test_billing_registration", "tax_amount")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN tax_amount DECIMAL(16,2) NULL COMMENT '税额'");
+        }
+        if (!hasColumn("test_billing_registration", "invoice_file_url")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN invoice_file_url VARCHAR(2048) NULL COMMENT '票据附件或链接'");
+        }
         invoiceLifecycleColumnsChecked = true;
     }
 
@@ -518,6 +622,47 @@ public class FinanceServiceImpl implements FinanceService {
                 tableName,
                 columnName);
         return count != null && count > 0;
+    }
+
+    private BigDecimal optionalPositiveMoney(Object value, BigDecimal defaultValue, String message) {
+        if (value == null || String.valueOf(value).trim().isEmpty()) {
+            return defaultValue == null ? BigDecimal.ZERO.setScale(2, BigDecimal.ROUND_HALF_UP) : defaultValue.setScale(2, BigDecimal.ROUND_HALF_UP);
+        }
+        try {
+            BigDecimal amount = new BigDecimal(String.valueOf(value).replace(",", "").replace("￥", "").trim());
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException(message);
+            }
+            return amount.setScale(2, BigDecimal.ROUND_HALF_UP);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    private BigDecimal optionalNonNegativeMoney(Object value, BigDecimal defaultValue, String message) {
+        if (value == null || String.valueOf(value).trim().isEmpty()) {
+            return defaultValue == null ? BigDecimal.ZERO : defaultValue;
+        }
+        try {
+            BigDecimal amount = new BigDecimal(String.valueOf(value).replace(",", "").replace("￥", "").trim());
+            if (amount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException(message);
+            }
+            return amount;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    private BigDecimal invoiceTaxAmount(BigDecimal invoiceAmount, BigDecimal taxRate, Object taxAmountValue) {
+        if (taxAmountValue != null && !String.valueOf(taxAmountValue).trim().isEmpty()) {
+            return optionalNonNegativeMoney(taxAmountValue, BigDecimal.ZERO, "税额格式不正确").setScale(2, BigDecimal.ROUND_HALF_UP);
+        }
+        if (invoiceAmount == null || taxRate == null || invoiceAmount.compareTo(BigDecimal.ZERO) <= 0 || taxRate.compareTo(BigDecimal.ZERO) <= 0) {
+            return BigDecimal.ZERO.setScale(2, BigDecimal.ROUND_HALF_UP);
+        }
+        return invoiceAmount.multiply(taxRate)
+                .divide(taxRate.add(new BigDecimal("100")), 2, BigDecimal.ROUND_HALF_UP);
     }
 
     private BigDecimal requiredMoney(Map<String, Object> payload, String key, String message) {
