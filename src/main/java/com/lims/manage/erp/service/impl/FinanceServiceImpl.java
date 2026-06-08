@@ -23,6 +23,8 @@ public class FinanceServiceImpl implements FinanceService {
     @Resource
     private JdbcTemplate jdbcTemplate;
 
+    private volatile boolean invoiceLifecycleColumnsChecked = false;
+
     private static final String RECEIVABLE_AMOUNT =
             "COALESCE(CAST(NULLIF(REPLACE(REPLACE(e.actual_price, ',', ''), '￥', ''), '') AS DECIMAL(16,2)), " +
                     "CAST(NULLIF(REPLACE(REPLACE(e.system_price, ',', ''), '￥', ''), '') AS DECIMAL(16,2)), " +
@@ -34,17 +36,20 @@ public class FinanceServiceImpl implements FinanceService {
                     "FROM test_entrust_remittance_registration GROUP BY entrusted_id) pay ON pay.entrusted_id = e.id ";
 
     private static final String INVOICE_SUBQUERY =
-            "LEFT JOIN (SELECT entrustment_id, COUNT(*) invoice_count, MAX(registration_time) last_invoice_time " +
+            "LEFT JOIN (SELECT entrustment_id, " +
+                    "SUM(CASE WHEN COALESCE(invoice_status, 'NORMAL') = 'NORMAL' THEN 1 ELSE 0 END) invoice_count, " +
+                    "MAX(CASE WHEN COALESCE(invoice_status, 'NORMAL') = 'NORMAL' THEN registration_time ELSE NULL END) last_invoice_time " +
                     "FROM test_billing_registration GROUP BY entrustment_id) inv ON inv.entrustment_id = e.id ";
 
     @Override
     public Map<String, Object> summary() {
+        ensureInvoiceLifecycleColumns();
         String sql = "SELECT COUNT(*) entrustCount, " +
                 "SUM(CASE WHEN x.receivable_amount <= 0 THEN 1 ELSE 0 END) pendingBillingCount, " +
                 "COALESCE(SUM(x.receivable_amount), 0) receivableAmount, " +
                 "COALESCE(SUM(x.paid_amount), 0) paidAmount, " +
                 "COALESCE(SUM(GREATEST(x.receivable_amount - x.paid_amount, 0)), 0) receivableBalance, " +
-                "SUM(CASE WHEN x.receivable_amount > 0 AND x.invoice_count = 0 AND x.is_invoice <> '是' THEN 1 ELSE 0 END) pendingInvoiceCount " +
+                "SUM(CASE WHEN x.receivable_amount > 0 AND x.invoice_count = 0 THEN 1 ELSE 0 END) pendingInvoiceCount " +
                 "FROM (" + baseFinanceSql(null, false) + ") x";
         Map<String, Object> row = jdbcTemplate.queryForMap(sql);
         Map<String, Object> result = new HashMap<>();
@@ -59,6 +64,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public Map<String, Object> billingList(Integer pageNum, Integer pageSize, String search) {
+        ensureInvoiceLifecycleColumns();
         int offset = Math.max(pageNum - 1, 0) * pageSize;
         List<Object> params = new ArrayList<>();
         String where = buildWhere(search, params);
@@ -74,7 +80,7 @@ public class FinanceServiceImpl implements FinanceService {
                 "WHEN x.paid_amount >= x.receivable_amount THEN '已结清' " +
                 "WHEN x.paid_amount > 0 THEN '部分回款' " +
                 "ELSE '待回款' END billing_status, " +
-                "CASE WHEN x.invoice_count > 0 OR x.is_invoice = '是' THEN '已登记' ELSE '未登记' END invoice_status, " +
+                "CASE WHEN x.invoice_count > 0 THEN '已登记' ELSE '未登记' END invoice_status, " +
                 "CASE " +
                 "WHEN x.receivable_amount <= x.paid_amount THEN '正常' " +
                 "WHEN x.acceptance_date IS NULL THEN '正常' " +
@@ -178,6 +184,7 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addInvoice(Map<String, Object> payload) {
+        ensureInvoiceLifecycleColumns();
         Long entrustId = requiredLong(payload, "entrustId", "委托单不能为空");
         Map<String, Object> entrust = findFinanceRow(entrustId);
         Date registrationTime = optionalDate(payload.get("registrationTime"), new Date(), "开票日期格式不正确");
@@ -207,14 +214,88 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
+    public Map<String, Object> invoiceLedger(Integer pageNum, Integer pageSize, String search, String status) {
+        ensureInvoiceLifecycleColumns();
+        int offset = Math.max(pageNum - 1, 0) * pageSize;
+        List<Object> params = new ArrayList<>();
+        String where = buildInvoiceWhere(search, status, params);
+
+        Long total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM test_billing_registration b " +
+                        "LEFT JOIN test_entrusted_info e ON e.id = b.entrustment_id " + where,
+                params.toArray(),
+                Long.class);
+
+        List<Object> listParams = new ArrayList<>(params);
+        listParams.add(pageSize);
+        listParams.add(offset);
+        String sql = "SELECT CAST(b.id AS CHAR) id, CAST(b.entrustment_id AS CHAR) entrust_id, " +
+                "b.entrustment_no entrust_no, b.entrust_company customer, e.project_name project_name, " +
+                RECEIVABLE_AMOUNT + " invoice_amount, b.sample_name, b.registration_time, b.registered_name, " +
+                "b.remark, b.crate_time, b.update_time, COALESCE(b.invoice_status, 'NORMAL') invoice_status, " +
+                "b.status_reason, b.status_time, b.status_user " +
+                "FROM test_billing_registration b " +
+                "LEFT JOIN test_entrusted_info e ON e.id = b.entrustment_id " +
+                where +
+                "ORDER BY b.registration_time DESC, b.id DESC LIMIT ? OFFSET ?";
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, listParams.toArray());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("total", total == null ? 0 : total);
+        result.put("list", rows);
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateInvoiceStatus(Map<String, Object> payload) {
+        ensureInvoiceLifecycleColumns();
+        Long id = requiredLong(payload, "id", "发票记录不能为空");
+        String status = requiredString(payload, "status", "发票状态不能为空");
+        validateInvoiceStatus(status);
+        String reason = optionalString(payload.get("reason"));
+        if (!"NORMAL".equals(status) && (reason == null || reason.trim().isEmpty())) {
+            throw new IllegalArgumentException("作废/红冲原因不能为空");
+        }
+        Map<String, Object> invoice = findInvoice(id);
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        String statusUser = displayName(userInfo) + "&" + (userInfo == null ? "" : userInfo.getUserId());
+
+        int updated = jdbcTemplate.update(
+                "UPDATE test_billing_registration SET invoice_status = ?, status_reason = ?, status_time = NOW(), status_user = ?, update_time = NOW() WHERE id = ?",
+                status,
+                reason,
+                statusUser,
+                id);
+        if (updated == 0) {
+            throw new IllegalArgumentException("发票记录不存在");
+        }
+
+        Object entrustIdValue = invoice.get("entrust_id");
+        if (entrustIdValue != null && !String.valueOf(entrustIdValue).trim().isEmpty()) {
+            Long entrustId = Long.valueOf(String.valueOf(entrustIdValue));
+            Long activeCount = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM test_billing_registration WHERE entrustment_id = ? AND COALESCE(invoice_status, 'NORMAL') = 'NORMAL'",
+                    Long.class,
+                    entrustId);
+            jdbcTemplate.update(
+                    "UPDATE test_entrusted_info SET is_invoice = ? WHERE id = ?",
+                    activeCount != null && activeCount > 0 ? "是" : "否",
+                    entrustId);
+        }
+    }
+
+    @Override
     public Map<String, Object> statement(Long entrustId) {
+        ensureInvoiceLifecycleColumns();
         Map<String, Object> entrust = findFinanceRow(entrustId);
         List<Map<String, Object>> remittances = jdbcTemplate.queryForList(
                 "SELECT id, amount, registration_date, payment_method, payment_source, note, create_time, registrant " +
                         "FROM test_entrust_remittance_registration WHERE entrusted_id = ? ORDER BY registration_date ASC, id ASC",
                 entrustId);
         List<Map<String, Object>> invoices = jdbcTemplate.queryForList(
-                "SELECT id, entrustment_no, entrust_company, sample_name, registration_time, registered_name, remark, crate_time " +
+                "SELECT CAST(id AS CHAR) id, entrustment_no, entrust_company, sample_name, registration_time, registered_name, remark, crate_time, " +
+                        "COALESCE(invoice_status, 'NORMAL') invoice_status, status_reason, status_time, status_user " +
                         "FROM test_billing_registration WHERE entrustment_id = ? OR entrustment_no = ? ORDER BY registration_time ASC, id ASC",
                 entrustId,
                 stringValue(entrust.get("entrust_no")));
@@ -253,7 +334,26 @@ public class FinanceServiceImpl implements FinanceService {
         return where.toString();
     }
 
+    private String buildInvoiceWhere(String search, String status, List<Object> params) {
+        StringBuilder where = new StringBuilder("WHERE b.id > 0 ");
+        if (search != null && !search.trim().isEmpty()) {
+            String value = "%" + search.trim() + "%";
+            where.append("AND (b.entrustment_no LIKE ? OR b.entrust_company LIKE ? OR e.project_name LIKE ? OR b.registered_name LIKE ?) ");
+            params.add(value);
+            params.add(value);
+            params.add(value);
+            params.add(value);
+        }
+        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status.trim())) {
+            validateInvoiceStatus(status.trim());
+            where.append("AND COALESCE(b.invoice_status, 'NORMAL') = ? ");
+            params.add(status.trim());
+        }
+        return where.toString();
+    }
+
     private Map<String, Object> findFinanceRow(Long entrustId) {
+        ensureInvoiceLifecycleColumns();
         String where = "WHERE e.id = ? AND (e.state IS NULL OR e.state <> 144) ";
         String sql = "SELECT x.*, " +
                 "GREATEST(x.receivable_amount - x.paid_amount, 0) balance_amount, " +
@@ -262,7 +362,7 @@ public class FinanceServiceImpl implements FinanceService {
                 "WHEN x.paid_amount >= x.receivable_amount THEN '已结清' " +
                 "WHEN x.paid_amount > 0 THEN '部分回款' " +
                 "ELSE '待回款' END billing_status, " +
-                "CASE WHEN x.invoice_count > 0 OR x.is_invoice = '是' THEN '已登记' ELSE '未登记' END invoice_status, " +
+                "CASE WHEN x.invoice_count > 0 THEN '已登记' ELSE '未登记' END invoice_status, " +
                 "CASE " +
                 "WHEN x.receivable_amount <= x.paid_amount THEN '正常' " +
                 "WHEN x.acceptance_date IS NULL THEN '正常' " +
@@ -273,6 +373,19 @@ public class FinanceServiceImpl implements FinanceService {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, entrustId);
         if (rows.isEmpty()) {
             throw new IllegalArgumentException("委托单不存在");
+        }
+        return rows.get(0);
+    }
+
+    private Map<String, Object> findInvoice(Long id) {
+        ensureInvoiceLifecycleColumns();
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                "SELECT CAST(id AS CHAR) id, CAST(entrustment_id AS CHAR) entrust_id, entrustment_no, entrust_company, " +
+                        "COALESCE(invoice_status, 'NORMAL') invoice_status, status_reason, status_time, status_user " +
+                        "FROM test_billing_registration WHERE id = ?",
+                id);
+        if (rows.isEmpty()) {
+            throw new IllegalArgumentException("发票记录不存在");
         }
         return rows.get(0);
     }
@@ -299,6 +412,53 @@ public class FinanceServiceImpl implements FinanceService {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(message);
         }
+    }
+
+    private String requiredString(Map<String, Object> payload, String key, String message) {
+        Object value = payload == null ? null : payload.get(key);
+        if (value == null || String.valueOf(value).trim().isEmpty()) {
+            throw new IllegalArgumentException(message);
+        }
+        return String.valueOf(value).trim();
+    }
+
+    private void validateInvoiceStatus(String status) {
+        if (!"NORMAL".equals(status) && !"VOID".equals(status) && !"RED_OFFSET".equals(status)) {
+            throw new IllegalArgumentException("发票状态不正确");
+        }
+    }
+
+    private synchronized void ensureInvoiceLifecycleColumns() {
+        if (invoiceLifecycleColumnsChecked) {
+            return;
+        }
+        if (!hasColumn("test_billing_registration", "invoice_status")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN invoice_status VARCHAR(20) NOT NULL DEFAULT 'NORMAL' COMMENT '发票状态：NORMAL正常，VOID作废，RED_OFFSET红冲'");
+        }
+        if (!hasColumn("test_billing_registration", "status_reason")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN status_reason VARCHAR(255) NULL COMMENT '发票状态变更原因'");
+        }
+        if (!hasColumn("test_billing_registration", "status_time")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN status_time DATETIME NULL COMMENT '发票状态变更时间'");
+        }
+        if (!hasColumn("test_billing_registration", "status_user")) {
+            jdbcTemplate.execute("ALTER TABLE test_billing_registration " +
+                    "ADD COLUMN status_user VARCHAR(100) NULL COMMENT '发票状态变更人'");
+        }
+        invoiceLifecycleColumnsChecked = true;
+    }
+
+    private boolean hasColumn(String tableName, String columnName) {
+        Long count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS " +
+                        "WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?",
+                Long.class,
+                tableName,
+                columnName);
+        return count != null && count > 0;
     }
 
     private BigDecimal requiredMoney(Map<String, Object> payload, String key, String message) {

@@ -90,6 +90,24 @@ public class FinanceController {
         }
     }
 
+    @GetMapping("invoice/ledger")
+    public Result invoiceLedger(Integer pageNum, Integer pageSize, String search, String status) {
+        if (pageNum == null || pageSize == null) {
+            return ResultUtil.error("缺少分页参数！");
+        }
+        return ResultUtil.success(financeService.invoiceLedger(pageNum, pageSize, search, status));
+    }
+
+    @PostMapping("invoice/status")
+    public Result updateInvoiceStatus(@RequestBody Map<String, Object> payload) {
+        try {
+            financeService.updateInvoiceStatus(payload);
+            return ResultUtil.success("操作成功");
+        } catch (RuntimeException e) {
+            return ResultUtil.error(e.getMessage());
+        }
+    }
+
     @GetMapping("statement")
     public Result statement(Long entrustId) {
         if (entrustId == null) {
