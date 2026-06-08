@@ -4,10 +4,13 @@ import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.service.FinanceService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/finance/")
@@ -27,5 +30,43 @@ public class FinanceController {
             return ResultUtil.error("缺少分页参数！");
         }
         return ResultUtil.success(financeService.billingList(pageNum, pageSize, search));
+    }
+
+    @PostMapping("billing/calculate")
+    public Result calculateBilling(@RequestBody Map<String, Object> payload) {
+        try {
+            financeService.calculateBilling(payload);
+            return ResultUtil.success("操作成功");
+        } catch (RuntimeException e) {
+            return ResultUtil.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("remittance/add")
+    public Result addRemittance(@RequestBody Map<String, Object> payload) {
+        try {
+            financeService.addRemittance(payload);
+            return ResultUtil.success("操作成功");
+        } catch (RuntimeException e) {
+            return ResultUtil.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("invoice/add")
+    public Result addInvoice(@RequestBody Map<String, Object> payload) {
+        try {
+            financeService.addInvoice(payload);
+            return ResultUtil.success("操作成功");
+        } catch (RuntimeException e) {
+            return ResultUtil.error(e.getMessage());
+        }
+    }
+
+    @GetMapping("statement")
+    public Result statement(Long entrustId) {
+        if (entrustId == null) {
+            return ResultUtil.error("缺少委托单参数！");
+        }
+        return ResultUtil.success(financeService.statement(entrustId));
     }
 }
