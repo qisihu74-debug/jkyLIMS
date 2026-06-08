@@ -52,6 +52,34 @@ public class FinanceController {
         }
     }
 
+    @GetMapping("remittance/list")
+    public Result remittanceList(Long entrustId) {
+        if (entrustId == null) {
+            return ResultUtil.error("缺少委托单参数！");
+        }
+        return ResultUtil.success(financeService.remittanceList(entrustId));
+    }
+
+    @PostMapping("remittance/update")
+    public Result updateRemittance(@RequestBody Map<String, Object> payload) {
+        try {
+            financeService.updateRemittance(payload);
+            return ResultUtil.success("操作成功");
+        } catch (RuntimeException e) {
+            return ResultUtil.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("remittance/delete")
+    public Result deleteRemittance(@RequestBody Map<String, Object> payload) {
+        try {
+            financeService.deleteRemittance(payload);
+            return ResultUtil.success("操作成功");
+        } catch (RuntimeException e) {
+            return ResultUtil.error(e.getMessage());
+        }
+    }
+
     @PostMapping("invoice/add")
     public Result addInvoice(@RequestBody Map<String, Object> payload) {
         try {

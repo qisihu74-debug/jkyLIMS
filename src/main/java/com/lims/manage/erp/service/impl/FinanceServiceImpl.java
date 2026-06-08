@@ -131,6 +131,51 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
+    public List<Map<String, Object>> remittanceList(Long entrustId) {
+        findFinanceRow(entrustId);
+        return jdbcTemplate.queryForList(
+                "SELECT CAST(id AS CHAR) id, CAST(entrusted_id AS CHAR) entrusted_id, entrustment_no, amount, " +
+                        "registration_date, payment_method, payment_source, note, create_time, update_time, registrant " +
+                        "FROM test_entrust_remittance_registration " +
+                        "WHERE entrusted_id = ? ORDER BY registration_date DESC, id DESC",
+                entrustId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateRemittance(Map<String, Object> payload) {
+        Long id = requiredLong(payload, "id", "回款记录不能为空");
+        BigDecimal amount = requiredMoney(payload, "amount", "回款金额不能为空");
+        findRemittance(id);
+        Date registrationDate = optionalDate(payload.get("registrationDate"), new Date(), "登记日期格式不正确");
+
+        int updated = jdbcTemplate.update(
+                "UPDATE test_entrust_remittance_registration " +
+                        "SET amount = ?, registration_date = ?, payment_method = ?, payment_source = ?, note = ?, update_time = NOW() " +
+                        "WHERE id = ?",
+                amount.toPlainString(),
+                registrationDate,
+                optionalString(payload.get("paymentMethod")),
+                optionalString(payload.get("paymentSource")),
+                optionalString(payload.get("note")),
+                id);
+        if (updated == 0) {
+            throw new IllegalArgumentException("回款记录不存在");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteRemittance(Map<String, Object> payload) {
+        Long id = requiredLong(payload, "id", "回款记录不能为空");
+        findRemittance(id);
+        int deleted = jdbcTemplate.update("DELETE FROM test_entrust_remittance_registration WHERE id = ?", id);
+        if (deleted == 0) {
+            throw new IllegalArgumentException("回款记录不存在");
+        }
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void addInvoice(Map<String, Object> payload) {
         Long entrustId = requiredLong(payload, "entrustId", "委托单不能为空");
@@ -228,6 +273,18 @@ public class FinanceServiceImpl implements FinanceService {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, entrustId);
         if (rows.isEmpty()) {
             throw new IllegalArgumentException("委托单不存在");
+        }
+        return rows.get(0);
+    }
+
+    private Map<String, Object> findRemittance(Long id) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                "SELECT CAST(id AS CHAR) id, CAST(entrusted_id AS CHAR) entrusted_id, entrustment_no, amount, " +
+                        "registration_date, payment_method, payment_source, note, create_time, update_time, registrant " +
+                        "FROM test_entrust_remittance_registration WHERE id = ?",
+                id);
+        if (rows.isEmpty()) {
+            throw new IllegalArgumentException("回款记录不存在");
         }
         return rows.get(0);
     }
