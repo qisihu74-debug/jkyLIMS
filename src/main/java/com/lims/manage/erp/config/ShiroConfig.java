@@ -124,6 +124,13 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/report/onlineEdit","anon");
         filterChainDefinitionMap.put("/report/onlineReportMerge","anon");
         filterChainDefinitionMap.put("/l-docs/**", "anon");
+        filterChainDefinitionMap.put("/customer/sendSmsCode", "anon");
+        filterChainDefinitionMap.put("/customer/register", "anon");
+        filterChainDefinitionMap.put("/customer/login", "anon");
+        filterChainDefinitionMap.put("/customer/profile", "anon");
+        filterChainDefinitionMap.put("/customer/claim/candidates", "anon");
+        filterChainDefinitionMap.put("/customer/claim/apply", "anon");
+        filterChainDefinitionMap.put("/customer/claim/myStatus", "anon");
 
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
         shiroFilterFactoryBean.setLoginUrl("index.html");
