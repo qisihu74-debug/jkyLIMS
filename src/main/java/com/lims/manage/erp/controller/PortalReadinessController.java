@@ -156,6 +156,59 @@ public class PortalReadinessController {
         return ResultUtil.success(data);
     }
 
+    @GetMapping("/migration-draft")
+    public Result migrationDraft() {
+        try {
+            String generatedAt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            String fileTimestamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT risk.* FROM (" + riskAccountBaseSql() + ") risk " +
+                            "ORDER BY risk.riskType ASC, FIELD(risk.reviewStatus,'PENDING','DEFERRED','CONFIRMED','IGNORE'), CAST(risk.userId AS UNSIGNED) DESC");
+            List<Map<String, Object>> stats = jdbcTemplate.queryForList(riskStatsSql());
+
+            long riskTotal = rows.size();
+            long pendingCount = countRows(rows, null, "PENDING");
+            long deferredCount = countRows(rows, null, "DEFERRED");
+            long confirmedCount = countRows(rows, null, "CONFIRMED");
+            long ignoredCount = countRows(rows, null, "IGNORE");
+            long confirmedUnassignedCount = countRows(rows, "UNASSIGNED_PORTAL", "CONFIRMED");
+            long confirmedMultiCount = countRows(rows, "MULTI_PORTAL", "CONFIRMED");
+            long blockingCount = pendingCount + deferredCount;
+            boolean readyForRehearsal = riskTotal > 0 && blockingCount == 0;
+
+            String sqlDraft = buildMigrationSqlDraft(rows, generatedAt, readyForRehearsal);
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("phase", "phase6-migration-draft");
+            data.put("generatedAt", generatedAt);
+            data.put("dryRun", true);
+            data.put("executable", false);
+            data.put("migrationWriteEnabled", false);
+            data.put("readyForRehearsal", readyForRehearsal);
+            data.put("riskTotal", riskTotal);
+            data.put("blockingRiskCount", blockingCount);
+            data.put("pendingRiskCount", pendingCount);
+            data.put("deferredRiskCount", deferredCount);
+            data.put("confirmedRiskCount", confirmedCount);
+            data.put("ignoredRiskCount", ignoredCount);
+            data.put("confirmedUnassignedCount", confirmedUnassignedCount);
+            data.put("confirmedMultiCount", confirmedMultiCount);
+            data.put("stats", stats);
+            data.put("checklist", migrationChecklist(readyForRehearsal, riskTotal, blockingCount));
+            data.put("sqlDraft", sqlDraft);
+            data.put("sqlDraftLineCount", sqlDraft.split("\\n").length);
+            data.put("fileName", "portal-migration-draft-" + fileTimestamp + ".sql");
+            data.put("notes", Arrays.asList(
+                    "本接口只生成迁移预案和 SQL 草稿，不执行任何权限表写入。",
+                    "草稿中的 INSERT/UPDATE/DELETE/CREATE TABLE 语句均以注释形式输出。",
+                    "PENDING 或 DEFERRED 风险项清零前，不建议进入 staging 迁移演练。"
+            ));
+            return ResultUtil.success(data);
+        } catch (Exception e) {
+            return ResultUtil.error(500, "生成迁移预案失败：" + e.getMessage());
+        }
+    }
+
     private List<Map<String, Object>> buildMetrics(List<Map<String, Object>> warnings) {
         List<Map<String, Object>> metrics = new ArrayList<>();
         metrics.add(metric("internalUserCount", safeCount("SELECT COUNT(*) FROM sys_user u WHERE " + ACTIVE_USER_FILTER, warnings, "internalUserCount"), "normal"));
@@ -347,7 +400,8 @@ public class PortalReadinessController {
                 validation("customerTokenGuard", "passed", "automated"),
                 validation("softBlockPaths", "pending", "manual"),
                 validation("customerClaimSampling", "pending", "manual"),
-                validation("riskAccountChecklist", "pending", "manual")
+                validation("riskAccountChecklist", "pending", "manual"),
+                validation("migrationDraftExport", "pending", "manual")
         );
     }
 
@@ -387,5 +441,151 @@ public class PortalReadinessController {
 
     private boolean hasText(String value) {
         return value != null && value.trim().length() > 0;
+    }
+
+    private long countRows(List<Map<String, Object>> rows, String riskType, String reviewStatus) {
+        long count = 0L;
+        for (Map<String, Object> row : rows) {
+            if (hasText(riskType) && !riskType.equals(valueAsString(row.get("riskType")))) {
+                continue;
+            }
+            if (hasText(reviewStatus) && !reviewStatus.equals(valueAsString(row.get("reviewStatus")))) {
+                continue;
+            }
+            count++;
+        }
+        return count;
+    }
+
+    private List<Map<String, Object>> migrationChecklist(boolean readyForRehearsal, long riskTotal, long blockingCount) {
+        List<Map<String, Object>> items = new ArrayList<>();
+        items.add(checkItem("riskListExists", riskTotal > 0, "风险清单已生成：" + riskTotal + " 条"));
+        items.add(checkItem("allRisksReviewed", blockingCount == 0, blockingCount == 0 ? "风险项已无待确认/暂缓" : "仍有 " + blockingCount + " 条待确认或暂缓"));
+        items.add(checkItem("sqlDraftOnly", true, "仅生成 SQL 草稿，不执行权限表写入"));
+        items.add(checkItem("businessSignoff", false, "需业务负责人确认风险清单和迁移口径"));
+        items.add(checkItem("backupPlan", false, "正式演练前需人工准备 sys_user_role 备份"));
+        items.add(checkItem("stagingRehearsal", readyForRehearsal, readyForRehearsal ? "可进入 staging 演练评审" : "风险清单确认完成后再进入 staging 演练"));
+        return items;
+    }
+
+    private Map<String, Object> checkItem(String key, boolean passed, String message) {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("key", key);
+        item.put("passed", passed);
+        item.put("status", passed ? "passed" : "pending");
+        item.put("message", message);
+        return item;
+    }
+
+    private String buildMigrationSqlDraft(List<Map<String, Object>> rows, String generatedAt, boolean readyForRehearsal) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("-- jkyLIMS phase6 portal migration draft\n");
+        sql.append("-- generated_at: ").append(generatedAt).append("\n");
+        sql.append("-- dry_run_only: true\n");
+        sql.append("-- executable: false\n");
+        sql.append("-- IMPORTANT: all mutating statements are intentionally commented out.\n");
+        sql.append("-- Running this file as-is must not change sys_user_role or any permission table.\n\n");
+
+        sql.append("SELECT 'risk_total' AS item, COUNT(*) AS value FROM (\n");
+        sql.append(riskAccountBaseSql()).append("\n");
+        sql.append(") risk;\n\n");
+
+        sql.append("SELECT risk.riskType, risk.reviewStatus, COUNT(*) AS count FROM (\n");
+        sql.append(riskAccountBaseSql()).append("\n");
+        sql.append(") risk GROUP BY risk.riskType, risk.reviewStatus ORDER BY risk.riskType, risk.reviewStatus;\n\n");
+
+        sql.append("-- Gate: ready_for_staging_rehearsal = ").append(readyForRehearsal).append("\n");
+        sql.append("-- Do not uncomment any mutating SQL before all PENDING/DEFERRED rows are resolved and signed off.\n\n");
+
+        sql.append("-- 1. Manual backup draft. Keep commented until the rehearsal window is approved.\n");
+        sql.append("-- CREATE TABLE sys_user_role_bak_phase6_").append(new SimpleDateFormat("yyyyMMdd").format(new Date())).append(" AS SELECT * FROM sys_user_role;\n\n");
+
+        appendBlockers(sql, rows);
+        appendConfirmedUnassignedDraft(sql, rows);
+        appendConfirmedMultiPortalDraft(sql, rows);
+        appendIgnoredDraft(sql, rows);
+
+        sql.append("-- End of dry-run draft. No executable mutation is included.\n");
+        return sql.toString();
+    }
+
+    private void appendBlockers(StringBuilder sql, List<Map<String, Object>> rows) {
+        sql.append("-- 2. Blocking rows: PENDING or DEFERRED must be handled before rehearsal.\n");
+        for (Map<String, Object> row : rows) {
+            String status = valueAsString(row.get("reviewStatus"));
+            if (!"PENDING".equals(status) && !"DEFERRED".equals(status)) {
+                continue;
+            }
+            sql.append("-- BLOCKED ")
+                    .append("status=").append(status)
+                    .append(", riskType=").append(commentValue(row.get("riskType")))
+                    .append(", user_id=").append(commentValue(row.get("userId")))
+                    .append(", username=").append(commentValue(row.get("username")))
+                    .append(", name=").append(commentValue(row.get("name")))
+                    .append(", roleTypes=").append(commentValue(row.get("roleTypes")))
+                    .append(", remark=").append(commentValue(row.get("reviewRemark")))
+                    .append("\n");
+        }
+        sql.append("\n");
+    }
+
+    private void appendConfirmedUnassignedDraft(StringBuilder sql, List<Map<String, Object>> rows) {
+        sql.append("-- 3. Confirmed UNASSIGNED_PORTAL rows.\n");
+        sql.append("-- Each row needs a business-selected target role_id before any migration rehearsal.\n");
+        for (Map<String, Object> row : rows) {
+            if (!"UNASSIGNED_PORTAL".equals(valueAsString(row.get("riskType"))) || !"CONFIRMED".equals(valueAsString(row.get("reviewStatus")))) {
+                continue;
+            }
+            String userId = commentValue(row.get("userId"));
+            sql.append("-- user_id=").append(userId)
+                    .append(", username=").append(commentValue(row.get("username")))
+                    .append(", name=").append(commentValue(row.get("name")))
+                    .append(", reviewed_by=").append(commentValue(row.get("reviewUserName")))
+                    .append("\n");
+            sql.append("-- INSERT INTO sys_user_role (user_id, role_id) VALUES (")
+                    .append(userId)
+                    .append(", <target_role_id>);\n");
+        }
+        sql.append("\n");
+    }
+
+    private void appendConfirmedMultiPortalDraft(StringBuilder sql, List<Map<String, Object>> rows) {
+        sql.append("-- 4. Confirmed MULTI_PORTAL rows.\n");
+        sql.append("-- Default action is no sys_user_role mutation; verify portal switch behavior and default portal separately.\n");
+        for (Map<String, Object> row : rows) {
+            if (!"MULTI_PORTAL".equals(valueAsString(row.get("riskType"))) || !"CONFIRMED".equals(valueAsString(row.get("reviewStatus")))) {
+                continue;
+            }
+            sql.append("-- MULTI_PORTAL no-op user_id=").append(commentValue(row.get("userId")))
+                    .append(", username=").append(commentValue(row.get("username")))
+                    .append(", name=").append(commentValue(row.get("name")))
+                    .append(", roleTypes=").append(commentValue(row.get("roleTypes")))
+                    .append(", roleNames=").append(commentValue(row.get("roleNames")))
+                    .append("\n");
+        }
+        sql.append("\n");
+    }
+
+    private void appendIgnoredDraft(StringBuilder sql, List<Map<String, Object>> rows) {
+        sql.append("-- 5. IGNORE rows. These are explicitly excluded from migration draft mutations.\n");
+        for (Map<String, Object> row : rows) {
+            if (!"IGNORE".equals(valueAsString(row.get("reviewStatus")))) {
+                continue;
+            }
+            sql.append("-- IGNORE riskType=").append(commentValue(row.get("riskType")))
+                    .append(", user_id=").append(commentValue(row.get("userId")))
+                    .append(", username=").append(commentValue(row.get("username")))
+                    .append(", name=").append(commentValue(row.get("name")))
+                    .append(", remark=").append(commentValue(row.get("reviewRemark")))
+                    .append("\n");
+        }
+        sql.append("\n");
+    }
+
+    private String commentValue(Object value) {
+        if (value == null) {
+            return "-";
+        }
+        return String.valueOf(value).replace("\r", " ").replace("\n", " ").replace("--", "- -").trim();
     }
 }
