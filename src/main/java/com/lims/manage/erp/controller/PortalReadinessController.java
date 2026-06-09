@@ -386,6 +386,76 @@ public class PortalReadinessController {
         }
     }
 
+    @GetMapping("/rehearsal-window-draft")
+    public Result rehearsalWindowDraft() {
+        try {
+            String generatedAt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            String fileTimestamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT risk.* FROM (" + riskAccountBaseSql() + ") risk " +
+                            "ORDER BY FIELD(risk.reviewStatus,'PENDING','DEFERRED','CONFIRMED','IGNORE'), " +
+                            "FIELD(risk.followStatus,'BLOCKED','OPEN','DONE'), risk.riskType ASC, CAST(risk.userId AS UNSIGNED) DESC");
+
+            long riskTotal = rows.size();
+            long pendingCount = countRows(rows, null, "PENDING");
+            long deferredCount = countRows(rows, null, "DEFERRED");
+            long confirmedCount = countRows(rows, null, "CONFIRMED");
+            long ignoredCount = countRows(rows, null, "IGNORE");
+            long blockingCount = pendingCount + deferredCount;
+            long blockedFollowCount = countFollowStatus(rows, "BLOCKED");
+            boolean readyForWindowScheduling = riskTotal > 0 && blockingCount == 0;
+
+            List<Map<String, Object>> taskItems = buildRehearsalTaskItems(rows);
+            List<Map<String, Object>> windowOptions = buildRehearsalWindowOptions(readyForWindowScheduling, blockingCount);
+            List<Map<String, Object>> goNoGoChecklist = buildRehearsalGoNoGoChecklist(
+                    readyForWindowScheduling, riskTotal, pendingCount, deferredCount, confirmedCount, ignoredCount,
+                    blockedFollowCount, taskItems.size());
+            List<Map<String, Object>> rollbackTriggers = rehearsalRollbackTriggers();
+            List<Map<String, Object>> rollbackChecklist = rehearsalRollbackChecklist();
+            List<Map<String, Object>> signoffRows = rehearsalWindowSignoffRows(readyForWindowScheduling, blockingCount);
+            String csvDraft = buildRehearsalWindowCsvDraft(goNoGoChecklist, rollbackChecklist, signoffRows);
+            String textDraft = buildRehearsalWindowTextDraft(generatedAt, readyForWindowScheduling, riskTotal,
+                    pendingCount, deferredCount, confirmedCount, ignoredCount, blockedFollowCount, windowOptions,
+                    goNoGoChecklist, rollbackTriggers, rollbackChecklist, signoffRows);
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("phase", "phase6-rehearsal-window-draft");
+            data.put("generatedAt", generatedAt);
+            data.put("dryRun", true);
+            data.put("executable", false);
+            data.put("migrationWriteEnabled", false);
+            data.put("permissionWriteEnabled", false);
+            data.put("readyForWindowScheduling", readyForWindowScheduling);
+            data.put("goNoGoPassed", false);
+            data.put("rollbackReady", false);
+            data.put("riskTotal", riskTotal);
+            data.put("blockingRiskCount", blockingCount);
+            data.put("pendingRiskCount", pendingCount);
+            data.put("deferredRiskCount", deferredCount);
+            data.put("confirmedRiskCount", confirmedCount);
+            data.put("ignoredRiskCount", ignoredCount);
+            data.put("blockedFollowCount", blockedFollowCount);
+            data.put("taskItemCount", taskItems.size());
+            data.put("windowOptions", windowOptions);
+            data.put("goNoGoChecklist", goNoGoChecklist);
+            data.put("rollbackTriggers", rollbackTriggers);
+            data.put("rollbackChecklist", rollbackChecklist);
+            data.put("signoffRows", signoffRows);
+            data.put("csvDraft", csvDraft);
+            data.put("textDraft", textDraft);
+            data.put("csvFileName", "portal-rehearsal-window-confirmation-" + fileTimestamp + ".csv");
+            data.put("textFileName", "portal-rehearsal-window-rollback-draft-" + fileTimestamp + ".md");
+            data.put("notes", Arrays.asList(
+                    "This endpoint only generates rehearsal window and rollback confirmation drafts.",
+                    "It does not update sys_user_role or any permission table.",
+                    "Go/No-Go remains false until business, test, ops and rollback owners sign manually."
+            ));
+            return ResultUtil.success(data);
+        } catch (Exception e) {
+            return ResultUtil.error(500, "generate rehearsal window draft failed: " + e.getMessage());
+        }
+    }
+
     private List<Map<String, Object>> buildMetrics(List<Map<String, Object>> warnings) {
         List<Map<String, Object>> metrics = new ArrayList<>();
         metrics.add(metric("internalUserCount", safeCount("SELECT COUNT(*) FROM sys_user u WHERE " + ACTIVE_USER_FILTER, warnings, "internalUserCount"), "normal"));
@@ -621,7 +691,8 @@ public class PortalReadinessController {
                 validation("riskAccountChecklist", "pending", "manual"),
                 validation("migrationDraftExport", "pending", "manual"),
                 validation("riskReviewWorklist", "pending", "manual"),
-                validation("rehearsalTaskDraft", "pending", "manual")
+                validation("rehearsalTaskDraft", "pending", "manual"),
+                validation("rehearsalWindowRollbackDraft", "pending", "manual")
         );
     }
 
@@ -993,6 +1064,298 @@ public class PortalReadinessController {
         }
         text.append("\nNo SQL execution entry is provided by this draft.\n");
         return text.toString();
+    }
+
+    private List<Map<String, Object>> buildRehearsalWindowOptions(boolean readyForWindowScheduling, long blockingCount) {
+        String status = readyForWindowScheduling ? "READY_FOR_MANUAL_SIGNOFF" : "BLOCKED_BY_RISK_REVIEW";
+        String condition = readyForWindowScheduling
+                ? "business_test_ops_and_rollback_signoff_required"
+                : "resolve_" + blockingCount + "_pending_or_deferred_risk_items_first";
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(draftRow("staging_dry_run_window", "Staging dry-run window", "ops_owner",
+                "TBD by business owner", "90 minutes", status, condition,
+                "Run against l staging only; no permission SQL is executed by the system."));
+        rows.add(draftRow("business_regression_window", "Business regression window", "test_owner",
+                "TBD after dry-run", "120 minutes", "DRAFT", "dry_run_window_signed",
+                "Verify portal entry, menu visibility, customer report ownership and rollback smoke."));
+        rows.add(draftRow("rollback_rehearsal_window", "Rollback rehearsal window", "rollback_owner",
+                "TBD before production change", "60 minutes", "DRAFT", "rollback_owner_signed",
+                "Confirm static package, backend jar and database snapshot restore path before any real migration."));
+        return rows;
+    }
+
+    private List<Map<String, Object>> buildRehearsalGoNoGoChecklist(boolean readyForWindowScheduling,
+                                                                    long riskTotal,
+                                                                    long pendingCount,
+                                                                    long deferredCount,
+                                                                    long confirmedCount,
+                                                                    long ignoredCount,
+                                                                    long blockedFollowCount,
+                                                                    int taskItemCount) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(checkItem("risk_review_closed", "Risk review has no PENDING or DEFERRED rows", "business_owner",
+                readyForWindowScheduling, "risk_total=" + riskTotal + ", pending=" + pendingCount +
+                        ", deferred=" + deferredCount + ", confirmed=" + confirmedCount + ", ignored=" + ignoredCount));
+        rows.add(checkItem("blocked_followup_cleared", "No risk item is still marked BLOCKED in follow-up worklist", "business_owner",
+                blockedFollowCount == 0, "blocked_follow_count=" + blockedFollowCount));
+        rows.add(checkItem("task_sheet_generated", "Rehearsal task sheet has been generated from confirmed risk rows", "system_admin",
+                taskItemCount > 0, "task_item_count=" + taskItemCount));
+        rows.add(checkItem("permission_write_guard", "System draft keeps permission writes disabled", "system_admin",
+                true, "permission_write_enabled=false"));
+        rows.add(checkItem("database_snapshot_signed", "Database snapshot and restore owner are confirmed", "db_owner",
+                false, "manual_signoff_required"));
+        rows.add(checkItem("static_and_jar_backup_signed", "Frontend static backup and backend jar rollback point are confirmed", "ops_owner",
+                false, "manual_signoff_required"));
+        rows.add(checkItem("business_window_signed", "Business accepts rehearsal window and freeze period", "business_owner",
+                false, "manual_signoff_required"));
+        rows.add(checkItem("rollback_owner_signed", "Rollback owner accepts trigger conditions and recovery steps", "rollback_owner",
+                false, "manual_signoff_required"));
+        return rows;
+    }
+
+    private List<Map<String, Object>> rehearsalRollbackTriggers() {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(triggerItem("portal_login_failure", "Any target portal role cannot log in after rehearsal start", "pause_rehearsal_and_keep_permission_sql_commented"));
+        rows.add(triggerItem("portal_switch_regression", "Multi-portal account cannot switch portal or returns wrong menu", "stop_and_restore_previous_static_or_backend_package_if_code_related"));
+        rows.add(triggerItem("customer_report_guard_failure", "Customer A can view or download customer B report", "stop_window_and_restore_last_known_good_backend"));
+        rows.add(triggerItem("unexpected_permission_table_change", "sys_user_role or role mapping row count changes unexpectedly", "rollback_database_snapshot_by_dba"));
+        rows.add(triggerItem("service_health_drop", "Staging 18082 has repeated 500/timeout during smoke", "restart_staging_or_restore_previous_jar_then_rerun_smoke"));
+        return rows;
+    }
+
+    private List<Map<String, Object>> rehearsalRollbackChecklist() {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(draftRow("freeze_manual_execution", "Freeze manual SQL execution", "system_admin",
+                "Before rehearsal", "immediate", "REQUIRED", "go_no_go_failed_or_trigger_hit",
+                "Confirm all migration SQL remains commented unless manually approved outside the system."));
+        rows.add(draftRow("capture_current_state", "Capture current staging state", "ops_owner",
+                "Before rehearsal", "15 minutes", "REQUIRED", "window_opened",
+                "Record frontend package, backend jar checksum, DB snapshot id and smoke baseline."));
+        rows.add(draftRow("restore_frontend_static", "Restore previous frontend static package", "ops_owner",
+                "If frontend regression trigger hits", "15 minutes", "DRAFT", "static_backup_confirmed",
+                "Use the latest staging static backup selected by ops owner; do not restore production from this draft."));
+        rows.add(draftRow("restore_backend_jar", "Restore previous backend jar", "ops_owner",
+                "If backend regression trigger hits", "20 minutes", "DRAFT", "jar_backup_confirmed",
+                "Switch back to the pre-window jar and restart staging, then rerun readiness smoke."));
+        rows.add(draftRow("restore_permission_snapshot", "Restore permission/database snapshot", "db_owner",
+                "If permission table changed unexpectedly", "30 minutes", "DRAFT", "db_snapshot_signed",
+                "DB owner restores the signed snapshot; application does not auto-run rollback SQL."));
+        rows.add(draftRow("rerun_smoke", "Rerun readonly readiness smoke", "test_owner",
+                "After rollback", "10 minutes", "REQUIRED", "service_recovered",
+                "Run SMOKE_WRITE_REVIEW=0 SMOKE_ASSIGN_WORK=0 smoke and attach output to signoff."));
+        return rows;
+    }
+
+    private List<Map<String, Object>> rehearsalWindowSignoffRows(boolean readyForWindowScheduling, long blockingCount) {
+        String riskNote = readyForWindowScheduling ? "risk_review_ready_for_manual_window" :
+                "blocked_by_" + blockingCount + "_pending_or_deferred_risks";
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(signoffRow("business_owner", "Business owner", "Accept rehearsal window, freeze period and residual risk", "before_window_schedule", riskNote));
+        rows.add(signoffRow("system_admin", "System admin", "Confirm permission-write guard and migration SQL remains manual", "before_window_schedule", "permission_write_enabled_false"));
+        rows.add(signoffRow("test_owner", "Test owner", "Accept portal regression scope and smoke evidence", "before_window_start", "readonly_smoke_required"));
+        rows.add(signoffRow("ops_owner", "Ops owner", "Confirm static package, backend jar backup and restart plan", "before_window_start", "manual_backup_confirmation_required"));
+        rows.add(signoffRow("db_owner", "DB owner", "Confirm database snapshot and restore owner", "before_window_start", "manual_snapshot_confirmation_required"));
+        rows.add(signoffRow("rollback_owner", "Rollback owner", "Accept rollback triggers and recovery sequence", "before_window_start", "manual_rollback_confirmation_required"));
+        return rows;
+    }
+
+    private String buildRehearsalWindowCsvDraft(List<Map<String, Object>> goNoGoChecklist,
+                                                List<Map<String, Object>> rollbackChecklist,
+                                                List<Map<String, Object>> signoffRows) {
+        StringBuilder csv = new StringBuilder();
+        csv.append(csvLine(Arrays.asList("itemType", "key", "title", "owner", "requiredBefore", "duration", "status",
+                "passed", "condition", "evidence", "notes")));
+        for (Map<String, Object> item : goNoGoChecklist) {
+            csv.append(csvLine(Arrays.asList(
+                    "go_no_go",
+                    item.get("key"),
+                    item.get("title"),
+                    item.get("owner"),
+                    item.get("requiredBefore"),
+                    "",
+                    item.get("status"),
+                    item.get("passed"),
+                    item.get("condition"),
+                    item.get("evidence"),
+                    item.get("notes")
+            )));
+        }
+        for (Map<String, Object> item : rollbackChecklist) {
+            csv.append(csvLine(Arrays.asList(
+                    "rollback",
+                    item.get("key"),
+                    item.get("title"),
+                    item.get("owner"),
+                    item.get("requiredBefore"),
+                    item.get("duration"),
+                    item.get("status"),
+                    false,
+                    item.get("condition"),
+                    "",
+                    item.get("notes")
+            )));
+        }
+        for (Map<String, Object> item : signoffRows) {
+            csv.append(csvLine(Arrays.asList(
+                    "signoff",
+                    item.get("key"),
+                    item.get("title"),
+                    item.get("owner"),
+                    item.get("requiredBefore"),
+                    "",
+                    item.get("status"),
+                    item.get("signed"),
+                    item.get("condition"),
+                    item.get("evidence"),
+                    item.get("notes")
+            )));
+        }
+        return csv.toString();
+    }
+
+    private String buildRehearsalWindowTextDraft(String generatedAt,
+                                                 boolean readyForWindowScheduling,
+                                                 long riskTotal,
+                                                 long pendingCount,
+                                                 long deferredCount,
+                                                 long confirmedCount,
+                                                 long ignoredCount,
+                                                 long blockedFollowCount,
+                                                 List<Map<String, Object>> windowOptions,
+                                                 List<Map<String, Object>> goNoGoChecklist,
+                                                 List<Map<String, Object>> rollbackTriggers,
+                                                 List<Map<String, Object>> rollbackChecklist,
+                                                 List<Map<String, Object>> signoffRows) {
+        StringBuilder text = new StringBuilder();
+        text.append("# jkyLIMS rehearsal window and rollback confirmation draft\n\n");
+        text.append("- generated_at: ").append(generatedAt).append("\n");
+        text.append("- dry_run_only: true\n");
+        text.append("- executable: false\n");
+        text.append("- permission_write_enabled: false\n");
+        text.append("- migration_write_enabled: false\n");
+        text.append("- go_no_go_passed: false\n");
+        text.append("- ready_for_window_scheduling: ").append(readyForWindowScheduling).append("\n\n");
+        text.append("## Risk Gate\n\n");
+        text.append("- risk_total: ").append(riskTotal).append("\n");
+        text.append("- pending: ").append(pendingCount).append("\n");
+        text.append("- deferred: ").append(deferredCount).append("\n");
+        text.append("- confirmed: ").append(confirmedCount).append("\n");
+        text.append("- ignored: ").append(ignoredCount).append("\n");
+        text.append("- blocked_follow_count: ").append(blockedFollowCount).append("\n\n");
+        text.append("## Window Draft\n\n");
+        appendDraftTable(text, windowOptions, true);
+        text.append("\n## Go/No-Go Checklist\n\n");
+        appendDraftTable(text, goNoGoChecklist, false);
+        text.append("\n## Rollback Triggers\n\n");
+        text.append("| key | title | action |\n");
+        text.append("|---|---|---|\n");
+        for (Map<String, Object> item : rollbackTriggers) {
+            text.append("| ")
+                    .append(markdownCell(item.get("key"))).append(" | ")
+                    .append(markdownCell(item.get("title"))).append(" | ")
+                    .append(markdownCell(item.get("action"))).append(" |\n");
+        }
+        text.append("\n## Rollback Checklist\n\n");
+        appendDraftTable(text, rollbackChecklist, true);
+        text.append("\n## Business Signoff\n\n");
+        appendDraftTable(text, signoffRows, false);
+        text.append("\nNo permission migration or rollback SQL is executed by this draft.\n");
+        return text.toString();
+    }
+
+    private void appendDraftTable(StringBuilder text, List<Map<String, Object>> rows, boolean includeDuration) {
+        if (includeDuration) {
+            text.append("| key | title | owner | requiredBefore | duration | status | condition | notes |\n");
+            text.append("|---|---|---|---|---|---|---|---|\n");
+        } else {
+            text.append("| key | title | owner | requiredBefore | status | passed/signed | condition | evidence | notes |\n");
+            text.append("|---|---|---|---|---|---|---|---|---|\n");
+        }
+        for (Map<String, Object> item : rows) {
+            if (includeDuration) {
+                text.append("| ")
+                        .append(markdownCell(item.get("key"))).append(" | ")
+                        .append(markdownCell(item.get("title"))).append(" | ")
+                        .append(markdownCell(item.get("owner"))).append(" | ")
+                        .append(markdownCell(item.get("requiredBefore"))).append(" | ")
+                        .append(markdownCell(item.get("duration"))).append(" | ")
+                        .append(markdownCell(item.get("status"))).append(" | ")
+                        .append(markdownCell(item.get("condition"))).append(" | ")
+                        .append(markdownCell(item.get("notes"))).append(" |\n");
+            } else {
+                Object passed = item.containsKey("passed") ? item.get("passed") : item.get("signed");
+                text.append("| ")
+                        .append(markdownCell(item.get("key"))).append(" | ")
+                        .append(markdownCell(item.get("title"))).append(" | ")
+                        .append(markdownCell(item.get("owner"))).append(" | ")
+                        .append(markdownCell(item.get("requiredBefore"))).append(" | ")
+                        .append(markdownCell(item.get("status"))).append(" | ")
+                        .append(markdownCell(passed)).append(" | ")
+                        .append(markdownCell(item.get("condition"))).append(" | ")
+                        .append(markdownCell(item.get("evidence"))).append(" | ")
+                        .append(markdownCell(item.get("notes"))).append(" |\n");
+            }
+        }
+    }
+
+    private Map<String, Object> draftRow(String key, String title, String owner, String requiredBefore,
+                                         String duration, String status, String condition, String notes) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("key", key);
+        row.put("title", title);
+        row.put("owner", owner);
+        row.put("requiredBefore", requiredBefore);
+        row.put("duration", duration);
+        row.put("status", status);
+        row.put("condition", condition);
+        row.put("notes", notes);
+        return row;
+    }
+
+    private Map<String, Object> checkItem(String key, String title, String owner, boolean passed, String evidence) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("key", key);
+        row.put("title", title);
+        row.put("owner", owner);
+        row.put("requiredBefore", "before_window_schedule");
+        row.put("status", passed ? "PASSED" : "WAITING_MANUAL_SIGNOFF");
+        row.put("passed", passed);
+        row.put("condition", passed ? "satisfied" : "manual_confirmation_required");
+        row.put("evidence", evidence);
+        row.put("notes", passed ? "system_derived" : "must_be_signed_before_rehearsal");
+        return row;
+    }
+
+    private Map<String, Object> triggerItem(String key, String title, String action) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("key", key);
+        row.put("title", title);
+        row.put("action", action);
+        return row;
+    }
+
+    private Map<String, Object> signoffRow(String key, String title, String notes, String requiredBefore, String evidence) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("key", key);
+        row.put("title", title);
+        row.put("owner", key);
+        row.put("requiredBefore", requiredBefore);
+        row.put("status", "WAITING_SIGNATURE");
+        row.put("signed", false);
+        row.put("condition", "manual_signature_required");
+        row.put("evidence", evidence);
+        row.put("notes", notes);
+        return row;
+    }
+
+    private long countFollowStatus(List<Map<String, Object>> rows, String followStatus) {
+        long count = 0L;
+        for (Map<String, Object> row : rows) {
+            if (followStatus.equals(valueAsString(row.get("followStatus")))) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private String rehearsalAction(String riskType, String reviewStatus) {
