@@ -329,6 +329,63 @@ public class PortalReadinessController {
         }
     }
 
+    @GetMapping("/rehearsal-task-draft")
+    public Result rehearsalTaskDraft() {
+        try {
+            String generatedAt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            String fileTimestamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT risk.* FROM (" + riskAccountBaseSql() + ") risk " +
+                            "ORDER BY FIELD(risk.reviewStatus,'PENDING','DEFERRED','CONFIRMED','IGNORE'), " +
+                            "FIELD(risk.followStatus,'BLOCKED','OPEN','DONE'), risk.riskType ASC, CAST(risk.userId AS UNSIGNED) DESC");
+
+            long riskTotal = rows.size();
+            long pendingCount = countRows(rows, null, "PENDING");
+            long deferredCount = countRows(rows, null, "DEFERRED");
+            long confirmedCount = countRows(rows, null, "CONFIRMED");
+            long ignoredCount = countRows(rows, null, "IGNORE");
+            long blockingCount = pendingCount + deferredCount;
+            boolean readyForRehearsal = riskTotal > 0 && blockingCount == 0;
+
+            List<Map<String, Object>> taskItems = buildRehearsalTaskItems(rows);
+            List<Map<String, Object>> ownerSummary = buildRehearsalOwnerSummary(taskItems);
+            List<Map<String, Object>> signoffChecklist = rehearsalSignoffChecklist(taskItems, readyForRehearsal, blockingCount);
+            String csvDraft = buildRehearsalCsvDraft(taskItems);
+            String textDraft = buildRehearsalTextDraft(taskItems, signoffChecklist, generatedAt, readyForRehearsal,
+                    riskTotal, pendingCount, deferredCount, confirmedCount, ignoredCount);
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("phase", "phase6-rehearsal-task-draft");
+            data.put("generatedAt", generatedAt);
+            data.put("dryRun", true);
+            data.put("executable", false);
+            data.put("migrationWriteEnabled", false);
+            data.put("permissionWriteEnabled", false);
+            data.put("readyForRehearsal", readyForRehearsal);
+            data.put("riskTotal", riskTotal);
+            data.put("blockingRiskCount", blockingCount);
+            data.put("pendingRiskCount", pendingCount);
+            data.put("deferredRiskCount", deferredCount);
+            data.put("confirmedRiskCount", confirmedCount);
+            data.put("ignoredRiskCount", ignoredCount);
+            data.put("taskItems", taskItems);
+            data.put("ownerSummary", ownerSummary);
+            data.put("signoffChecklist", signoffChecklist);
+            data.put("csvDraft", csvDraft);
+            data.put("textDraft", textDraft);
+            data.put("csvFileName", "portal-rehearsal-task-draft-" + fileTimestamp + ".csv");
+            data.put("textFileName", "portal-rehearsal-signoff-draft-" + fileTimestamp + ".md");
+            data.put("notes", Arrays.asList(
+                    "This endpoint only generates rehearsal task and signoff drafts.",
+                    "It does not update sys_user_role or any permission table.",
+                    "Keep all PENDING/DEFERRED rows blocked until business signoff is complete."
+            ));
+            return ResultUtil.success(data);
+        } catch (Exception e) {
+            return ResultUtil.error(500, "generate rehearsal task draft failed: " + e.getMessage());
+        }
+    }
+
     private List<Map<String, Object>> buildMetrics(List<Map<String, Object>> warnings) {
         List<Map<String, Object>> metrics = new ArrayList<>();
         metrics.add(metric("internalUserCount", safeCount("SELECT COUNT(*) FROM sys_user u WHERE " + ACTIVE_USER_FILTER, warnings, "internalUserCount"), "normal"));
@@ -563,7 +620,8 @@ public class PortalReadinessController {
                 validation("customerClaimSampling", "pending", "manual"),
                 validation("riskAccountChecklist", "pending", "manual"),
                 validation("migrationDraftExport", "pending", "manual"),
-                validation("riskReviewWorklist", "pending", "manual")
+                validation("riskReviewWorklist", "pending", "manual"),
+                validation("rehearsalTaskDraft", "pending", "manual")
         );
     }
 
@@ -750,6 +808,268 @@ public class PortalReadinessController {
                     .append("\n");
         }
         sql.append("\n");
+    }
+
+    private List<Map<String, Object>> buildRehearsalTaskItems(List<Map<String, Object>> rows) {
+        List<Map<String, Object>> tasks = new ArrayList<>();
+        int itemNo = 1;
+        for (Map<String, Object> row : rows) {
+            String riskType = valueAsString(row.get("riskType"));
+            String reviewStatus = valueAsString(row.get("reviewStatus"));
+            String followStatus = valueAsString(row.get("followStatus"));
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("itemNo", itemNo++);
+            item.put("riskType", riskType);
+            item.put("targetId", valueAsString(row.get("targetId")));
+            item.put("userId", valueAsString(row.get("userId")));
+            item.put("username", valueAsString(row.get("username")));
+            item.put("name", valueAsString(row.get("name")));
+            item.put("mobile", valueAsString(row.get("mobile")));
+            item.put("roleTypes", valueAsString(row.get("roleTypes")));
+            item.put("roleNames", valueAsString(row.get("roleNames")));
+            item.put("reviewStatus", reviewStatus);
+            item.put("reviewRemark", valueAsString(row.get("reviewRemark")));
+            item.put("reviewUserName", valueAsString(row.get("reviewUserName")));
+            item.put("reviewTime", valueAsString(row.get("reviewTime")));
+            item.put("followOwner", valueAsString(row.get("followOwner")));
+            item.put("followDueDate", valueAsString(row.get("followDueDate")));
+            item.put("followStatus", hasText(followStatus) ? followStatus : "OPEN");
+            item.put("followRemark", valueAsString(row.get("followRemark")));
+            item.put("action", rehearsalAction(riskType, reviewStatus));
+            item.put("verification", rehearsalVerification(riskType, reviewStatus));
+            item.put("signoffRole", rehearsalSignoffRole(riskType, reviewStatus));
+            item.put("blocking", "PENDING".equals(reviewStatus) || "DEFERRED".equals(reviewStatus));
+            item.put("permissionWriteEnabled", false);
+            tasks.add(item);
+        }
+        return tasks;
+    }
+
+    private List<Map<String, Object>> buildRehearsalOwnerSummary(List<Map<String, Object>> taskItems) {
+        Map<String, Map<String, Object>> grouped = new LinkedHashMap<>();
+        for (Map<String, Object> item : taskItems) {
+            String owner = valueAsString(item.get("followOwner"));
+            if (!hasText(owner)) {
+                owner = "UNASSIGNED";
+            }
+            Map<String, Object> summary = grouped.get(owner);
+            if (summary == null) {
+                summary = new LinkedHashMap<>();
+                summary.put("followOwner", owner);
+                summary.put("total", 0L);
+                summary.put("pending", 0L);
+                summary.put("deferred", 0L);
+                summary.put("confirmed", 0L);
+                summary.put("ignored", 0L);
+                summary.put("open", 0L);
+                summary.put("done", 0L);
+                summary.put("blocked", 0L);
+                grouped.put(owner, summary);
+            }
+            increment(summary, "total");
+            String reviewStatus = valueAsString(item.get("reviewStatus"));
+            if ("PENDING".equals(reviewStatus)) {
+                increment(summary, "pending");
+            } else if ("DEFERRED".equals(reviewStatus)) {
+                increment(summary, "deferred");
+            } else if ("CONFIRMED".equals(reviewStatus)) {
+                increment(summary, "confirmed");
+            } else if ("IGNORE".equals(reviewStatus)) {
+                increment(summary, "ignored");
+            }
+            String followStatus = valueAsString(item.get("followStatus"));
+            if ("DONE".equals(followStatus)) {
+                increment(summary, "done");
+            } else if ("BLOCKED".equals(followStatus)) {
+                increment(summary, "blocked");
+            } else {
+                increment(summary, "open");
+            }
+        }
+        return new ArrayList<>(grouped.values());
+    }
+
+    private List<Map<String, Object>> rehearsalSignoffChecklist(List<Map<String, Object>> taskItems,
+                                                               boolean readyForRehearsal,
+                                                               long blockingCount) {
+        long blockingWithoutOwner = 0L;
+        long confirmedWithoutReviewer = 0L;
+        for (Map<String, Object> item : taskItems) {
+            String reviewStatus = valueAsString(item.get("reviewStatus"));
+            if (("PENDING".equals(reviewStatus) || "DEFERRED".equals(reviewStatus)) && !hasText(valueAsString(item.get("followOwner")))) {
+                blockingWithoutOwner++;
+            }
+            if (("CONFIRMED".equals(reviewStatus) || "IGNORE".equals(reviewStatus)) && !hasText(valueAsString(item.get("reviewUserName")))) {
+                confirmedWithoutReviewer++;
+            }
+        }
+
+        List<Map<String, Object>> items = new ArrayList<>();
+        items.add(checkItem("permissionWriteDisabled", true, "Draft only; permission table write switches remain disabled."));
+        items.add(checkItem("allRisksReviewed", readyForRehearsal, blockingCount == 0 ? "No PENDING/DEFERRED risk remains." : blockingCount + " PENDING/DEFERRED risks still block rehearsal."));
+        items.add(checkItem("blockingOwnersAssigned", blockingWithoutOwner == 0, blockingWithoutOwner == 0 ? "All blocking rows have follow owners or no blocking row exists." : blockingWithoutOwner + " blocking rows have no follow owner."));
+        items.add(checkItem("reviewerTraceComplete", confirmedWithoutReviewer == 0, confirmedWithoutReviewer == 0 ? "Reviewed rows have reviewer trace or no reviewed row exists." : confirmedWithoutReviewer + " reviewed rows have no reviewer trace."));
+        items.add(checkItem("businessSignoff", false, "Business owner must sign the task list and exclusion list."));
+        items.add(checkItem("backupConfirmed", false, "DBA/operator must confirm sys_user_role backup before any rehearsal."));
+        items.add(checkItem("rehearsalWindowConfirmed", false, "Owner, time window, rollback contact and communication plan must be confirmed."));
+        return items;
+    }
+
+    private String buildRehearsalCsvDraft(List<Map<String, Object>> taskItems) {
+        StringBuilder csv = new StringBuilder();
+        csv.append(csvLine(Arrays.asList("itemNo", "riskType", "userId", "username", "name", "mobile", "roleTypes",
+                "reviewStatus", "followStatus", "followOwner", "followDueDate", "action", "verification",
+                "signoffRole", "reviewRemark", "followRemark")));
+        for (Map<String, Object> item : taskItems) {
+            csv.append(csvLine(Arrays.asList(
+                    item.get("itemNo"),
+                    item.get("riskType"),
+                    item.get("userId"),
+                    item.get("username"),
+                    item.get("name"),
+                    item.get("mobile"),
+                    item.get("roleTypes"),
+                    item.get("reviewStatus"),
+                    item.get("followStatus"),
+                    item.get("followOwner"),
+                    item.get("followDueDate"),
+                    item.get("action"),
+                    item.get("verification"),
+                    item.get("signoffRole"),
+                    item.get("reviewRemark"),
+                    item.get("followRemark")
+            )));
+        }
+        return csv.toString();
+    }
+
+    private String buildRehearsalTextDraft(List<Map<String, Object>> taskItems,
+                                           List<Map<String, Object>> signoffChecklist,
+                                           String generatedAt,
+                                           boolean readyForRehearsal,
+                                           long riskTotal,
+                                           long pendingCount,
+                                           long deferredCount,
+                                           long confirmedCount,
+                                           long ignoredCount) {
+        StringBuilder text = new StringBuilder();
+        text.append("# jkyLIMS portal migration rehearsal task draft\n\n");
+        text.append("- generated_at: ").append(generatedAt).append("\n");
+        text.append("- dry_run_only: true\n");
+        text.append("- executable: false\n");
+        text.append("- permission_write_enabled: false\n");
+        text.append("- ready_for_rehearsal: ").append(readyForRehearsal).append("\n\n");
+        text.append("## Summary\n\n");
+        text.append("- risk_total: ").append(riskTotal).append("\n");
+        text.append("- pending: ").append(pendingCount).append("\n");
+        text.append("- deferred: ").append(deferredCount).append("\n");
+        text.append("- confirmed: ").append(confirmedCount).append("\n");
+        text.append("- ignored: ").append(ignoredCount).append("\n\n");
+        text.append("## Signoff Checklist\n\n");
+        for (Map<String, Object> item : signoffChecklist) {
+            boolean passed = Boolean.TRUE.equals(item.get("passed"));
+            text.append("- [").append(passed ? "x" : " ").append("] ")
+                    .append(commentValue(item.get("key")))
+                    .append(" - ")
+                    .append(commentValue(item.get("message")))
+                    .append("\n");
+        }
+        text.append("\n## Task Items\n\n");
+        text.append("| # | riskType | userId | username | name | reviewStatus | followStatus | owner | due | action | signoff |\n");
+        text.append("|---|---|---|---|---|---|---|---|---|---|---|\n");
+        for (Map<String, Object> item : taskItems) {
+            text.append("| ")
+                    .append(markdownCell(item.get("itemNo"))).append(" | ")
+                    .append(markdownCell(item.get("riskType"))).append(" | ")
+                    .append(markdownCell(item.get("userId"))).append(" | ")
+                    .append(markdownCell(item.get("username"))).append(" | ")
+                    .append(markdownCell(item.get("name"))).append(" | ")
+                    .append(markdownCell(item.get("reviewStatus"))).append(" | ")
+                    .append(markdownCell(item.get("followStatus"))).append(" | ")
+                    .append(markdownCell(item.get("followOwner"))).append(" | ")
+                    .append(markdownCell(item.get("followDueDate"))).append(" | ")
+                    .append(markdownCell(item.get("action"))).append(" | ")
+                    .append(markdownCell(item.get("signoffRole"))).append(" |\n");
+        }
+        text.append("\nNo SQL execution entry is provided by this draft.\n");
+        return text.toString();
+    }
+
+    private String rehearsalAction(String riskType, String reviewStatus) {
+        if ("PENDING".equals(reviewStatus)) {
+            return "complete_review_before_rehearsal";
+        }
+        if ("DEFERRED".equals(reviewStatus)) {
+            return "resolve_deferred_decision_or_keep_blocked";
+        }
+        if ("IGNORE".equals(reviewStatus)) {
+            return "document_exclusion_reason";
+        }
+        if ("UNASSIGNED_PORTAL".equals(riskType)) {
+            return "select_target_portal_role_for_rehearsal";
+        }
+        if ("MULTI_PORTAL".equals(riskType)) {
+            return "verify_multi_portal_switching_no_role_mutation";
+        }
+        return "manual_review_required";
+    }
+
+    private String rehearsalVerification(String riskType, String reviewStatus) {
+        if ("PENDING".equals(reviewStatus) || "DEFERRED".equals(reviewStatus)) {
+            return "business_owner_must_confirm_or_keep_blocked";
+        }
+        if ("IGNORE".equals(reviewStatus)) {
+            return "exclusion_reason_signed";
+        }
+        if ("UNASSIGNED_PORTAL".equals(riskType)) {
+            return "target_role_selected_and_sql_still_commented";
+        }
+        if ("MULTI_PORTAL".equals(riskType)) {
+            return "portal_switch_regression_passed";
+        }
+        return "manual_verification_required";
+    }
+
+    private String rehearsalSignoffRole(String riskType, String reviewStatus) {
+        if ("PENDING".equals(reviewStatus) || "DEFERRED".equals(reviewStatus)) {
+            return "business_owner";
+        }
+        if ("IGNORE".equals(reviewStatus)) {
+            return "business_owner";
+        }
+        if ("UNASSIGNED_PORTAL".equals(riskType)) {
+            return "business_owner,system_admin";
+        }
+        if ("MULTI_PORTAL".equals(riskType)) {
+            return "business_owner,test_owner";
+        }
+        return "business_owner";
+    }
+
+    private void increment(Map<String, Object> summary, String key) {
+        Object value = summary.get(key);
+        long current = value instanceof Number ? ((Number) value).longValue() : 0L;
+        summary.put(key, current + 1L);
+    }
+
+    private String csvLine(List<?> values) {
+        StringBuilder line = new StringBuilder();
+        for (int i = 0; i < values.size(); i++) {
+            if (i > 0) {
+                line.append(",");
+            }
+            line.append(csvCell(values.get(i)));
+        }
+        line.append("\n");
+        return line.toString();
+    }
+
+    private String csvCell(Object value) {
+        return "\"" + commentValue(value).replace("\"", "\"\"") + "\"";
+    }
+
+    private String markdownCell(Object value) {
+        return commentValue(value).replace("|", "\\|");
     }
 
     private String commentValue(Object value) {
