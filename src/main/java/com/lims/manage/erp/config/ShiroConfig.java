@@ -131,6 +131,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/customer/claim/candidates", "anon");
         filterChainDefinitionMap.put("/customer/claim/apply", "anon");
         filterChainDefinitionMap.put("/customer/claim/myStatus", "anon");
+        filterChainDefinitionMap.put("/customer/entrust/admin/**", "authc");
         filterChainDefinitionMap.put("/customer/entrust/**", "anon");
         filterChainDefinitionMap.put("/customer/report/**", "anon");
 

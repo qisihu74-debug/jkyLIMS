@@ -36,6 +36,12 @@ public class CustomerEntrustDraftEntity implements Serializable {
     private String address;
     private String remark;
     private Timestamp submitTime;
+    private String reviewRemark;
+    private Long reviewUserId;
+    private String reviewUserName;
+    private Timestamp reviewTime;
+    private Long formalEntrustId;
+    private Integer formalEntrustmentNo;
     private Timestamp createTime;
     private Timestamp updateTime;
 }

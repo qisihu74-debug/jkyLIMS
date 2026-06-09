@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `cus_entrust_draft` (
   `bind_company_id` int DEFAULT NULL COMMENT '提交时绑定的test_company.company_id',
   `bind_customer_id` int DEFAULT NULL COMMENT '提交时绑定的test_customer.customer_id',
   `draft_no` varchar(40) NOT NULL COMMENT '草稿编号',
-  `status` varchar(20) NOT NULL DEFAULT 'DRAFT' COMMENT 'DRAFT草稿 SUBMITTED已提交 CANCELLED已取消',
+  `status` varchar(20) NOT NULL DEFAULT 'DRAFT' COMMENT 'DRAFT草稿 SUBMITTED已提交 ACCEPTED已受理 REJECTED已退回 CANCELLED已取消',
   `entrust_company` varchar(255) DEFAULT NULL COMMENT '委托单位',
   `entrust_people` varchar(100) DEFAULT NULL COMMENT '委托联系人',
   `entrust_phone` varchar(32) DEFAULT NULL COMMENT '联系人电话',
@@ -60,6 +60,12 @@ CREATE TABLE IF NOT EXISTS `cus_entrust_draft` (
   `address` varchar(500) DEFAULT NULL COMMENT '邮寄地址',
   `remark` varchar(1000) DEFAULT NULL COMMENT '备注',
   `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
+  `review_remark` varchar(1000) DEFAULT NULL COMMENT '内部受理备注',
+  `review_user_id` bigint DEFAULT NULL COMMENT '内部受理用户ID',
+  `review_user_name` varchar(100) DEFAULT NULL COMMENT '内部受理用户姓名',
+  `review_time` datetime DEFAULT NULL COMMENT '内部受理时间',
+  `formal_entrust_id` bigint DEFAULT NULL COMMENT '转入test_entrusted_info.id',
+  `formal_entrustment_no` int DEFAULT NULL COMMENT '转入正式/预委托编号',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
@@ -67,3 +73,12 @@ CREATE TABLE IF NOT EXISTS `cus_entrust_draft` (
   KEY `idx_cus_entrust_account_status` (`account_id`, `status`),
   KEY `idx_cus_entrust_company` (`bind_company_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客户门户自助委托草稿表';
+
+-- 已有 cus_entrust_draft 表的环境，由 CustomerPortalSchemaInitializer 启动时自动补列。
+-- 如需手工迁移，可按需执行以下语句（重复执行前需先检查字段是否已存在）：
+-- ALTER TABLE `cus_entrust_draft` ADD COLUMN `review_remark` varchar(1000) DEFAULT NULL COMMENT '内部受理备注';
+-- ALTER TABLE `cus_entrust_draft` ADD COLUMN `review_user_id` bigint DEFAULT NULL COMMENT '内部受理用户ID';
+-- ALTER TABLE `cus_entrust_draft` ADD COLUMN `review_user_name` varchar(100) DEFAULT NULL COMMENT '内部受理用户姓名';
+-- ALTER TABLE `cus_entrust_draft` ADD COLUMN `review_time` datetime DEFAULT NULL COMMENT '内部受理时间';
+-- ALTER TABLE `cus_entrust_draft` ADD COLUMN `formal_entrust_id` bigint DEFAULT NULL COMMENT '转入test_entrusted_info.id';
+-- ALTER TABLE `cus_entrust_draft` ADD COLUMN `formal_entrustment_no` int DEFAULT NULL COMMENT '转入正式/预委托编号';

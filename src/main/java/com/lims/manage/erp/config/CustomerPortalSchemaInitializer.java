@@ -61,7 +61,7 @@ public class CustomerPortalSchemaInitializer {
                 "`bind_company_id` int DEFAULT NULL COMMENT '提交时绑定的test_company.company_id'," +
                 "`bind_customer_id` int DEFAULT NULL COMMENT '提交时绑定的test_customer.customer_id'," +
                 "`draft_no` varchar(40) NOT NULL COMMENT '草稿编号'," +
-                "`status` varchar(20) NOT NULL DEFAULT 'DRAFT' COMMENT 'DRAFT草稿 SUBMITTED已提交 CANCELLED已取消'," +
+                "`status` varchar(20) NOT NULL DEFAULT 'DRAFT' COMMENT 'DRAFT草稿 SUBMITTED已提交 ACCEPTED已受理 REJECTED已退回 CANCELLED已取消'," +
                 "`entrust_company` varchar(255) DEFAULT NULL COMMENT '委托单位'," +
                 "`entrust_people` varchar(100) DEFAULT NULL COMMENT '委托联系人'," +
                 "`entrust_phone` varchar(32) DEFAULT NULL COMMENT '联系人电话'," +
@@ -78,6 +78,12 @@ public class CustomerPortalSchemaInitializer {
                 "`address` varchar(500) DEFAULT NULL COMMENT '邮寄地址'," +
                 "`remark` varchar(1000) DEFAULT NULL COMMENT '备注'," +
                 "`submit_time` datetime DEFAULT NULL COMMENT '提交时间'," +
+                "`review_remark` varchar(1000) DEFAULT NULL COMMENT '内部受理备注'," +
+                "`review_user_id` bigint DEFAULT NULL COMMENT '内部受理用户ID'," +
+                "`review_user_name` varchar(100) DEFAULT NULL COMMENT '内部受理用户姓名'," +
+                "`review_time` datetime DEFAULT NULL COMMENT '内部受理时间'," +
+                "`formal_entrust_id` bigint DEFAULT NULL COMMENT '转入test_entrusted_info.id'," +
+                "`formal_entrustment_no` int DEFAULT NULL COMMENT '转入正式/预委托编号'," +
                 "`create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'," +
                 "`update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'," +
                 "PRIMARY KEY (`id`)," +
@@ -85,5 +91,30 @@ public class CustomerPortalSchemaInitializer {
                 "KEY `idx_cus_entrust_account_status` (`account_id`, `status`)," +
                 "KEY `idx_cus_entrust_company` (`bind_company_id`)" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客户门户自助委托草稿表'");
+
+        ensureColumn("cus_entrust_draft", "review_remark",
+                "`review_remark` varchar(1000) DEFAULT NULL COMMENT '内部受理备注'");
+        ensureColumn("cus_entrust_draft", "review_user_id",
+                "`review_user_id` bigint DEFAULT NULL COMMENT '内部受理用户ID'");
+        ensureColumn("cus_entrust_draft", "review_user_name",
+                "`review_user_name` varchar(100) DEFAULT NULL COMMENT '内部受理用户姓名'");
+        ensureColumn("cus_entrust_draft", "review_time",
+                "`review_time` datetime DEFAULT NULL COMMENT '内部受理时间'");
+        ensureColumn("cus_entrust_draft", "formal_entrust_id",
+                "`formal_entrust_id` bigint DEFAULT NULL COMMENT '转入test_entrusted_info.id'");
+        ensureColumn("cus_entrust_draft", "formal_entrustment_no",
+                "`formal_entrustment_no` int DEFAULT NULL COMMENT '转入正式/预委托编号'");
+    }
+
+    private void ensureColumn(String tableName, String columnName, String definition) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS " +
+                        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?",
+                Integer.class,
+                tableName,
+                columnName);
+        if (count == null || count == 0) {
+            jdbcTemplate.execute("ALTER TABLE `" + tableName + "` ADD COLUMN " + definition);
+        }
     }
 }
