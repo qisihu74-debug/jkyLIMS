@@ -1,0 +1,11 @@
+package com.lims.manage.erp.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.lims.manage.erp.entity.CustomerEntrustDraftEntity;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
+
+@Component
+@Mapper
+public interface CustomerEntrustDraftMapper extends BaseMapper<CustomerEntrustDraftEntity> {
+}

@@ -2,6 +2,7 @@ package com.lims.manage.erp.mapper;
 
 import com.lims.manage.erp.vo.CustomerClaimAdminVo;
 import com.lims.manage.erp.vo.CustomerClaimCandidateVo;
+import com.lims.manage.erp.vo.CustomerReportVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -60,4 +61,40 @@ public interface CustomerPortalMapper {
             "LIMIT 200" +
             "</script>")
     List<CustomerClaimAdminVo> selectClaimReviewList(@Param("status") String status);
+
+    @Select("<script>" +
+            "SELECT r.id AS reportId, r.report_code AS reportCode, r.sample_name AS sampleName, " +
+            "       r.report_type AS reportType, r.state AS reportState, " +
+            "       DATE_FORMAT(r.report_time, '%Y-%m-%d') AS reportTime, " +
+            "       DATE_FORMAT(r.seal_time, '%Y-%m-%d') AS sealTime, " +
+            "       DATE_FORMAT(r.issuer_time, '%Y-%m-%d') AS issuerTime, " +
+            "       e.id AS entrustId, e.entrustment_no AS entrustmentNo, " +
+            "       e.entrust_company AS entrustCompany, e.project_name AS projectName " +
+            "FROM test_report_record r " +
+            "LEFT JOIN test_entrusted_info e ON e.id = r.entrustment_id " +
+            "WHERE e.entrust_company_id = #{companyId} " +
+            "  AND e.state &lt;&gt; 144 " +
+            "  AND COALESCE(NULLIF(r.seal_report_url, ''), r.report_url) IS NOT NULL " +
+            "  <if test='keyword != null and keyword != \"\"'> " +
+            "    AND (r.report_code LIKE CONCAT('%', #{keyword}, '%') " +
+            "      OR r.sample_name LIKE CONCAT('%', #{keyword}, '%') " +
+            "      OR e.entrustment_no LIKE CONCAT('%', #{keyword}, '%') " +
+            "      OR e.project_name LIKE CONCAT('%', #{keyword}, '%')) " +
+            "  </if> " +
+            "ORDER BY r.report_time DESC, r.id DESC " +
+            "LIMIT 200" +
+            "</script>")
+    List<CustomerReportVo> selectCustomerReports(@Param("companyId") Integer companyId,
+                                                 @Param("keyword") String keyword);
+
+    @Select("SELECT r.id AS reportId, r.report_code AS reportCode, " +
+            "       COALESCE(NULLIF(r.seal_report_url, ''), r.report_url) AS downloadUrl " +
+            "FROM test_report_record r " +
+            "LEFT JOIN test_entrusted_info e ON e.id = r.entrustment_id " +
+            "WHERE r.id = #{reportId} " +
+            "  AND e.entrust_company_id = #{companyId} " +
+            "  AND e.state <> 144 " +
+            "LIMIT 1")
+    CustomerReportVo selectCustomerReportDownload(@Param("reportId") Long reportId,
+                                                  @Param("companyId") Integer companyId);
 }

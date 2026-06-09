@@ -131,6 +131,8 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/customer/claim/candidates", "anon");
         filterChainDefinitionMap.put("/customer/claim/apply", "anon");
         filterChainDefinitionMap.put("/customer/claim/myStatus", "anon");
+        filterChainDefinitionMap.put("/customer/entrust/**", "anon");
+        filterChainDefinitionMap.put("/customer/report/**", "anon");
 
         // 配置shiro默认登录界面地址，前后端分离中登录界面跳转应由前端路由控制，后台仅返回json数据
         shiroFilterFactoryBean.setLoginUrl("index.html");
