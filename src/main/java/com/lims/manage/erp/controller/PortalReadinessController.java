@@ -29,6 +29,8 @@ public class PortalReadinessController {
     private static final List<String> RISK_TYPES = Arrays.asList("UNASSIGNED_PORTAL", "MULTI_PORTAL");
     private static final List<String> REVIEW_QUERY_STATUSES = Arrays.asList("PENDING", "CONFIRMED", "DEFERRED", "IGNORE");
     private static final List<String> REVIEW_WRITE_STATUSES = Arrays.asList("CONFIRMED", "DEFERRED", "IGNORE");
+    private static final List<String> FOLLOW_STATUSES = Arrays.asList("OPEN", "DONE", "BLOCKED");
+    private static final List<String> WORKLIST_SCOPES = Arrays.asList("ACTIONABLE", "ALL", "PENDING", "DEFERRED", "CONFIRMED", "IGNORE");
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -103,6 +105,124 @@ public class PortalReadinessController {
         } catch (Exception e) {
             return ResultUtil.error(500, "读取迁移清单失败：" + e.getMessage());
         }
+    }
+
+    @GetMapping("/review-worklist")
+    public Result reviewWorklist(@RequestParam(required = false, defaultValue = "ACTIONABLE") String scope,
+                                 @RequestParam(required = false, defaultValue = "1") Integer pageNum,
+                                 @RequestParam(required = false, defaultValue = "20") Integer pageSize,
+                                 @RequestParam(required = false) String keyword,
+                                 @RequestParam(required = false) String followOwner,
+                                 @RequestParam(required = false) String followStatus) {
+        String normalizedScope = normalize(scope);
+        if (!hasText(normalizedScope)) {
+            normalizedScope = "ACTIONABLE";
+        }
+        String normalizedFollowStatus = normalize(followStatus);
+        if (!WORKLIST_SCOPES.contains(normalizedScope)) {
+            return ResultUtil.error(400, "worklist scope invalid");
+        }
+        if (hasText(normalizedFollowStatus) && !FOLLOW_STATUSES.contains(normalizedFollowStatus)) {
+            return ResultUtil.error(400, "follow status invalid");
+        }
+
+        int current = Math.max(pageNum == null ? 1 : pageNum, 1);
+        int size = Math.min(Math.max(pageSize == null ? 20 : pageSize, 1), 100);
+        int offset = (current - 1) * size;
+
+        List<Object> params = new ArrayList<>();
+        String whereSql = worklistFilterSql(normalizedScope, followOwner, normalizedFollowStatus, keyword, params);
+        String baseSql = riskAccountBaseSql();
+
+        try {
+            Long total = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM (" + baseSql + ") risk " + whereSql,
+                    Long.class,
+                    params.toArray());
+
+            List<Object> rowParams = new ArrayList<>(params);
+            rowParams.add(size);
+            rowParams.add(offset);
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT risk.* FROM (" + baseSql + ") risk " + whereSql +
+                            "ORDER BY FIELD(risk.reviewStatus,'PENDING','DEFERRED','CONFIRMED','IGNORE'), " +
+                            "FIELD(risk.followStatus,'BLOCKED','OPEN','DONE'), risk.riskType ASC, CAST(risk.userId AS UNSIGNED) DESC " +
+                            "LIMIT ? OFFSET ?",
+                    rowParams.toArray());
+
+            List<Map<String, Object>> stats = jdbcTemplate.queryForList(
+                    "SELECT risk.reviewStatus, risk.followStatus, COUNT(*) AS count " +
+                            "FROM (" + baseSql + ") risk " + whereSql +
+                            "GROUP BY risk.reviewStatus, risk.followStatus " +
+                            "ORDER BY FIELD(risk.reviewStatus,'PENDING','DEFERRED','CONFIRMED','IGNORE'), " +
+                            "FIELD(risk.followStatus,'BLOCKED','OPEN','DONE')",
+                    params.toArray());
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("scope", normalizedScope);
+            data.put("pageNum", current);
+            data.put("pageSize", size);
+            data.put("total", total == null ? 0L : total);
+            data.put("rows", rows);
+            data.put("stats", stats);
+            data.put("readOnlyPermissionTables", true);
+            return ResultUtil.success(data);
+        } catch (Exception e) {
+            return ResultUtil.error(500, "read review worklist failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/review-worklist/assign")
+    public Result assignReviewWork(@RequestBody Map<String, Object> payload) {
+        String riskType = normalize(valueAsString(payload.get("riskType")));
+        String targetId = valueAsString(payload.get("targetId"));
+        String followOwner = limit(valueAsString(payload.get("followOwner")), 100);
+        String followDueDate = limit(valueAsString(payload.get("followDueDate")), 20);
+        String followStatus = normalize(valueAsString(payload.get("followStatus")));
+        String followRemark = limit(valueAsString(payload.get("followRemark")), 500);
+        if (!hasText(followStatus)) {
+            followStatus = "OPEN";
+        }
+
+        if (!RISK_TYPES.contains(riskType)) {
+            return ResultUtil.error(400, "risk type invalid");
+        }
+        if (!hasText(targetId)) {
+            return ResultUtil.error(400, "target id required");
+        }
+        if (!FOLLOW_STATUSES.contains(followStatus)) {
+            return ResultUtil.error(400, "follow status invalid");
+        }
+        if (!riskExists(riskType, targetId)) {
+            return ResultUtil.error(404, "risk account not found");
+        }
+
+        jdbcTemplate.update(
+                "INSERT INTO portal_readiness_review " +
+                        "(risk_type, target_id, review_status, follow_owner, follow_due_date, follow_status, follow_remark) " +
+                        "VALUES (?, ?, 'PENDING', ?, ?, ?, ?) " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "follow_owner = VALUES(follow_owner), " +
+                        "follow_due_date = VALUES(follow_due_date), " +
+                        "follow_status = VALUES(follow_status), " +
+                        "follow_remark = VALUES(follow_remark), " +
+                        "update_time = NOW()",
+                riskType,
+                targetId,
+                followOwner,
+                followDueDate,
+                followStatus,
+                followRemark);
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("riskType", riskType);
+        data.put("targetId", targetId);
+        data.put("followOwner", followOwner);
+        data.put("followDueDate", followDueDate);
+        data.put("followStatus", followStatus);
+        data.put("followRemark", followRemark);
+        data.put("permissionWriteEnabled", false);
+        return ResultUtil.success(data);
     }
 
     @PostMapping("/risk-accounts/review")
@@ -324,7 +444,9 @@ public class PortalReadinessController {
                 "NULL AS roleTypes, NULL AS roleNames, 'HIGH' AS riskLevel, " +
                 "'assign_portal_role_or_confirm_block' AS suggestion, " +
                 "COALESCE(pr.review_status,'PENDING') AS reviewStatus, pr.review_remark AS reviewRemark, " +
-                "pr.review_user_name AS reviewUserName, DATE_FORMAT(pr.review_time, '%Y-%m-%d %H:%i:%s') AS reviewTime " +
+                "pr.review_user_name AS reviewUserName, DATE_FORMAT(pr.review_time, '%Y-%m-%d %H:%i:%s') AS reviewTime, " +
+                "pr.follow_owner AS followOwner, pr.follow_due_date AS followDueDate, " +
+                "COALESCE(pr.follow_status,'OPEN') AS followStatus, pr.follow_remark AS followRemark " +
                 "FROM sys_user u " +
                 "LEFT JOIN portal_readiness_review pr ON pr.risk_type = 'UNASSIGNED_PORTAL' AND pr.target_id = CAST(u.user_id AS CHAR) " +
                 "WHERE " + ACTIVE_USER_FILTER + " " +
@@ -341,14 +463,17 @@ public class PortalReadinessController {
                 "GROUP_CONCAT(DISTINCT r.role_name ORDER BY r.role_name SEPARATOR ',') AS roleNames, 'MEDIUM' AS riskLevel, " +
                 "'confirm_primary_portal_and_switching_path' AS suggestion, " +
                 "COALESCE(pr.review_status,'PENDING') AS reviewStatus, pr.review_remark AS reviewRemark, " +
-                "pr.review_user_name AS reviewUserName, DATE_FORMAT(pr.review_time, '%Y-%m-%d %H:%i:%s') AS reviewTime " +
+                "pr.review_user_name AS reviewUserName, DATE_FORMAT(pr.review_time, '%Y-%m-%d %H:%i:%s') AS reviewTime, " +
+                "pr.follow_owner AS followOwner, pr.follow_due_date AS followDueDate, " +
+                "COALESCE(pr.follow_status,'OPEN') AS followStatus, pr.follow_remark AS followRemark " +
                 "FROM sys_user u " +
                 "JOIN sys_user_role ur ON ur.user_id = u.user_id " +
                 "JOIN sys_role r ON r.role_id = ur.role_id " +
                 "LEFT JOIN portal_readiness_review pr ON pr.risk_type = 'MULTI_PORTAL' AND pr.target_id = CAST(u.user_id AS CHAR) " +
                 "WHERE " + ACTIVE_USER_FILTER + " " +
                 "AND r.role_type IS NOT NULL AND r.role_type <> '' " +
-                "GROUP BY u.user_id, u.username, u.name, u.mobile, u.department, pr.review_status, pr.review_remark, pr.review_user_name, pr.review_time " +
+                "GROUP BY u.user_id, u.username, u.name, u.mobile, u.department, pr.review_status, pr.review_remark, pr.review_user_name, pr.review_time, " +
+                "pr.follow_owner, pr.follow_due_date, pr.follow_status, pr.follow_remark " +
                 "HAVING COUNT(DISTINCT r.role_type) > 1";
     }
 
@@ -365,6 +490,42 @@ public class PortalReadinessController {
         if (hasText(keyword)) {
             String likeKeyword = "%" + keyword.trim() + "%";
             sql.append("AND (risk.userId LIKE ? OR risk.username LIKE ? OR risk.name LIKE ? OR risk.mobile LIKE ? OR risk.roleTypes LIKE ? OR risk.roleNames LIKE ?) ");
+            params.add(likeKeyword);
+            params.add(likeKeyword);
+            params.add(likeKeyword);
+            params.add(likeKeyword);
+            params.add(likeKeyword);
+            params.add(likeKeyword);
+        }
+        return sql.toString();
+    }
+
+    private String worklistFilterSql(String scope,
+                                     String followOwner,
+                                     String followStatus,
+                                     String keyword,
+                                     List<Object> params) {
+        StringBuilder sql = new StringBuilder("WHERE 1 = 1 ");
+        if ("ACTIONABLE".equals(scope)) {
+            sql.append("AND risk.reviewStatus IN ('PENDING','DEFERRED') ");
+        } else if (!"ALL".equals(scope)) {
+            sql.append("AND risk.reviewStatus = ? ");
+            params.add(scope);
+        }
+        if (hasText(followStatus)) {
+            sql.append("AND risk.followStatus = ? ");
+            params.add(followStatus);
+        }
+        if (hasText(followOwner)) {
+            sql.append("AND risk.followOwner LIKE ? ");
+            params.add("%" + followOwner.trim() + "%");
+        }
+        if (hasText(keyword)) {
+            String likeKeyword = "%" + keyword.trim() + "%";
+            sql.append("AND (risk.userId LIKE ? OR risk.username LIKE ? OR risk.name LIKE ? OR risk.mobile LIKE ? " +
+                    "OR risk.roleTypes LIKE ? OR risk.roleNames LIKE ? OR risk.followOwner LIKE ? OR risk.followRemark LIKE ?) ");
+            params.add(likeKeyword);
+            params.add(likeKeyword);
             params.add(likeKeyword);
             params.add(likeKeyword);
             params.add(likeKeyword);
@@ -401,7 +562,8 @@ public class PortalReadinessController {
                 validation("softBlockPaths", "pending", "manual"),
                 validation("customerClaimSampling", "pending", "manual"),
                 validation("riskAccountChecklist", "pending", "manual"),
-                validation("migrationDraftExport", "pending", "manual")
+                validation("migrationDraftExport", "pending", "manual"),
+                validation("riskReviewWorklist", "pending", "manual")
         );
     }
 
@@ -437,6 +599,14 @@ public class PortalReadinessController {
 
     private String valueAsString(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private String limit(String value, int maxLength) {
+        if (!hasText(value)) {
+            return "";
+        }
+        String trimmed = value.trim();
+        return trimmed.length() > maxLength ? trimmed.substring(0, maxLength) : trimmed;
     }
 
     private boolean hasText(String value) {
