@@ -105,6 +105,127 @@ public class TaskController {
     }
 
     /**
+     * PageOffice 原始记录工作台只读聚合数据。
+     * 不修改 PageOffice 保存回调，也不推进复核状态，只把任务详情中的检测项状态整理给前端。
+     *
+     * @param taskId 任务单主键
+     * @return 原始记录工作台视图数据
+     */
+    @RequestMapping("/originalRecordWorkbench")
+    public Result originalRecordWorkbench(Long taskId) {
+        if (taskId == null) {
+            return ResultUtil.error(ResultEnum.VERIFY_FAIL_NINE.getCode(), ResultEnum.VERIFY_FAIL_NINE.getMsg());
+        }
+        SysUserEntity userInfo = ShiroUtils.getUserInfo();
+        if (userInfo == null) {
+            return ResultUtil.error("token 已过期！");
+        }
+        if (taskService.judgeTaskStatus(taskId)) {
+            return ResultUtil.error(678, "操作失败！任务单已废弃！！！");
+        }
+
+        TaskDetailInfoVo detailInfo = taskService.getTaskDetailInfo(taskId);
+        if (detailInfo == null) {
+            return ResultUtil.error("任务详情不存在");
+        }
+
+        List<Map<String, Object>> itemRows = new ArrayList<>();
+        List<Integer> allItemIds = new ArrayList<>();
+        List<Integer> editableItemIds = new ArrayList<>();
+        List<Integer> pendingReviewItemIds = new ArrayList<>();
+        int savedCount = 0;
+        int pendingReviewCount = 0;
+        int passedCount = 0;
+        int rejectedCount = 0;
+
+        if (!CollectionUtils.isEmpty(detailInfo.getSampleDetailList())) {
+            for (SampleDetailVo sample : detailInfo.getSampleDetailList()) {
+                if (sample == null || CollectionUtils.isEmpty(sample.getCheckItemInfoList())) {
+                    continue;
+                }
+                for (CheckItemInfoVo item : sample.getCheckItemInfoList()) {
+                    if (item == null) {
+                        continue;
+                    }
+                    Integer itemId = item.getItemId();
+                    Integer state = item.getState();
+                    boolean saved = StringUtils.isNotBlank(item.getOriginUrl()) || StringUtils.isNotBlank(item.getEditData());
+                    boolean editable = itemId != null && (state == null || !state.equals(3));
+                    boolean pendingReview = state != null && state.equals(2);
+
+                    if (itemId != null) {
+                        allItemIds.add(itemId);
+                        if (editable) {
+                            editableItemIds.add(itemId);
+                        }
+                        if (pendingReview) {
+                            pendingReviewItemIds.add(itemId);
+                        }
+                    }
+                    if (saved) {
+                        savedCount++;
+                    }
+                    if (pendingReview) {
+                        pendingReviewCount++;
+                    }
+                    if (state != null && state.equals(3)) {
+                        passedCount++;
+                    }
+                    if (state != null && state.equals(4)) {
+                        rejectedCount++;
+                    }
+
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("itemId", itemId);
+                    row.put("checkItemId", item.getCheckItemId());
+                    row.put("checkItemName", item.getCheckItemName());
+                    row.put("standardCode", item.getStandardCode());
+                    row.put("standardName", item.getStandardName());
+                    row.put("methodName", item.getMethodName());
+                    row.put("state", state);
+                    row.put("originUrl", item.getOriginUrl());
+                    row.put("editData", item.getEditData());
+                    row.put("opinion", item.getOpinion());
+                    row.put("suffixType", item.getSuffixType());
+                    row.put("sampleName", sample.getSampleName());
+                    row.put("sampleCode", sample.getSampleCode());
+                    row.put("saved", saved);
+                    row.put("editable", editable);
+                    row.put("pendingReview", pendingReview);
+                    itemRows.add(row);
+                }
+            }
+        }
+
+        boolean canReview = false;
+        try {
+            canReview = testDetectionService.reviewTheLogin(userInfo.getUserId(), taskId);
+        } catch (Exception e) {
+            log.warn("原始记录工作台复核权限判断失败 taskId={}, userId={}", taskId, userInfo.getUserId(), e);
+        }
+
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("itemCount", itemRows.size());
+        summary.put("savedCount", savedCount);
+        summary.put("pendingReviewCount", pendingReviewCount);
+        summary.put("passedCount", passedCount);
+        summary.put("rejectedCount", rejectedCount);
+        summary.put("canOpenPageOffice", !CollectionUtils.isEmpty(editableItemIds));
+        summary.put("canReview", canReview);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("taskId", taskId);
+        data.put("detail", detailInfo);
+        data.put("itemRows", itemRows);
+        data.put("allItemIds", allItemIds);
+        data.put("editableItemIds", editableItemIds);
+        data.put("pendingReviewItemIds", pendingReviewItemIds);
+        data.put("summary", summary);
+        data.put("canReview", canReview);
+        return ResultUtil.success("查询原始记录工作台成功！", data);
+    }
+
+    /**
      * 查询任务详情——线上使用
      *
      * @param taskId
