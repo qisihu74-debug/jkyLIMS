@@ -52,15 +52,22 @@ public class TestOriginalRecordTemplateController extends ApiController {
     public Result selectAll(Page<TorttpiVo> page, TestOriginalRecordTemplate testOriginalRecordTemplate) {
         QueryWrapper<TestOriginalRecordTemplate> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("tort.del_flag",0);
-        if (testOriginalRecordTemplate.getName()!=null){
-            queryWrapper.like("name",testOriginalRecordTemplate.getName());
+        if (StringUtils.isNotBlank(testOriginalRecordTemplate.getCode())){
+            queryWrapper.like("tort.code", testOriginalRecordTemplate.getCode());
+        }
+        if (StringUtils.isNotBlank(testOriginalRecordTemplate.getName())){
+            queryWrapper.like("tort.name",testOriginalRecordTemplate.getName());
+        }
+        if (testOriginalRecordTemplate.getCheckItemId()!=null){
+            queryWrapper.eq("tort.check_item_id", testOriginalRecordTemplate.getCheckItemId());
+        }
+        if (StringUtils.isNotBlank(testOriginalRecordTemplate.getStatus())){
+            queryWrapper.eq("tort.status", testOriginalRecordTemplate.getStatus());
         }
         queryWrapper.orderByDesc("tort.create_time");
         IPage<TorttpiVo> pageList = this.testOriginalRecordTemplateService.getPageList(page, queryWrapper);
         for (TorttpiVo bean:pageList.getRecords()) {
-            if (StringUtils.isNotEmpty(bean.getFileUrl())){
-                bean.setFileUrl(bean.getFileUrl().substring(0,bean.getFileUrl().indexOf("?")));
-            }
+            bean.setFileUrl(stripQuery(bean.getFileUrl()));
         }
         return ResultUtil.success(pageList);
     }
@@ -75,6 +82,9 @@ public class TestOriginalRecordTemplateController extends ApiController {
     public Result selectOne(@PathVariable Serializable id) {
         if (id!=null&&id!=""){
             TestOriginalRecordTemplate testMethod=this.testOriginalRecordTemplateService.getOne(new QueryWrapper<TestOriginalRecordTemplate>().eq("id",id).eq("del_flag",0));
+            if (testMethod == null) {
+                return ResultUtil.error("原始记录模板不存在");
+            }
             testMethod.setCopyUrl(testMethod.getFileUrl());
             return ResultUtil.success(testMethod);
         }else {
@@ -159,6 +169,14 @@ public class TestOriginalRecordTemplateController extends ApiController {
         }else {
             return ResultUtil.error("查询原始记录变更列表失败！");
         }
+    }
+
+    private String stripQuery(String fileUrl) {
+        if (StringUtils.isBlank(fileUrl)) {
+            return fileUrl;
+        }
+        int queryIndex = fileUrl.indexOf("?");
+        return queryIndex >= 0 ? fileUrl.substring(0, queryIndex) : fileUrl;
     }
 
 }

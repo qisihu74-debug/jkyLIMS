@@ -87,7 +87,8 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
         }*/
         testOriginalRecordTemplate.setUpdateTime(new Date());
         if (this.updateById(testOriginalRecordTemplate)){
-            if (!testOriginalRecordTemplate.getFileUrl().equals(testOriginalRecordTemplate.getCopyUrl())){
+            if (testOriginalRecordTemplate.getCopyUrl() != null
+                    && !testOriginalRecordTemplate.getCopyUrl().equals(testOriginalRecordTemplate.getFileUrl())){
                 sysOssService.delAnnounce(testOriginalRecordTemplate.getCopyUrl());
             }
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"修改原始记录模板"+testOriginalRecordTemplate.getId()+"成功!", Const.DETECTION_MANAGEMENT_LOG,true);
@@ -110,7 +111,8 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
             testProductType.setUpdateTime(new Date());
             testProductType.setDelFlag(1);
             testProductType.setId(aLong.intValue());
-            String url=this.getById(aLong).getFileUrl();
+            TestOriginalRecordTemplate current = this.getById(aLong);
+            String url=current == null ? null : current.getFileUrl();
             if (url!=null){
                 sysOssService.delAnnounce(url);
             }
@@ -152,9 +154,17 @@ public class TestOriginalRecordTemplateServiceImpl extends ServiceImpl<TestOrigi
         if (testOriginalRecordTemplate.getName()==null){
             return ResultUtil.error("原始模板名称不能为空");
         }
+        if (testOriginalRecordTemplate.getId()==null){
+            return ResultUtil.error("变更对象ID为空");
+        }
         Integer oldId = testOriginalRecordTemplate.getId();
-        Integer pid = testOriginalRecordTemplate.getPid();
         TestOriginalRecordTemplate detail = testOriginalRecordTemplateDao.getDetail(oldId);
+        if (detail == null) {
+            return ResultUtil.error("原始记录模板不存在");
+        }
+        Integer pid = testOriginalRecordTemplate.getPid() != null
+                ? testOriginalRecordTemplate.getPid()
+                : (detail.getPid() != null ? detail.getPid() : oldId);
         detail.setUpdateTime(new Date());
         testOriginalRecordTemplateDao.insertRecord(detail);
         testOriginalRecordTemplateDao.deleteById(oldId);
