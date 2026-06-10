@@ -44,6 +44,15 @@ public class TestProductItemMethodRelController extends ApiController {
     @GetMapping("/list")
     public Result selectAll(Page<TestProductItemMethodRel> page, TestProductItemMethodRel testProductItemMethodRel) {
         QueryWrapper<TestProductItemMethodRel> queryWrapper=new QueryWrapper<>();
+        if (testProductItemMethodRel.getCheckItemId() != null) {
+            queryWrapper.eq("check_item_id", testProductItemMethodRel.getCheckItemId());
+        }
+        if (testProductItemMethodRel.getMethodId() != null) {
+            queryWrapper.eq("method_id", testProductItemMethodRel.getMethodId());
+        }
+        if (StrUtil.isNotBlank(testProductItemMethodRel.getMethodType())) {
+            queryWrapper.like("method_type", testProductItemMethodRel.getMethodType());
+        }
         queryWrapper.orderByDesc("id");
         return ResultUtil.success(this.testProductItemMethodRelService.page(page, queryWrapper));
     }
@@ -107,4 +116,3 @@ public class TestProductItemMethodRelController extends ApiController {
         }
     }
 }
-

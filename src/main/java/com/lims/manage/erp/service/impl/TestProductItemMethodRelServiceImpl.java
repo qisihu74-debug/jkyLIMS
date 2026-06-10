@@ -42,6 +42,9 @@ public class TestProductItemMethodRelServiceImpl extends ServiceImpl<TestProduct
 
     @Override
     public Result updTestMethodRel(TestProductItemMethodRel testProductItemMethodRel) {
+        if (testProductItemMethodRel.getId()==null){
+            return ResultUtil.error("ID不能为空");
+        }
         if (testProductItemMethodRel.getCheckItemId()==null){
             return ResultUtil.error("检测项ID不能为空");
         }
@@ -51,7 +54,7 @@ public class TestProductItemMethodRelServiceImpl extends ServiceImpl<TestProduct
         if (this.getOne(new QueryWrapper<TestProductItemMethodRel>().eq("method_id",testProductItemMethodRel.getMethodId()).eq("check_item_id",testProductItemMethodRel.getCheckItemId()).ne("id",testProductItemMethodRel.getId()))!=null){
             return ResultUtil.error("检测方法重复");
         }
-        if (this.save(testProductItemMethodRel)){
+        if (this.updateById(testProductItemMethodRel)){
             return ResultUtil.success("修改成功!");
         }else {
             return ResultUtil.error("修改失败，未知异常!");
@@ -68,4 +71,3 @@ public class TestProductItemMethodRelServiceImpl extends ServiceImpl<TestProduct
         }
     }
 }
-
