@@ -45,8 +45,14 @@ public class PartenrController extends ApiController {
 
         QueryWrapper<Partenr> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("del_flag",0);
-        if (partenr.getPartnername()!=null){
+        if (StrUtil.isNotBlank(partenr.getPartnername())){
             queryWrapper.like("partnername",partenr.getPartnername());
+        }
+        if (StrUtil.isNotBlank(partenr.getContact())){
+            queryWrapper.like("contact",partenr.getContact());
+        }
+        if (StrUtil.isNotBlank(partenr.getContactway())){
+            queryWrapper.like("contactway",partenr.getContactway());
         }
         queryWrapper.orderByDesc("create_time");
         return ResultUtil.success(this.partenrService.page(page, queryWrapper));

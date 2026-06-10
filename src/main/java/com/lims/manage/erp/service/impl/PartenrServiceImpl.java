@@ -42,7 +42,9 @@ public class PartenrServiceImpl extends ServiceImpl<PartenrDao, Partenr> impleme
             return ResultUtil.error("合作公司名称重复");
         }
         partenr.setStatus("0");
-        partenr.setRemark("0");
+        if (partenr.getRemark() == null) {
+            partenr.setRemark("");
+        }
         partenr.setCreateTime(new Date());
         if (this.save(partenr)){
             logManagerService.addOpSysLog(ShiroUtils.getUserInfo(),"用户："+userInfo.getUsername()+"添加合作伙伴"+partenr.getId()+"成功!", Const.PARTNERSHIP_MANAGEMENT_LOG,true);
