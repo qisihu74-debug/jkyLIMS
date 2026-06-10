@@ -1,6 +1,7 @@
 package com.lims.manage.erp.controller;
 
 import com.lims.manage.erp.entity.SysUserEntity;
+import com.lims.manage.erp.mapper.SysUserDao;
 import com.lims.manage.erp.result.Result;
 import com.lims.manage.erp.result.ResultUtil;
 import com.lims.manage.erp.util.ShiroUtils;
@@ -34,6 +35,9 @@ public class PortalReadinessController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private SysUserDao sysUserDao;
 
     @GetMapping("/summary")
     public Result summary() {
@@ -174,6 +178,11 @@ public class PortalReadinessController {
 
     @PostMapping("/review-worklist/assign")
     public Result assignReviewWork(@RequestBody Map<String, Object> payload) {
+        SysUserEntity operator = currentUser();
+        if (operator == null || sysUserDao.isManagerOrAbove(operator.getUserId()) == 0) {
+            return ResultUtil.error(403, "权限不足");
+        }
+
         String riskType = normalize(valueAsString(payload.get("riskType")));
         String targetId = valueAsString(payload.get("targetId"));
         String followOwner = limit(valueAsString(payload.get("followOwner")), 100);
@@ -227,6 +236,11 @@ public class PortalReadinessController {
 
     @PostMapping("/risk-accounts/review")
     public Result reviewRiskAccount(@RequestBody Map<String, Object> payload) {
+        SysUserEntity currentUser = currentUser();
+        if (currentUser == null || sysUserDao.isManagerOrAbove(currentUser.getUserId()) == 0) {
+            return ResultUtil.error(403, "权限不足");
+        }
+
         String riskType = normalize(valueAsString(payload.get("riskType")));
         String targetId = valueAsString(payload.get("targetId"));
         String reviewStatus = normalize(valueAsString(payload.get("reviewStatus")));
@@ -245,8 +259,7 @@ public class PortalReadinessController {
             return ResultUtil.error(404, "风险账号不存在或已不在迁移清单中");
         }
 
-        SysUserEntity currentUser = currentUser();
-        Long reviewUserId = currentUser == null ? null : currentUser.getUserId();
+        Long reviewUserId = currentUser.getUserId();
         String reviewUserName = currentUserName(currentUser);
 
         jdbcTemplate.update(

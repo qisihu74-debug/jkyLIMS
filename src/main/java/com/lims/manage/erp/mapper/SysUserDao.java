@@ -177,7 +177,7 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
     @Select("SELECT COUNT(*) FROM sys_user_role WHERE user_id = #{userId} AND role_id = 1652359989314100")
     int isAdmin(@Param("userId") Long userId);
 
-    @Select("SELECT COUNT(*) FROM sys_user_role WHERE user_id = #{userId} AND role_id IN (1, 1652359989314100, 5, 1655371808564113, 1655372073196115, 6, 12, 102)")
+    @Select("SELECT COUNT(*) FROM sys_user_role WHERE user_id = #{userId} AND role_id IN (1, 999, 1652359989314100, 5, 1655371808564113, 1655372073196115, 6, 12, 102)")
     int isManagerOrAbove(@Param("userId") Long userId);
 
     @Select("SELECT\n" +
