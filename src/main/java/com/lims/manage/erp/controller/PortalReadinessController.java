@@ -456,6 +456,92 @@ public class PortalReadinessController {
         }
     }
 
+    @GetMapping("/rehearsal-signoff-package")
+    public Result rehearsalSignoffPackage() {
+        try {
+            String generatedAt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            String fileTimestamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                    "SELECT risk.* FROM (" + riskAccountBaseSql() + ") risk " +
+                            "ORDER BY FIELD(risk.reviewStatus,'PENDING','DEFERRED','CONFIRMED','IGNORE'), " +
+                            "FIELD(risk.followStatus,'BLOCKED','OPEN','DONE'), risk.riskType ASC, CAST(risk.userId AS UNSIGNED) DESC");
+
+            long riskTotal = rows.size();
+            long pendingCount = countRows(rows, null, "PENDING");
+            long deferredCount = countRows(rows, null, "DEFERRED");
+            long confirmedCount = countRows(rows, null, "CONFIRMED");
+            long ignoredCount = countRows(rows, null, "IGNORE");
+            long blockingCount = pendingCount + deferredCount;
+            long blockedFollowCount = countFollowStatus(rows, "BLOCKED");
+            boolean readyForRehearsal = riskTotal > 0 && blockingCount == 0;
+
+            List<Map<String, Object>> taskItems = buildRehearsalTaskItems(rows);
+            List<Map<String, Object>> ownerSummary = buildRehearsalOwnerSummary(taskItems);
+            List<Map<String, Object>> taskSignoff = rehearsalSignoffChecklist(taskItems, readyForRehearsal, blockingCount);
+            List<Map<String, Object>> windowOptions = buildRehearsalWindowOptions(readyForRehearsal, blockingCount);
+            List<Map<String, Object>> goNoGoChecklist = buildRehearsalGoNoGoChecklist(
+                    readyForRehearsal, riskTotal, pendingCount, deferredCount, confirmedCount, ignoredCount,
+                    blockedFollowCount, taskItems.size());
+            List<Map<String, Object>> rollbackTriggers = rehearsalRollbackTriggers();
+            List<Map<String, Object>> rollbackChecklist = rehearsalRollbackChecklist();
+            List<Map<String, Object>> windowSignoffRows = rehearsalWindowSignoffRows(readyForRehearsal, blockingCount);
+            List<Map<String, Object>> packageSections = buildRehearsalPackageSections(
+                    riskTotal, blockingCount, pendingCount, deferredCount, confirmedCount, ignoredCount,
+                    taskItems.size(), windowOptions.size(), rollbackChecklist.size(), rollbackTriggers.size(),
+                    readyForRehearsal);
+            List<Map<String, Object>> smokeEvidence = rehearsalSmokeEvidence(validationMatrix().size(), riskTotal,
+                    taskItems.size(), taskSignoff.size(), windowOptions.size(), goNoGoChecklist.size(),
+                    rollbackChecklist.size(), rollbackTriggers.size(), windowSignoffRows.size());
+            List<Map<String, Object>> packageSignoffRows = rehearsalPackageSignoffRows(readyForRehearsal, blockingCount);
+            String csvDraft = buildRehearsalPackageCsvDraft(packageSections, packageSignoffRows, smokeEvidence);
+            String textDraft = buildRehearsalPackageTextDraft(generatedAt, readyForRehearsal, riskTotal,
+                    pendingCount, deferredCount, confirmedCount, ignoredCount, blockedFollowCount, taskItems.size(),
+                    packageSections, ownerSummary, taskSignoff, windowOptions, goNoGoChecklist, rollbackTriggers,
+                    rollbackChecklist, windowSignoffRows, smokeEvidence, packageSignoffRows);
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("phase", "phase6-rehearsal-signoff-package");
+            data.put("generatedAt", generatedAt);
+            data.put("dryRun", true);
+            data.put("executable", false);
+            data.put("migrationWriteEnabled", false);
+            data.put("permissionWriteEnabled", false);
+            data.put("packageSigned", false);
+            data.put("readyForPackageReview", riskTotal > 0);
+            data.put("readyForRehearsal", readyForRehearsal);
+            data.put("riskTotal", riskTotal);
+            data.put("blockingRiskCount", blockingCount);
+            data.put("pendingRiskCount", pendingCount);
+            data.put("deferredRiskCount", deferredCount);
+            data.put("confirmedRiskCount", confirmedCount);
+            data.put("ignoredRiskCount", ignoredCount);
+            data.put("blockedFollowCount", blockedFollowCount);
+            data.put("taskItemCount", taskItems.size());
+            data.put("ownerSummary", ownerSummary);
+            data.put("packageSections", packageSections);
+            data.put("taskSignoffChecklist", taskSignoff);
+            data.put("windowOptions", windowOptions);
+            data.put("goNoGoChecklist", goNoGoChecklist);
+            data.put("rollbackTriggers", rollbackTriggers);
+            data.put("rollbackChecklist", rollbackChecklist);
+            data.put("windowSignoffRows", windowSignoffRows);
+            data.put("smokeEvidence", smokeEvidence);
+            data.put("packageSignoffRows", packageSignoffRows);
+            data.put("csvDraft", csvDraft);
+            data.put("textDraft", textDraft);
+            data.put("csvFileName", "portal-rehearsal-signoff-package-" + fileTimestamp + ".csv");
+            data.put("textFileName", "portal-rehearsal-signoff-package-" + fileTimestamp + ".md");
+            data.put("notes", Arrays.asList(
+                    "This endpoint only aggregates existing phase-6 rehearsal drafts into a readonly signoff package.",
+                    "It does not execute smoke tests, migration SQL, rollback SQL or permission-table writes.",
+                    "packageSigned remains false until business, test, ops, DBA and rollback owners sign manually."
+            ));
+            return ResultUtil.success(data);
+        } catch (Exception e) {
+            return ResultUtil.error(500, "generate rehearsal signoff package failed: " + e.getMessage());
+        }
+    }
+
     private List<Map<String, Object>> buildMetrics(List<Map<String, Object>> warnings) {
         List<Map<String, Object>> metrics = new ArrayList<>();
         metrics.add(metric("internalUserCount", safeCount("SELECT COUNT(*) FROM sys_user u WHERE " + ACTIVE_USER_FILTER, warnings, "internalUserCount"), "normal"));
@@ -692,7 +778,8 @@ public class PortalReadinessController {
                 validation("migrationDraftExport", "pending", "manual"),
                 validation("riskReviewWorklist", "pending", "manual"),
                 validation("rehearsalTaskDraft", "pending", "manual"),
-                validation("rehearsalWindowRollbackDraft", "pending", "manual")
+                validation("rehearsalWindowRollbackDraft", "pending", "manual"),
+                validation("rehearsalSignoffPackage", "pending", "manual")
         );
     }
 
@@ -1356,6 +1443,272 @@ public class PortalReadinessController {
             }
         }
         return count;
+    }
+
+    private List<Map<String, Object>> buildRehearsalPackageSections(long riskTotal,
+                                                                    long blockingCount,
+                                                                    long pendingCount,
+                                                                    long deferredCount,
+                                                                    long confirmedCount,
+                                                                    long ignoredCount,
+                                                                    int taskItemCount,
+                                                                    int windowOptionCount,
+                                                                    int rollbackItemCount,
+                                                                    int rollbackTriggerCount,
+                                                                    boolean readyForRehearsal) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(packageSection("risk_review", "风险推进状态", "risk_owner",
+                blockingCount == 0, "risk_total=" + riskTotal + ", pending=" + pendingCount +
+                        ", deferred=" + deferredCount + ", confirmed=" + confirmedCount + ", ignored=" + ignoredCount,
+                blockingCount == 0 ? "风险确认已关闭" : "仍有待确认/暂缓风险，禁止演练放行"));
+        rows.add(packageSection("task_sheet", "演练任务单/业务签字清单", "business_owner",
+                taskItemCount > 0, "task_items=" + taskItemCount,
+                "任务单来自风险清单，所有任务仍需人工签字"));
+        rows.add(packageSection("migration_sql_draft", "迁移 SQL 草稿", "system_admin",
+                true, "dry_run=true, executable=false, permission_write_enabled=false",
+                "SQL 草稿仅可下载审阅，系统不提供执行入口"));
+        rows.add(packageSection("window_rollback", "演练窗口/回滚预案", "ops_owner",
+                windowOptionCount > 0 && rollbackItemCount > 0 && rollbackTriggerCount > 0,
+                "window_options=" + windowOptionCount + ", rollback_items=" + rollbackItemCount +
+                        ", rollback_triggers=" + rollbackTriggerCount,
+                "窗口与回滚方案必须由运维、DBA、回滚负责人手工确认"));
+        rows.add(packageSection("readonly_smoke", "只读 smoke 证据", "test_owner",
+                true, "SMOKE_WRITE_REVIEW=0, SMOKE_ASSIGN_WORK=0",
+                "接口只给出 smoke 命令和当前摘要，不自动执行 smoke"));
+        rows.add(packageSection("final_manual_signoff", "最终业务签字", "business_owner",
+                false, readyForRehearsal ? "ready_for_manual_signoff" : "blocked_by_risk_review",
+                "最终签字永远由人工完成，packageSigned 固定为 false"));
+        return rows;
+    }
+
+    private List<Map<String, Object>> rehearsalSmokeEvidence(int matrixCount,
+                                                             long riskTotal,
+                                                             int taskItemCount,
+                                                             int taskSignoffCount,
+                                                             int windowOptionCount,
+                                                             int goNoGoCount,
+                                                             int rollbackItemCount,
+                                                             int rollbackTriggerCount,
+                                                             int windowSignoffCount) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(smokeEvidenceRow("readonly_command", "只读 smoke 命令",
+                "SMOKE_WRITE_REVIEW=0 SMOKE_ASSIGN_WORK=0 python3 /home/hxg/staging/smoke-portal-readiness.py",
+                "must_run_manually_or_by_operator"));
+        rows.add(smokeEvidenceRow("expected_flags", "写入护栏",
+                "assignWork=skipped, reviewWrite=skipped, migrationWriteEnabled=false, permissionWriteEnabled=false",
+                "system_generated"));
+        rows.add(smokeEvidenceRow("expected_matrix", "矩阵项数量",
+                "matrix=" + matrixCount + ", includes=rehearsalSignoffPackage",
+                "system_generated"));
+        rows.add(smokeEvidenceRow("current_package_shape", "当前验收包规模",
+                "riskTotal=" + riskTotal + ", taskItems=" + taskItemCount + ", signoffItems=" + taskSignoffCount +
+                        ", windowOptions=" + windowOptionCount + ", goNoGoItems=" + goNoGoCount +
+                        ", rollbackItems=" + rollbackItemCount + ", rollbackTriggers=" + rollbackTriggerCount +
+                        ", windowSignoffItems=" + windowSignoffCount,
+                "system_generated"));
+        return rows;
+    }
+
+    private List<Map<String, Object>> rehearsalPackageSignoffRows(boolean readyForRehearsal, long blockingCount) {
+        String riskNote = readyForRehearsal ? "risk_review_closed" : "blocked_by_" + blockingCount + "_risk_items";
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(signoffRow("business_owner_final", "业务负责人最终签字", "确认风险、窗口、任务单和回滚预案均可接受", "before_any_manual_sql", riskNote));
+        rows.add(signoffRow("system_admin_final", "系统管理员签字", "确认系统未自动写权限表，SQL 仍为人工草稿", "before_any_manual_sql", "permission_write_enabled_false"));
+        rows.add(signoffRow("test_owner_final", "测试负责人签字", "确认只读 smoke 和门户回归证据已附在签字包", "before_any_manual_sql", "readonly_smoke_required"));
+        rows.add(signoffRow("ops_owner_final", "运维负责人签字", "确认前端静态包、后端 jar、重启和回退路径", "before_any_manual_sql", "staging_backup_required"));
+        rows.add(signoffRow("db_owner_final", "DBA 签字", "确认 DB 快照编号、恢复负责人和恢复耗时", "before_any_manual_sql", "db_snapshot_required"));
+        rows.add(signoffRow("rollback_owner_final", "回滚负责人签字", "确认回滚触发条件和恢复顺序", "before_any_manual_sql", "rollback_plan_required"));
+        return rows;
+    }
+
+    private String buildRehearsalPackageCsvDraft(List<Map<String, Object>> packageSections,
+                                                 List<Map<String, Object>> packageSignoffRows,
+                                                 List<Map<String, Object>> smokeEvidence) {
+        StringBuilder csv = new StringBuilder();
+        csv.append(csvLine(Arrays.asList("itemType", "key", "title", "owner", "status", "passedOrSigned", "evidence", "notes")));
+        for (Map<String, Object> item : packageSections) {
+            csv.append(csvLine(Arrays.asList(
+                    "section",
+                    item.get("key"),
+                    item.get("title"),
+                    item.get("owner"),
+                    item.get("status"),
+                    item.get("passed"),
+                    item.get("evidence"),
+                    item.get("notes")
+            )));
+        }
+        for (Map<String, Object> item : smokeEvidence) {
+            csv.append(csvLine(Arrays.asList(
+                    "smoke",
+                    item.get("key"),
+                    item.get("title"),
+                    item.get("owner"),
+                    item.get("status"),
+                    false,
+                    item.get("evidence"),
+                    item.get("notes")
+            )));
+        }
+        for (Map<String, Object> item : packageSignoffRows) {
+            csv.append(csvLine(Arrays.asList(
+                    "signoff",
+                    item.get("key"),
+                    item.get("title"),
+                    item.get("owner"),
+                    item.get("status"),
+                    item.get("signed"),
+                    item.get("evidence"),
+                    item.get("notes")
+            )));
+        }
+        return csv.toString();
+    }
+
+    private String buildRehearsalPackageTextDraft(String generatedAt,
+                                                  boolean readyForRehearsal,
+                                                  long riskTotal,
+                                                  long pendingCount,
+                                                  long deferredCount,
+                                                  long confirmedCount,
+                                                  long ignoredCount,
+                                                  long blockedFollowCount,
+                                                  int taskItemCount,
+                                                  List<Map<String, Object>> packageSections,
+                                                  List<Map<String, Object>> ownerSummary,
+                                                  List<Map<String, Object>> taskSignoff,
+                                                  List<Map<String, Object>> windowOptions,
+                                                  List<Map<String, Object>> goNoGoChecklist,
+                                                  List<Map<String, Object>> rollbackTriggers,
+                                                  List<Map<String, Object>> rollbackChecklist,
+                                                  List<Map<String, Object>> windowSignoffRows,
+                                                  List<Map<String, Object>> smokeEvidence,
+                                                  List<Map<String, Object>> packageSignoffRows) {
+        StringBuilder text = new StringBuilder();
+        text.append("# jkyLIMS phase 6 rehearsal signoff package\n\n");
+        text.append("- generated_at: ").append(generatedAt).append("\n");
+        text.append("- dry_run_only: true\n");
+        text.append("- executable: false\n");
+        text.append("- permission_write_enabled: false\n");
+        text.append("- migration_write_enabled: false\n");
+        text.append("- package_signed: false\n");
+        text.append("- ready_for_rehearsal: ").append(readyForRehearsal).append("\n\n");
+        text.append("## Risk Progress\n\n");
+        text.append("- risk_total: ").append(riskTotal).append("\n");
+        text.append("- pending: ").append(pendingCount).append("\n");
+        text.append("- deferred: ").append(deferredCount).append("\n");
+        text.append("- confirmed: ").append(confirmedCount).append("\n");
+        text.append("- ignored: ").append(ignoredCount).append("\n");
+        text.append("- blocked_follow_count: ").append(blockedFollowCount).append("\n");
+        text.append("- task_item_count: ").append(taskItemCount).append("\n\n");
+        text.append("## Package Sections\n\n");
+        appendPackageSectionTable(text, packageSections);
+        text.append("\n## Task Owner Summary\n\n");
+        appendOwnerSummaryTable(text, ownerSummary);
+        text.append("\n## Task Signoff Checklist\n\n");
+        appendPackageCheckTable(text, taskSignoff);
+        text.append("\n## Window Options\n\n");
+        appendDraftTable(text, windowOptions, true);
+        text.append("\n## Go/No-Go Checklist\n\n");
+        appendDraftTable(text, goNoGoChecklist, false);
+        text.append("\n## Rollback Triggers\n\n");
+        text.append("| key | title | action |\n");
+        text.append("|---|---|---|\n");
+        for (Map<String, Object> item : rollbackTriggers) {
+            text.append("| ")
+                    .append(markdownCell(item.get("key"))).append(" | ")
+                    .append(markdownCell(item.get("title"))).append(" | ")
+                    .append(markdownCell(item.get("action"))).append(" |\n");
+        }
+        text.append("\n## Rollback Checklist\n\n");
+        appendDraftTable(text, rollbackChecklist, true);
+        text.append("\n## Window Signoff\n\n");
+        appendDraftTable(text, windowSignoffRows, false);
+        text.append("\n## Smoke Evidence\n\n");
+        appendSmokeEvidenceTable(text, smokeEvidence);
+        text.append("\n## Final Signoff\n\n");
+        appendDraftTable(text, packageSignoffRows, false);
+        text.append("\nNo smoke, SQL migration, rollback SQL or permission-table write is executed by this package.\n");
+        return text.toString();
+    }
+
+    private void appendPackageSectionTable(StringBuilder text, List<Map<String, Object>> rows) {
+        text.append("| key | title | owner | status | passed | evidence | notes |\n");
+        text.append("|---|---|---|---|---|---|---|\n");
+        for (Map<String, Object> item : rows) {
+            text.append("| ")
+                    .append(markdownCell(item.get("key"))).append(" | ")
+                    .append(markdownCell(item.get("title"))).append(" | ")
+                    .append(markdownCell(item.get("owner"))).append(" | ")
+                    .append(markdownCell(item.get("status"))).append(" | ")
+                    .append(markdownCell(item.get("passed"))).append(" | ")
+                    .append(markdownCell(item.get("evidence"))).append(" | ")
+                    .append(markdownCell(item.get("notes"))).append(" |\n");
+        }
+    }
+
+    private void appendOwnerSummaryTable(StringBuilder text, List<Map<String, Object>> rows) {
+        text.append("| owner | total | pending | deferred | confirmed | ignored | blocked |\n");
+        text.append("|---|---|---|---|---|---|---|\n");
+        for (Map<String, Object> item : rows) {
+            text.append("| ")
+                    .append(markdownCell(item.get("followOwner"))).append(" | ")
+                    .append(markdownCell(item.get("total"))).append(" | ")
+                    .append(markdownCell(item.get("pending"))).append(" | ")
+                    .append(markdownCell(item.get("deferred"))).append(" | ")
+                    .append(markdownCell(item.get("confirmed"))).append(" | ")
+                    .append(markdownCell(item.get("ignored"))).append(" | ")
+                    .append(markdownCell(item.get("blocked"))).append(" |\n");
+        }
+    }
+
+    private void appendPackageCheckTable(StringBuilder text, List<Map<String, Object>> rows) {
+        text.append("| key | status | passed | message |\n");
+        text.append("|---|---|---|---|\n");
+        for (Map<String, Object> item : rows) {
+            text.append("| ")
+                    .append(markdownCell(item.get("key"))).append(" | ")
+                    .append(markdownCell(item.get("status"))).append(" | ")
+                    .append(markdownCell(item.get("passed"))).append(" | ")
+                    .append(markdownCell(item.get("message"))).append(" |\n");
+        }
+    }
+
+    private void appendSmokeEvidenceTable(StringBuilder text, List<Map<String, Object>> rows) {
+        text.append("| key | title | owner | status | evidence | notes |\n");
+        text.append("|---|---|---|---|---|---|\n");
+        for (Map<String, Object> item : rows) {
+            text.append("| ")
+                    .append(markdownCell(item.get("key"))).append(" | ")
+                    .append(markdownCell(item.get("title"))).append(" | ")
+                    .append(markdownCell(item.get("owner"))).append(" | ")
+                    .append(markdownCell(item.get("status"))).append(" | ")
+                    .append(markdownCell(item.get("evidence"))).append(" | ")
+                    .append(markdownCell(item.get("notes"))).append(" |\n");
+        }
+    }
+
+    private Map<String, Object> packageSection(String key, String title, String owner, boolean passed, String evidence, String notes) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("key", key);
+        row.put("title", title);
+        row.put("owner", owner);
+        row.put("status", passed ? "READY" : "WAITING");
+        row.put("passed", passed);
+        row.put("evidence", evidence);
+        row.put("notes", notes);
+        return row;
+    }
+
+    private Map<String, Object> smokeEvidenceRow(String key, String title, String evidence, String notes) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("key", key);
+        row.put("title", title);
+        row.put("owner", "test_owner");
+        row.put("status", "WAITING_ATTACHMENT");
+        row.put("evidence", evidence);
+        row.put("notes", notes);
+        return row;
     }
 
     private String rehearsalAction(String riskType, String reviewStatus) {
