@@ -13,7 +13,7 @@ FROM
 	sys_role_function rf
 LEFT JOIN sys_function f ON rf.function_id = f.function_id
 WHERE
-	rf.role_id = #{roleId} order by f.sort ASC
+	rf.role_id = #{roleId} AND f.function_id IS NOT NULL order by f.sort ASC
     </select>
 
 	<select id="getMenusByRoleId" resultType="com.lims.manage.erp.entity.SysMenuEntity">
@@ -26,7 +26,7 @@ FROM
 LEFT JOIN sys_menu f ON rf.menu_id = f.menu_id
 LEFT JOIN sys_function sf ON f.own_func = sf.function_id
 WHERE
-	rf.role_id = #{roleId}
+	rf.role_id = #{roleId} AND f.menu_id IS NOT NULL
 	</select>
 
 	<delete id="delFuncByRoleId">

@@ -41,7 +41,13 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
         //获取所有菜单
         List<SysFunction> allFuncs = sysRoleFuncMenuDao.getFunctions();
         for (SysFunction abean :allFuncs) {
+            if (abean == null || abean.getFunctionId() == null) {
+                continue;
+            }
             for (SysFunction bean:funcs) {
+                if (bean == null || bean.getFunctionId() == null) {
+                    continue;
+                }
                 if (abean.getFunctionId().equals(bean.getFunctionId())){
                     abean.setFlag(true);
                 }
@@ -53,7 +59,13 @@ public class SysRoleFuncMenuServiceImpl implements SysRoleFuncMenuService {
         List<SysMenuEntity> allMenuList = sysRoleFuncMenuDao.getMenus();
         //整合已有的菜单、权限设置状态
         for (SysMenuEntity entity:allMenuList) {
+            if (entity == null || entity.getMenuId() == null) {
+                continue;
+            }
             for (SysMenuEntity menuEntity:menuList) {
+                if (menuEntity == null || menuEntity.getMenuId() == null) {
+                    continue;
+                }
                 if (entity.getMenuId().equals(menuEntity.getMenuId())){
                     entity.setFlag(true);
                 }
